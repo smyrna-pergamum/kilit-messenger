@@ -60,16 +60,37 @@ fn random<const N: usize>() -> Result<[u8; N], VaultError> {
     Ok(b)
 }
 
-fn kek(
-    pin: &SecretString,
-    hw: &dyn HardwareKey,
-    salt: &[u8],
-    params: KdfParams,
-) -> Result<Zeroizing<[u8; 32]>, VaultError> {
+/// The bytes a hardware key MACs for a PIN: a fixed domain label, then the
+/// PIN in UTF-8. Platform code that computes the MAC itself (Android
+/// Keystore, Windows TPM) must MAC exactly these bytes.
+pub fn pin_mac_input(pin: &SecretString) -> Zeroizing<Vec<u8>> {
     let mut input = Zeroizing::new(PIN_DOMAIN.to_vec());
     input.extend_from_slice(pin.expose_secret().as_bytes());
-    let pre = Zeroizing::new(hw.mac(&input)?);
+    input
+}
 
+/// HMAC(hardware key, [`pin_mac_input`]): what Argon2id stretches. Made on
+/// the device, either here through a [`HardwareKey`] or by platform code.
+pub struct PinMac(Zeroizing<[u8; 32]>);
+
+impl PinMac {
+    /// MACs `pin` with `hw`, refusing PINs shorter than six characters.
+    pub fn compute(pin: &SecretString, hw: &dyn HardwareKey) -> Result<Self, VaultError> {
+        if pin.expose_secret().chars().count() < MIN_PIN_CHARS {
+            return Err(VaultError::Rejected("PIN too short"));
+        }
+        Ok(Self(Zeroizing::new(hw.mac(&pin_mac_input(pin))?)))
+    }
+
+    /// A MAC computed by platform code. The caller has checked the PIN's
+    /// length, since the PIN itself never reaches Rust on this path.
+    pub fn from_bytes(mac: [u8; 32]) -> Self {
+        Self(Zeroizing::new(mac))
+    }
+}
+
+fn kek(pre: &PinMac, salt: &[u8], params: KdfParams) -> Result<Zeroizing<[u8; 32]>, VaultError> {
+    let pre = &pre.0;
     let p = Params::new(params.m_kib, params.t, params.p, Some(32))
         .map_err(|_| VaultError::Rejected("Argon2id parameters"))?;
     let mut full_salt = SALT_LABEL.to_vec();
@@ -98,10 +119,15 @@ impl Vault {
         hw: &dyn HardwareKey,
         params: KdfParams,
     ) -> Result<(Self, Vec<u8>), VaultError> {
+        Self::create_with_mac(&PinMac::compute(pin, hw)?, params)
+    }
+
+    /// [`Vault::create`] with a MAC made by platform code.
+    pub fn create_with_mac(mac: &PinMac, params: KdfParams) -> Result<(Self, Vec<u8>), VaultError> {
         let vault = Self {
             master: Zeroizing::new(random::<32>()?),
         };
-        let sealed = vault.seal(pin, hw, params)?;
+        let sealed = vault.seal_with_mac(mac, params)?;
         Ok((vault, sealed))
     }
 
@@ -111,6 +137,16 @@ impl Vault {
         pin: &SecretString,
         hw: &dyn HardwareKey,
     ) -> Result<Self, VaultError> {
+        // a short PIN can never have sealed a vault; no need to MAC it
+        let mac = PinMac::compute(pin, hw).map_err(|e| match e {
+            VaultError::Rejected(_) => VaultError::Locked,
+            e => e,
+        })?;
+        Self::unlock_with_mac(sealed, &mac)
+    }
+
+    /// [`Vault::unlock`] with a MAC made by platform code.
+    pub fn unlock_with_mac(sealed: &[u8], mac: &PinMac) -> Result<Self, VaultError> {
         let s: SealedV1 = ciborium::from_reader(sealed).map_err(|_| VaultError::Locked)?;
         if s.v != VERSION {
             return Err(VaultError::Unsupported);
@@ -127,7 +163,7 @@ impl Vault {
             .as_slice()
             .try_into()
             .map_err(|_| VaultError::Locked)?;
-        let key = kek(pin, hw, &s.salt, params)?;
+        let key = kek(mac, &s.salt, params)?;
         let plain = Zeroizing::new(
             cipher(&key)?
                 .decrypt(
@@ -155,9 +191,12 @@ impl Vault {
         hw: &dyn HardwareKey,
         params: KdfParams,
     ) -> Result<Vec<u8>, VaultError> {
-        if pin.expose_secret().chars().count() < MIN_PIN_CHARS {
-            return Err(VaultError::Rejected("PIN too short"));
-        }
+        self.seal_with_mac(&PinMac::compute(pin, hw)?, params)
+    }
+
+    /// [`Vault::seal`] with a MAC made by platform code: how a vault moves
+    /// from the software key to a hardware one.
+    pub fn seal_with_mac(&self, mac: &PinMac, params: KdfParams) -> Result<Vec<u8>, VaultError> {
         if params.m_kib < KdfParams::MINIMUM.m_kib
             || params.t < KdfParams::MINIMUM.t
             || params.p == 0
@@ -176,7 +215,7 @@ impl Vault {
             nonce: random::<24>()?.to_vec(),
             ct: Vec::new(),
         };
-        let key = kek(pin, hw, &s.salt, params)?;
+        let key = kek(mac, &s.salt, params)?;
         let nonce: [u8; 24] = s
             .nonce
             .as_slice()

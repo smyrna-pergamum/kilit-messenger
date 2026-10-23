@@ -12,11 +12,16 @@ use kilit_klt::{
     XWingIdentity, find_in_text, open, open_message, seal, seal_message,
 };
 use kilit_store::Store;
-use kilit_vault::{SoftwareKey, Vault, VaultError};
+use kilit_vault::{PinMac, SoftwareKey, Vault, VaultError};
 use secrecy::SecretString;
 use serde::{Deserialize, Serialize};
 
+/// The vault sealed under the software key (no hardware key on this device,
+/// or not moved yet).
 const VAULT: &str = "vault";
+/// The vault sealed under a hardware key. A separate blob, so moving a vault
+/// to the hardware key is one atomic write: if both exist, this one wins.
+const VAULT_HW: &str = "vault-hw";
 const DEVICE_KEY: &str = "device-key";
 const ATTEMPTS: &str = "attempts";
 const INDEX: &str = "index";
@@ -82,6 +87,18 @@ pub enum Unlock {
         /// Seconds until the next attempt is allowed.
         wait_secs: u64,
     },
+}
+
+/// What protects the vault's PIN on this device.
+#[derive(Debug, PartialEq, Eq)]
+pub enum KeyKind {
+    /// No vault yet.
+    None,
+    /// A software key beside the vault: a copy of the directory can be
+    /// attacked offline.
+    Software,
+    /// A hardware key (StrongBox, TEE, TPM) that cannot leave the device.
+    Hardware,
 }
 
 /// One item in the vault, as the list shows it.
@@ -165,7 +182,6 @@ struct Open {
 /// One user's Kilit on this device.
 pub struct Engine {
     store: Store,
-    hw: SoftwareKey,
     params: KdfParams,
     open: Option<Open>,
     now: fn() -> i64,
@@ -213,19 +229,6 @@ impl Engine {
 
     fn open_with_clock(dir: &str, desktop: bool, now: fn() -> i64) -> Result<Self, EngineError> {
         let store = Store::open(dir)?;
-        // No hardware key yet: a random per-install key kept beside the
-        // vault. It protects nothing against a copy of the whole directory;
-        // the UI says so until StrongBox/TPM replace it.
-        let key = match store.read(DEVICE_KEY)? {
-            Some(k) => k.try_into().map_err(|_| EngineError::Damaged)?,
-            None => {
-                let mut k = [0u8; 32];
-                getrandom::fill(&mut k)
-                    .map_err(|_| EngineError::Storage("no system randomness".into()))?;
-                store.write(DEVICE_KEY, &k)?;
-                k
-            }
-        };
         let params = if desktop {
             KdfParams::DEFAULT
         } else {
@@ -233,29 +236,90 @@ impl Engine {
         };
         Ok(Self {
             store,
-            hw: SoftwareKey::new(key),
             params,
             open: None,
             now,
         })
     }
 
-    /// Whether a vault exists.
-    pub fn has_vault(&self) -> Result<bool, EngineError> {
-        Ok(self.store.len(VAULT)?.is_some())
+    /// The per-install software key, made on first use. It sits beside the
+    /// vault, so it protects nothing against a copy of the whole directory;
+    /// it exists only for devices without a hardware key.
+    fn software_key(&self) -> Result<SoftwareKey, EngineError> {
+        let key: [u8; 32] = match self.store.read(DEVICE_KEY)? {
+            Some(k) => k.try_into().map_err(|_| EngineError::Damaged)?,
+            None => {
+                let mut k = [0u8; 32];
+                getrandom::fill(&mut k)
+                    .map_err(|_| EngineError::Storage("no system randomness".into()))?;
+                self.store.write(DEVICE_KEY, &k)?;
+                k
+            }
+        };
+        Ok(SoftwareKey::new(key))
     }
 
-    /// Makes a new identity sealed under `pin` and leaves it unlocked.
+    /// Whether a vault exists.
+    pub fn has_vault(&self) -> Result<bool, EngineError> {
+        Ok(self.key_kind()? != KeyKind::None)
+    }
+
+    /// What protects this vault's PIN.
+    pub fn key_kind(&self) -> Result<KeyKind, EngineError> {
+        Ok(if self.store.len(VAULT_HW)?.is_some() {
+            KeyKind::Hardware
+        } else if self.store.len(VAULT)?.is_some() {
+            KeyKind::Software
+        } else {
+            KeyKind::None
+        })
+    }
+
+    fn after_create(&mut self, vault: Vault) -> Result<(), EngineError> {
+        self.open = Some(Self::opened(vault, Vec::new())?);
+        self.save_index()
+    }
+
+    /// Makes a new identity sealed under `pin` with the software key, and
+    /// leaves it unlocked. For devices without a hardware key.
     pub fn create_vault(&mut self, pin: String) -> Result<(), EngineError> {
         if self.has_vault()? {
             return Err(EngineError::AlreadyExists);
         }
+        let hw = self.software_key()?;
         let (vault, sealed) =
-            Vault::create(&SecretString::from(pin), &self.hw, self.params).map_err(vault_err)?;
+            Vault::create(&SecretString::from(pin), &hw, self.params).map_err(vault_err)?;
         self.store.write(VAULT, &sealed)?;
-        self.open = Some(Self::opened(vault, Vec::new())?);
-        self.save_index()?;
-        Ok(())
+        self.after_create(vault)
+    }
+
+    /// Makes a new identity sealed under a PIN MAC from the hardware key,
+    /// and leaves it unlocked. The caller has checked the PIN's length.
+    pub fn create_vault_with_mac(&mut self, mac: [u8; 32]) -> Result<(), EngineError> {
+        if self.has_vault()? {
+            return Err(EngineError::AlreadyExists);
+        }
+        let (vault, sealed) =
+            Vault::create_with_mac(&PinMac::from_bytes(mac), self.params).map_err(vault_err)?;
+        self.store.write(VAULT_HW, &sealed)?;
+        self.after_create(vault)
+    }
+
+    /// Moves an unlocked software-key vault to the hardware key: seals it
+    /// again under `mac` (the same PIN, MACed by the hardware key), then
+    /// removes the software-sealed copy and the software key.
+    pub fn move_to_hardware(&mut self, mac: [u8; 32]) -> Result<(), EngineError> {
+        if self.key_kind()? != KeyKind::Software {
+            return Err(EngineError::Rejected("not a software-key vault".into()));
+        }
+        let sealed = self
+            .require_open()?
+            .vault
+            .seal_with_mac(&PinMac::from_bytes(mac), self.params)
+            .map_err(vault_err)?;
+        self.store.write(VAULT_HW, &sealed)?;
+        self.store.delete(VAULT)?;
+        Ok(self.store.delete(DEVICE_KEY)?)
     }
 
     fn opened(vault: Vault, index: Vec<Entry>) -> Result<Open, EngineError> {
@@ -290,7 +354,36 @@ impl Engine {
     /// The count lives in the store, so someone who can edit the app's files
     /// can reset it. Only the hardware key layer can enforce a real limit.
     pub fn unlock(&mut self, pin: String) -> Result<Unlock, EngineError> {
-        let sealed = self.store.read(VAULT)?.ok_or(EngineError::NoVault)?;
+        if self.key_kind()? == KeyKind::Hardware {
+            return Err(EngineError::Rejected(
+                "this vault needs the hardware key".into(),
+            ));
+        }
+        let hw = self.software_key()?;
+        self.attempt(VAULT, |sealed| {
+            Vault::unlock(sealed, &SecretString::from(pin), &hw)
+        })
+    }
+
+    /// Tries a PIN MAC made by the hardware key. Counts misses like
+    /// [`Engine::unlock`].
+    pub fn unlock_with_mac(&mut self, mac: [u8; 32]) -> Result<Unlock, EngineError> {
+        if self.key_kind()? != KeyKind::Hardware {
+            return Err(EngineError::Rejected(
+                "this vault uses the software key".into(),
+            ));
+        }
+        self.attempt(VAULT_HW, |sealed| {
+            Vault::unlock_with_mac(sealed, &PinMac::from_bytes(mac))
+        })
+    }
+
+    fn attempt(
+        &mut self,
+        blob: &str,
+        try_open: impl FnOnce(&[u8]) -> Result<Vault, VaultError>,
+    ) -> Result<Unlock, EngineError> {
+        let sealed = self.store.read(blob)?.ok_or(EngineError::NoVault)?;
         let mut a = self.attempts();
         let now = (self.now)();
         if a.retry_at > now {
@@ -298,7 +391,7 @@ impl Engine {
                 wait_secs: (a.retry_at - now) as u64,
             });
         }
-        match Vault::unlock(&sealed, &SecretString::from(pin), &self.hw) {
+        match try_open(&sealed) {
             Ok(vault) => {
                 if a.failures != 0 || a.retry_at != 0 {
                     self.save_attempts(&Attempts::default())?;
@@ -715,6 +808,88 @@ mod tests {
             Message::Text("kendime".into(), SignatureCheck::Mine)
         );
         assert_eq!(other.open_message(p, None), Message::WrongKey);
+    }
+
+    /// Stands in for Android Keystore or the TPM.
+    fn platform_mac(pin: &str) -> [u8; 32] {
+        use kilit_vault::{HardwareKey, pin_mac_input};
+        SoftwareKey::new([0x5a; 32])
+            .mac(&pin_mac_input(&SecretString::from(pin.to_owned())))
+            .unwrap()
+    }
+
+    #[test]
+    fn a_hardware_vault_needs_the_hardware_mac() {
+        let dir = tempfile::tempdir().unwrap();
+        {
+            let mut e = engine(&dir);
+            e.create_vault_with_mac(platform_mac("482916")).unwrap();
+            e.add_note("not", "donanım").unwrap();
+        }
+        let mut e = engine(&dir);
+        assert_eq!(e.key_kind().unwrap(), KeyKind::Hardware);
+        assert_eq!(e.store.read(DEVICE_KEY).unwrap(), None);
+        assert!(matches!(
+            e.unlock("482916".into()),
+            Err(EngineError::Rejected(_))
+        ));
+        assert_eq!(
+            e.unlock_with_mac(platform_mac("000000")).unwrap(),
+            Unlock::WrongPin { wait_secs: 0 }
+        );
+        assert_eq!(
+            e.unlock_with_mac(platform_mac("482916")).unwrap(),
+            Unlock::Unlocked
+        );
+        assert_eq!(e.items().unwrap().len(), 1);
+    }
+
+    #[test]
+    fn a_software_vault_moves_to_the_hardware_key_and_keeps_everything() {
+        let dir = tempfile::tempdir().unwrap();
+        let fp = {
+            let mut e = ready(&dir);
+            e.add_note("eski", "taşınacak").unwrap();
+            e.move_to_hardware(platform_mac("482916")).unwrap();
+            e.fingerprint().unwrap()
+        };
+        let mut e = engine(&dir);
+        assert_eq!(e.key_kind().unwrap(), KeyKind::Hardware);
+        assert_eq!(e.store.read(VAULT).unwrap(), None);
+        assert_eq!(e.store.read(DEVICE_KEY).unwrap(), None);
+        assert_eq!(
+            e.unlock_with_mac(platform_mac("482916")).unwrap(),
+            Unlock::Unlocked
+        );
+        assert_eq!(e.fingerprint().unwrap(), fp);
+        let id = e.items().unwrap()[0].id.clone();
+        assert_eq!(e.read(&id).unwrap(), "taşınacak".as_bytes());
+    }
+
+    #[test]
+    fn an_interrupted_move_still_opens_with_the_hardware_key() {
+        let dir = tempfile::tempdir().unwrap();
+        {
+            let e = ready(&dir);
+            // the hardware copy was written, the software copy not yet removed
+            let sealed = e
+                .open
+                .as_ref()
+                .unwrap()
+                .vault
+                .seal_with_mac(
+                    &PinMac::from_bytes(platform_mac("482916")),
+                    KdfParams::MINIMUM,
+                )
+                .unwrap();
+            e.store.write(VAULT_HW, &sealed).unwrap();
+        }
+        let mut e = engine(&dir);
+        assert_eq!(e.key_kind().unwrap(), KeyKind::Hardware);
+        assert_eq!(
+            e.unlock_with_mac(platform_mac("482916")).unwrap(),
+            Unlock::Unlocked
+        );
     }
 
     #[test]

@@ -7,8 +7,12 @@ import 'frb_generated.dart';
 
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `engine`
+// These functions are ignored because they are not marked as `pub`: `engine`, `mac32`, `reply`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `from`, `from`, `from`
+
+/// The bytes the platform's hardware key must MAC for `pin`.
+Uint8List pinMacInput({required String pin}) =>
+    RustLib.instance.api.crateApiPinMacInput(pin: pin);
 
 /// Finds `KLT1:` packets in pasted text. Needs no vault.
 List<FoundPacket> findPackets({required String text}) =>
@@ -19,8 +23,13 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// Seals a note into the vault.
   Future<ItemInfo> addNote({required String title, required String text});
 
-  /// Makes a new vault sealed under `pin`, and leaves it unlocked.
+  /// Makes a new vault sealed under `pin` with the software key, and
+  /// leaves it unlocked. Only for devices without a hardware key.
   Future<void> createVault({required String pin});
+
+  /// Makes a new vault sealed under a hardware PIN MAC, and leaves it
+  /// unlocked.
+  Future<void> createVaultWithMac({required List<int> mac});
 
   /// Removes an item.
   Future<void> deleteItem({required String id});
@@ -37,8 +46,14 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// The vault's items, newest first.
   Future<List<ItemInfo>> items();
 
+  /// What protects this vault's PIN.
+  PinKeyKind keyKind();
+
   /// Drops every key and decrypted entry.
   void lock();
+
+  /// Moves the unlocked software-key vault to the hardware key.
+  Future<void> moveToHardware({required List<int> mac});
 
   /// Opens the store in `dir`; `desktop` picks the larger Argon2id cost.
   static Future<KilitHandle> open({
@@ -59,8 +74,11 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// A message as `KLT1:` text, to a shared passphrase or to this vault.
   Future<String> sealForCarrier({required String message, String? passphrase});
 
-  /// Tries `pin`.
+  /// Tries `pin` against a software-key vault.
   Future<UnlockReply> unlock({required String pin});
+
+  /// Tries a hardware PIN MAC against a hardware-key vault.
+  Future<UnlockReply> unlockWithMac({required List<int> mac});
 }
 
 /// What kind of thing was found in pasted text.
@@ -279,6 +297,18 @@ class PacketReport {
           packetBytes == other.packetBytes &&
           recipients == other.recipients &&
           signedBy == other.signedBy;
+}
+
+/// What protects the vault's PIN on this device.
+enum PinKeyKind {
+  /// No vault yet.
+  none,
+
+  /// A software key beside the vault.
+  software,
+
+  /// A hardware key that cannot leave the device.
+  hardware,
 }
 
 /// Who signed a packet.

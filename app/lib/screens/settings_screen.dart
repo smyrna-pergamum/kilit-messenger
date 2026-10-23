@@ -58,11 +58,11 @@ class SettingsScreen extends StatelessWidget {
                   : Icons.warning_amber_rounded,
               color: core.isHardwareBacked ? t.safe : t.danger,
             ),
-            title: const Text('PIN koruması'),
+            title: Text('PIN koruması: ${core.pinProtection}'),
             subtitle: Text(
               core.isHardwareBacked
-                  ? 'PIN bu cihazın donanım anahtarına bağlı.'
-                  : 'Donanım anahtarı yok: kasa dosyası kopyalanırsa PIN tahmin edilebilir.',
+                  ? 'PIN bu cihazın donanım anahtarına bağlı. Kasa dosyası kopyalansa bile başka bir cihazda denenemez.'
+                  : 'Donanım anahtarı yok: kasa dosyası kopyalanırsa PIN başka bir cihazda tahmin edilebilir.',
             ),
           ),
         ),

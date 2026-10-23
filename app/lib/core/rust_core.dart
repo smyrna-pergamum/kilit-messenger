@@ -1,37 +1,78 @@
 import 'dart:typed_data';
 
+import '../platform/pin_key.dart';
 import '../src/rust/api.dart' as rust;
 import 'kilit_core.dart';
 
 /// [KilitCore] backed by the Rust core (`core/crates/kilit-ffi`) through
 /// flutter_rust_bridge. All cryptography happens in Rust; this class only
-/// converts types.
+/// converts types and fetches the PIN MAC from the hardware key.
+///
+/// With a platform key (Android Keystore, Windows TPM) the PIN never reaches
+/// the vault's Argon2id directly: the platform MACs it first, and only the
+/// MAC goes to Rust. Without one, the Rust core uses its software key. A
+/// vault made before the hardware key existed moves to it at the next unlock.
 class RustCore implements KilitCore {
-  RustCore._(this._h);
+  RustCore._(this._h, this._key, this._level);
 
   final rust.KilitHandle _h;
+  final PinKey _key;
+  final KeyLevel _level;
 
   /// Opens the store in [dir]. [desktop] picks the larger Argon2id cost.
-  static Future<RustCore> open(String dir, {required bool desktop}) async =>
-      RustCore._(await rust.KilitHandle.open(dir: dir, desktop: desktop));
+  static Future<RustCore> open(
+    String dir, {
+    required bool desktop,
+    PinKey? key,
+  }) async {
+    final k = key ?? PlatformPinKey();
+    final h = await rust.KilitHandle.open(dir: dir, desktop: desktop);
+    return RustCore._(h, k, await k.level());
+  }
+
+  bool get _platformKey => _level != KeyLevel.none;
+
+  Future<Uint8List> _mac(String pin) => _key.mac(rust.pinMacInput(pin: pin));
 
   @override
   bool get isDevelopmentStub => false;
 
-  // StrongBox and TPM keys come next; until then the Rust core uses a
-  // per-install software key and the settings screen says so.
   @override
-  bool get isHardwareBacked => false;
+  bool get isHardwareBacked =>
+      _level.isHardware && _h.keyKind() == rust.PinKeyKind.hardware;
+
+  @override
+  String get pinProtection => switch (_h.keyKind()) {
+    rust.PinKeyKind.hardware => _level.label,
+    rust.PinKeyKind.software => 'Yazılım anahtarı (kasanın yanında)',
+    rust.PinKeyKind.none => _platformKey ? _level.label : 'Yok',
+  };
 
   @override
   Future<bool> hasVault() => _h.hasVault();
 
   @override
-  Future<void> createVault(String pin) => _h.createVault(pin: pin);
+  Future<void> createVault(String pin) async {
+    if (_platformKey) {
+      await _h.createVaultWithMac(mac: await _mac(pin));
+    } else {
+      await _h.createVault(pin: pin);
+    }
+  }
 
   @override
   Future<UnlockResult> unlock(String pin) async {
-    final r = await _h.unlock(pin: pin);
+    final rust.UnlockReply r;
+    if (_h.keyKind() == rust.PinKeyKind.hardware) {
+      r = await _h.unlockWithMac(mac: await _mac(pin));
+    } else {
+      r = await _h.unlock(pin: pin);
+      // the right PIN for an old software-key vault: move it to the
+      // hardware key now, while the PIN is at hand
+      if (r.outcome == rust.UnlockOutcome.unlocked && _platformKey) {
+        await _h.moveToHardware(mac: await _mac(pin));
+      }
+    }
     final wait = Duration(seconds: r.waitSecs.toInt());
     return switch (r.outcome) {
       rust.UnlockOutcome.unlocked => const UnlockResult(UnlockOutcome.unlocked),

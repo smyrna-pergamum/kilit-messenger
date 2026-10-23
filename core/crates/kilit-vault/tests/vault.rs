@@ -143,3 +143,25 @@ fn a_packet_sealed_to_the_vault_and_signed_by_it_opens_verified() {
 fn the_software_key_says_it_is_not_hardware() {
     assert!(!device(1).is_hardware_backed());
 }
+
+#[test]
+fn a_mac_made_by_platform_code_opens_the_same_vault() {
+    use kilit_vault::{PinMac, pin_mac_input};
+    let hw = device(7);
+    // what Android Keystore or the TPM would return for this PIN
+    let platform = PinMac::from_bytes(hw.mac(&pin_mac_input(&pin("482916"))).unwrap());
+    let (vault, sealed) = Vault::create_with_mac(&platform, KdfParams::MINIMUM).unwrap();
+    let again = Vault::unlock(&sealed, &pin("482916"), &hw).unwrap();
+    assert_eq!(
+        vault.public_identity().unwrap(),
+        again.public_identity().unwrap()
+    );
+    let wrong = PinMac::from_bytes(hw.mac(&pin_mac_input(&pin("482917"))).unwrap());
+    assert!(Vault::unlock_with_mac(&sealed, &wrong).is_err());
+}
+
+#[test]
+fn the_mac_input_is_the_domain_then_the_pin() {
+    let input = kilit_vault::pin_mac_input(&pin("123456"));
+    assert_eq!(&input[..], b"kilit/v1/vault-pin\x00123456");
+}

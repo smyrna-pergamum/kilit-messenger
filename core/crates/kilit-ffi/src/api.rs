@@ -7,7 +7,7 @@ use std::sync::{Mutex, MutexGuard};
 
 use flutter_rust_bridge::frb;
 
-use crate::engine::{self, Engine, EngineError, Found, Message, SignatureCheck, Unlock};
+use crate::engine::{self, Engine, EngineError, Found, KeyKind, Message, SignatureCheck, Unlock};
 
 /// Called once by the generated Dart `RustLib.init()`.
 #[frb(init)]
@@ -178,6 +178,46 @@ pub struct MessageReply {
     pub signed_by: SignedBy,
 }
 
+/// What protects the vault's PIN on this device.
+pub enum PinKeyKind {
+    /// No vault yet.
+    None,
+    /// A software key beside the vault.
+    Software,
+    /// A hardware key that cannot leave the device.
+    Hardware,
+}
+
+/// The bytes the platform's hardware key must MAC for `pin`.
+#[frb(sync)]
+pub fn pin_mac_input(pin: String) -> Vec<u8> {
+    kilit_vault::pin_mac_input(&secrecy::SecretString::from(pin)).to_vec()
+}
+
+fn mac32(mac: Vec<u8>) -> Result<[u8; 32], KilitError> {
+    mac.try_into().map_err(|_| KilitError {
+        kind: KilitErrorKind::Rejected,
+        detail: "a PIN MAC is 32 bytes".into(),
+    })
+}
+
+fn reply(u: Unlock) -> UnlockReply {
+    match u {
+        Unlock::Unlocked => UnlockReply {
+            outcome: UnlockOutcome::Unlocked,
+            wait_secs: 0,
+        },
+        Unlock::WrongPin { wait_secs } => UnlockReply {
+            outcome: UnlockOutcome::WrongPin,
+            wait_secs,
+        },
+        Unlock::Wait { wait_secs } => UnlockReply {
+            outcome: UnlockOutcome::Wait,
+            wait_secs,
+        },
+    }
+}
+
 /// Finds `KLT1:` packets in pasted text. Needs no vault.
 #[frb(sync)]
 pub fn find_packets(text: String) -> Vec<FoundPacket> {
@@ -226,27 +266,41 @@ impl KilitHandle {
         Ok(self.engine()?.has_vault()?)
     }
 
-    /// Makes a new vault sealed under `pin`, and leaves it unlocked.
+    /// What protects this vault's PIN.
+    #[frb(sync)]
+    pub fn key_kind(&self) -> Result<PinKeyKind, KilitError> {
+        Ok(match self.engine()?.key_kind()? {
+            KeyKind::None => PinKeyKind::None,
+            KeyKind::Software => PinKeyKind::Software,
+            KeyKind::Hardware => PinKeyKind::Hardware,
+        })
+    }
+
+    /// Makes a new vault sealed under `pin` with the software key, and
+    /// leaves it unlocked. Only for devices without a hardware key.
     pub fn create_vault(&self, pin: String) -> Result<(), KilitError> {
         Ok(self.engine()?.create_vault(pin)?)
     }
 
-    /// Tries `pin`.
+    /// Makes a new vault sealed under a hardware PIN MAC, and leaves it
+    /// unlocked.
+    pub fn create_vault_with_mac(&self, mac: Vec<u8>) -> Result<(), KilitError> {
+        Ok(self.engine()?.create_vault_with_mac(mac32(mac)?)?)
+    }
+
+    /// Tries `pin` against a software-key vault.
     pub fn unlock(&self, pin: String) -> Result<UnlockReply, KilitError> {
-        Ok(match self.engine()?.unlock(pin)? {
-            Unlock::Unlocked => UnlockReply {
-                outcome: UnlockOutcome::Unlocked,
-                wait_secs: 0,
-            },
-            Unlock::WrongPin { wait_secs } => UnlockReply {
-                outcome: UnlockOutcome::WrongPin,
-                wait_secs,
-            },
-            Unlock::Wait { wait_secs } => UnlockReply {
-                outcome: UnlockOutcome::Wait,
-                wait_secs,
-            },
-        })
+        Ok(reply(self.engine()?.unlock(pin)?))
+    }
+
+    /// Tries a hardware PIN MAC against a hardware-key vault.
+    pub fn unlock_with_mac(&self, mac: Vec<u8>) -> Result<UnlockReply, KilitError> {
+        Ok(reply(self.engine()?.unlock_with_mac(mac32(mac)?)?))
+    }
+
+    /// Moves the unlocked software-key vault to the hardware key.
+    pub fn move_to_hardware(&self, mac: Vec<u8>) -> Result<(), KilitError> {
+        Ok(self.engine()?.move_to_hardware(mac32(mac)?)?)
     }
 
     /// Drops every key and decrypted entry.

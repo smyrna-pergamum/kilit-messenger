@@ -24,7 +24,7 @@ mod sealed;
 pub use hardware::{HardwareKey, SoftwareKey};
 pub use identity::PublicIdentity;
 pub use kilit_klt::KdfParams;
-pub use sealed::Vault;
+pub use sealed::{PinMac, Vault, pin_mac_input};
 
 use std::fmt;
 

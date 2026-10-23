@@ -10,8 +10,11 @@ abstract interface class KilitCore {
   /// True only for the in-memory stand-in. The UI shows a warning banner.
   bool get isDevelopmentStub;
 
-  /// Whether the PIN is bound to a hardware key (StrongBox, TPM).
+  /// Whether the PIN is bound to a hardware key (StrongBox, TEE, TPM).
   bool get isHardwareBacked;
+
+  /// What protects the PIN, in words for the settings screen.
+  String get pinProtection;
 
   Future<bool> hasVault();
   Future<void> createVault(String pin);

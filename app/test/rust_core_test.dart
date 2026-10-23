@@ -10,7 +10,40 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kilit/core/kilit_core.dart';
 import 'package:kilit/core/rust_core.dart';
+import 'package:kilit/platform/pin_key.dart';
 import 'package:kilit/src/rust/frb_generated.dart';
+
+/// No platform key: the Rust core uses its software key.
+class NoKey implements PinKey {
+  @override
+  Future<KeyLevel> level() async => KeyLevel.none;
+  @override
+  Future<Uint8List> mac(Uint8List data) => throw UnsupportedError('no key');
+}
+
+/// Stands in for StrongBox or the TPM: deterministic, depends on every byte
+/// and on a device secret. Not a real MAC; tests only.
+class FakeHardwareKey implements PinKey {
+  FakeHardwareKey(this.device);
+  final int device;
+  int calls = 0;
+  @override
+  Future<KeyLevel> level() async => KeyLevel.strongbox;
+  @override
+  Future<Uint8List> mac(Uint8List data) async {
+    calls++;
+    final out = Uint8List(32);
+    var h = 0x811c9dc5 ^ device;
+    for (var round = 0; round < 32; round++) {
+      for (final b in data) {
+        h = ((h ^ b) * 0x01000193) & 0xffffffff;
+      }
+      h = ((h ^ round) * 0x01000193) & 0xffffffff;
+      out[round] = h & 0xff;
+    }
+    return out;
+  }
+}
 
 void main() {
   final lib = Platform.environment['KILIT_FFI_LIB'];
@@ -26,7 +59,7 @@ void main() {
     final dir = await Directory.systemTemp.createTemp('kilit-');
     addTearDown(() => dir.delete(recursive: true));
 
-    final first = await RustCore.open(dir.path, desktop: false);
+    final first = await RustCore.open(dir.path, desktop: false, key: NoKey());
     expect(await first.hasVault(), isFalse);
     await first.createVault('482916');
     final note = await first.addNote('ilk', 'merhaba dünya');
@@ -35,7 +68,7 @@ void main() {
     first.lock();
     expect(() => first.items(), throwsA(anything));
 
-    final again = await RustCore.open(dir.path, desktop: false);
+    final again = await RustCore.open(dir.path, desktop: false, key: NoKey());
     final wrong = await again.unlock('000000');
     expect(wrong.outcome, UnlockOutcome.wrongPin);
     final right = await again.unlock('482916');
@@ -55,8 +88,8 @@ void main() {
     final b = await Directory.systemTemp.createTemp('kilit-b-');
     addTearDown(() => a.delete(recursive: true));
     addTearDown(() => b.delete(recursive: true));
-    final ayse = await RustCore.open(a.path, desktop: false);
-    final bob = await RustCore.open(b.path, desktop: false);
+    final ayse = await RustCore.open(a.path, desktop: false, key: NoKey());
+    final bob = await RustCore.open(b.path, desktop: false, key: NoKey());
     await ayse.createVault('482916');
     await bob.createVault('739204');
 
@@ -75,5 +108,52 @@ void main() {
 
     final cut = bob.findPackets(text.substring(0, text.length - 10));
     expect(cut.single.problem, FoundProblem.truncated);
+  }, skip: skip);
+
+  test('with a hardware key the vault needs that key', () async {
+    final dir = await Directory.systemTemp.createTemp('kilit-hw-');
+    addTearDown(() => dir.delete(recursive: true));
+    final key = FakeHardwareKey(1);
+
+    final first = await RustCore.open(dir.path, desktop: false, key: key);
+    await first.createVault('482916');
+    expect(first.isHardwareBacked, isTrue);
+    expect(first.pinProtection, 'StrongBox güvenlik çipi');
+    await first.addNote('not', 'donanımla');
+
+    final again = await RustCore.open(dir.path, desktop: false, key: key);
+    expect((await again.unlock('000000')).outcome, UnlockOutcome.wrongPin);
+    expect((await again.unlock('482916')).outcome, UnlockOutcome.unlocked);
+    expect(await again.items(), hasLength(1));
+
+    // the same files on another device: its key gives other MACs
+    final elsewhere = await RustCore.open(
+      dir.path,
+      desktop: false,
+      key: FakeHardwareKey(2),
+    );
+    expect((await elsewhere.unlock('482916')).outcome, UnlockOutcome.wrongPin);
+  }, skip: skip);
+
+  test('an old software-key vault moves to the hardware key', () async {
+    final dir = await Directory.systemTemp.createTemp('kilit-move-');
+    addTearDown(() => dir.delete(recursive: true));
+
+    final old = await RustCore.open(dir.path, desktop: false, key: NoKey());
+    await old.createVault('482916');
+    await old.addNote('eski', 'taşınacak');
+    expect(old.isHardwareBacked, isFalse);
+    expect(File('${dir.path}/device-key').existsSync(), isTrue);
+
+    final key = FakeHardwareKey(1);
+    final moved = await RustCore.open(dir.path, desktop: false, key: key);
+    expect((await moved.unlock('482916')).outcome, UnlockOutcome.unlocked);
+    expect(moved.isHardwareBacked, isTrue);
+    expect(File('${dir.path}/device-key').existsSync(), isFalse);
+
+    final later = await RustCore.open(dir.path, desktop: false, key: key);
+    expect((await later.unlock('482916')).outcome, UnlockOutcome.unlocked);
+    final note = (await later.items()).single;
+    expect(await later.readText(note.id), 'taşınacak');
   }, skip: skip);
 }

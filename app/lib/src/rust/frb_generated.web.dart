@@ -100,6 +100,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PacketReport dco_decode_packet_report(dynamic raw);
 
   @protected
+  PinKeyKind dco_decode_pin_key_kind(dynamic raw);
+
+  @protected
   SignedBy dco_decode_signed_by(dynamic raw);
 
   @protected
@@ -191,6 +194,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   PacketReport sse_decode_packet_report(SseDeserializer deserializer);
+
+  @protected
+  PinKeyKind sse_decode_pin_key_kind(SseDeserializer deserializer);
 
   @protected
   SignedBy sse_decode_signed_by(SseDeserializer deserializer);
@@ -296,6 +302,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_packet_report(PacketReport self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_pin_key_kind(PinKeyKind self, SseSerializer serializer);
 
   @protected
   void sse_encode_signed_by(SignedBy self, SseSerializer serializer);
