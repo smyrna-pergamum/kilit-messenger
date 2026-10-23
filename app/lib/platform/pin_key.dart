@@ -18,21 +18,6 @@ enum KeyLevel {
   none,
 }
 
-extension KeyLevelText on KeyLevel {
-  bool get isHardware =>
-      this == KeyLevel.strongbox ||
-      this == KeyLevel.tee ||
-      this == KeyLevel.tpm;
-
-  String get label => switch (this) {
-    KeyLevel.strongbox => 'StrongBox güvenlik çipi',
-    KeyLevel.tee => 'Güvenli işlem ortamı (TEE)',
-    KeyLevel.tpm => 'TPM 2.0',
-    KeyLevel.osSoftware => 'Android Keystore (donanımsız)',
-    KeyLevel.none => 'Yok',
-  };
-}
-
 /// The device key that MACs the PIN (Android Keystore, Windows TPM).
 abstract interface class PinKey {
   Future<KeyLevel> level();

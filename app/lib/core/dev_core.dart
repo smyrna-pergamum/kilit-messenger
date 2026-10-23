@@ -26,7 +26,7 @@ class DevCore implements KilitCore {
   bool get isHardwareBacked => false;
 
   @override
-  String get pinProtection => 'Yok (geliştirme çekirdeği)';
+  PinProtection get pinProtection => PinProtection.dev;
 
   @override
   Future<bool> hasVault() async => _pin != null;

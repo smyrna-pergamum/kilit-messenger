@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../platform/files.dart';
+import '../state/prefs.dart';
 import '../state/session.dart';
 import '../theme/tokens.dart';
 import 'settings_screen.dart';
@@ -10,10 +12,16 @@ import 'vault_screen.dart';
 const wideLayoutWidth = 720.0;
 
 class Shell extends StatefulWidget {
-  const Shell({super.key, required this.session, required this.files});
+  const Shell({
+    super.key,
+    required this.session,
+    required this.files,
+    required this.prefs,
+  });
 
   final Session session;
   final FileAccess files;
+  final Prefs prefs;
 
   @override
   State<Shell> createState() => _ShellState();
@@ -21,45 +29,52 @@ class Shell extends StatefulWidget {
 
 class _Destination {
   const _Destination(this.label, this.icon, this.selectedIcon);
-  final String label;
+  final String Function(L) label;
   final IconData icon;
   final IconData selectedIcon;
 }
 
-const _destinations = [
-  _Destination('Sohbetler', Icons.chat_bubble_outline, Icons.chat_bubble),
-  _Destination('Kasa', Icons.lock_outline, Icons.lock),
-  _Destination('Kamera', Icons.photo_camera_outlined, Icons.photo_camera),
-  _Destination('Ayarlar', Icons.settings_outlined, Icons.settings),
+final _destinations = [
+  _Destination((l) => l.navChats, Icons.chat_bubble_outline, Icons.chat_bubble),
+  _Destination((l) => l.navVault, Icons.lock_outline, Icons.lock),
+  _Destination(
+    (l) => l.navCamera,
+    Icons.photo_camera_outlined,
+    Icons.photo_camera,
+  ),
+  _Destination((l) => l.navSettings, Icons.settings_outlined, Icons.settings),
 ];
 
 class _ShellState extends State<Shell> {
   // the vault is what Aşama 1 can do, so it opens first
   int _index = 1;
 
-  Widget _page() => switch (_index) {
-    0 => const _ComingLater(
-      title: 'Sohbetler',
-      text: 'Tor üzerinden mesajlaşma Aşama 2\'de geliyor.',
+  Widget _page(L l) => switch (_index) {
+    0 => _ComingLater(text: l.chatsLater),
+    1 => VaultScreen(
+      core: widget.session.core,
+      files: widget.files,
+      prefs: widget.prefs,
     ),
-    1 => VaultScreen(core: widget.session.core, files: widget.files),
-    2 => const _ComingLater(
-      title: 'Kamera',
-      text: 'Diske şifresiz yazmayan kamera Aşama 2\'de geliyor.',
+    2 => _ComingLater(text: l.cameraLater),
+    _ => SettingsScreen(
+      session: widget.session,
+      prefs: widget.prefs,
+      files: widget.files,
     ),
-    _ => SettingsScreen(session: widget.session),
   };
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final l = L.of(context);
     final wide = MediaQuery.sizeOf(context).width >= wideLayoutWidth;
     final appBar = AppBar(
-      title: Text(_destinations[_index].label),
+      title: Text(_destinations[_index].label(l)),
       actions: [
         IconButton(
           key: const ValueKey('lock-now'),
-          tooltip: 'Şimdi kilitle',
+          tooltip: l.lockNow,
           icon: Icon(Icons.lock_clock_outlined, color: t.accent),
           onPressed: widget.session.lock,
         ),
@@ -68,7 +83,7 @@ class _ShellState extends State<Shell> {
     if (!wide) {
       return Scaffold(
         appBar: appBar,
-        body: _page(),
+        body: _page(l),
         bottomNavigationBar: NavigationBar(
           selectedIndex: _index,
           onDestinationSelected: (i) => setState(() => _index = i),
@@ -77,7 +92,7 @@ class _ShellState extends State<Shell> {
               NavigationDestination(
                 icon: Icon(d.icon),
                 selectedIcon: Icon(d.selectedIcon),
-                label: d.label,
+                label: d.label(l),
               ),
           ],
         ),
@@ -99,13 +114,13 @@ class _ShellState extends State<Shell> {
                 NavigationRailDestination(
                   icon: Icon(d.icon),
                   selectedIcon: Icon(d.selectedIcon),
-                  label: Text(d.label),
+                  label: Text(d.label(l)),
                 ),
             ],
           ),
           VerticalDivider(width: 1, color: t.outline),
           Expanded(
-            child: Scaffold(appBar: appBar, body: _page()),
+            child: Scaffold(appBar: appBar, body: _page(l)),
           ),
         ],
       ),
@@ -114,9 +129,8 @@ class _ShellState extends State<Shell> {
 }
 
 class _ComingLater extends StatelessWidget {
-  const _ComingLater({required this.title, required this.text});
+  const _ComingLater({required this.text});
 
-  final String title;
   final String text;
 
   @override

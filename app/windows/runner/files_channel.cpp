@@ -2,6 +2,7 @@
 
 // clang-format off
 #include <windows.h>
+#include <shellapi.h>
 #include <shobjidl.h>
 // clang-format on
 
@@ -97,6 +98,13 @@ void RegisterFilesChannel(flutter::BinaryMessenger* messenger) {
       [](const flutter::MethodCall<flutter::EncodableValue>& call,
          std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>>
              result) {
+        if (call.method_name() == "openAppSettings") {
+          // the privacy page, where camera and other app permissions live
+          ShellExecuteW(nullptr, L"open", L"ms-settings:privacy", nullptr,
+                        nullptr, SW_SHOWNORMAL);
+          result->Success();
+          return;
+        }
         std::optional<std::string> path;
         if (call.method_name() == "pickPath") {
           path = PickPath();

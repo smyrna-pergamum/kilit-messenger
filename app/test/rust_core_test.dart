@@ -118,7 +118,7 @@ void main() {
     final first = await RustCore.open(dir.path, desktop: false, key: key);
     await first.createVault('482916');
     expect(first.isHardwareBacked, isTrue);
-    expect(first.pinProtection, 'StrongBox güvenlik çipi');
+    expect(first.pinProtection, PinProtection.strongbox);
     await first.addNote('not', 'donanımla');
 
     final again = await RustCore.open(dir.path, desktop: false, key: key);

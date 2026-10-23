@@ -39,6 +39,9 @@ abstract interface class FileAccess {
 
   /// Fires when something arrives while Kilit is running.
   Stream<void> get incomingReady;
+
+  /// Opens the system page where Kilit's permissions are granted.
+  Future<void> openAppSettings();
 }
 
 /// A media type from a file name, for platforms that give no type.
@@ -158,4 +161,13 @@ class PlatformFileAccess implements FileAccess {
 
   @override
   Stream<void> get incomingReady => _ready.stream;
+
+  @override
+  Future<void> openAppSettings() async {
+    try {
+      await _channel.invokeMethod<void>('openAppSettings');
+    } on MissingPluginException {
+      // a platform without the channel: nothing to open
+    }
+  }
 }

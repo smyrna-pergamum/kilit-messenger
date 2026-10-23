@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../core/kilit_core.dart';
+import '../l10n/app_localizations.dart';
 import '../state/session.dart';
 import '../theme/tokens.dart';
 import '../widgets/pin_pad.dart';
@@ -29,7 +30,7 @@ class _LockScreenState extends State<LockScreen> {
   List<int> _order = shuffledDigits();
   final List<int> _entered = [];
   String? _firstPin;
-  String? _message;
+  String? Function(L)? _message;
   bool _error = false;
   bool _busy = false;
   DateTime? _retryAt;
@@ -42,17 +43,16 @@ class _LockScreenState extends State<LockScreen> {
     super.dispose();
   }
 
-  String get _title => switch (_step) {
-    _Step.unlock => 'Kilidi aç',
-    _Step.create => 'Bir PIN belirle',
-    _Step.confirm => 'PIN\'i tekrar gir',
+  String _title(L l) => switch (_step) {
+    _Step.unlock => l.lockTitleUnlock,
+    _Step.create => l.lockTitleCreate,
+    _Step.confirm => l.lockTitleConfirm,
   };
 
-  String get _hint => switch (_step) {
-    _Step.unlock => 'Kasanı açmak için PIN\'ini gir.',
-    _Step.create =>
-      'En az $minPinLength rakam. Unutursan kasan açılamaz: kurtarma yolu yok.',
-    _Step.confirm => 'Aynı PIN\'i bir kez daha gir.',
+  String _hint(L l) => switch (_step) {
+    _Step.unlock => l.lockHintUnlock,
+    _Step.create => l.lockHintCreate(minPinLength),
+    _Step.confirm => l.lockHintConfirm,
   };
 
   bool get _waiting => _retryAt != null && DateTime.now().isBefore(_retryAt!);
@@ -70,7 +70,8 @@ class _LockScreenState extends State<LockScreen> {
     setState(() => _entered.removeLast());
   }
 
-  void _reset({String? message, bool error = false}) {
+  /// [message] is looked up at build time, so it follows a language change.
+  void _reset({String? Function(L)? message, bool error = false}) {
     _entered.clear();
     _order = shuffledDigits();
     _message = message;
@@ -107,7 +108,7 @@ class _LockScreenState extends State<LockScreen> {
             setState(() {
               _firstPin = null;
               _step = _Step.create;
-              _reset(message: 'PIN\'ler eşleşmedi. Baştan başla.', error: true);
+              _reset(message: (l) => l.lockMismatch, error: true);
             });
             return;
           }
@@ -126,7 +127,7 @@ class _LockScreenState extends State<LockScreen> {
             _reset(
               message: r.outcome == UnlockOutcome.waitBeforeRetry
                   ? null
-                  : 'PIN yanlış.',
+                  : (l) => l.lockWrongPin,
               error: true,
             );
           });
@@ -139,6 +140,7 @@ class _LockScreenState extends State<LockScreen> {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final l = L.of(context);
     final waitLeft = _waiting
         ? _retryAt!.difference(DateTime.now()).inSeconds + 1
         : 0;
@@ -154,7 +156,7 @@ class _LockScreenState extends State<LockScreen> {
                 Icon(Icons.lock_rounded, size: 48, color: t.accent),
                 const SizedBox(height: 16),
                 Text(
-                  _title,
+                  _title(l),
                   key: const ValueKey('lock-title'),
                   style: Theme.of(context).textTheme.headlineSmall
                       ?.copyWith(color: t.text),
@@ -163,7 +165,7 @@ class _LockScreenState extends State<LockScreen> {
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 340),
                   child: Text(
-                    _hint,
+                    _hint(l),
                     textAlign: TextAlign.center,
                     style: TextStyle(color: t.textMuted),
                   ),
@@ -175,8 +177,8 @@ class _LockScreenState extends State<LockScreen> {
                   child: Center(
                     child: Text(
                       _waiting
-                          ? 'Tekrar denemek için $waitLeft sn bekle.'
-                          : (_message ?? ''),
+                          ? l.lockWait(waitLeft)
+                          : (_message?.call(l) ?? ''),
                       key: const ValueKey('lock-message'),
                       style: TextStyle(color: t.danger),
                     ),
@@ -214,7 +216,7 @@ class _DevBanner extends StatelessWidget {
         border: Border.all(color: t.danger),
       ),
       child: Text(
-        'Geliştirme çekirdeği: gerçek şifreleme yok.',
+        L.of(context).devBanner,
         key: const ValueKey('dev-banner'),
         style: TextStyle(color: t.text),
       ),

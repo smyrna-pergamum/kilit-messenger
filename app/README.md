@@ -31,6 +31,23 @@ Kilit'in Flutter arayüzü: Android ve Windows.
 - **Windows:** pencere `WDA_EXCLUDEFROMCAPTURE` ile ekran yakalamadan
   gizlenir (Windows 10 2004 ve sonrası).
 
+## Diller ve tercihler
+
+- **Ana dil İngilizce.** Yeni kurulumlar İngilizce açılır. Desteklenmeyen
+  bir sistem dilinde de İngilizce kullanılır. Ayarlar'dan Türkçe ya da
+  "Sistem dili" seçilebilir.
+- **Çeviriler:** `lib/l10n/app_en.arb` şablon dosyasıdır, `app_tr.arb`
+  Türkçe çevirisidir. Yeni bir dil, bir `.arb` dosyası eklenip
+  `lib/state/prefs.dart` içindeki `supportedLanguages` listesine yazılarak
+  eklenir. Dart kodu `flutter gen-l10n` ile üretilir.
+- **Tercihler:** Tema, dil ve pano önerisi gizli değildir, ama kasa
+  açılmadan önce gerekirler. Bu yüzden kasanın yanında `prefs.json`
+  dosyasında tutulurlar.
+- **Pano:** WhatsApp, metin mesajlarını diğer uygulamalara paylaşamaz.
+  Kasa'daki "Panodan aç" düğmesi, WhatsApp'ta kopyalanan mesajı tek
+  dokunuşla açar. Kasa açılırken panoya kendiliğinden bakma özelliği
+  varsayılan olarak kapalıdır; Ayarlar → Gizlilik'ten açılır.
+
 ## Dosyalar
 
 - **Android:** dosyalar Storage Access Framework ile akış olarak okunur ve

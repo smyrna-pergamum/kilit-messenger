@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../core/kilit_core.dart';
+import '../l10n/app_localizations.dart';
 import '../platform/files.dart';
+import '../state/prefs.dart';
 import '../theme/theme.dart';
 import '../theme/tokens.dart';
 
@@ -21,10 +23,16 @@ String formatDate(DateTime d) {
 
 /// Kasa: the vault's packets, and carrier mode in and out.
 class VaultScreen extends StatefulWidget {
-  const VaultScreen({super.key, required this.core, required this.files});
+  const VaultScreen({
+    super.key,
+    required this.core,
+    required this.files,
+    required this.prefs,
+  });
 
   final KilitCore core;
   final FileAccess files;
+  final Prefs prefs;
 
   @override
   State<VaultScreen> createState() => _VaultScreenState();
@@ -33,13 +41,17 @@ class VaultScreen extends StatefulWidget {
 class _VaultScreenState extends State<VaultScreen> {
   late Future<List<VaultItem>> _items = widget.core.items();
   StreamSubscription<void>? _incoming;
+  String? _clipboardPacket;
 
   @override
   void initState() {
     super.initState();
     // things shared or opened into Kilit wait until the vault is open
     _incoming = widget.files.incomingReady.listen((_) => _takeIncoming());
-    WidgetsBinding.instance.addPostFrameCallback((_) => _takeIncoming());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _takeIncoming();
+      if (widget.prefs.clipboardHint) _checkClipboard();
+    });
   }
 
   @override
@@ -60,6 +72,31 @@ class _VaultScreenState extends State<VaultScreen> {
         .showSnackBar(SnackBar(content: Text(message)));
   }
 
+  /// The clipboard's text when it holds a KLT1: packet. Reading it is what
+  /// makes Android show its "pasted from clipboard" notice.
+  static Future<String?> _clipboardWithPacket() async {
+    final text = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
+    return text != null && text.contains('KLT1:') ? text : null;
+  }
+
+  /// Offered at unlock when the user turned it on in settings.
+  Future<void> _checkClipboard() async {
+    final text = await _clipboardWithPacket();
+    if (mounted && text != null) setState(() => _clipboardPacket = text);
+  }
+
+  /// The one-tap path for WhatsApp, which cannot share a message's text to
+  /// other apps: copy it there, tap this here.
+  Future<void> _openFromClipboard() async {
+    final text = await _clipboardWithPacket();
+    if (!mounted) return;
+    if (text == null) {
+      _say(L.of(context).clipboardEmpty);
+      return;
+    }
+    await _openPasted(initial: text);
+  }
+
   Future<void> _takeIncoming() async {
     final got = await widget.files.takeIncoming();
     if (got == null || !mounted) return;
@@ -72,28 +109,25 @@ class _VaultScreenState extends State<VaultScreen> {
     }
   }
 
-  Future<void> _sealFile() async {
-    final PickedFile? f;
+  Future<PickedFile?> _pick() async {
     try {
-      f = await widget.files.pick();
+      return await widget.files.pick();
     } on FileTooLarge {
-      _say('Dosya çok büyük: en fazla 64 MB.');
-      return;
+      if (mounted) _say(L.of(context).vaultFileTooLarge);
+      return null;
     }
+  }
+
+  Future<void> _sealFile() async {
+    final f = await _pick();
     if (f == null) return;
     await widget.core.addFile(f.name, f.mime, f.bytes);
     _reload();
-    _say('${f.name} şifrelendi ve kasaya eklendi.');
+    if (mounted) _say(L.of(context).vaultFileSealed(f.name));
   }
 
   Future<void> _openKlt() async {
-    final PickedFile? f;
-    try {
-      f = await widget.files.pick();
-    } on FileTooLarge {
-      _say('Dosya çok büyük.');
-      return;
-    }
+    final f = await _pick();
     if (f != null) await _import(f);
   }
 
@@ -143,9 +177,32 @@ class _VaultScreenState extends State<VaultScreen> {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final l = L.of(context);
+    final clipboard = _clipboardPacket;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (clipboard != null)
+          MaterialBanner(
+            key: const ValueKey('clipboard-banner'),
+            backgroundColor: t.surfaceRaised,
+            leading: Icon(Icons.content_paste_go_rounded, color: t.accent),
+            content: Text(l.clipboardBanner),
+            actions: [
+              TextButton(
+                onPressed: () => setState(() => _clipboardPacket = null),
+                child: Text(l.clipboardBannerDismiss),
+              ),
+              TextButton(
+                key: const ValueKey('clipboard-banner-open'),
+                onPressed: () {
+                  setState(() => _clipboardPacket = null);
+                  _openPasted(initial: clipboard);
+                },
+                child: Text(l.clipboardBannerOpen),
+              ),
+            ],
+          ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
           child: Wrap(
@@ -156,31 +213,37 @@ class _VaultScreenState extends State<VaultScreen> {
                 key: const ValueKey('add-note'),
                 onPressed: _addNote,
                 icon: const Icon(Icons.note_add_outlined),
-                label: const Text('Not ekle'),
+                label: Text(l.vaultAddNote),
               ),
               OutlinedButton.icon(
                 key: const ValueKey('compose-carrier'),
                 onPressed: _compose,
                 icon: const Icon(Icons.send_outlined),
-                label: const Text('Taşıyıcı mesajı'),
+                label: Text(l.vaultCompose),
+              ),
+              OutlinedButton.icon(
+                key: const ValueKey('open-clipboard'),
+                onPressed: _openFromClipboard,
+                icon: const Icon(Icons.content_paste_go_rounded),
+                label: Text(l.vaultOpenClipboard),
               ),
               OutlinedButton.icon(
                 key: const ValueKey('open-pasted'),
                 onPressed: _openPasted,
                 icon: const Icon(Icons.content_paste_search_outlined),
-                label: const Text('Yapıştırılanı aç'),
+                label: Text(l.vaultOpenPasted),
               ),
               OutlinedButton.icon(
                 key: const ValueKey('seal-file'),
                 onPressed: _sealFile,
                 icon: const Icon(Icons.upload_file_outlined),
-                label: const Text('Dosya şifrele'),
+                label: Text(l.vaultSealFile),
               ),
               OutlinedButton.icon(
                 key: const ValueKey('open-klt'),
                 onPressed: _openKlt,
                 icon: const Icon(Icons.file_open_outlined),
-                label: const Text('.klt aç'),
+                label: Text(l.vaultOpenKlt),
               ),
             ],
           ),
@@ -198,7 +261,7 @@ class _VaultScreenState extends State<VaultScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(32),
                     child: Text(
-                      'Kasan boş. Bir not ekle ya da bir dosya şifrele; hepsi `.klt` paketi olarak saklanır.',
+                      l.vaultEmpty,
                       key: const ValueKey('vault-empty'),
                       textAlign: TextAlign.center,
                       style: TextStyle(color: t.textMuted),
@@ -250,7 +313,7 @@ class _ItemTile extends StatelessWidget {
         ),
         trailing: item.signed
             ? Tooltip(
-                message: 'İmzalı',
+                message: L.of(context).vaultSigned,
                 child: Icon(Icons.verified_outlined, color: t.safe, size: 20),
               )
             : null,
@@ -288,8 +351,9 @@ class _NoteDialogState extends State<_NoteDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     return AlertDialog(
-      title: const Text('Yeni not'),
+      title: Text(l.noteNew),
       content: SizedBox(
         width: 420,
         child: Column(
@@ -298,14 +362,14 @@ class _NoteDialogState extends State<_NoteDialog> {
             TextField(
               key: const ValueKey('note-title'),
               controller: _title,
-              decoration: const InputDecoration(labelText: 'Başlık'),
+              decoration: InputDecoration(labelText: l.noteTitle),
               enableIMEPersonalizedLearning: false,
             ),
             const SizedBox(height: 12),
             TextField(
               key: const ValueKey('note-text'),
               controller: _text,
-              decoration: const InputDecoration(labelText: 'Not'),
+              decoration: InputDecoration(labelText: l.noteText),
               minLines: 3,
               maxLines: 8,
               enableIMEPersonalizedLearning: false,
@@ -316,12 +380,12 @@ class _NoteDialogState extends State<_NoteDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Vazgeç'),
+          child: Text(l.cancel),
         ),
         FilledButton(
           key: const ValueKey('note-save'),
           onPressed: _save,
-          child: const Text('Şifrele ve kaydet'),
+          child: Text(l.sealAndSave),
         ),
       ],
     );
@@ -364,32 +428,28 @@ class _CarrierComposeSheetState extends State<_CarrierComposeSheet> {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final l = L.of(context);
     final sealed = _sealed;
     return _SheetFrame(
-      title: 'Taşıyıcı mesajı',
+      title: l.carrierTitle,
       children: sealed == null
           ? [
-              Text(
-                'Mesaj şifrelenir ve WhatsApp gibi bir uygulamaya yapıştırılacak metne çevrilir.',
-                style: TextStyle(color: t.textMuted),
-              ),
+              Text(l.carrierIntro, style: TextStyle(color: t.textMuted)),
               const SizedBox(height: 12),
               TextField(
                 key: const ValueKey('carrier-message'),
                 controller: _message,
                 minLines: 3,
                 maxLines: 8,
-                decoration: const InputDecoration(labelText: 'Mesaj'),
+                decoration: InputDecoration(labelText: l.carrierMessage),
                 enableIMEPersonalizedLearning: false,
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 value: _usePassphrase,
                 onChanged: (v) => setState(() => _usePassphrase = v),
-                title: const Text('Ortak parola ile'),
-                subtitle: const Text(
-                  'Karşı taraf aynı parolayla açar. Kapalıysa yalnızca sen açabilirsin.',
-                ),
+                title: Text(l.withPassphrase),
+                subtitle: Text(l.carrierWithPassphraseHint),
               ),
               if (_usePassphrase)
                 TextField(
@@ -397,23 +457,20 @@ class _CarrierComposeSheetState extends State<_CarrierComposeSheet> {
                   controller: _passphrase,
                   obscureText: true,
                   enableIMEPersonalizedLearning: false,
-                  decoration: const InputDecoration(
-                    labelText: 'Ortak parola',
-                    helperText: 'En az 12 karakter. Parolayı bu mesajla aynı kanaldan gönderme.',
+                  decoration: InputDecoration(
+                    labelText: l.passphrase,
+                    helperText: l.carrierPassphraseHelper,
                   ),
                 ),
               const SizedBox(height: 16),
               FilledButton(
                 key: const ValueKey('carrier-seal'),
                 onPressed: _seal,
-                child: const Text('Şifrele'),
+                child: Text(l.carrierSeal),
               ),
             ]
           : [
-              Text(
-                'Bu metni kopyalayıp gönder. Kanal yalnızca şifreli veriyi görür.',
-                style: TextStyle(color: t.textMuted),
-              ),
+              Text(l.carrierResultIntro, style: TextStyle(color: t.textMuted)),
               const SizedBox(height: 12),
               Container(
                 constraints: const BoxConstraints(maxHeight: 200),
@@ -436,7 +493,7 @@ class _CarrierComposeSheetState extends State<_CarrierComposeSheet> {
               ),
               const SizedBox(height: 8),
               Text(
-                '${sealed.length} karakter',
+                l.carrierChars(sealed.length),
                 style: TextStyle(color: t.textMuted),
               ),
               const SizedBox(height: 16),
@@ -445,13 +502,12 @@ class _CarrierComposeSheetState extends State<_CarrierComposeSheet> {
                 onPressed: () async {
                   await Clipboard.setData(ClipboardData(text: sealed));
                   if (context.mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(const SnackBar(content: Text('Kopyalandı')));
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text(l.copied)));
                   }
                 },
                 icon: const Icon(Icons.copy_rounded),
-                label: const Text('Kopyala'),
+                label: Text(l.copy),
               ),
             ],
     );
@@ -464,7 +520,7 @@ class _PasteSheet extends StatefulWidget {
 
   final KilitCore core;
 
-  /// Text shared into Kilit from another app.
+  /// Text from the clipboard, or shared into Kilit from another app.
   final String? initial;
 
   @override
@@ -475,6 +531,15 @@ class _PasteSheetState extends State<_PasteSheet> {
   late final _pasted = TextEditingController(text: widget.initial);
   final _passphrase = TextEditingController();
   List<String>? _results;
+
+  @override
+  void initState() {
+    super.initState();
+    // text that arrived from outside opens at once; a passphrase can follow
+    if (widget.initial != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _open());
+    }
+  }
 
   @override
   void dispose() {
@@ -489,16 +554,17 @@ class _PasteSheetState extends State<_PasteSheet> {
   }
 
   Future<void> _open() async {
+    final l = L.of(context);
     final found = widget.core.findPackets(_pasted.text);
     final results = <String>[];
-    if (found.isEmpty) results.add('Metinde KLT1 paketi bulunamadı.');
+    if (found.isEmpty) results.add(l.pasteNone);
     for (final f in found) {
       final packet = f.packet;
       if (packet == null) {
         results.add(
           f.problem == FoundProblem.truncated
-              ? 'Bir paket kesilmiş: gönderen uygulama mesajı kısaltmış olabilir.'
-              : 'Bir paket bozuk.',
+              ? l.pasteTruncated
+              : l.pasteMalformed,
         );
         continue;
       }
@@ -508,11 +574,9 @@ class _PasteSheetState extends State<_PasteSheet> {
       );
       results.add(switch (opened.failure) {
         null => opened.text!,
-        OpenFailure.wrongKey =>
-          'Bu paket bu parolayla ya da anahtarla açılmıyor.',
-        OpenFailure.damaged => 'Bu paket bozuk ya da değiştirilmiş.',
-        OpenFailure.notAMessage =>
-          'Bu paket bir dosya; Kasa\'ya kaydederek aç.',
+        OpenFailure.wrongKey => l.openWrongKey,
+        OpenFailure.damaged => l.openDamaged,
+        OpenFailure.notAMessage => l.openIsFile,
       });
     }
     if (mounted) setState(() => _results = results);
@@ -521,9 +585,10 @@ class _PasteSheetState extends State<_PasteSheet> {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final l = L.of(context);
     final results = _results;
     return _SheetFrame(
-      title: 'Yapıştırılanı aç',
+      title: l.pasteTitle,
       children: [
         TextField(
           key: const ValueKey('paste-input'),
@@ -532,9 +597,9 @@ class _PasteSheetState extends State<_PasteSheet> {
           maxLines: 6,
           enableIMEPersonalizedLearning: false,
           decoration: InputDecoration(
-            labelText: 'Sohbetten kopyaladığın metin',
+            labelText: l.pasteInput,
             suffixIcon: IconButton(
-              tooltip: 'Panodan yapıştır',
+              tooltip: l.pasteFromClipboard,
               icon: const Icon(Icons.content_paste_rounded),
               onPressed: _pasteFromClipboard,
             ),
@@ -546,13 +611,13 @@ class _PasteSheetState extends State<_PasteSheet> {
           controller: _passphrase,
           obscureText: true,
           enableIMEPersonalizedLearning: false,
-          decoration: const InputDecoration(labelText: 'Ortak parola (varsa)'),
+          decoration: InputDecoration(labelText: l.passphraseIfAny),
         ),
         const SizedBox(height: 16),
         FilledButton(
           key: const ValueKey('paste-open'),
           onPressed: _open,
-          child: const Text('Bul ve aç'),
+          child: Text(l.pasteOpen),
         ),
         if (results != null) ...[
           const SizedBox(height: 16),
@@ -584,6 +649,7 @@ class _PacketSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final l = L.of(context);
     return FutureBuilder<PacketInfo>(
       future: core.inspect(item.id),
       builder: (context, snap) {
@@ -604,29 +670,39 @@ class _PacketSheet extends StatelessWidget {
           ),
         );
         return _SheetFrame(
-          title: 'Paket analizi',
+          title: l.packetTitle,
           children: info == null
               ? [const Center(child: CircularProgressIndicator())]
               : [
-                  row('Dosya', info.name),
-                  row('Tür', info.mime),
+                  row(l.packetFile, info.name),
+                  row(l.packetType, info.mime),
                   row(
-                    'Boyut',
-                    '${formatBytes(info.contentBytes)} (paket ${formatBytes(info.packetBytes)})',
+                    l.packetSize,
+                    l.packetSizeValue(
+                      formatBytes(info.contentBytes),
+                      formatBytes(info.packetBytes),
+                    ),
                   ),
-                  row('Biçim', 'KLT1 (age v1 üzerine)'),
+                  row(l.packetFormat, l.packetFormatValue),
                   row(
-                    'Alıcılar',
-                    info.recipients.map(_describeRecipient).join('\n'),
+                    l.packetRecipients,
+                    info.recipients
+                        .map(
+                          (tag) => switch (tag) {
+                            'klt-xwing' => l.recipientXwing,
+                            'klt-argon2id' => l.recipientPassphrase,
+                            _ => tag,
+                          },
+                        )
+                        .join('\n'),
                   ),
-                  row('İçerik', 'ChaCha20-Poly1305, 64 KiB parçalar'),
+                  row(l.packetContent, l.packetContentValue),
                   row(
-                    'İmza',
+                    l.packetSignature,
                     switch (info.signature) {
-                      SignatureState.verified =>
-                        'Ed25519 + ML-DSA-65, doğrulandı',
-                      SignatureState.unsigned => 'İmzasız',
-                      SignatureState.invalid => 'GEÇERSİZ',
+                      SignatureState.verified => l.sigVerified,
+                      SignatureState.unsigned => l.sigUnsigned,
+                      SignatureState.invalid => l.sigInvalid,
                     },
                     color: switch (info.signature) {
                       SignatureState.verified => t.safe,
@@ -661,14 +737,14 @@ class _PacketSheet extends StatelessWidget {
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
-                                child: const Text('Kapat'),
+                                child: Text(l.close),
                               ),
                             ],
                           ),
                         );
                       },
                       icon: const Icon(Icons.lock_open_outlined),
-                      label: const Text('Aç'),
+                      label: Text(l.itemOpen),
                     ),
                     const SizedBox(height: 8),
                   ],
@@ -688,7 +764,7 @@ class _PacketSheet extends StatelessWidget {
                         );
                       },
                       icon: const Icon(Icons.image_outlined),
-                      label: const Text('Görüntüle'),
+                      label: Text(l.itemView),
                     ),
                     const SizedBox(height: 8),
                   ],
@@ -701,7 +777,7 @@ class _PacketSheet extends StatelessWidget {
                           _ExportSheet(core: core, files: files, item: item),
                     ),
                     icon: const Icon(Icons.ios_share_outlined),
-                    label: const Text('.klt olarak dışa aktar'),
+                    label: Text(l.itemExport),
                   ),
                   const SizedBox(height: 8),
                   OutlinedButton.icon(
@@ -710,20 +786,17 @@ class _PacketSheet extends StatelessWidget {
                       final ok = await showDialog<bool>(
                         context: context,
                         builder: (_) => AlertDialog(
-                          title: const Text('Şifresiz kaydedilsin mi?'),
-                          content: const Text(
-                            'Dosya şifresi çözülmüş olarak kaydedilir. Kaydettiğin yerde '
-                            'kim erişebiliyorsa okuyabilir; Kilit onu artık koruyamaz.',
-                          ),
+                          title: Text(l.savePlainTitle),
+                          content: Text(l.savePlainBody),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
-                              child: const Text('Vazgeç'),
+                              child: Text(l.cancel),
                             ),
                             TextButton(
                               key: const ValueKey('confirm-save-plain'),
                               onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Şifresiz kaydet'),
+                              child: Text(l.itemSavePlain),
                             ),
                           ],
                         ),
@@ -733,7 +806,7 @@ class _PacketSheet extends StatelessWidget {
                       await files.save(info.name, info.mime, bytes);
                     },
                     icon: const Icon(Icons.lock_open_outlined),
-                    label: const Text('Şifresiz kaydet'),
+                    label: Text(l.itemSavePlain),
                   ),
                   const SizedBox(height: 8),
                   OutlinedButton.icon(
@@ -744,7 +817,7 @@ class _PacketSheet extends StatelessWidget {
                       if (context.mounted) Navigator.pop(context, true);
                     },
                     icon: const Icon(Icons.delete_outline),
-                    label: const Text('Kasadan sil'),
+                    label: Text(l.itemDelete),
                   ),
                 ],
         );
@@ -772,7 +845,7 @@ class _ExportSheet extends StatefulWidget {
 class _ExportSheetState extends State<_ExportSheet> {
   final _passphrase = TextEditingController();
   bool _usePassphrase = true;
-  String? _error;
+  bool _tooShort = false;
 
   @override
   void dispose() {
@@ -782,7 +855,7 @@ class _ExportSheetState extends State<_ExportSheet> {
 
   Future<void> _export() async {
     if (_usePassphrase && _passphrase.text.length < 12) {
-      setState(() => _error = 'Ortak parola en az 12 karakter olmalı.');
+      setState(() => _tooShort = true);
       return;
     }
     final klt = await widget.core.exportKlt(
@@ -800,22 +873,17 @@ class _ExportSheetState extends State<_ExportSheet> {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final l = L.of(context);
     return _SheetFrame(
-      title: '.klt olarak dışa aktar',
+      title: l.exportTitle,
       children: [
-        Text(
-          'Dosya yeniden şifrelenir ve kasan tarafından imzalanır. Dosya adı '
-          'rastgele olur; asıl ad yalnızca şifreli paketin içinde durur.',
-          style: TextStyle(color: t.textMuted),
-        ),
+        Text(l.exportIntro, style: TextStyle(color: t.textMuted)),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: _usePassphrase,
           onChanged: (v) => setState(() => _usePassphrase = v),
-          title: const Text('Ortak parola ile'),
-          subtitle: const Text(
-            'Parolayı bilen herkes açar. Kapalıysa yalnızca senin kasan açar (yedek için).',
-          ),
+          title: Text(l.withPassphrase),
+          subtitle: Text(l.exportWithPassphraseHint),
         ),
         if (_usePassphrase)
           TextField(
@@ -824,16 +892,16 @@ class _ExportSheetState extends State<_ExportSheet> {
             obscureText: true,
             enableIMEPersonalizedLearning: false,
             decoration: InputDecoration(
-              labelText: 'Ortak parola',
-              helperText: 'En az 12 karakter. Dosyayla aynı kanaldan gönderme.',
-              errorText: _error,
+              labelText: l.passphrase,
+              helperText: l.exportPassphraseHelper,
+              errorText: _tooShort ? l.passphraseTooShort : null,
             ),
           ),
         const SizedBox(height: 16),
         FilledButton(
           key: const ValueKey('export-go'),
           onPressed: _export,
-          child: const Text('Şifrele ve kaydet'),
+          child: Text(l.sealAndSave),
         ),
       ],
     );
@@ -853,7 +921,7 @@ class _ImportSheet extends StatefulWidget {
 
 class _ImportSheetState extends State<_ImportSheet> {
   final _passphrase = TextEditingController();
-  String? _result;
+  ImportOutcome? _failed;
   bool _busy = false;
 
   @override
@@ -863,6 +931,7 @@ class _ImportSheetState extends State<_ImportSheet> {
   }
 
   Future<void> _open() async {
+    final l = L.of(context);
     setState(() => _busy = true);
     final r = await widget.core.importKlt(
       widget.file.bytes,
@@ -870,29 +939,32 @@ class _ImportSheetState extends State<_ImportSheet> {
     );
     if (!mounted) return;
     if (r.outcome == ImportOutcome.imported) {
-      final who = r.signature == SignatureState.verified ? 'imzalı' : 'imzasız';
+      final name = r.item!.name;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${r.item!.name} kasaya eklendi ($who).')),
+        SnackBar(
+          content: Text(
+            r.signature == SignatureState.verified
+                ? l.importAddedSigned(name)
+                : l.importAddedUnsigned(name),
+          ),
+        ),
       );
       Navigator.pop(context, true);
       return;
     }
     setState(() {
       _busy = false;
-      _result = switch (r.outcome) {
-        ImportOutcome.wrongKey =>
-          'Bu dosya bu parolayla ya da kasanla açılmıyor.',
-        ImportOutcome.notKlt => 'Bu bir .klt dosyası değil.',
-        _ => 'Dosya bozuk ya da değiştirilmiş.',
-      };
+      _failed = r.outcome;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final l = L.of(context);
+    final failed = _failed;
     return _SheetFrame(
-      title: '.klt dosyasını aç',
+      title: l.importTitle,
       children: [
         Text(
           '${widget.file.name} · ${formatBytes(widget.file.bytes.length)}',
@@ -904,15 +976,19 @@ class _ImportSheetState extends State<_ImportSheet> {
           controller: _passphrase,
           obscureText: true,
           enableIMEPersonalizedLearning: false,
-          decoration: const InputDecoration(
-            labelText: 'Ortak parola (varsa)',
-            helperText: 'Sana kendi kasanla gönderildiyse boş bırak.',
+          decoration: InputDecoration(
+            labelText: l.passphraseIfAny,
+            helperText: l.importPassphraseHelper,
           ),
         ),
-        if (_result != null) ...[
+        if (failed != null) ...[
           const SizedBox(height: 12),
           Text(
-            _result!,
+            switch (failed) {
+              ImportOutcome.wrongKey => l.importWrongKey,
+              ImportOutcome.notKlt => l.importNotKlt,
+              _ => l.importDamaged,
+            },
             key: const ValueKey('import-result'),
             style: TextStyle(color: t.danger),
           ),
@@ -921,18 +997,12 @@ class _ImportSheetState extends State<_ImportSheet> {
         FilledButton(
           key: const ValueKey('import-go'),
           onPressed: _busy ? null : _open,
-          child: const Text('Aç ve kasaya ekle'),
+          child: Text(l.importGo),
         ),
       ],
     );
   }
 }
-
-String _describeRecipient(String tag) => switch (tag) {
-  'klt-xwing' => 'klt-xwing (ML-KEM-768 + X25519)',
-  'klt-argon2id' => 'klt-argon2id (ortak parola)',
-  _ => tag,
-};
 
 class _SheetFrame extends StatelessWidget {
   const _SheetFrame({required this.title, required this.children});

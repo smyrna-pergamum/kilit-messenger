@@ -54,6 +54,15 @@ class FilesChannel(private val activity: Activity, private val channel: MethodCh
                     .putExtra(Intent.EXTRA_TITLE, call.argument<String>("name") ?: "kilit.klt")
                 activity.startActivityForResult(intent, SAVE)
             }
+            "openAppSettings" -> {
+                // Kilit's page in Android settings, where the user grants or
+                // revokes its permissions
+                activity.startActivity(
+                    Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        .setData(Uri.fromParts("package", activity.packageName, null)),
+                )
+                result.success(null)
+            }
             "takeIncoming" -> {
                 result.success(incoming)
                 incoming = null

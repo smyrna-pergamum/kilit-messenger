@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../theme/tokens.dart';
 
 /// The ten digits in a fresh random order. Shuffled on every lock screen
@@ -83,7 +84,7 @@ class PinPad extends StatelessWidget {
             child: key(
               Icon(Icons.backspace_outlined, color: t.textMuted),
               onBackspace,
-              label: 'Sil',
+              label: L.of(context).pinDelete,
               k: const ValueKey('pin-backspace'),
             ),
           ),
@@ -95,7 +96,7 @@ class PinPad extends StatelessWidget {
                 color: canSubmit ? t.accent : t.outline,
               ),
               canSubmit ? onSubmit : null,
-              label: 'Tamam',
+              label: L.of(context).pinOk,
               k: const ValueKey('pin-submit'),
             ),
           ),
@@ -121,7 +122,7 @@ class PinDots extends StatelessWidget {
     final t = context.tokens;
     final shown = max(count, 6);
     return Semantics(
-      label: '$count rakam girildi',
+      label: L.of(context).pinDigitsEntered(count),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

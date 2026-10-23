@@ -13,8 +13,8 @@ abstract interface class KilitCore {
   /// Whether the PIN is bound to a hardware key (StrongBox, TEE, TPM).
   bool get isHardwareBacked;
 
-  /// What protects the PIN, in words for the settings screen.
-  String get pinProtection;
+  /// What protects the PIN, for the settings screen.
+  PinProtection get pinProtection;
 
   Future<bool> hasVault();
   Future<void> createVault(String pin);
@@ -54,6 +54,32 @@ abstract interface class KilitCore {
   /// Finds packets in pasted text; see `find_in_text` in kilit-klt.
   List<FoundPacket> findPackets(String pasted);
   Future<OpenedMessage> openMessage(Uint8List packet, {String? passphrase});
+}
+
+/// What protects the vault's PIN on this device.
+enum PinProtection {
+  strongbox,
+  tee,
+  tpm,
+
+  /// Android Keystore without secure hardware.
+  osSoftware,
+
+  /// The Rust core's software key file beside the vault.
+  softwareFile,
+
+  /// No vault yet and no platform key.
+  none,
+
+  /// The in-memory development core.
+  dev,
+}
+
+extension PinProtectionHardware on PinProtection {
+  bool get isHardware =>
+      this == PinProtection.strongbox ||
+      this == PinProtection.tee ||
+      this == PinProtection.tpm;
 }
 
 enum UnlockOutcome { unlocked, wrongPin, waitBeforeRetry }

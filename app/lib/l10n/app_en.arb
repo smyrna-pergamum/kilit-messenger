@@ -1,0 +1,203 @@
+{
+  "@@locale": "en",
+  "appTitle": "Kilit",
+  "cancel": "Cancel",
+  "close": "Close",
+  "copy": "Copy",
+  "copied": "Copied",
+  "lockNow": "Lock now",
+  "devBanner": "Development core: no real encryption.",
+  "lockTitleUnlock": "Unlock",
+  "lockTitleCreate": "Choose a PIN",
+  "lockTitleConfirm": "Enter the PIN again",
+  "lockHintUnlock": "Enter your PIN to open your vault.",
+  "lockHintCreate": "At least {min} digits. If you forget it your vault cannot be opened: there is no recovery.",
+  "@lockHintCreate": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "lockHintConfirm": "Enter the same PIN once more.",
+  "lockMismatch": "The PINs did not match. Start again.",
+  "lockWrongPin": "Wrong PIN.",
+  "lockWait": "Wait {seconds} s before trying again.",
+  "@lockWait": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "pinDigitsEntered": "{count} digits entered",
+  "@pinDigitsEntered": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pinDelete": "Delete",
+  "pinOk": "OK",
+  "navChats": "Chats",
+  "navVault": "Vault",
+  "navCamera": "Camera",
+  "navSettings": "Settings",
+  "chatsLater": "Messaging over Tor arrives in stage 2.",
+  "cameraLater": "A camera that never writes plaintext to disk arrives in stage 2.",
+  "vaultAddNote": "Add note",
+  "vaultCompose": "Carrier message",
+  "vaultOpenClipboard": "Open from clipboard",
+  "vaultOpenPasted": "Open pasted text",
+  "vaultSealFile": "Encrypt a file",
+  "vaultOpenKlt": "Open .klt",
+  "vaultEmpty": "Your vault is empty. Add a note or encrypt a file; everything is kept as a .klt packet.",
+  "vaultSigned": "Signed",
+  "vaultFileTooLarge": "The file is too large: 64 MB at most.",
+  "vaultFileSealed": "{name} was encrypted and added to the vault.",
+  "@vaultFileSealed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "clipboardEmpty": "No Kilit message on the clipboard. In WhatsApp, long-press the message and tap Copy.",
+  "clipboardBanner": "There is a Kilit message on the clipboard.",
+  "clipboardBannerOpen": "Open",
+  "clipboardBannerDismiss": "Ignore",
+  "noteNew": "New note",
+  "noteTitle": "Title",
+  "noteText": "Note",
+  "sealAndSave": "Encrypt and save",
+  "carrierTitle": "Carrier message",
+  "carrierIntro": "The message is encrypted and turned into text to paste into an app such as WhatsApp.",
+  "carrierMessage": "Message",
+  "withPassphrase": "With a shared passphrase",
+  "carrierWithPassphraseHint": "The other side opens it with the same passphrase. Off: only you can open it.",
+  "passphrase": "Shared passphrase",
+  "carrierPassphraseHelper": "At least 12 characters. Do not send it through the same channel as the message.",
+  "carrierSeal": "Encrypt",
+  "carrierResultIntro": "Copy and send this text. The channel only sees encrypted data.",
+  "carrierChars": "{count} characters",
+  "@carrierChars": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pasteTitle": "Open pasted text",
+  "pasteInput": "Text you copied from a chat",
+  "pasteFromClipboard": "Paste from clipboard",
+  "passphraseIfAny": "Shared passphrase (if any)",
+  "pasteOpen": "Find and open",
+  "pasteNone": "No KLT1 packet found in the text.",
+  "pasteTruncated": "A packet was cut off: the sending app may have shortened the message.",
+  "pasteMalformed": "A packet is damaged.",
+  "openWrongKey": "This packet does not open with this passphrase or key.",
+  "openDamaged": "This packet is damaged or was changed.",
+  "openIsFile": "This packet holds a file; add it to the vault with Open .klt.",
+  "packetTitle": "Packet analysis",
+  "packetFile": "File",
+  "packetType": "Type",
+  "packetSize": "Size",
+  "packetSizeValue": "{content} (packet {packet})",
+  "@packetSizeValue": {
+    "placeholders": {
+      "content": {
+        "type": "String"
+      },
+      "packet": {
+        "type": "String"
+      }
+    }
+  },
+  "packetFormat": "Format",
+  "packetFormatValue": "KLT1 (built on age v1)",
+  "packetRecipients": "Recipients",
+  "packetContent": "Content",
+  "packetContentValue": "ChaCha20-Poly1305, 64 KiB chunks",
+  "packetSignature": "Signature",
+  "sigVerified": "Ed25519 + ML-DSA-65, verified",
+  "sigUnsigned": "Unsigned",
+  "sigInvalid": "INVALID",
+  "recipientXwing": "klt-xwing (ML-KEM-768 + X25519)",
+  "recipientPassphrase": "klt-argon2id (shared passphrase)",
+  "itemOpen": "Open",
+  "itemView": "View",
+  "itemExport": "Export as .klt",
+  "itemSavePlain": "Save unencrypted",
+  "savePlainTitle": "Save unencrypted?",
+  "savePlainBody": "The file is saved decrypted. Anyone with access to where you save it can read it; Kilit can no longer protect it.",
+  "itemDelete": "Delete from vault",
+  "exportTitle": "Export as .klt",
+  "exportIntro": "The file is encrypted again and signed by your vault. The file name is random; the real name stays inside the encrypted packet.",
+  "exportWithPassphraseHint": "Anyone with the passphrase can open it. Off: only your vault opens it (for backups).",
+  "exportPassphraseHelper": "At least 12 characters. Do not send it through the same channel as the file.",
+  "passphraseTooShort": "The shared passphrase must be at least 12 characters.",
+  "importTitle": "Open a .klt file",
+  "importPassphraseHelper": "Leave empty if it was sent to your own vault.",
+  "importGo": "Open and add to vault",
+  "importAddedSigned": "{name} was added to the vault (signed).",
+  "@importAddedSigned": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "importAddedUnsigned": "{name} was added to the vault (unsigned).",
+  "@importAddedUnsigned": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "importWrongKey": "This file does not open with this passphrase or your vault.",
+  "importNotKlt": "This is not a .klt file.",
+  "importDamaged": "The file is damaged or was changed.",
+  "settingsProtections": "Your protections",
+  "protPin": "PIN protection",
+  "protScreenshots": "Screenshot blocking",
+  "protScreenshotsValue": "On, on every screen",
+  "protAutoLock": "Auto-lock",
+  "protAutoLockValue": "When you leave the app",
+  "protNetwork": "Tor connection",
+  "protNetworkValue": "Not connected: stage 1 never goes online. Tor arrives in stage 2.",
+  "hwStrongbox": "StrongBox security chip",
+  "hwTee": "Trusted execution environment (TEE)",
+  "hwTpm": "TPM 2.0",
+  "hwOsSoftware": "Android Keystore (no secure hardware)",
+  "hwSoftwareFile": "Software key (next to the vault)",
+  "hwNone": "None",
+  "hwDev": "None (development core)",
+  "hwBoundHint": "Your PIN is bound to this device's hardware key. Even a copy of the vault file cannot be tried on another device.",
+  "hwNotBoundHint": "No hardware key: if the vault file is copied, the PIN can be guessed on another device.",
+  "settingsFingerprint": "Your safety number",
+  "settingsFingerprintHint": "When verifying a contact it must be the same on both devices.",
+  "settingsAppearance": "Appearance",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "settingsLanguage": "Language",
+  "languageSystem": "System language",
+  "settingsPrivacy": "Privacy",
+  "clipboardCheck": "Offer the Kilit message on the clipboard",
+  "clipboardCheckHint": "When the vault opens, offers to open a KLT1: message on the clipboard. Android shows a notice that the clipboard was read.",
+  "settingsPermissions": "Permissions",
+  "permIntro": "Kilit uses no sensitive permission right now.",
+  "permCamera": "Camera",
+  "permCameraValue": "Not used (camera arrives in stage 2)",
+  "permNotifications": "Notifications",
+  "permNotificationsValue": "Not used",
+  "permInternet": "Internet",
+  "permInternetValue": "None: stage 1 works offline",
+  "permOpenSystem": "Open system permission settings",
+  "settingsAbout": "About",
+  "aboutVersion": "Version",
+  "aboutLicense": "License",
+  "aboutAlpha": "Not independently audited. Alpha: good for testing, not for high-stakes use."
+}

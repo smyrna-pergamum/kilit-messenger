@@ -38,14 +38,21 @@ class RustCore implements KilitCore {
   bool get isDevelopmentStub => false;
 
   @override
-  bool get isHardwareBacked =>
-      _level.isHardware && _h.keyKind() == rust.PinKeyKind.hardware;
+  bool get isHardwareBacked => pinProtection.isHardware;
+
+  PinProtection get _platform => switch (_level) {
+    KeyLevel.strongbox => PinProtection.strongbox,
+    KeyLevel.tee => PinProtection.tee,
+    KeyLevel.tpm => PinProtection.tpm,
+    KeyLevel.osSoftware => PinProtection.osSoftware,
+    KeyLevel.none => PinProtection.none,
+  };
 
   @override
-  String get pinProtection => switch (_h.keyKind()) {
-    rust.PinKeyKind.hardware => _level.label,
-    rust.PinKeyKind.software => 'Yazılım anahtarı (kasanın yanında)',
-    rust.PinKeyKind.none => _platformKey ? _level.label : 'Yok',
+  PinProtection get pinProtection => switch (_h.keyKind()) {
+    rust.PinKeyKind.hardware => _platform,
+    rust.PinKeyKind.software => PinProtection.softwareFile,
+    rust.PinKeyKind.none => _platform,
   };
 
   @override

@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'app.dart';
 import 'core/rust_core.dart';
 import 'platform/files.dart';
+import 'state/prefs.dart';
 import 'src/rust/frb_generated.dart';
 
 Future<void> main(List<String> args) async {
@@ -14,10 +15,20 @@ Future<void> main(List<String> args) async {
   // app-private storage: excluded from Android backup and device transfer
   // (res/xml/data_extraction_rules.xml); %APPDATA% on Windows
   final dir = await getApplicationSupportDirectory();
+  final sep = Platform.pathSeparator;
   final core = await RustCore.open(
-    '${dir.path}${Platform.pathSeparator}kilit',
+    '${dir.path}${sep}kilit',
     desktop: Platform.isWindows || Platform.isLinux || Platform.isMacOS,
   );
-  // on Windows a .klt opened from Explorer arrives as an argument
-  runApp(KilitApp(core: core, files: PlatformFileAccess(args)));
+  final prefs = await Prefs.load(
+    FilePrefsStore(File('${dir.path}${sep}prefs.json')),
+  );
+  runApp(
+    KilitApp(
+      core: core,
+      // on Windows a .klt opened from Explorer arrives as an argument
+      files: PlatformFileAccess(args),
+      prefs: prefs,
+    ),
+  );
 }
