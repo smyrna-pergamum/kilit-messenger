@@ -186,6 +186,14 @@ class DevCore implements KilitCore {
     return 'KLT1:$_marker${base64Url.encode(utf8.encode(message)).replaceAll('=', '')}.';
   }
 
+  /// Pretends every JPEG had camera details and a location, and knows no
+  /// other format. The bytes come back as they went in.
+  @override
+  Future<CleanedFile> cleanMetadata(Uint8List bytes) async =>
+      bytes.length >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8
+      ? CleanedFile.cleaned(bytes, const {HiddenData.exif, HiddenData.location})
+      : const CleanedFile.failed(CleanOutcome.unsupported);
+
   @override
   List<FoundPacket> findPackets(String pasted) {
     final found = <FoundPacket>[];

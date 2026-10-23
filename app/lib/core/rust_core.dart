@@ -178,6 +178,32 @@ class RustCore implements KilitCore {
       _h.sealForCarrier(message: message, passphrase: passphrase);
 
   @override
+  Future<CleanedFile> cleanMetadata(Uint8List bytes) async {
+    final r = await rust.cleanMetadata(data: bytes);
+    return switch (r.outcome) {
+      rust.CleanOutcome.cleaned => CleanedFile.cleaned(r.data, {
+        for (final k in r.removed)
+          switch (k) {
+            rust.RemovedKind.exif => HiddenData.exif,
+            rust.RemovedKind.location => HiddenData.location,
+            rust.RemovedKind.xmp => HiddenData.xmp,
+            rust.RemovedKind.iptc => HiddenData.iptc,
+            rust.RemovedKind.comment => HiddenData.comment,
+            rust.RemovedKind.extraImages => HiddenData.extraImages,
+            rust.RemovedKind.text => HiddenData.text,
+            rust.RemovedKind.other => HiddenData.other,
+          },
+      }),
+      rust.CleanOutcome.unsupported => const CleanedFile.failed(
+        CleanOutcome.unsupported,
+      ),
+      rust.CleanOutcome.damaged => const CleanedFile.failed(
+        CleanOutcome.damaged,
+      ),
+    };
+  }
+
+  @override
   List<FoundPacket> findPackets(String pasted) => [
     for (final f in rust.findPackets(text: pasted))
       switch (f.kind) {

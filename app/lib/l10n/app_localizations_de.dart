@@ -128,6 +128,44 @@ class LDe extends L {
   }
 
   @override
+  String vaultFileCleaned(String name, String removed) {
+    return '$name wurde verschlüsselt und zum Tresor hinzugefügt. Entfernte versteckte Daten: $removed.';
+  }
+
+  @override
+  String vaultFileUnchecked(String name) {
+    return '$name wurde verschlüsselt und zum Tresor hinzugefügt. Kilit kann aus diesem Dateityp keine versteckten Daten (etwa den Autor) entfernen; prüfe die Datei, bevor du sie teilst.';
+  }
+
+  @override
+  String get damagedPictureTitle => 'Beschädigtes Bild';
+
+  @override
+  String get damagedPictureBody =>
+      'Dieses Bild ist beschädigt, daher konnte Kilit seine versteckten Daten, etwa den Aufnahmeort, nicht entfernen. Trotzdem unverändert hinzufügen?';
+
+  @override
+  String get damagedPictureSeal => 'Unverändert hinzufügen';
+
+  @override
+  String get hiddenLocation => 'Standort';
+
+  @override
+  String get hiddenCamera => 'Kameradaten';
+
+  @override
+  String get hiddenAuthorNotes => 'Autor und Notizen';
+
+  @override
+  String get hiddenExtraImages => 'zusätzliche Bilder';
+
+  @override
+  String get hiddenOther => 'sonstige Metadaten';
+
+  @override
+  String get hiddenListSeparator => ', ';
+
+  @override
   String get clipboardEmpty =>
       'Keine Kilit-Nachricht in der Zwischenablage. Halte in WhatsApp die Nachricht gedrückt und tippe auf Kopieren.';
 

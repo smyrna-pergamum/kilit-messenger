@@ -40,7 +40,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -48720525;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 21468754;
 
 // Section: executor
 
@@ -1106,6 +1106,39 @@ fn wire__crate__api__KilitHandle_unlock_with_mac_impl(
         },
     )
 }
+fn wire__crate__api__clean_metadata_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "clean_metadata",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_data = <Vec<u8>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, ()>((move || {
+                    let output_ok = Ok::<_, ()>(crate::api::clean_metadata(api_data))?;
+                    std::result::Result::Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
 fn wire__crate__api__find_packets_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -1241,6 +1274,33 @@ impl SseDecode for bool {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         deserializer.cursor.read_u8().unwrap() != 0
+    }
+}
+
+impl SseDecode for crate::api::CleanOutcome {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::CleanOutcome::Cleaned,
+            1 => crate::api::CleanOutcome::Unsupported,
+            2 => crate::api::CleanOutcome::Damaged,
+            _ => unreachable!("Invalid variant for CleanOutcome: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::CleanReply {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_outcome = <crate::api::CleanOutcome>::sse_decode(deserializer);
+        let mut var_data = <Vec<u8>>::sse_decode(deserializer);
+        let mut var_removed = <Vec<crate::api::RemovedKind>>::sse_decode(deserializer);
+        return crate::api::CleanReply {
+            outcome: var_outcome,
+            data: var_data,
+            removed: var_removed,
+        };
     }
 }
 
@@ -1421,6 +1481,18 @@ impl SseDecode for Vec<u8> {
     }
 }
 
+impl SseDecode for Vec<crate::api::RemovedKind> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = Vec::with_capacity(len_ as usize);
+        for idx_ in 0..len_ {
+            ans_.push(<crate::api::RemovedKind>::sse_decode(deserializer));
+        }
+        return ans_;
+    }
+}
+
 impl SseDecode for crate::api::MessageKind {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1496,6 +1568,24 @@ impl SseDecode for crate::api::PinKeyKind {
             1 => crate::api::PinKeyKind::Software,
             2 => crate::api::PinKeyKind::Hardware,
             _ => unreachable!("Invalid variant for PinKeyKind: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::RemovedKind {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::RemovedKind::Exif,
+            1 => crate::api::RemovedKind::Location,
+            2 => crate::api::RemovedKind::Xmp,
+            3 => crate::api::RemovedKind::Iptc,
+            4 => crate::api::RemovedKind::Comment,
+            5 => crate::api::RemovedKind::ExtraImages,
+            6 => crate::api::RemovedKind::Text,
+            7 => crate::api::RemovedKind::Other,
+            _ => unreachable!("Invalid variant for RemovedKind: {}", inner),
         };
     }
 }
@@ -1601,7 +1691,8 @@ fn pde_ffi_dispatcher_primary_impl(
         }
         20 => wire__crate__api__KilitHandle_unlock_impl(port, ptr, rust_vec_len, data_len),
         21 => wire__crate__api__KilitHandle_unlock_with_mac_impl(port, ptr, rust_vec_len, data_len),
-        23 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
+        22 => wire__crate__api__clean_metadata_impl(port, ptr, rust_vec_len, data_len),
+        24 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -1616,8 +1707,8 @@ fn pde_ffi_dispatcher_sync_impl(
     match func_id {
         12 => wire__crate__api__KilitHandle_key_kind_impl(ptr, rust_vec_len, data_len),
         13 => wire__crate__api__KilitHandle_lock_impl(ptr, rust_vec_len, data_len),
-        22 => wire__crate__api__find_packets_impl(ptr, rust_vec_len, data_len),
-        24 => wire__crate__api__pin_mac_input_impl(ptr, rust_vec_len, data_len),
+        23 => wire__crate__api__find_packets_impl(ptr, rust_vec_len, data_len),
+        25 => wire__crate__api__pin_mac_input_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -1639,6 +1730,40 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<KilitHandle>> for KilitHandle 
     }
 }
 
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::CleanOutcome {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Cleaned => 0.into_dart(),
+            Self::Unsupported => 1.into_dart(),
+            Self::Damaged => 2.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::CleanOutcome {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::CleanOutcome> for crate::api::CleanOutcome {
+    fn into_into_dart(self) -> crate::api::CleanOutcome {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::CleanReply {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.outcome.into_into_dart().into_dart(),
+            self.data.into_into_dart().into_dart(),
+            self.removed.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::CleanReply {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::CleanReply> for crate::api::CleanReply {
+    fn into_into_dart(self) -> crate::api::CleanReply {
+        self
+    }
+}
 // Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::ExportedKlt {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
@@ -1852,6 +1977,28 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::PinKeyKind> for crate::api::P
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::RemovedKind {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Exif => 0.into_dart(),
+            Self::Location => 1.into_dart(),
+            Self::Xmp => 2.into_dart(),
+            Self::Iptc => 3.into_dart(),
+            Self::Comment => 4.into_dart(),
+            Self::ExtraImages => 5.into_dart(),
+            Self::Text => 6.into_dart(),
+            Self::Other => 7.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::RemovedKind {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::RemovedKind> for crate::api::RemovedKind {
+    fn into_into_dart(self) -> crate::api::RemovedKind {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::SignedBy {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
@@ -1931,6 +2078,32 @@ impl SseEncode for bool {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         serializer.cursor.write_u8(self as _).unwrap();
+    }
+}
+
+impl SseEncode for crate::api::CleanOutcome {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::CleanOutcome::Cleaned => 0,
+                crate::api::CleanOutcome::Unsupported => 1,
+                crate::api::CleanOutcome::Damaged => 2,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::CleanReply {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <crate::api::CleanOutcome>::sse_encode(self.outcome, serializer);
+        <Vec<u8>>::sse_encode(self.data, serializer);
+        <Vec<crate::api::RemovedKind>>::sse_encode(self.removed, serializer);
     }
 }
 
@@ -2090,6 +2263,16 @@ impl SseEncode for Vec<u8> {
     }
 }
 
+impl SseEncode for Vec<crate::api::RemovedKind> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::RemovedKind>::sse_encode(item, serializer);
+        }
+    }
+}
+
 impl SseEncode for crate::api::MessageKind {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -2155,6 +2338,28 @@ impl SseEncode for crate::api::PinKeyKind {
                 crate::api::PinKeyKind::None => 0,
                 crate::api::PinKeyKind::Software => 1,
                 crate::api::PinKeyKind::Hardware => 2,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::RemovedKind {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::RemovedKind::Exif => 0,
+                crate::api::RemovedKind::Location => 1,
+                crate::api::RemovedKind::Xmp => 2,
+                crate::api::RemovedKind::Iptc => 3,
+                crate::api::RemovedKind::Comment => 4,
+                crate::api::RemovedKind::ExtraImages => 5,
+                crate::api::RemovedKind::Text => 6,
+                crate::api::RemovedKind::Other => 7,
                 _ => {
                     unimplemented!("");
                 }

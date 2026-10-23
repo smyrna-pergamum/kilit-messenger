@@ -128,6 +128,44 @@ class LTr extends L {
   }
 
   @override
+  String vaultFileCleaned(String name, String removed) {
+    return '$name şifrelendi ve kasaya eklendi. Kaldırılan gizli veriler: $removed.';
+  }
+
+  @override
+  String vaultFileUnchecked(String name) {
+    return '$name şifrelendi ve kasaya eklendi. Kilit bu dosya türünden gizli verileri (yazar adı gibi) kaldıramaz; paylaşmadan önce kontrol edin.';
+  }
+
+  @override
+  String get damagedPictureTitle => 'Bozuk resim';
+
+  @override
+  String get damagedPictureBody =>
+      'Bu resim bozuk olduğu için Kilit, çekildiği yer gibi gizli verilerini kaldıramadı. Olduğu gibi eklensin mi?';
+
+  @override
+  String get damagedPictureSeal => 'Olduğu gibi ekle';
+
+  @override
+  String get hiddenLocation => 'konum';
+
+  @override
+  String get hiddenCamera => 'kamera bilgileri';
+
+  @override
+  String get hiddenAuthorNotes => 'yazar ve notlar';
+
+  @override
+  String get hiddenExtraImages => 'ek resimler';
+
+  @override
+  String get hiddenOther => 'diğer üst veriler';
+
+  @override
+  String get hiddenListSeparator => ', ';
+
+  @override
   String get clipboardEmpty =>
       'Panoda bir Kilit mesajı yok. WhatsApp\'ta mesaja uzun basıp Kopyala\'ya dokun.';
 

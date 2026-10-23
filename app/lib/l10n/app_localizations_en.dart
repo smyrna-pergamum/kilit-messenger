@@ -128,6 +128,44 @@ class LEn extends L {
   }
 
   @override
+  String vaultFileCleaned(String name, String removed) {
+    return '$name was encrypted and added to the vault. Hidden data removed: $removed.';
+  }
+
+  @override
+  String vaultFileUnchecked(String name) {
+    return '$name was encrypted and added to the vault. Kilit can\'t remove hidden data (such as the author) from this file type; check it before you share it.';
+  }
+
+  @override
+  String get damagedPictureTitle => 'Damaged picture';
+
+  @override
+  String get damagedPictureBody =>
+      'This picture is damaged, so Kilit couldn\'t remove its hidden data, such as where it was taken. Add it as it is?';
+
+  @override
+  String get damagedPictureSeal => 'Add as it is';
+
+  @override
+  String get hiddenLocation => 'location';
+
+  @override
+  String get hiddenCamera => 'camera details';
+
+  @override
+  String get hiddenAuthorNotes => 'author and notes';
+
+  @override
+  String get hiddenExtraImages => 'extra pictures';
+
+  @override
+  String get hiddenOther => 'other metadata';
+
+  @override
+  String get hiddenListSeparator => ', ';
+
+  @override
   String get clipboardEmpty =>
       'No Kilit message on the clipboard. In WhatsApp, long-press the message and tap Copy.';
 

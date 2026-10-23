@@ -126,6 +126,43 @@ class LZh extends L {
   }
 
   @override
+  String vaultFileCleaned(String name, String removed) {
+    return '$name 已加密并添加到保险库。已移除的隐藏数据：$removed。';
+  }
+
+  @override
+  String vaultFileUnchecked(String name) {
+    return '$name 已加密并添加到保险库。Kilit 无法从此类文件中移除隐藏数据（例如作者）；分享前请先检查。';
+  }
+
+  @override
+  String get damagedPictureTitle => '图片已损坏';
+
+  @override
+  String get damagedPictureBody => '此图片已损坏，Kilit 无法移除其隐藏数据（例如拍摄地点）。仍要按原样添加吗？';
+
+  @override
+  String get damagedPictureSeal => '按原样添加';
+
+  @override
+  String get hiddenLocation => '位置';
+
+  @override
+  String get hiddenCamera => '相机信息';
+
+  @override
+  String get hiddenAuthorNotes => '作者和备注';
+
+  @override
+  String get hiddenExtraImages => '额外图片';
+
+  @override
+  String get hiddenOther => '其他元数据';
+
+  @override
+  String get hiddenListSeparator => '、';
+
+  @override
   String get clipboardEmpty => '剪贴板中没有 Kilit 消息。在 WhatsApp 中长按消息并点按“复制”。';
 
   @override

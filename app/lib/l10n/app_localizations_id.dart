@@ -128,6 +128,44 @@ class LId extends L {
   }
 
   @override
+  String vaultFileCleaned(String name, String removed) {
+    return '$name telah dienkripsi dan ditambahkan ke brankas. Data tersembunyi yang dihapus: $removed.';
+  }
+
+  @override
+  String vaultFileUnchecked(String name) {
+    return '$name telah dienkripsi dan ditambahkan ke brankas. Kilit tidak bisa menghapus data tersembunyi (seperti nama pembuat) dari jenis file ini; periksa dulu sebelum membagikannya.';
+  }
+
+  @override
+  String get damagedPictureTitle => 'Gambar rusak';
+
+  @override
+  String get damagedPictureBody =>
+      'Gambar ini rusak, jadi Kilit tidak bisa menghapus data tersembunyinya, seperti lokasi pengambilan. Tambahkan apa adanya?';
+
+  @override
+  String get damagedPictureSeal => 'Tambahkan apa adanya';
+
+  @override
+  String get hiddenLocation => 'lokasi';
+
+  @override
+  String get hiddenCamera => 'detail kamera';
+
+  @override
+  String get hiddenAuthorNotes => 'pembuat dan catatan';
+
+  @override
+  String get hiddenExtraImages => 'gambar tambahan';
+
+  @override
+  String get hiddenOther => 'metadata lain';
+
+  @override
+  String get hiddenListSeparator => ', ';
+
+  @override
   String get clipboardEmpty =>
       'Tidak ada pesan Kilit di papan klip. Di WhatsApp, tekan lama pesan lalu ketuk Salin.';
 

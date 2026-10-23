@@ -129,6 +129,44 @@ class LIt extends L {
   }
 
   @override
+  String vaultFileCleaned(String name, String removed) {
+    return '$name è stato cifrato e aggiunto alla cassaforte. Dati nascosti rimossi: $removed.';
+  }
+
+  @override
+  String vaultFileUnchecked(String name) {
+    return '$name è stato cifrato e aggiunto alla cassaforte. Kilit non può rimuovere i dati nascosti (come l\'autore) da questo tipo di file; controllalo prima di condividerlo.';
+  }
+
+  @override
+  String get damagedPictureTitle => 'Immagine danneggiata';
+
+  @override
+  String get damagedPictureBody =>
+      'Questa immagine è danneggiata, quindi Kilit non ha potuto rimuovere i suoi dati nascosti, come il luogo dello scatto. Aggiungerla così com\'è?';
+
+  @override
+  String get damagedPictureSeal => 'Aggiungi così com\'è';
+
+  @override
+  String get hiddenLocation => 'posizione';
+
+  @override
+  String get hiddenCamera => 'dati della fotocamera';
+
+  @override
+  String get hiddenAuthorNotes => 'autore e note';
+
+  @override
+  String get hiddenExtraImages => 'immagini aggiuntive';
+
+  @override
+  String get hiddenOther => 'altri metadati';
+
+  @override
+  String get hiddenListSeparator => ', ';
+
+  @override
   String get clipboardEmpty =>
       'Nessun messaggio Kilit negli appunti. In WhatsApp, tieni premuto il messaggio e tocca Copia.';
 

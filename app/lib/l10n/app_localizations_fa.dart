@@ -128,6 +128,44 @@ class LFa extends L {
   }
 
   @override
+  String vaultFileCleaned(String name, String removed) {
+    return '$name رمزگذاری شد و به گاوصندوق افزوده شد. داده‌های پنهانِ حذف‌شده: $removed.';
+  }
+
+  @override
+  String vaultFileUnchecked(String name) {
+    return '$name رمزگذاری شد و به گاوصندوق افزوده شد. Kilit نمی‌تواند داده‌های پنهان (مانند نام نویسنده) را از این نوع فایل حذف کند؛ پیش از هم‌رسانی آن را بررسی کنید.';
+  }
+
+  @override
+  String get damagedPictureTitle => 'تصویر آسیب‌دیده';
+
+  @override
+  String get damagedPictureBody =>
+      'این تصویر آسیب دیده است، بنابراین Kilit نتوانست داده‌های پنهان آن، مانند محل گرفتن عکس، را حذف کند. همان‌طور که هست افزوده شود؟';
+
+  @override
+  String get damagedPictureSeal => 'افزودن همان‌طور که هست';
+
+  @override
+  String get hiddenLocation => 'موقعیت مکانی';
+
+  @override
+  String get hiddenCamera => 'اطلاعات دوربین';
+
+  @override
+  String get hiddenAuthorNotes => 'نویسنده و یادداشت‌ها';
+
+  @override
+  String get hiddenExtraImages => 'تصاویر اضافی';
+
+  @override
+  String get hiddenOther => 'سایر فراداده‌ها';
+
+  @override
+  String get hiddenListSeparator => '، ';
+
+  @override
   String get clipboardEmpty =>
       'پیام Kilit در کلیپ‌بورد نیست. در WhatsApp، پیام را لمس طولانی کنید و کپی را بزنید.';
 

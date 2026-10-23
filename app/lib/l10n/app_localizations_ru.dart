@@ -128,6 +128,44 @@ class LRu extends L {
   }
 
   @override
+  String vaultFileCleaned(String name, String removed) {
+    return '$name: зашифровано и добавлено в хранилище. Удалены скрытые данные: $removed.';
+  }
+
+  @override
+  String vaultFileUnchecked(String name) {
+    return '$name: зашифровано и добавлено в хранилище. Kilit не может удалить скрытые данные (например, автора) из файлов этого типа; проверьте файл, прежде чем делиться им.';
+  }
+
+  @override
+  String get damagedPictureTitle => 'Повреждённое изображение';
+
+  @override
+  String get damagedPictureBody =>
+      'Изображение повреждено, поэтому Kilit не смог удалить его скрытые данные, например место съёмки. Добавить как есть?';
+
+  @override
+  String get damagedPictureSeal => 'Добавить как есть';
+
+  @override
+  String get hiddenLocation => 'местоположение';
+
+  @override
+  String get hiddenCamera => 'данные камеры';
+
+  @override
+  String get hiddenAuthorNotes => 'автор и заметки';
+
+  @override
+  String get hiddenExtraImages => 'дополнительные изображения';
+
+  @override
+  String get hiddenOther => 'прочие метаданные';
+
+  @override
+  String get hiddenListSeparator => ', ';
+
+  @override
   String get clipboardEmpty =>
       'В буфере обмена нет сообщения Kilit. В WhatsApp нажми и удерживай сообщение, затем выбери «Копировать».';
 

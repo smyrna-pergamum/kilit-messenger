@@ -240,6 +240,82 @@ pub fn find_packets(text: String) -> Vec<FoundPacket> {
         .collect()
 }
 
+/// What [`clean_metadata`] took out of a picture.
+pub enum RemovedKind {
+    /// Camera, settings, dates, often a thumbnail.
+    Exif,
+    /// GPS coordinates.
+    Location,
+    /// Editing history, sometimes names.
+    Xmp,
+    /// Captions, author, copyright.
+    Iptc,
+    /// Free-text comments.
+    Comment,
+    /// Depth maps, previews, motion-photo halves.
+    ExtraImages,
+    /// PNG text and timestamps.
+    Text,
+    /// Metadata of other kinds.
+    Other,
+}
+
+impl From<kilit_parse::Removed> for RemovedKind {
+    fn from(r: kilit_parse::Removed) -> Self {
+        use kilit_parse::Removed as R;
+        match r {
+            R::Exif => Self::Exif,
+            R::Location => Self::Location,
+            R::Xmp => Self::Xmp,
+            R::Iptc => Self::Iptc,
+            R::Comment => Self::Comment,
+            R::ExtraImages => Self::ExtraImages,
+            R::Text => Self::Text,
+            R::Other => Self::Other,
+        }
+    }
+}
+
+/// How cleaning a file went.
+pub enum CleanOutcome {
+    /// `data` is the file without its metadata (`removed` may be empty).
+    Cleaned,
+    /// Not a picture format Kilit can clean; the file is left as it is.
+    Unsupported,
+    /// A picture whose structure is broken; nothing could be checked.
+    Damaged,
+}
+
+/// The result of [`clean_metadata`].
+pub struct CleanReply {
+    /// How it went.
+    pub outcome: CleanOutcome,
+    /// The cleaned file; empty unless the outcome is `Cleaned`.
+    pub data: Vec<u8>,
+    /// What was removed, each kind once.
+    pub removed: Vec<RemovedKind>,
+}
+
+/// Strips location, camera, author and editing metadata from a JPEG, PNG
+/// or WebP picture without re-encoding it. Needs no vault.
+pub fn clean_metadata(data: Vec<u8>) -> CleanReply {
+    match kilit_parse::clean(&data) {
+        Ok(r) => CleanReply {
+            outcome: CleanOutcome::Cleaned,
+            data: r.data,
+            removed: r.removed.into_iter().map(RemovedKind::from).collect(),
+        },
+        Err(e) => CleanReply {
+            outcome: match e {
+                kilit_parse::CleanError::Unsupported => CleanOutcome::Unsupported,
+                kilit_parse::CleanError::Damaged => CleanOutcome::Damaged,
+            },
+            data: Vec::new(),
+            removed: Vec::new(),
+        },
+    }
+}
+
 /// A `.klt` file ready to save or share.
 pub struct ExportedKlt {
     /// A random `kilit-xxxxxxxx.klt` name that says nothing of the content.

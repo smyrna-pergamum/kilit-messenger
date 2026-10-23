@@ -13,6 +13,7 @@ publish = false
 [workspace.dependencies]
 kilit-ipc = { path = "crates/kilit-ipc" }
 kilit-klt = { path = "crates/kilit-klt" }
+kilit-parse = { path = "crates/kilit-parse" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

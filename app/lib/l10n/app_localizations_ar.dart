@@ -128,6 +128,44 @@ class LAr extends L {
   }
 
   @override
+  String vaultFileCleaned(String name, String removed) {
+    return 'تم تشفير $name وإضافته إلى الخزنة. البيانات المخفية التي أُزيلت: $removed.';
+  }
+
+  @override
+  String vaultFileUnchecked(String name) {
+    return 'تم تشفير $name وإضافته إلى الخزنة. لا يستطيع Kilit إزالة البيانات المخفية (مثل اسم المؤلف) من هذا النوع من الملفات؛ تحقّق منه قبل مشاركته.';
+  }
+
+  @override
+  String get damagedPictureTitle => 'صورة تالفة';
+
+  @override
+  String get damagedPictureBody =>
+      'هذه الصورة تالفة، لذا تعذّر على Kilit إزالة بياناتها المخفية، مثل مكان التقاطها. هل تريد إضافتها كما هي؟';
+
+  @override
+  String get damagedPictureSeal => 'إضافة كما هي';
+
+  @override
+  String get hiddenLocation => 'الموقع';
+
+  @override
+  String get hiddenCamera => 'بيانات الكاميرا';
+
+  @override
+  String get hiddenAuthorNotes => 'المؤلف والملاحظات';
+
+  @override
+  String get hiddenExtraImages => 'صور إضافية';
+
+  @override
+  String get hiddenOther => 'بيانات وصفية أخرى';
+
+  @override
+  String get hiddenListSeparator => '، ';
+
+  @override
   String get clipboardEmpty =>
       'لا توجد رسالة Kilit في الحافظة. في WhatsApp، اضغط مطولًا على الرسالة ثم اختر نسخ.';
 

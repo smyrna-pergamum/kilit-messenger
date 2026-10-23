@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kilit/app.dart';
 import 'package:kilit/core/dev_core.dart';
+import 'package:kilit/core/kilit_core.dart';
 import 'package:kilit/platform/files.dart';
 import 'package:kilit/state/prefs.dart';
 import 'package:kilit/widgets/pin_pad.dart';
@@ -60,6 +61,13 @@ class FakeFiles implements FileAccess {
   Future<void> shareText(String text) async => shared.add(text);
 }
 
+/// A core that finds every picture damaged.
+class DamagedPictures extends DevCore {
+  @override
+  Future<CleanedFile> cleanMetadata(Uint8List bytes) async =>
+      const CleanedFile.failed(CleanOutcome.damaged);
+}
+
 /// Answers Flutter's clipboard calls with [text].
 void fakeClipboard(WidgetTester tester, String? text) {
   tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -83,11 +91,12 @@ Future<(DevCore, Prefs)> startApp(
   Size size = const Size(400, 860),
   FileAccess? files,
   Map<String, Object?>? prefs,
+  DevCore? core,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  final core = DevCore();
+  core ??= DevCore();
   final p = await Prefs.load(MemoryPrefsStore(prefs));
   await tester.pumpWidget(
     KilitApp(core: core, files: files ?? FakeFiles(), prefs: p),
@@ -364,6 +373,69 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('import-go')));
     await tester.pumpAndSettle();
     expect(find.text('holiday.jpg'), findsNWidgets(2));
+  });
+
+  testWidgets('a picture loses its hidden data before it is sealed', (
+    tester,
+  ) async {
+    final files = FakeFiles();
+    await startApp(tester, files: files);
+    await setUpVault(tester);
+    files.next = PickedFile(
+      'beach.jpg',
+      'image/jpeg',
+      Uint8List.fromList([0xFF, 0xD8, 0xFF, 0xD9]),
+    );
+    await tester.tap(find.byKey(const ValueKey('seal-file')));
+    await tester.pump();
+    expect(
+      find.text(
+        'beach.jpg was encrypted and added to the vault. '
+        'Hidden data removed: location, camera details.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a file type that cannot be cleaned is sealed with a note', (
+    tester,
+  ) async {
+    final files = FakeFiles();
+    await startApp(tester, files: files);
+    await setUpVault(tester);
+    files.next = PickedFile(
+      'cv.pdf',
+      'application/pdf',
+      Uint8List.fromList([0x25, 0x50]),
+    );
+    await tester.tap(find.byKey(const ValueKey('seal-file')));
+    await tester.pump();
+    expect(find.textContaining("Kilit can't remove hidden data"), findsOne);
+  });
+
+  testWidgets('a damaged picture is sealed only when the user agrees', (
+    tester,
+  ) async {
+    final files = FakeFiles();
+    await startApp(tester, files: files, core: DamagedPictures());
+    await setUpVault(tester);
+    files.next = PickedFile(
+      'broken.jpg',
+      'image/jpeg',
+      Uint8List.fromList([0xFF, 0xD8, 0xFF]),
+    );
+    await tester.tap(find.byKey(const ValueKey('seal-file')));
+    await tester.pumpAndSettle();
+    expect(find.text('Damaged picture'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.text('broken.jpg'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('seal-file')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('confirm-seal-damaged')));
+    await tester.pumpAndSettle();
+    expect(find.text('broken.jpg'), findsOneWidget);
   });
 
   testWidgets('saving unencrypted asks first', (tester) async {

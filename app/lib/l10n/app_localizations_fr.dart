@@ -129,6 +129,44 @@ class LFr extends L {
   }
 
   @override
+  String vaultFileCleaned(String name, String removed) {
+    return '$name a été chiffré et ajouté au coffre. Données cachées supprimées : $removed.';
+  }
+
+  @override
+  String vaultFileUnchecked(String name) {
+    return '$name a été chiffré et ajouté au coffre. Kilit ne peut pas supprimer les données cachées (comme l\'auteur) de ce type de fichier ; vérifiez-le avant de le partager.';
+  }
+
+  @override
+  String get damagedPictureTitle => 'Image endommagée';
+
+  @override
+  String get damagedPictureBody =>
+      'Cette image est endommagée : Kilit n\'a pas pu supprimer ses données cachées, comme le lieu de la prise de vue. L\'ajouter telle quelle ?';
+
+  @override
+  String get damagedPictureSeal => 'Ajouter telle quelle';
+
+  @override
+  String get hiddenLocation => 'position';
+
+  @override
+  String get hiddenCamera => 'infos de l\'appareil photo';
+
+  @override
+  String get hiddenAuthorNotes => 'auteur et notes';
+
+  @override
+  String get hiddenExtraImages => 'images supplémentaires';
+
+  @override
+  String get hiddenOther => 'autres métadonnées';
+
+  @override
+  String get hiddenListSeparator => ', ';
+
+  @override
   String get clipboardEmpty =>
       'Aucun message Kilit dans le presse-papiers. Dans WhatsApp, appuyez longuement sur le message puis sur Copier.';
 

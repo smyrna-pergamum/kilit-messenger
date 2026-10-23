@@ -10,6 +10,10 @@ publish.workspace = true
 
 [dependencies]
 kilit-ipc.workspace = true
+img-parts = "=0.4.1"
+
+[dev-dependencies]
+image = { version = "0.25.10", default-features = false, features = ["jpeg", "png"] }
 
 [lints]
 workspace = true

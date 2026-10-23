@@ -32,6 +32,11 @@ abstract interface class KilitCore {
   /// A text item, decrypted into memory to show it.
   Future<String> readText(String id);
 
+  /// Strips location, camera, author and editing metadata from a JPEG, PNG
+  /// or WebP picture without re-encoding it; see `clean` in kilit-parse.
+  /// Needs no vault.
+  Future<CleanedFile> cleanMetadata(Uint8List bytes);
+
   /// Seals a file into the vault (at most 64 MiB).
   Future<VaultItem> addFile(String name, String mime, Uint8List bytes);
 
@@ -80,6 +85,33 @@ extension PinProtectionHardware on PinProtection {
       this == PinProtection.strongbox ||
       this == PinProtection.tee ||
       this == PinProtection.tpm;
+}
+
+enum CleanOutcome {
+  /// [CleanedFile.bytes] is the picture without its metadata.
+  cleaned,
+
+  /// Not a picture format Kilit can clean; the file may carry metadata.
+  unsupported,
+
+  /// A picture whose structure is broken; nothing could be checked.
+  damaged,
+}
+
+/// Kinds of metadata a picture can hide.
+enum HiddenData { exif, location, xmp, iptc, comment, extraImages, text, other }
+
+class CleanedFile {
+  const CleanedFile.cleaned(Uint8List this.bytes, this.removed)
+    : outcome = CleanOutcome.cleaned;
+  const CleanedFile.failed(this.outcome) : bytes = null, removed = const {};
+  final CleanOutcome outcome;
+
+  /// The cleaned picture; null unless [outcome] is [CleanOutcome.cleaned].
+  final Uint8List? bytes;
+
+  /// What was taken out; empty when there was nothing to take out.
+  final Set<HiddenData> removed;
 }
 
 enum UnlockOutcome { unlocked, wrongPin, waitBeforeRetry }

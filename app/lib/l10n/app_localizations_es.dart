@@ -129,6 +129,44 @@ class LEs extends L {
   }
 
   @override
+  String vaultFileCleaned(String name, String removed) {
+    return '$name se cifró y se añadió a la bóveda. Datos ocultos eliminados: $removed.';
+  }
+
+  @override
+  String vaultFileUnchecked(String name) {
+    return '$name se cifró y se añadió a la bóveda. Kilit no puede eliminar datos ocultos (como el autor) de este tipo de archivo; revísalo antes de compartirlo.';
+  }
+
+  @override
+  String get damagedPictureTitle => 'Imagen dañada';
+
+  @override
+  String get damagedPictureBody =>
+      'Esta imagen está dañada, así que Kilit no pudo eliminar sus datos ocultos, como el lugar donde se tomó. ¿Añadirla tal como está?';
+
+  @override
+  String get damagedPictureSeal => 'Añadir tal cual';
+
+  @override
+  String get hiddenLocation => 'ubicación';
+
+  @override
+  String get hiddenCamera => 'datos de la cámara';
+
+  @override
+  String get hiddenAuthorNotes => 'autor y notas';
+
+  @override
+  String get hiddenExtraImages => 'imágenes adicionales';
+
+  @override
+  String get hiddenOther => 'otros metadatos';
+
+  @override
+  String get hiddenListSeparator => ', ';
+
+  @override
   String get clipboardEmpty =>
       'No hay ningún mensaje de Kilit en el portapapeles. En WhatsApp, mantén pulsado el mensaje y toca Copiar.';
 

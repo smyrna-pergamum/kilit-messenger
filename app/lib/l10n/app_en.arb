@@ -64,6 +64,37 @@
       }
     }
   },
+  "vaultFileCleaned": "{name} was encrypted and added to the vault. Hidden data removed: {removed}.",
+  "@vaultFileCleaned": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "removed": {
+        "type": "String"
+      }
+    }
+  },
+  "vaultFileUnchecked": "{name} was encrypted and added to the vault. Kilit can't remove hidden data (such as the author) from this file type; check it before you share it.",
+  "@vaultFileUnchecked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "damagedPictureTitle": "Damaged picture",
+  "damagedPictureBody": "This picture is damaged, so Kilit couldn't remove its hidden data, such as where it was taken. Add it as it is?",
+  "damagedPictureSeal": "Add as it is",
+  "hiddenLocation": "location",
+  "hiddenCamera": "camera details",
+  "hiddenAuthorNotes": "author and notes",
+  "hiddenExtraImages": "extra pictures",
+  "hiddenOther": "other metadata",
+  "hiddenListSeparator": ", ",
+  "@hiddenListSeparator": {
+    "description": "Between the kinds of hidden data in vaultFileCleaned, with any space it needs."
+  },
   "clipboardEmpty": "No Kilit message on the clipboard. In WhatsApp, long-press the message and tap Copy.",
   "clipboardBanner": "There is a Kilit message on the clipboard.",
   "clipboardBannerOpen": "Open",

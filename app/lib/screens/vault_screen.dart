@@ -118,12 +118,70 @@ class _VaultScreenState extends State<VaultScreen> {
     }
   }
 
+  /// Pictures lose their metadata (location, camera, author) before they
+  /// are sealed, so a later export or share cannot give it away.
   Future<void> _sealFile() async {
     final f = await _pick();
     if (f == null) return;
-    await widget.core.addFile(f.name, f.mime, f.bytes);
+    final c = await widget.core.cleanMetadata(f.bytes);
+    if (!mounted) return;
+    if (c.outcome == CleanOutcome.damaged && await _sealDamaged() != true) {
+      return;
+    }
+    await widget.core.addFile(f.name, f.mime, c.bytes ?? f.bytes);
     _reload();
-    if (mounted) _say(L.of(context).vaultFileSealed(f.name));
+    if (!mounted) return;
+    final l = L.of(context);
+    _say(switch (c.outcome) {
+      CleanOutcome.cleaned when c.removed.isNotEmpty => l.vaultFileCleaned(
+        f.name,
+        _hiddenList(l, c.removed),
+      ),
+      CleanOutcome.unsupported => l.vaultFileUnchecked(f.name),
+      _ => l.vaultFileSealed(f.name),
+    });
+  }
+
+  Future<bool?> _sealDamaged() {
+    final l = L.of(context);
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l.damagedPictureTitle),
+        content: Text(l.damagedPictureBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l.cancel),
+          ),
+          TextButton(
+            key: const ValueKey('confirm-seal-damaged'),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l.damagedPictureSeal),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// What was removed, in words, most revealing first.
+  static String _hiddenList(L l, Set<HiddenData> removed) {
+    final words = <String>[
+      if (removed.contains(HiddenData.location)) l.hiddenLocation,
+      if (removed.contains(HiddenData.exif)) l.hiddenCamera,
+      if (removed.any(
+        (k) => const {
+          HiddenData.xmp,
+          HiddenData.iptc,
+          HiddenData.comment,
+          HiddenData.text,
+        }.contains(k),
+      ))
+        l.hiddenAuthorNotes,
+      if (removed.contains(HiddenData.extraImages)) l.hiddenExtraImages,
+      if (removed.contains(HiddenData.other)) l.hiddenOther,
+    ];
+    return words.join(l.hiddenListSeparator);
   }
 
   Future<void> _openKlt() async {

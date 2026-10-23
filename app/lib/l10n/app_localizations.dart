@@ -339,6 +339,72 @@ abstract class L {
   /// **'{name} was encrypted and added to the vault.'**
   String vaultFileSealed(String name);
 
+  /// No description provided for @vaultFileCleaned.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} was encrypted and added to the vault. Hidden data removed: {removed}.'**
+  String vaultFileCleaned(String name, String removed);
+
+  /// No description provided for @vaultFileUnchecked.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} was encrypted and added to the vault. Kilit can\'t remove hidden data (such as the author) from this file type; check it before you share it.'**
+  String vaultFileUnchecked(String name);
+
+  /// No description provided for @damagedPictureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Damaged picture'**
+  String get damagedPictureTitle;
+
+  /// No description provided for @damagedPictureBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This picture is damaged, so Kilit couldn\'t remove its hidden data, such as where it was taken. Add it as it is?'**
+  String get damagedPictureBody;
+
+  /// No description provided for @damagedPictureSeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Add as it is'**
+  String get damagedPictureSeal;
+
+  /// No description provided for @hiddenLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'location'**
+  String get hiddenLocation;
+
+  /// No description provided for @hiddenCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'camera details'**
+  String get hiddenCamera;
+
+  /// No description provided for @hiddenAuthorNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'author and notes'**
+  String get hiddenAuthorNotes;
+
+  /// No description provided for @hiddenExtraImages.
+  ///
+  /// In en, this message translates to:
+  /// **'extra pictures'**
+  String get hiddenExtraImages;
+
+  /// No description provided for @hiddenOther.
+  ///
+  /// In en, this message translates to:
+  /// **'other metadata'**
+  String get hiddenOther;
+
+  /// Between the kinds of hidden data in vaultFileCleaned, with any space it needs.
+  ///
+  /// In en, this message translates to:
+  /// **', '**
+  String get hiddenListSeparator;
+
   /// No description provided for @clipboardEmpty.
   ///
   /// In en, this message translates to:

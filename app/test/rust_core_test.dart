@@ -192,4 +192,28 @@ void main() {
     final junk = await bob.importKlt(Uint8List.fromList([1, 2, 3, 4, 5]));
     expect(junk.outcome, ImportOutcome.notKlt);
   }, skip: skip);
+
+  test(
+    'the Rust cleaner strips a JPEG comment and leaves a PDF alone',
+    () async {
+      final dir = await Directory.systemTemp.createTemp('kilit-c-');
+      addTearDown(() => dir.delete(recursive: true));
+      final core = await RustCore.open(dir.path, desktop: false, key: NoKey());
+      // start of image, a comment "hi", end of image
+      final jpeg = Uint8List.fromList([
+        0xFF, 0xD8, 0xFF, 0xFE, 0, 4, 0x68, 0x69, 0xFF, 0xD9, //
+      ]);
+      final c = await core.cleanMetadata(jpeg);
+      expect(c.outcome, CleanOutcome.cleaned);
+      expect(c.removed, {HiddenData.comment});
+      expect(c.bytes, [0xFF, 0xD8, 0xFF, 0xD9]);
+
+      final pdf = await core.cleanMetadata(
+        Uint8List.fromList('%PDF-1.7'.codeUnits),
+      );
+      expect(pdf.outcome, CleanOutcome.unsupported);
+      expect(pdf.bytes, isNull);
+    },
+    skip: skip,
+  );
 }

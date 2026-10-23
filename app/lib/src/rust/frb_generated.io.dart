@@ -53,6 +53,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ItemInfo dco_decode_box_autoadd_item_info(dynamic raw);
 
   @protected
+  CleanOutcome dco_decode_clean_outcome(dynamic raw);
+
+  @protected
+  CleanReply dco_decode_clean_reply(dynamic raw);
+
+  @protected
   ExportedKlt dco_decode_exported_klt(dynamic raw);
 
   @protected
@@ -98,6 +104,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
+  List<RemovedKind> dco_decode_list_removed_kind(dynamic raw);
+
+  @protected
   MessageKind dco_decode_message_kind(dynamic raw);
 
   @protected
@@ -114,6 +123,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   PinKeyKind dco_decode_pin_key_kind(dynamic raw);
+
+  @protected
+  RemovedKind dco_decode_removed_kind(dynamic raw);
 
   @protected
   SignedBy dco_decode_signed_by(dynamic raw);
@@ -164,6 +176,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ItemInfo sse_decode_box_autoadd_item_info(SseDeserializer deserializer);
 
   @protected
+  CleanOutcome sse_decode_clean_outcome(SseDeserializer deserializer);
+
+  @protected
+  CleanReply sse_decode_clean_reply(SseDeserializer deserializer);
+
+  @protected
   ExportedKlt sse_decode_exported_klt(SseDeserializer deserializer);
 
   @protected
@@ -209,6 +227,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
+  List<RemovedKind> sse_decode_list_removed_kind(SseDeserializer deserializer);
+
+  @protected
   MessageKind sse_decode_message_kind(SseDeserializer deserializer);
 
   @protected
@@ -225,6 +246,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   PinKeyKind sse_decode_pin_key_kind(SseDeserializer deserializer);
+
+  @protected
+  RemovedKind sse_decode_removed_kind(SseDeserializer deserializer);
 
   @protected
   SignedBy sse_decode_signed_by(SseDeserializer deserializer);
@@ -281,6 +305,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_clean_outcome(CleanOutcome self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_clean_reply(CleanReply self, SseSerializer serializer);
+
+  @protected
   void sse_encode_exported_klt(ExportedKlt self, SseSerializer serializer);
 
   @protected
@@ -335,6 +365,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_removed_kind(
+    List<RemovedKind> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_message_kind(MessageKind self, SseSerializer serializer);
 
   @protected
@@ -354,6 +390,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_pin_key_kind(PinKeyKind self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_removed_kind(RemovedKind self, SseSerializer serializer);
 
   @protected
   void sse_encode_signed_by(SignedBy self, SseSerializer serializer);

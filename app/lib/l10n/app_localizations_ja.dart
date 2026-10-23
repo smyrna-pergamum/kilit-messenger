@@ -127,6 +127,44 @@ class LJa extends L {
   }
 
   @override
+  String vaultFileCleaned(String name, String removed) {
+    return '$nameを暗号化して金庫に追加しました。削除した隠しデータ：$removed。';
+  }
+
+  @override
+  String vaultFileUnchecked(String name) {
+    return '$nameを暗号化して金庫に追加しました。この種類のファイルからは隠しデータ（作成者など）を削除できません。共有する前に確認してください。';
+  }
+
+  @override
+  String get damagedPictureTitle => '破損した画像';
+
+  @override
+  String get damagedPictureBody =>
+      'この画像は破損しているため、撮影場所などの隠しデータを削除できませんでした。このまま追加しますか？';
+
+  @override
+  String get damagedPictureSeal => 'このまま追加';
+
+  @override
+  String get hiddenLocation => '位置情報';
+
+  @override
+  String get hiddenCamera => 'カメラ情報';
+
+  @override
+  String get hiddenAuthorNotes => '作成者とメモ';
+
+  @override
+  String get hiddenExtraImages => '追加の画像';
+
+  @override
+  String get hiddenOther => 'その他のメタデータ';
+
+  @override
+  String get hiddenListSeparator => '、';
+
+  @override
   String get clipboardEmpty =>
       'クリップボードにKilitメッセージがありません。WhatsAppでメッセージを長押しし、［コピー］をタップしてください。';
 

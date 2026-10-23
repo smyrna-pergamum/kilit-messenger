@@ -128,6 +128,44 @@ class LVi extends L {
   }
 
   @override
+  String vaultFileCleaned(String name, String removed) {
+    return '$name đã được mã hóa và thêm vào kho. Dữ liệu ẩn đã xóa: $removed.';
+  }
+
+  @override
+  String vaultFileUnchecked(String name) {
+    return '$name đã được mã hóa và thêm vào kho. Kilit không thể xóa dữ liệu ẩn (như tên tác giả) khỏi loại tệp này; hãy kiểm tra trước khi chia sẻ.';
+  }
+
+  @override
+  String get damagedPictureTitle => 'Ảnh bị hỏng';
+
+  @override
+  String get damagedPictureBody =>
+      'Ảnh này bị hỏng nên Kilit không thể xóa dữ liệu ẩn của nó, chẳng hạn nơi chụp. Vẫn thêm nguyên trạng?';
+
+  @override
+  String get damagedPictureSeal => 'Thêm nguyên trạng';
+
+  @override
+  String get hiddenLocation => 'vị trí';
+
+  @override
+  String get hiddenCamera => 'thông tin máy ảnh';
+
+  @override
+  String get hiddenAuthorNotes => 'tác giả và ghi chú';
+
+  @override
+  String get hiddenExtraImages => 'ảnh phụ';
+
+  @override
+  String get hiddenOther => 'siêu dữ liệu khác';
+
+  @override
+  String get hiddenListSeparator => ', ';
+
+  @override
   String get clipboardEmpty =>
       'Không có tin nhắn Kilit trong bộ nhớ tạm. Trong WhatsApp, nhấn giữ tin nhắn rồi chạm Sao chép.';
 

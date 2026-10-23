@@ -8,7 +8,7 @@ import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `engine`, `mac32`, `reply`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `from`, `from`, `from`, `from`
 
 /// The bytes the platform's hardware key must MAC for `pin`.
 Uint8List pinMacInput({required String pin}) =>
@@ -17,6 +17,11 @@ Uint8List pinMacInput({required String pin}) =>
 /// Finds `KLT1:` packets in pasted text. Needs no vault.
 List<FoundPacket> findPackets({required String text}) =>
     RustLib.instance.api.crateApiFindPackets(text: text);
+
+/// Strips location, camera, author and editing metadata from a JPEG, PNG
+/// or WebP picture without re-encoding it. Needs no vault.
+Future<CleanReply> cleanMetadata({required List<int> data}) =>
+    RustLib.instance.api.crateApiCleanMetadata(data: data);
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<KilitHandle>>
 abstract class KilitHandle implements RustOpaqueInterface {
@@ -96,6 +101,48 @@ abstract class KilitHandle implements RustOpaqueInterface {
 
   /// Tries a hardware PIN MAC against a hardware-key vault.
   Future<UnlockReply> unlockWithMac({required List<int> mac});
+}
+
+/// How cleaning a file went.
+enum CleanOutcome {
+  /// `data` is the file without its metadata (`removed` may be empty).
+  cleaned,
+
+  /// Not a picture format Kilit can clean; the file is left as it is.
+  unsupported,
+
+  /// A picture whose structure is broken; nothing could be checked.
+  damaged,
+}
+
+/// The result of [`clean_metadata`].
+class CleanReply {
+  /// How it went.
+  final CleanOutcome outcome;
+
+  /// The cleaned file; empty unless the outcome is `Cleaned`.
+  final Uint8List data;
+
+  /// What was removed, each kind once.
+  final List<RemovedKind> removed;
+
+  const CleanReply({
+    required this.outcome,
+    required this.data,
+    required this.removed,
+  });
+
+  @override
+  int get hashCode => outcome.hashCode ^ data.hashCode ^ removed.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CleanReply &&
+          runtimeType == other.runtimeType &&
+          outcome == other.outcome &&
+          data == other.data &&
+          removed == other.removed;
 }
 
 /// A `.klt` file ready to save or share.
@@ -389,6 +436,33 @@ enum PinKeyKind {
 
   /// A hardware key that cannot leave the device.
   hardware,
+}
+
+/// What [`clean_metadata`] took out of a picture.
+enum RemovedKind {
+  /// Camera, settings, dates, often a thumbnail.
+  exif,
+
+  /// GPS coordinates.
+  location,
+
+  /// Editing history, sometimes names.
+  xmp,
+
+  /// Captions, author, copyright.
+  iptc,
+
+  /// Free-text comments.
+  comment,
+
+  /// Depth maps, previews, motion-photo halves.
+  extraImages,
+
+  /// PNG text and timestamps.
+  text,
+
+  /// Metadata of other kinds.
+  other,
 }
 
 /// Who signed a packet.

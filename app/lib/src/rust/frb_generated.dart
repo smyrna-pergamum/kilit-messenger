@@ -69,7 +69,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => -48720525;
+  int get rustContentHash => 21468754;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -177,6 +177,8 @@ abstract class RustLibApi extends BaseApi {
     required KilitHandle that,
     required List<int> mac,
   });
+
+  Future<CleanReply> crateApiCleanMetadata({required List<int> data});
 
   List<FoundPacket> crateApiFindPackets({required String text});
 
@@ -970,13 +972,41 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<CleanReply> crateApiCleanMetadata({required List<int> data}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_prim_u_8_loose(data, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 22,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_clean_reply,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiCleanMetadataConstMeta,
+        argValues: [data],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiCleanMetadataConstMeta =>
+      const TaskConstMeta(debugName: "clean_metadata", argNames: ["data"]);
+
+  @override
   List<FoundPacket> crateApiFindPackets({required String text}) {
     return handler.executeSync(
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(text, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 22)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 23)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_found_packet,
@@ -1001,7 +1031,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 23,
+            funcId: 24,
             port: port_,
           );
         },
@@ -1026,7 +1056,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(pin, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 24)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 25)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -1093,6 +1123,25 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ItemInfo dco_decode_box_autoadd_item_info(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_item_info(raw);
+  }
+
+  @protected
+  CleanOutcome dco_decode_clean_outcome(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return CleanOutcome.values[raw as int];
+  }
+
+  @protected
+  CleanReply dco_decode_clean_reply(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 3)
+      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    return CleanReply(
+      outcome: dco_decode_clean_outcome(arr[0]),
+      data: dco_decode_list_prim_u_8_strict(arr[1]),
+      removed: dco_decode_list_removed_kind(arr[2]),
+    );
   }
 
   @protected
@@ -1221,6 +1270,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<RemovedKind> dco_decode_list_removed_kind(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_removed_kind).toList();
+  }
+
+  @protected
   MessageKind dco_decode_message_kind(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return MessageKind.values[raw as int];
@@ -1269,6 +1324,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   PinKeyKind dco_decode_pin_key_kind(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return PinKeyKind.values[raw as int];
+  }
+
+  @protected
+  RemovedKind dco_decode_removed_kind(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return RemovedKind.values[raw as int];
   }
 
   @protected
@@ -1372,6 +1433,26 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ItemInfo sse_decode_box_autoadd_item_info(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_item_info(deserializer));
+  }
+
+  @protected
+  CleanOutcome sse_decode_clean_outcome(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_i_32(deserializer);
+    return CleanOutcome.values[inner];
+  }
+
+  @protected
+  CleanReply sse_decode_clean_reply(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_outcome = sse_decode_clean_outcome(deserializer);
+    var var_data = sse_decode_list_prim_u_8_strict(deserializer);
+    var var_removed = sse_decode_list_removed_kind(deserializer);
+    return CleanReply(
+      outcome: var_outcome,
+      data: var_data,
+      removed: var_removed,
+    );
   }
 
   @protected
@@ -1510,6 +1591,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<RemovedKind> sse_decode_list_removed_kind(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <RemovedKind>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_removed_kind(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
   MessageKind sse_decode_message_kind(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var inner = sse_decode_i_32(deserializer);
@@ -1567,6 +1660,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var inner = sse_decode_i_32(deserializer);
     return PinKeyKind.values[inner];
+  }
+
+  @protected
+  RemovedKind sse_decode_removed_kind(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_i_32(deserializer);
+    return RemovedKind.values[inner];
   }
 
   @protected
@@ -1672,6 +1772,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_item_info(self, serializer);
+  }
+
+  @protected
+  void sse_encode_clean_outcome(CleanOutcome self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
+  void sse_encode_clean_reply(CleanReply self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_clean_outcome(self.outcome, serializer);
+    sse_encode_list_prim_u_8_strict(self.data, serializer);
+    sse_encode_list_removed_kind(self.removed, serializer);
   }
 
   @protected
@@ -1803,6 +1917,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_list_removed_kind(
+    List<RemovedKind> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_removed_kind(item, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_message_kind(MessageKind self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.index, serializer);
@@ -1850,6 +1976,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void sse_encode_pin_key_kind(PinKeyKind self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
+  void sse_encode_removed_kind(RemovedKind self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.index, serializer);
   }
