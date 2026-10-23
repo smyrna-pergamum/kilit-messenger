@@ -94,7 +94,7 @@ class _VaultScreenState extends State<VaultScreen> {
       _say(L.of(context).clipboardEmpty);
       return;
     }
-    await _openPasted(initial: text);
+    await _openPasted(initial: text, fromClipboard: true);
   }
 
   Future<void> _takeIncoming() async {
@@ -215,12 +215,21 @@ class _VaultScreenState extends State<VaultScreen> {
     );
   }
 
-  Future<void> _openPasted({String? initial}) async {
+  Future<void> _openPasted({
+    String? initial,
+    bool fromClipboard = false,
+  }) async {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (_) => _PasteSheet(core: widget.core, initial: initial),
+      builder: (_) => _PasteSheet(
+        core: widget.core,
+        initial: initial,
+        fromClipboard: fromClipboard,
+      ),
     );
+    // opened messages were kept
+    if (mounted) _reload();
   }
 
   Future<void> _details(VaultItem item) async {
@@ -256,7 +265,7 @@ class _VaultScreenState extends State<VaultScreen> {
                 key: const ValueKey('clipboard-banner-open'),
                 onPressed: () {
                   setState(() => _clipboardPacket = null);
-                  _openPasted(initial: clipboard);
+                  _openPasted(initial: clipboard, fromClipboard: true);
                 },
                 child: Text(l.clipboardBannerOpen),
               ),
@@ -593,21 +602,40 @@ class _CarrierComposeSheetState extends State<_CarrierComposeSheet> {
 
 /// Finds `KLT1:` packets in pasted text and opens the messages among them.
 class _PasteSheet extends StatefulWidget {
-  const _PasteSheet({required this.core, this.initial});
+  const _PasteSheet({
+    required this.core,
+    this.initial,
+    this.fromClipboard = false,
+  });
 
   final KilitCore core;
 
   /// Text from the clipboard, or shared into Kilit from another app.
   final String? initial;
 
+  /// [initial] came from the clipboard, which is emptied once a message in
+  /// it is kept.
+  final bool fromClipboard;
+
   @override
   State<_PasteSheet> createState() => _PasteSheetState();
+}
+
+/// A note's name from a message: its first line, shortened.
+String keptTitle(String text, String fallback) {
+  final line = text.trim().split('\n').first.trim();
+  if (line.isEmpty) return fallback;
+  final chars = line.characters;
+  return chars.length <= 40 ? line : '${chars.take(40)}…';
 }
 
 class _PasteSheetState extends State<_PasteSheet> {
   late final _pasted = TextEditingController(text: widget.initial);
   final _passphrase = TextEditingController();
-  List<String>? _results;
+  late bool _fromClipboard = widget.fromClipboard;
+
+  /// Each result, and under an opened message whether it was kept.
+  List<(String, String?)>? _results;
 
   @override
   void initState() {
@@ -627,34 +655,58 @@ class _PasteSheetState extends State<_PasteSheet> {
 
   Future<void> _pasteFromClipboard() async {
     final data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data?.text != null) _pasted.text = data!.text!;
+    if (data?.text != null) {
+      _pasted.text = data!.text!;
+      _fromClipboard = true;
+    }
   }
 
   Future<void> _open() async {
     final l = L.of(context);
     final found = widget.core.findPackets(_pasted.text);
-    final results = <String>[];
-    if (found.isEmpty) results.add(l.pasteNone);
+    final results = <(String, String?)>[];
+    var kept = false;
+    if (found.isEmpty) results.add((l.pasteNone, null));
     for (final f in found) {
       final packet = f.packet;
       if (packet == null) {
-        results.add(
+        results.add((
           f.problem == FoundProblem.truncated
               ? l.pasteTruncated
               : l.pasteMalformed,
-        );
+          null,
+        ));
         continue;
       }
       final opened = await widget.core.openMessage(
         packet,
         passphrase: _passphrase.text.isEmpty ? null : _passphrase.text,
       );
-      results.add(switch (opened.failure) {
-        null => opened.text!,
-        OpenFailure.wrongKey => l.openWrongKey,
-        OpenFailure.damaged => l.openDamaged,
-        OpenFailure.notAMessage => l.openIsFile,
-      });
+      final text = opened.text;
+      if (text == null) {
+        results.add((
+          switch (opened.failure) {
+            OpenFailure.wrongKey => l.openWrongKey,
+            OpenFailure.notAMessage => l.openIsFile,
+            _ => l.openDamaged,
+          },
+          null,
+        ));
+        continue;
+      }
+      // read messages stay in the vault, once each
+      final k = await widget.core.keepMessage(
+        packet,
+        keptTitle(text, l.keptTitleFallback),
+        text,
+      );
+      kept = true;
+      results.add((text, k.already ? l.alreadyInVault : l.keptInVault));
+    }
+    // the ciphertext has done its job; it does not stay on the clipboard
+    if (kept && _fromClipboard) {
+      await Clipboard.setData(const ClipboardData(text: ''));
+      _fromClipboard = false;
     }
     if (mounted) setState(() => _results = results);
   }
@@ -698,11 +750,36 @@ class _PasteSheetState extends State<_PasteSheet> {
         ),
         if (results != null) ...[
           const SizedBox(height: 16),
-          for (final r in results)
+          for (final (text, note) in results)
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(12),
-                child: SelectableText(r, style: TextStyle(color: t.text)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SelectableText(text, style: TextStyle(color: t.text)),
+                    if (note != null) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.inventory_2_outlined,
+                            size: 16,
+                            color: t.safe,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              note,
+                              key: const ValueKey('kept-note'),
+                              style: TextStyle(color: t.textMuted),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
         ],

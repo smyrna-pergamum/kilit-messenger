@@ -165,6 +165,138 @@ abstract class L {
   /// **'Lock now'**
   String get lockNow;
 
+  /// No description provided for @panicTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to lock, hold for the panic code'**
+  String get panicTooltip;
+
+  /// No description provided for @panicNoCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a panic code in Settings first.'**
+  String get panicNoCode;
+
+  /// No description provided for @panicEnterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Panic code'**
+  String get panicEnterTitle;
+
+  /// No description provided for @panicEnterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the panic code to erase everything in Kilit.'**
+  String get panicEnterHint;
+
+  /// No description provided for @panicWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not the panic code.'**
+  String get panicWrong;
+
+  /// No description provided for @settingsPanic.
+  ///
+  /// In en, this message translates to:
+  /// **'Panic code'**
+  String get settingsPanic;
+
+  /// No description provided for @panicExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'Four digits. Entered on the lock screen instead of your PIN, or after holding the lock button, it erases every key, message and file in Kilit for good and opens an empty vault, as if there had never been anything in it.'**
+  String get panicExplain;
+
+  /// No description provided for @panicStatusOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Set'**
+  String get panicStatusOn;
+
+  /// No description provided for @panicStatusOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get panicStatusOff;
+
+  /// No description provided for @panicSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Set panic code'**
+  String get panicSet;
+
+  /// No description provided for @panicChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change panic code'**
+  String get panicChange;
+
+  /// No description provided for @panicRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove panic code'**
+  String get panicRemove;
+
+  /// No description provided for @panicCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a panic code'**
+  String get panicCreateTitle;
+
+  /// No description provided for @panicCreateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Four digits. Anyone who sees this code entered can erase Kilit.'**
+  String get panicCreateHint;
+
+  /// No description provided for @panicConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat the panic code'**
+  String get panicConfirmTitle;
+
+  /// No description provided for @panicMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The codes did not match. Start again.'**
+  String get panicMismatch;
+
+  /// No description provided for @panicSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Panic code set.'**
+  String get panicSaved;
+
+  /// No description provided for @panicRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Panic code removed.'**
+  String get panicRemoved;
+
+  /// No description provided for @panicRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'This code cannot be used. Choose another.'**
+  String get panicRejected;
+
+  /// No description provided for @keptInVault.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved in the vault.'**
+  String get keptInVault;
+
+  /// No description provided for @alreadyInVault.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in the vault.'**
+  String get alreadyInVault;
+
+  /// No description provided for @keptTitleFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get keptTitleFallback;
+
   /// No description provided for @devBanner.
   ///
   /// In en, this message translates to:

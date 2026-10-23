@@ -69,7 +69,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => 21468754;
+  int get rustContentHash => 358079284;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -93,6 +93,8 @@ abstract class RustLibApi extends BaseApi {
     required String title,
     required String text,
   });
+
+  Future<void> crateApiKilitHandleClearPanic({required KilitHandle that});
 
   Future<void> crateApiKilitHandleCreateVault({
     required KilitHandle that,
@@ -132,6 +134,13 @@ abstract class RustLibApi extends BaseApi {
 
   Future<List<ItemInfo>> crateApiKilitHandleItems({required KilitHandle that});
 
+  Future<KeptReply> crateApiKilitHandleKeepMessage({
+    required KilitHandle that,
+    required List<int> packet,
+    required String title,
+    required String text,
+  });
+
   PinKeyKind crateApiKilitHandleKeyKind({required KilitHandle that});
 
   void crateApiKilitHandleLock({required KilitHandle that});
@@ -152,6 +161,18 @@ abstract class RustLibApi extends BaseApi {
     String? passphrase,
   });
 
+  Future<bool> crateApiKilitHandlePanicSet({required KilitHandle that});
+
+  Future<bool> crateApiKilitHandlePanicWipe({
+    required KilitHandle that,
+    required String code,
+  });
+
+  Future<bool> crateApiKilitHandlePanicWipeWithMac({
+    required KilitHandle that,
+    required List<int> mac,
+  });
+
   Future<Uint8List> crateApiKilitHandleReadFile({
     required KilitHandle that,
     required String id,
@@ -166,6 +187,16 @@ abstract class RustLibApi extends BaseApi {
     required KilitHandle that,
     required String message,
     String? passphrase,
+  });
+
+  Future<void> crateApiKilitHandleSetPanic({
+    required KilitHandle that,
+    required String code,
+  });
+
+  Future<void> crateApiKilitHandleSetPanicWithMac({
+    required KilitHandle that,
+    required List<int> mac,
   });
 
   Future<UnlockReply> crateApiKilitHandleUnlock({
@@ -284,6 +315,40 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
+  Future<void> crateApiKilitHandleClearPanic({required KilitHandle that}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 3,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleClearPanicConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleClearPanicConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_clear_panic",
+        argNames: ["that"],
+      );
+
+  @override
   Future<void> crateApiKilitHandleCreateVault({
     required KilitHandle that,
     required String pin,
@@ -300,7 +365,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 3,
+            funcId: 4,
             port: port_,
           );
         },
@@ -338,7 +403,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 4,
+            funcId: 5,
             port: port_,
           );
         },
@@ -376,7 +441,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 5,
+            funcId: 6,
             port: port_,
           );
         },
@@ -416,7 +481,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 6,
+            funcId: 7,
             port: port_,
           );
         },
@@ -450,7 +515,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 7,
+            funcId: 8,
             port: port_,
           );
         },
@@ -484,7 +549,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 8,
+            funcId: 9,
             port: port_,
           );
         },
@@ -524,7 +589,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 9,
+            funcId: 10,
             port: port_,
           );
         },
@@ -562,7 +627,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 10,
+            funcId: 11,
             port: port_,
           );
         },
@@ -595,7 +660,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 11,
+            funcId: 12,
             port: port_,
           );
         },
@@ -614,6 +679,48 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "KilitHandle_items", argNames: ["that"]);
 
   @override
+  Future<KeptReply> crateApiKilitHandleKeepMessage({
+    required KilitHandle that,
+    required List<int> packet,
+    required String title,
+    required String text,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_list_prim_u_8_loose(packet, serializer);
+          sse_encode_String(title, serializer);
+          sse_encode_String(text, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 13,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_kept_reply,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleKeepMessageConstMeta,
+        argValues: [that, packet, title, text],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleKeepMessageConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_keep_message",
+        argNames: ["that", "packet", "title", "text"],
+      );
+
+  @override
   PinKeyKind crateApiKilitHandleKeyKind({required KilitHandle that}) {
     return handler.executeSync(
       SyncTask(
@@ -623,7 +730,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 12)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 14)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_pin_key_kind,
@@ -651,7 +758,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 13)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 15)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -684,7 +791,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 14,
+            funcId: 16,
             port: port_,
           );
         },
@@ -719,7 +826,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 15,
+            funcId: 17,
             port: port_,
           );
         },
@@ -759,7 +866,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 16,
+            funcId: 18,
             port: port_,
           );
         },
@@ -781,6 +888,116 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<bool> crateApiKilitHandlePanicSet({required KilitHandle that}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 19,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_bool,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandlePanicSetConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandlePanicSetConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_panic_set",
+        argNames: ["that"],
+      );
+
+  @override
+  Future<bool> crateApiKilitHandlePanicWipe({
+    required KilitHandle that,
+    required String code,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(code, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 20,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_bool,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandlePanicWipeConstMeta,
+        argValues: [that, code],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandlePanicWipeConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_panic_wipe",
+        argNames: ["that", "code"],
+      );
+
+  @override
+  Future<bool> crateApiKilitHandlePanicWipeWithMac({
+    required KilitHandle that,
+    required List<int> mac,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_list_prim_u_8_loose(mac, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 21,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_bool,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandlePanicWipeWithMacConstMeta,
+        argValues: [that, mac],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandlePanicWipeWithMacConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_panic_wipe_with_mac",
+        argNames: ["that", "mac"],
+      );
+
+  @override
   Future<Uint8List> crateApiKilitHandleReadFile({
     required KilitHandle that,
     required String id,
@@ -797,7 +1014,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 17,
+            funcId: 22,
             port: port_,
           );
         },
@@ -835,7 +1052,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 18,
+            funcId: 23,
             port: port_,
           );
         },
@@ -875,7 +1092,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 19,
+            funcId: 24,
             port: port_,
           );
         },
@@ -897,6 +1114,82 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<void> crateApiKilitHandleSetPanic({
+    required KilitHandle that,
+    required String code,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(code, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 25,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleSetPanicConstMeta,
+        argValues: [that, code],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleSetPanicConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_set_panic",
+        argNames: ["that", "code"],
+      );
+
+  @override
+  Future<void> crateApiKilitHandleSetPanicWithMac({
+    required KilitHandle that,
+    required List<int> mac,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_list_prim_u_8_loose(mac, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 26,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleSetPanicWithMacConstMeta,
+        argValues: [that, mac],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleSetPanicWithMacConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_set_panic_with_mac",
+        argNames: ["that", "mac"],
+      );
+
+  @override
   Future<UnlockReply> crateApiKilitHandleUnlock({
     required KilitHandle that,
     required String pin,
@@ -913,7 +1206,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 20,
+            funcId: 27,
             port: port_,
           );
         },
@@ -950,7 +1243,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 21,
+            funcId: 28,
             port: port_,
           );
         },
@@ -981,7 +1274,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 22,
+            funcId: 29,
             port: port_,
           );
         },
@@ -1006,7 +1299,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(text, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 23)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 30)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_found_packet,
@@ -1031,7 +1324,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 24,
+            funcId: 31,
             port: port_,
           );
         },
@@ -1056,7 +1349,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(pin, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 25)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 32)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -1218,6 +1511,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       size: dco_decode_u_64(arr[3]),
       addedUnix: dco_decode_i_64(arr[4]),
       signed: dco_decode_bool(arr[5]),
+    );
+  }
+
+  @protected
+  KeptReply dco_decode_kept_reply(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return KeptReply(
+      item: dco_decode_item_info(arr[0]),
+      already: dco_decode_bool(arr[1]),
     );
   }
 
@@ -1523,6 +1828,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       addedUnix: var_addedUnix,
       signed: var_signed,
     );
+  }
+
+  @protected
+  KeptReply sse_decode_kept_reply(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_item = sse_decode_item_info(deserializer);
+    var var_already = sse_decode_bool(deserializer);
+    return KeptReply(item: var_item, already: var_already);
   }
 
   @protected
@@ -1846,6 +2159,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_kept_reply(KeptReply self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_item_info(self.item, serializer);
+    sse_encode_bool(self.already, serializer);
+  }
+
+  @protected
   void sse_encode_kilit_error(KilitError self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_kilit_error_kind(self.kind, serializer);
@@ -2068,6 +2388,10 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
         text: text,
       );
 
+  /// Removes the panic code.
+  Future<void> clearPanic() =>
+      RustLib.instance.api.crateApiKilitHandleClearPanic(that: this);
+
   /// Makes a new vault sealed under `pin` with the software key, and
   /// leaves it unlocked. Only for devices without a hardware key.
   Future<void> createVault({required String pin}) =>
@@ -2118,6 +2442,18 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
   Future<List<ItemInfo>> items() =>
       RustLib.instance.api.crateApiKilitHandleItems(that: this);
 
+  /// Keeps an opened message in the vault, once per packet.
+  Future<KeptReply> keepMessage({
+    required List<int> packet,
+    required String title,
+    required String text,
+  }) => RustLib.instance.api.crateApiKilitHandleKeepMessage(
+    that: this,
+    packet: packet,
+    title: title,
+    text: text,
+  );
+
   /// What protects this vault's PIN.
   PinKeyKind keyKind() =>
       RustLib.instance.api.crateApiKilitHandleKeyKind(that: this);
@@ -2139,6 +2475,22 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
     passphrase: passphrase,
   );
 
+  /// Whether a panic code is set. Needs the open vault.
+  Future<bool> panicSet() =>
+      RustLib.instance.api.crateApiKilitHandlePanicSet(that: this);
+
+  /// The panic button, software key: erases everything when `code` is the
+  /// panic code and leaves a new, empty, locked vault under it.
+  Future<bool> panicWipe({required String code}) =>
+      RustLib.instance.api.crateApiKilitHandlePanicWipe(that: this, code: code);
+
+  /// The panic button, hardware key: erases everything when `mac` is the
+  /// panic code's. Then replace the hardware key and make a new vault.
+  Future<bool> panicWipeWithMac({required List<int> mac}) => RustLib
+      .instance
+      .api
+      .crateApiKilitHandlePanicWipeWithMac(that: this, mac: mac);
+
   /// An item's content, decrypted into memory: to show an image, or to
   /// save it unencrypted when the user asks for exactly that.
   Future<Uint8List> readFile({required String id}) =>
@@ -2157,6 +2509,14 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
     message: message,
     passphrase: passphrase,
   );
+
+  /// Sets the four-digit panic code of a software-key vault.
+  Future<void> setPanic({required String code}) =>
+      RustLib.instance.api.crateApiKilitHandleSetPanic(that: this, code: code);
+
+  /// Sets the panic code of a hardware-key vault from the code's MAC.
+  Future<void> setPanicWithMac({required List<int> mac}) => RustLib.instance.api
+      .crateApiKilitHandleSetPanicWithMac(that: this, mac: mac);
 
   /// Tries `pin` against a software-key vault.
   Future<UnlockReply> unlock({required String pin}) =>

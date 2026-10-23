@@ -18,7 +18,22 @@ abstract interface class KilitCore {
 
   Future<bool> hasVault();
   Future<void> createVault(String pin);
+
+  /// Tries [pin]. The panic code instead erases everything and opens a new,
+  /// empty vault under it, and says only "unlocked".
   Future<UnlockResult> unlock(String pin);
+
+  /// Whether a panic code is set. Needs the open vault.
+  Future<bool> hasPanicCode();
+
+  /// Sets the four-digit panic code. Throws when it cannot be used (it is
+  /// the PIN of a vault made after a panic).
+  Future<void> setPanicCode(String code);
+  Future<void> clearPanicCode();
+
+  /// The panic button: when [code] is the panic code, erases everything and
+  /// leaves a new, empty, locked vault under it. Returns whether it did.
+  Future<bool> panicWipe(String code);
 
   /// Wipes keys and decrypted state from memory.
   void lock();
@@ -59,6 +74,17 @@ abstract interface class KilitCore {
   /// Finds packets in pasted text; see `find_in_text` in kilit-klt.
   List<FoundPacket> findPackets(String pasted);
   Future<OpenedMessage> openMessage(Uint8List packet, {String? passphrase});
+
+  /// Keeps an opened message in the vault as a note, once per packet.
+  Future<KeptMessage> keepMessage(Uint8List packet, String title, String text);
+}
+
+class KeptMessage {
+  const KeptMessage(this.item, {required this.already});
+  final VaultItem item;
+
+  /// The same packet was kept before; nothing was added.
+  final bool already;
 }
 
 /// What protects the vault's PIN on this device.

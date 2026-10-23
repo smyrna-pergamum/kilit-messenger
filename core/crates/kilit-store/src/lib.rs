@@ -90,6 +90,19 @@ impl Store {
         }
     }
 
+    /// Deletes every blob, and any temporary file a crash left behind.
+    /// Like [`Store::delete`], this unlinks; the encryption is what makes it
+    /// final.
+    pub fn clear(&self) -> io::Result<()> {
+        for e in fs::read_dir(&self.root)? {
+            let e = e?;
+            if e.file_type()?.is_file() {
+                fs::remove_file(e.path())?;
+            }
+        }
+        Ok(())
+    }
+
     /// The size of a blob in bytes, or `None` if it does not exist.
     pub fn len(&self, name: &str) -> io::Result<Option<u64>> {
         match fs::metadata(self.path(name)?) {
@@ -121,6 +134,19 @@ mod tests {
         s.delete("vault").unwrap();
         s.delete("vault").unwrap();
         assert_eq!(s.read("vault").unwrap(), None);
+    }
+
+    #[test]
+    fn clearing_leaves_nothing() {
+        let dir = tempfile::tempdir().unwrap();
+        let s = Store::open(dir.path()).unwrap();
+        s.write("vault", b"1").unwrap();
+        s.write("item-0123456789abcdef", b"2").unwrap();
+        fs::write(dir.path().join(".tmp-0011"), b"3").unwrap();
+        s.clear().unwrap();
+        assert_eq!(fs::read_dir(dir.path()).unwrap().count(), 0);
+        s.write("vault", b"new").unwrap();
+        assert_eq!(s.read("vault").unwrap().as_deref(), Some(&b"new"[..]));
     }
 
     #[test]

@@ -31,6 +31,76 @@ class LTr extends L {
   String get lockNow => 'Şimdi kilitle';
 
   @override
+  String get panicTooltip =>
+      'Kilitlemek için dokunun, panik kodu için basılı tutun';
+
+  @override
+  String get panicNoCode => 'Önce Ayarlar\'dan bir panik kodu belirleyin.';
+
+  @override
+  String get panicEnterTitle => 'Panik kodu';
+
+  @override
+  String get panicEnterHint =>
+      'Kilit\'teki her şeyi silmek için panik kodunu girin.';
+
+  @override
+  String get panicWrong => 'Bu panik kodu değil.';
+
+  @override
+  String get settingsPanic => 'Panik kodu';
+
+  @override
+  String get panicExplain =>
+      'Dört haneli bir kod. Kilit ekranında PIN yerine ya da kilit düğmesine basılı tuttuktan sonra girilirse Kilit\'teki tüm anahtarları, mesajları ve dosyaları kalıcı olarak siler ve hiç içinde bir şey olmamış gibi boş bir kasa açar.';
+
+  @override
+  String get panicStatusOn => 'Belirlendi';
+
+  @override
+  String get panicStatusOff => 'Belirlenmedi';
+
+  @override
+  String get panicSet => 'Panik kodu belirle';
+
+  @override
+  String get panicChange => 'Panik kodunu değiştir';
+
+  @override
+  String get panicRemove => 'Panik kodunu kaldır';
+
+  @override
+  String get panicCreateTitle => 'Bir panik kodu seçin';
+
+  @override
+  String get panicCreateHint =>
+      'Dört hane. Bu kodu girerken gören herkes Kilit\'i silebilir.';
+
+  @override
+  String get panicConfirmTitle => 'Panik kodunu tekrar girin';
+
+  @override
+  String get panicMismatch => 'Kodlar eşleşmedi. Baştan başlayın.';
+
+  @override
+  String get panicSaved => 'Panik kodu belirlendi.';
+
+  @override
+  String get panicRemoved => 'Panik kodu kaldırıldı.';
+
+  @override
+  String get panicRejected => 'Bu kod kullanılamaz. Başka bir kod seçin.';
+
+  @override
+  String get keptInVault => 'Kasaya kaydedildi.';
+
+  @override
+  String get alreadyInVault => 'Zaten kasada.';
+
+  @override
+  String get keptTitleFallback => 'Mesaj';
+
+  @override
   String get devBanner => 'Geliştirme çekirdeği: gerçek şifreleme yok.';
 
   @override

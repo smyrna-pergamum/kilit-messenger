@@ -100,6 +100,26 @@ std::optional<std::vector<uint8_t>> Mac(const std::vector<uint8_t>& data) {
   return Sha256(sig.data(), sig.size());
 }
 
+// Deletes the key for good (the panic code). The next Mac call creates a
+// new one, so vault files sealed under the old key stay closed forever.
+bool DestroyKey() {
+  Handle provider;
+  if (NCryptOpenStorageProvider(
+          reinterpret_cast<NCRYPT_PROV_HANDLE*>(provider.out()),
+          MS_PLATFORM_CRYPTO_PROVIDER, 0) != ERROR_SUCCESS) {
+    return true;  // no TPM: no key to delete
+  }
+  NCRYPT_KEY_HANDLE key = 0;
+  SECURITY_STATUS s = NCryptOpenKey(
+      static_cast<NCRYPT_PROV_HANDLE>(provider.get()), &key, kKeyName, 0, 0);
+  if (s == NTE_BAD_KEYSET) return true;
+  if (s != ERROR_SUCCESS) return false;
+  // NCryptDeleteKey frees the handle when it succeeds
+  if (NCryptDeleteKey(key, 0) == ERROR_SUCCESS) return true;
+  NCryptFreeObject(key);
+  return false;
+}
+
 std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> channel;
 
 }  // namespace
@@ -128,6 +148,12 @@ void RegisterHardwareKeyChannel(flutter::BinaryMessenger* messenger) {
             result->Success(flutter::EncodableValue(*mac));
           } else {
             result->Error("hardware_key", "TPM signing failed");
+          }
+        } else if (call.method_name() == "destroy") {
+          if (DestroyKey()) {
+            result->Success(flutter::EncodableValue(true));
+          } else {
+            result->Error("hardware_key", "TPM key deletion failed");
           }
         } else {
           result->NotImplemented();

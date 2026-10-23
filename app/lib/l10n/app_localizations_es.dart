@@ -31,6 +31,76 @@ class LEs extends L {
   String get lockNow => 'Bloquear ahora';
 
   @override
+  String get panicTooltip =>
+      'Toca para bloquear, mantén pulsado para el código de pánico';
+
+  @override
+  String get panicNoCode => 'Primero define un código de pánico en Ajustes.';
+
+  @override
+  String get panicEnterTitle => 'Código de pánico';
+
+  @override
+  String get panicEnterHint =>
+      'Introduce el código de pánico para borrar todo lo que hay en Kilit.';
+
+  @override
+  String get panicWrong => 'Ese no es el código de pánico.';
+
+  @override
+  String get settingsPanic => 'Código de pánico';
+
+  @override
+  String get panicExplain =>
+      'Cuatro dígitos. Si se introduce en la pantalla de bloqueo en lugar de tu PIN, o tras mantener pulsado el botón de bloqueo, borra para siempre todas las claves, mensajes y archivos de Kilit y abre una bóveda vacía, como si nunca hubiera tenido nada.';
+
+  @override
+  String get panicStatusOn => 'Definido';
+
+  @override
+  String get panicStatusOff => 'Sin definir';
+
+  @override
+  String get panicSet => 'Definir código de pánico';
+
+  @override
+  String get panicChange => 'Cambiar código de pánico';
+
+  @override
+  String get panicRemove => 'Quitar código de pánico';
+
+  @override
+  String get panicCreateTitle => 'Elige un código de pánico';
+
+  @override
+  String get panicCreateHint =>
+      'Cuatro dígitos. Quien vea cómo lo introduces puede borrar Kilit.';
+
+  @override
+  String get panicConfirmTitle => 'Repite el código de pánico';
+
+  @override
+  String get panicMismatch => 'Los códigos no coinciden. Empieza de nuevo.';
+
+  @override
+  String get panicSaved => 'Código de pánico definido.';
+
+  @override
+  String get panicRemoved => 'Código de pánico quitado.';
+
+  @override
+  String get panicRejected => 'No se puede usar este código. Elige otro.';
+
+  @override
+  String get keptInVault => 'Guardado en la bóveda.';
+
+  @override
+  String get alreadyInVault => 'Ya está en la bóveda.';
+
+  @override
+  String get keptTitleFallback => 'Mensaje';
+
+  @override
   String get devBanner => 'Núcleo de desarrollo: sin cifrado real.';
 
   @override

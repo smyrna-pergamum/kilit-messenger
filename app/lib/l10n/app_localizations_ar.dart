@@ -31,6 +31,74 @@ class LAr extends L {
   String get lockNow => 'قفل الآن';
 
   @override
+  String get panicTooltip => 'انقر للقفل، واضغط مطولًا لرمز الطوارئ';
+
+  @override
+  String get panicNoCode => 'عيّن رمز طوارئ من الإعدادات أولًا.';
+
+  @override
+  String get panicEnterTitle => 'رمز الطوارئ';
+
+  @override
+  String get panicEnterHint => 'أدخل رمز الطوارئ لمسح كل ما في Kilit.';
+
+  @override
+  String get panicWrong => 'هذا ليس رمز الطوارئ.';
+
+  @override
+  String get settingsPanic => 'رمز الطوارئ';
+
+  @override
+  String get panicExplain =>
+      'أربعة أرقام. إذا أُدخل في شاشة القفل بدل رقم PIN، أو بعد الضغط مطولًا على زر القفل، يمسح نهائيًا كل المفاتيح والرسائل والملفات في Kilit ويفتح خزنة فارغة، كأنه لم يكن فيها شيء قط.';
+
+  @override
+  String get panicStatusOn => 'مُعيَّن';
+
+  @override
+  String get panicStatusOff => 'غير مُعيَّن';
+
+  @override
+  String get panicSet => 'تعيين رمز الطوارئ';
+
+  @override
+  String get panicChange => 'تغيير رمز الطوارئ';
+
+  @override
+  String get panicRemove => 'إزالة رمز الطوارئ';
+
+  @override
+  String get panicCreateTitle => 'اختر رمز طوارئ';
+
+  @override
+  String get panicCreateHint =>
+      'أربعة أرقام. أي شخص يراك تُدخله يمكنه مسح Kilit.';
+
+  @override
+  String get panicConfirmTitle => 'أعد إدخال رمز الطوارئ';
+
+  @override
+  String get panicMismatch => 'الرمزان غير متطابقين. ابدأ من جديد.';
+
+  @override
+  String get panicSaved => 'تم تعيين رمز الطوارئ.';
+
+  @override
+  String get panicRemoved => 'تمت إزالة رمز الطوارئ.';
+
+  @override
+  String get panicRejected => 'لا يمكن استخدام هذا الرمز. اختر رمزًا آخر.';
+
+  @override
+  String get keptInVault => 'حُفظت في الخزنة.';
+
+  @override
+  String get alreadyInVault => 'موجودة في الخزنة بالفعل.';
+
+  @override
+  String get keptTitleFallback => 'رسالة';
+
+  @override
   String get devBanner => 'نواة تطوير: لا يوجد تشفير حقيقي.';
 
   @override

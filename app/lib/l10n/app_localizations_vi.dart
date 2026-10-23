@@ -31,6 +31,74 @@ class LVi extends L {
   String get lockNow => 'Khóa ngay';
 
   @override
+  String get panicTooltip => 'Chạm để khóa, giữ để nhập mã khẩn cấp';
+
+  @override
+  String get panicNoCode => 'Hãy đặt mã khẩn cấp trong Cài đặt trước.';
+
+  @override
+  String get panicEnterTitle => 'Mã khẩn cấp';
+
+  @override
+  String get panicEnterHint => 'Nhập mã khẩn cấp để xóa mọi thứ trong Kilit.';
+
+  @override
+  String get panicWrong => 'Đó không phải mã khẩn cấp.';
+
+  @override
+  String get settingsPanic => 'Mã khẩn cấp';
+
+  @override
+  String get panicExplain =>
+      'Bốn chữ số. Nếu được nhập ở màn hình khóa thay cho mã PIN, hoặc sau khi giữ nút khóa, mã này xóa vĩnh viễn mọi khóa, tin nhắn và tệp trong Kilit rồi mở một kho trống, như thể chưa từng có gì.';
+
+  @override
+  String get panicStatusOn => 'Đã đặt';
+
+  @override
+  String get panicStatusOff => 'Chưa đặt';
+
+  @override
+  String get panicSet => 'Đặt mã khẩn cấp';
+
+  @override
+  String get panicChange => 'Đổi mã khẩn cấp';
+
+  @override
+  String get panicRemove => 'Gỡ mã khẩn cấp';
+
+  @override
+  String get panicCreateTitle => 'Chọn mã khẩn cấp';
+
+  @override
+  String get panicCreateHint =>
+      'Bốn chữ số. Ai thấy bạn nhập mã này đều có thể xóa Kilit.';
+
+  @override
+  String get panicConfirmTitle => 'Nhập lại mã khẩn cấp';
+
+  @override
+  String get panicMismatch => 'Hai mã không khớp. Hãy bắt đầu lại.';
+
+  @override
+  String get panicSaved => 'Đã đặt mã khẩn cấp.';
+
+  @override
+  String get panicRemoved => 'Đã gỡ mã khẩn cấp.';
+
+  @override
+  String get panicRejected => 'Không thể dùng mã này. Hãy chọn mã khác.';
+
+  @override
+  String get keptInVault => 'Đã lưu vào kho.';
+
+  @override
+  String get alreadyInVault => 'Đã có trong kho.';
+
+  @override
+  String get keptTitleFallback => 'Tin nhắn';
+
+  @override
   String get devBanner => 'Lõi phát triển: không mã hóa thật.';
 
   @override

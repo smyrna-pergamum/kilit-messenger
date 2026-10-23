@@ -31,6 +31,73 @@ class LJa extends L {
   String get lockNow => '今すぐロック';
 
   @override
+  String get panicTooltip => 'タップでロック、長押しでパニックコード';
+
+  @override
+  String get panicNoCode => '先に設定でパニックコードを設定してください。';
+
+  @override
+  String get panicEnterTitle => 'パニックコード';
+
+  @override
+  String get panicEnterHint => 'Kilit のすべてを消去するにはパニックコードを入力してください。';
+
+  @override
+  String get panicWrong => 'パニックコードではありません。';
+
+  @override
+  String get settingsPanic => 'パニックコード';
+
+  @override
+  String get panicExplain =>
+      '4桁の数字です。ロック画面で PIN の代わりに入力するか、ロックボタンを長押ししてから入力すると、Kilit のすべての鍵・メッセージ・ファイルを完全に消去し、最初から何もなかったかのように空の金庫を開きます。';
+
+  @override
+  String get panicStatusOn => '設定済み';
+
+  @override
+  String get panicStatusOff => '未設定';
+
+  @override
+  String get panicSet => 'パニックコードを設定';
+
+  @override
+  String get panicChange => 'パニックコードを変更';
+
+  @override
+  String get panicRemove => 'パニックコードを削除';
+
+  @override
+  String get panicCreateTitle => 'パニックコードを選んでください';
+
+  @override
+  String get panicCreateHint => '4桁。入力するところを見た人は誰でも Kilit を消去できます。';
+
+  @override
+  String get panicConfirmTitle => 'パニックコードをもう一度入力';
+
+  @override
+  String get panicMismatch => 'コードが一致しません。最初からやり直してください。';
+
+  @override
+  String get panicSaved => 'パニックコードを設定しました。';
+
+  @override
+  String get panicRemoved => 'パニックコードを削除しました。';
+
+  @override
+  String get panicRejected => 'このコードは使えません。別のコードを選んでください。';
+
+  @override
+  String get keptInVault => '金庫に保存しました。';
+
+  @override
+  String get alreadyInVault => 'すでに金庫にあります。';
+
+  @override
+  String get keptTitleFallback => 'メッセージ';
+
+  @override
   String get devBanner => '開発用コア：実際の暗号化は行われません。';
 
   @override

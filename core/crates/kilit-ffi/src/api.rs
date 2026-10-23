@@ -67,6 +67,9 @@ pub enum UnlockOutcome {
     WrongPin,
     /// Too soon; nothing was tried.
     Wait,
+    /// The panic code on a hardware-key vault: everything is erased. Replace
+    /// the hardware key, then make a new vault under the same code.
+    Wiped,
 }
 
 /// An unlock attempt's result.
@@ -215,6 +218,10 @@ fn reply(u: Unlock) -> UnlockReply {
             outcome: UnlockOutcome::Wait,
             wait_secs,
         },
+        Unlock::Wiped => UnlockReply {
+            outcome: UnlockOutcome::Wiped,
+            wait_secs: 0,
+        },
     }
 }
 
@@ -346,6 +353,14 @@ pub struct ImportReply {
     pub signed_by: SignedBy,
 }
 
+/// A message kept in the vault.
+pub struct KeptReply {
+    /// The vault item holding it.
+    pub item: ItemInfo,
+    /// True when the same packet had been kept before; nothing was added.
+    pub already: bool,
+}
+
 /// One user's Kilit on this device. Dart holds only this handle.
 #[frb(opaque)]
 pub struct KilitHandle {
@@ -407,6 +422,57 @@ impl KilitHandle {
     /// Moves the unlocked software-key vault to the hardware key.
     pub fn move_to_hardware(&self, mac: Vec<u8>) -> Result<(), KilitError> {
         Ok(self.engine()?.move_to_hardware(mac32(mac)?)?)
+    }
+
+    /// Whether a panic code is set. Needs the open vault.
+    pub fn panic_set(&self) -> Result<bool, KilitError> {
+        Ok(self.engine()?.panic_set()?)
+    }
+
+    /// Sets the four-digit panic code of a software-key vault.
+    pub fn set_panic(&self, code: String) -> Result<(), KilitError> {
+        Ok(self.engine()?.set_panic(code)?)
+    }
+
+    /// Sets the panic code of a hardware-key vault from the code's MAC.
+    pub fn set_panic_with_mac(&self, mac: Vec<u8>) -> Result<(), KilitError> {
+        Ok(self.engine()?.set_panic_with_mac(mac32(mac)?)?)
+    }
+
+    /// Removes the panic code.
+    pub fn clear_panic(&self) -> Result<(), KilitError> {
+        Ok(self.engine()?.clear_panic()?)
+    }
+
+    /// The panic button, software key: erases everything when `code` is the
+    /// panic code and leaves a new, empty, locked vault under it.
+    pub fn panic_wipe(&self, code: String) -> Result<bool, KilitError> {
+        Ok(self.engine()?.panic_wipe(code)?)
+    }
+
+    /// The panic button, hardware key: erases everything when `mac` is the
+    /// panic code's. Then replace the hardware key and make a new vault.
+    pub fn panic_wipe_with_mac(&self, mac: Vec<u8>) -> Result<bool, KilitError> {
+        Ok(self.engine()?.panic_wipe_with_mac(mac32(mac)?)?)
+    }
+
+    /// Keeps an opened message in the vault, once per packet.
+    pub fn keep_message(
+        &self,
+        packet: Vec<u8>,
+        title: String,
+        text: String,
+    ) -> Result<KeptReply, KilitError> {
+        Ok(match self.engine()?.keep_message(&packet, &title, &text)? {
+            engine::Kept::Added(e) => KeptReply {
+                item: e.into(),
+                already: false,
+            },
+            engine::Kept::Already(e) => KeptReply {
+                item: e.into(),
+                already: true,
+            },
+        })
     }
 
     /// Drops every key and decrypted entry.

@@ -5,6 +5,7 @@ import '../platform/files.dart';
 import '../state/prefs.dart';
 import '../state/session.dart';
 import '../theme/tokens.dart';
+import '../widgets/panic_code.dart';
 import 'settings_screen.dart';
 import 'vault_screen.dart';
 
@@ -49,6 +50,25 @@ class _ShellState extends State<Shell> {
   // the vault is what Aşama 1 can do, so it opens first
   int _index = 1;
 
+  /// A new message replaces the one on screen instead of queueing.
+  void _say(String message) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(message)));
+
+  /// Held down: the panic code erases everything.
+  Future<void> _panic() async {
+    final l = L.of(context);
+    final session = widget.session;
+    if (!await session.core.hasPanicCode()) {
+      if (mounted) _say(l.panicNoCode);
+      return;
+    }
+    if (!mounted) return;
+    final code = await askPanicCode(context, confirm: false);
+    if (code == null) return;
+    if (!await session.panicWipe(code) && mounted) _say(l.panicWrong);
+  }
+
   Widget _page(L l) => switch (_index) {
     0 => _ComingLater(text: l.chatsLater),
     1 => VaultScreen(
@@ -72,12 +92,25 @@ class _ShellState extends State<Shell> {
     final appBar = AppBar(
       title: Text(_destinations[_index].label(l)),
       actions: [
-        IconButton(
-          key: const ValueKey('lock-now'),
-          tooltip: l.lockNow,
-          icon: Icon(Icons.lock_clock_outlined, color: t.accent),
-          onPressed: widget.session.lock,
+        // tap: lock; hold: the panic code
+        Tooltip(
+          message: l.panicTooltip,
+          child: InkResponse(
+            key: const ValueKey('lock-now'),
+            radius: 24,
+            onTap: widget.session.lock,
+            onLongPress: _panic,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Icon(
+                Icons.gpp_maybe_outlined,
+                color: t.danger,
+                semanticLabel: l.panicTooltip,
+              ),
+            ),
+          ),
         ),
+        const SizedBox(width: 4),
       ],
     );
     if (!wide) {

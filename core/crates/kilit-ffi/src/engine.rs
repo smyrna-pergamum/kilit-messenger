@@ -12,9 +12,10 @@ use kilit_klt::{
     XWingIdentity, carrier_file_name, find_in_text, open, open_message, seal, seal_message,
 };
 use kilit_store::Store;
-use kilit_vault::{PinMac, SoftwareKey, Vault, VaultError};
+use kilit_vault::{HardwareKey, PinMac, SoftwareKey, Vault, VaultError, pin_mac_input};
 use secrecy::SecretString;
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 
 /// The vault sealed under the software key (no hardware key on this device,
 /// or not moved yet).
@@ -27,6 +28,14 @@ const ATTEMPTS: &str = "attempts";
 const INDEX: &str = "index";
 const INDEX_NAME: &str = "index.cbor";
 const INDEX_MIME: &str = "application/cbor";
+/// The panic code's check value: a salt and a tag, or random bytes of the
+/// same length when no code is set, so the file says nothing either way.
+const PANIC: &str = "panic";
+const PANIC_DOMAIN: &[u8] = b"kilit/v1/panic\0";
+const PANIC_LEN: usize = 16 + 32;
+/// Settings that must stay secret, sealed to the vault like the index.
+const CONFIG: &str = "config";
+const CONFIG_NAME: &str = "config.cbor";
 
 /// Misses before the first wait.
 const FREE_MISSES: u32 = 5;
@@ -91,6 +100,10 @@ pub enum Unlock {
         /// Seconds until the next attempt is allowed.
         wait_secs: u64,
     },
+    /// The panic code: everything was erased. The caller replaces the
+    /// hardware key and makes a new, empty vault under the same code with
+    /// [`Engine::create_vault_with_mac`], so it looks like an unlock.
+    Wiped,
 }
 
 /// What protects the vault's PIN on this device.
@@ -120,6 +133,10 @@ pub struct Entry {
     pub added: i64,
     /// Whether the vault signed it.
     pub signed: bool,
+    /// For a kept message: the SHA-256 of the packet it came in, so the
+    /// same message is not kept twice.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source: Option<Vec<u8>>,
 }
 
 /// "Paket analizi" for one item.
@@ -181,6 +198,39 @@ pub enum Message {
     Damaged,
     /// It holds a file, not a message.
     File,
+}
+
+#[derive(Default, Serialize, Deserialize)]
+struct Config {
+    panic: bool,
+}
+
+/// Whether a kept message was new.
+#[derive(Debug, PartialEq, Eq)]
+pub enum Kept {
+    /// Added to the vault now.
+    Added(Entry),
+    /// The same packet was kept before.
+    Already(Entry),
+}
+
+fn panic_tag(salt: &[u8], mac: &[u8; 32]) -> [u8; 32] {
+    let mut h = Sha256::new();
+    h.update(PANIC_DOMAIN);
+    h.update(salt);
+    h.update(mac);
+    h.finalize().into()
+}
+
+fn random_bytes<const N: usize>() -> Result<[u8; N], EngineError> {
+    let mut b = [0u8; N];
+    getrandom::fill(&mut b).map_err(|_| EngineError::Storage("no system randomness".into()))?;
+    Ok(b)
+}
+
+/// A panic code is four digits; a PIN at least six, so they never meet.
+fn valid_panic_code(code: &str) -> bool {
+    code.len() == 4 && code.bytes().all(|b| b.is_ascii_digit())
 }
 
 #[derive(Default, Serialize, Deserialize)]
@@ -294,7 +344,161 @@ impl Engine {
 
     fn after_create(&mut self, vault: Vault) -> Result<(), EngineError> {
         self.open = Some(Self::opened(vault, Vec::new())?);
-        self.save_index()
+        self.save_index()?;
+        self.save_config(&Config::default())?;
+        self.write_panic_filler()
+    }
+
+    /// The software key's MAC of a PIN or panic code, with no length rule:
+    /// a vault made after a panic is sealed under the four-digit code.
+    fn software_mac(&self, pin: &str) -> Result<[u8; 32], EngineError> {
+        self.software_key()?
+            .mac(&pin_mac_input(&SecretString::from(pin.to_owned())))
+            .map_err(vault_err)
+    }
+
+    fn write_panic_filler(&self) -> Result<(), EngineError> {
+        Ok(self.store.write(PANIC, &random_bytes::<PANIC_LEN>()?)?)
+    }
+
+    /// Whether `mac` is the panic code's. Compares without an early exit.
+    fn panic_matches(&self, mac: &[u8; 32]) -> Result<bool, EngineError> {
+        let Some(b) = self.store.read(PANIC)? else {
+            return Ok(false);
+        };
+        if b.len() != PANIC_LEN {
+            return Ok(false);
+        }
+        let tag = panic_tag(&b[..16], mac);
+        Ok(tag.iter().zip(&b[16..]).fold(0u8, |d, (x, y)| d | (x ^ y)) == 0)
+    }
+
+    /// Erases everything: vault, keys, items, settings, the attempt count.
+    /// Items are sealed to keys that only the vault held, so with the vault
+    /// and its PIN key gone they cannot be opened even if flash storage
+    /// keeps old copies of the files.
+    pub fn wipe(&mut self) -> Result<(), EngineError> {
+        self.open = None;
+        Ok(self.store.clear()?)
+    }
+
+    /// After a panic on the software key: a new, empty vault under the
+    /// panic code, open, as if the code had unlocked it.
+    fn replace_software_vault(&mut self, code: &str) -> Result<(), EngineError> {
+        let mac = self.software_mac(code)?;
+        let (vault, sealed) =
+            Vault::create_with_mac(&PinMac::from_bytes(mac), self.params).map_err(vault_err)?;
+        self.store.write(VAULT, &sealed)?;
+        self.after_create(vault)
+    }
+
+    fn load_config(&self) -> Result<Config, EngineError> {
+        let Some(packet) = self.store.read(CONFIG)? else {
+            return Ok(Config::default());
+        };
+        let (bytes, _) = self.open_mine(&packet)?;
+        ciborium::from_reader(bytes.as_slice()).map_err(|_| EngineError::Damaged)
+    }
+
+    fn save_config(&self, c: &Config) -> Result<(), EngineError> {
+        let mut bytes = Vec::new();
+        ciborium::into_writer(c, &mut bytes).map_err(|_| EngineError::Damaged)?;
+        let packet = self.seal_to_me(CONFIG_NAME, INDEX_MIME, &bytes)?;
+        Ok(self.store.write(CONFIG, &packet)?)
+    }
+
+    /// Whether a panic code is set. Needs the open vault: the panic file
+    /// alone does not tell.
+    pub fn panic_set(&self) -> Result<bool, EngineError> {
+        self.require_open()?;
+        Ok(self.load_config()?.panic)
+    }
+
+    fn set_panic_mac(&mut self, mac: [u8; 32]) -> Result<(), EngineError> {
+        self.require_open()?;
+        // a vault made after a panic is sealed under a four-digit code; that
+        // code cannot also be the one that erases it
+        let blob = if self.key_kind()? == KeyKind::Hardware {
+            VAULT_HW
+        } else {
+            VAULT
+        };
+        let sealed = self.store.read(blob)?.ok_or(EngineError::NoVault)?;
+        if Vault::unlock_with_mac(&sealed, &PinMac::from_bytes(mac)).is_ok() {
+            return Err(EngineError::Rejected("the panic code is the PIN".into()));
+        }
+        let salt = random_bytes::<16>()?;
+        let mut b = salt.to_vec();
+        b.extend_from_slice(&panic_tag(&salt, &mac));
+        self.store.write(PANIC, &b)?;
+        self.save_config(&Config { panic: true })
+    }
+
+    /// Sets the four-digit panic code of a software-key vault.
+    pub fn set_panic(&mut self, code: String) -> Result<(), EngineError> {
+        if !valid_panic_code(&code) {
+            return Err(EngineError::Rejected("a panic code is four digits".into()));
+        }
+        if self.key_kind()? != KeyKind::Software {
+            return Err(EngineError::Rejected(
+                "this vault needs the hardware key".into(),
+            ));
+        }
+        let mac = self.software_mac(&code)?;
+        self.set_panic_mac(mac)
+    }
+
+    /// Sets the panic code of a hardware-key vault from the code's MAC. The
+    /// caller has checked that the code is four digits.
+    pub fn set_panic_with_mac(&mut self, mac: [u8; 32]) -> Result<(), EngineError> {
+        if self.key_kind()? != KeyKind::Hardware {
+            return Err(EngineError::Rejected(
+                "this vault uses the software key".into(),
+            ));
+        }
+        self.set_panic_mac(mac)
+    }
+
+    /// Removes the panic code.
+    pub fn clear_panic(&mut self) -> Result<(), EngineError> {
+        self.require_open()?;
+        self.write_panic_filler()?;
+        self.save_config(&Config::default())
+    }
+
+    /// The panic button on a software-key vault: when `code` is the panic
+    /// code, erases everything and leaves a new, empty, locked vault under
+    /// it. Returns whether it did.
+    pub fn panic_wipe(&mut self, code: String) -> Result<bool, EngineError> {
+        if self.key_kind()? != KeyKind::Software {
+            return Err(EngineError::Rejected(
+                "this vault needs the hardware key".into(),
+            ));
+        }
+        let mac = self.software_mac(&code)?;
+        if !self.panic_matches(&mac)? {
+            return Ok(false);
+        }
+        self.wipe()?;
+        self.replace_software_vault(&code)?;
+        self.lock();
+        Ok(true)
+    }
+
+    /// The panic button on a hardware-key vault: when `mac` is the panic
+    /// code's, erases everything. The caller then replaces the hardware key
+    /// and makes the new vault, as after [`Unlock::Wiped`].
+    pub fn panic_wipe_with_mac(&mut self, mac: [u8; 32]) -> Result<bool, EngineError> {
+        if self.key_kind()? != KeyKind::Hardware {
+            return Err(EngineError::Rejected(
+                "this vault uses the software key".into(),
+            ));
+        }
+        if !self.panic_matches(&mac)? {
+            return Ok(false);
+        }
+        self.wipe()?;
+        Ok(true)
     }
 
     /// Makes a new identity sealed under `pin` with the software key, and
@@ -336,7 +540,10 @@ impl Engine {
             .map_err(vault_err)?;
         self.store.write(VAULT_HW, &sealed)?;
         self.store.delete(VAULT)?;
-        Ok(self.store.delete(DEVICE_KEY)?)
+        self.store.delete(DEVICE_KEY)?;
+        // a panic code was checked with the software key; it has to be set
+        // again under the hardware key
+        self.clear_panic()
     }
 
     fn opened(vault: Vault, index: Vec<Entry>) -> Result<Open, EngineError> {
@@ -376,9 +583,15 @@ impl Engine {
                 "this vault needs the hardware key".into(),
             ));
         }
-        let hw = self.software_key()?;
+        // checked before the wait: the panic code must work at any time
+        let mac = self.software_mac(&pin)?;
+        if self.panic_matches(&mac)? {
+            self.wipe()?;
+            self.replace_software_vault(&pin)?;
+            return Ok(Unlock::Unlocked);
+        }
         self.attempt(VAULT, |sealed| {
-            Vault::unlock(sealed, &SecretString::from(pin), &hw)
+            Vault::unlock_with_mac(sealed, &PinMac::from_bytes(mac))
         })
     }
 
@@ -389,6 +602,10 @@ impl Engine {
             return Err(EngineError::Rejected(
                 "this vault uses the software key".into(),
             ));
+        }
+        if self.panic_matches(&mac)? {
+            self.wipe()?;
+            return Ok(Unlock::Wiped);
         }
         self.attempt(VAULT_HW, |sealed| {
             Vault::unlock_with_mac(sealed, &PinMac::from_bytes(mac))
@@ -417,6 +634,10 @@ impl Engine {
                 let index = self.load_index()?;
                 if let Some(o) = self.open.as_mut() {
                     o.index = index;
+                }
+                // vaults from before the panic code get their filler now
+                if self.store.len(PANIC)?.is_none() {
+                    self.write_panic_filler()?;
                 }
                 Ok(Unlock::Unlocked)
             }
@@ -527,6 +748,40 @@ impl Engine {
 
     /// Seals any bytes into the vault.
     pub fn add(&mut self, name: &str, mime: &str, data: &[u8]) -> Result<Entry, EngineError> {
+        self.add_from(name, mime, data, None)
+    }
+
+    /// Keeps an opened message in the vault as a note, once per packet.
+    pub fn keep_message(
+        &mut self,
+        packet: &[u8],
+        title: &str,
+        text: &str,
+    ) -> Result<Kept, EngineError> {
+        let digest = Sha256::digest(packet).to_vec();
+        if let Some(e) = self
+            .require_open()?
+            .index
+            .iter()
+            .find(|e| e.source.as_deref() == Some(digest.as_slice()))
+        {
+            return Ok(Kept::Already(e.clone()));
+        }
+        Ok(Kept::Added(self.add_from(
+            &format!("{title}.txt"),
+            "text/plain; charset=utf-8",
+            text.as_bytes(),
+            Some(digest),
+        )?))
+    }
+
+    fn add_from(
+        &mut self,
+        name: &str,
+        mime: &str,
+        data: &[u8],
+        source: Option<Vec<u8>>,
+    ) -> Result<Entry, EngineError> {
         if data.len() > MAX_FILE_BYTES {
             return Err(EngineError::TooLong);
         }
@@ -540,6 +795,7 @@ impl Engine {
             size: data.len() as u64,
             added: (self.now)(),
             signed: true,
+            source,
         };
         if let Some(o) = self.open.as_mut() {
             o.index.push(entry.clone());
@@ -908,6 +1164,137 @@ mod tests {
         SoftwareKey::new([0x5a; 32])
             .mac(&pin_mac_input(&SecretString::from(pin.to_owned())))
             .unwrap()
+    }
+
+    #[test]
+    fn the_panic_code_erases_everything_and_opens_an_empty_vault() {
+        let dir = tempfile::tempdir().unwrap();
+        let fp = {
+            let mut e = ready(&dir);
+            e.add_note("gizli", "çok gizli").unwrap();
+            assert!(!e.panic_set().unwrap());
+            assert!(e.set_panic("12345".into()).is_err());
+            e.set_panic("7391".into()).unwrap();
+            assert!(e.panic_set().unwrap());
+            e.fingerprint().unwrap()
+        };
+        let mut e = engine(&dir);
+        // even while a wait is running
+        for _ in 0..FREE_MISSES {
+            e.unlock("000000".into()).unwrap();
+        }
+        assert!(matches!(
+            e.unlock("000000".into()).unwrap(),
+            Unlock::Wait { .. }
+        ));
+        assert_eq!(e.unlock("7391".into()).unwrap(), Unlock::Unlocked);
+        assert!(e.items().unwrap().is_empty());
+        assert_ne!(e.fingerprint().unwrap(), fp);
+        assert!(!e.panic_set().unwrap());
+
+        // the new vault opens with the code, and the real PIN is gone
+        let mut e = engine(&dir);
+        assert_eq!(
+            e.unlock("482916".into()).unwrap(),
+            Unlock::WrongPin { wait_secs: 0 }
+        );
+        assert_eq!(e.unlock("7391".into()).unwrap(), Unlock::Unlocked);
+        // and it cannot also be its own panic code
+        assert!(matches!(
+            e.set_panic("7391".into()),
+            Err(EngineError::Rejected(_))
+        ));
+    }
+
+    #[test]
+    fn the_panic_file_looks_the_same_with_and_without_a_code() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut e = ready(&dir);
+        let before = e.store.read(PANIC).unwrap().unwrap();
+        e.set_panic("7391".into()).unwrap();
+        let set = e.store.read(PANIC).unwrap().unwrap();
+        e.clear_panic().unwrap();
+        let cleared = e.store.read(PANIC).unwrap().unwrap();
+        assert_eq!(before.len(), PANIC_LEN);
+        assert_eq!(set.len(), PANIC_LEN);
+        assert_eq!(cleared.len(), PANIC_LEN);
+        e.lock();
+        assert_eq!(
+            e.unlock("7391".into()).unwrap(),
+            Unlock::WrongPin { wait_secs: 0 }
+        );
+    }
+
+    #[test]
+    fn the_panic_button_needs_the_code() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut e = ready(&dir);
+        e.add_note("gizli", "x").unwrap();
+        e.set_panic("7391".into()).unwrap();
+        assert!(!e.panic_wipe("1111".into()).unwrap());
+        assert_eq!(e.items().unwrap().len(), 1);
+        assert!(e.panic_wipe("7391".into()).unwrap());
+        assert!(matches!(e.items(), Err(EngineError::Locked)));
+        assert_eq!(e.unlock("7391".into()).unwrap(), Unlock::Unlocked);
+        assert!(e.items().unwrap().is_empty());
+    }
+
+    #[test]
+    fn the_hardware_panic_code_leaves_the_new_vault_to_the_caller() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut e = engine(&dir);
+        e.create_vault_with_mac(platform_mac("482916")).unwrap();
+        e.add_note("gizli", "x").unwrap();
+        e.set_panic_with_mac(platform_mac("7391")).unwrap();
+        e.lock();
+        assert_eq!(
+            e.unlock_with_mac(platform_mac("7391")).unwrap(),
+            Unlock::Wiped
+        );
+        assert_eq!(e.key_kind().unwrap(), KeyKind::None);
+        assert_eq!(fs_count(&dir), 0);
+        // a new hardware key, the same code
+        let new_key = SoftwareKey::new([0x77; 32])
+            .mac(&pin_mac_input(&SecretString::from("7391".to_owned())))
+            .unwrap();
+        e.create_vault_with_mac(new_key).unwrap();
+        assert!(e.items().unwrap().is_empty());
+    }
+
+    fn fs_count(dir: &tempfile::TempDir) -> usize {
+        std::fs::read_dir(dir.path()).unwrap().count()
+    }
+
+    #[test]
+    fn a_message_is_kept_once() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut e = ready(&dir);
+        let Kept::Added(first) = e
+            .keep_message(b"packet-1", "selam", "selam dostum")
+            .unwrap()
+        else {
+            unreachable!("a new packet is added");
+        };
+        assert_eq!(first.name, "selam.txt");
+        assert_eq!(e.read(&first.id).unwrap(), b"selam dostum");
+        assert_eq!(
+            e.keep_message(b"packet-1", "selam", "selam dostum")
+                .unwrap(),
+            Kept::Already(first.clone())
+        );
+        assert!(matches!(
+            e.keep_message(b"packet-2", "selam", "selam dostum")
+                .unwrap(),
+            Kept::Added(_)
+        ));
+        // the source survives a restart
+        drop(e);
+        let mut e = engine(&dir);
+        e.unlock("482916".into()).unwrap();
+        assert_eq!(
+            e.keep_message(b"packet-1", "x", "y").unwrap(),
+            Kept::Already(first)
+        );
     }
 
     #[test]

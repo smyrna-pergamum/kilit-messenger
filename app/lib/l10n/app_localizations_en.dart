@@ -31,6 +31,75 @@ class LEn extends L {
   String get lockNow => 'Lock now';
 
   @override
+  String get panicTooltip => 'Tap to lock, hold for the panic code';
+
+  @override
+  String get panicNoCode => 'Set a panic code in Settings first.';
+
+  @override
+  String get panicEnterTitle => 'Panic code';
+
+  @override
+  String get panicEnterHint =>
+      'Enter the panic code to erase everything in Kilit.';
+
+  @override
+  String get panicWrong => 'That is not the panic code.';
+
+  @override
+  String get settingsPanic => 'Panic code';
+
+  @override
+  String get panicExplain =>
+      'Four digits. Entered on the lock screen instead of your PIN, or after holding the lock button, it erases every key, message and file in Kilit for good and opens an empty vault, as if there had never been anything in it.';
+
+  @override
+  String get panicStatusOn => 'Set';
+
+  @override
+  String get panicStatusOff => 'Not set';
+
+  @override
+  String get panicSet => 'Set panic code';
+
+  @override
+  String get panicChange => 'Change panic code';
+
+  @override
+  String get panicRemove => 'Remove panic code';
+
+  @override
+  String get panicCreateTitle => 'Choose a panic code';
+
+  @override
+  String get panicCreateHint =>
+      'Four digits. Anyone who sees this code entered can erase Kilit.';
+
+  @override
+  String get panicConfirmTitle => 'Repeat the panic code';
+
+  @override
+  String get panicMismatch => 'The codes did not match. Start again.';
+
+  @override
+  String get panicSaved => 'Panic code set.';
+
+  @override
+  String get panicRemoved => 'Panic code removed.';
+
+  @override
+  String get panicRejected => 'This code cannot be used. Choose another.';
+
+  @override
+  String get keptInVault => 'Saved in the vault.';
+
+  @override
+  String get alreadyInVault => 'Already in the vault.';
+
+  @override
+  String get keptTitleFallback => 'Message';
+
+  @override
   String get devBanner => 'Development core: no real encryption.';
 
   @override

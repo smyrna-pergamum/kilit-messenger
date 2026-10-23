@@ -59,6 +59,16 @@ object HardwareKey {
         generate(strongBox = false)
     }
 
+    /**
+     * Deletes the key for good (the panic code). The next [key] call makes a
+     * new one, so vault files sealed under the old key stay closed forever.
+     */
+    @Synchronized
+    private fun destroy(): Boolean {
+        KeyStore.getInstance(STORE).apply { load(null) }.deleteEntry(ALIAS)
+        return true
+    }
+
     /** Where the key lives: "strongbox", "tee" or "software". */
     private fun level(k: SecretKey): String {
         val info = SecretKeyFactory.getInstance(k.algorithm, STORE)
@@ -86,6 +96,7 @@ object HardwareKey {
                 val reply: Any = when (call.method) {
                     "level" -> level(key())
                     "mac" -> mac(call.arguments as ByteArray)
+                    "destroy" -> destroy()
                     else -> {
                         post { result.notImplemented() }
                         return@execute

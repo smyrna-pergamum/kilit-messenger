@@ -24,6 +24,11 @@ abstract interface class PinKey {
 
   /// HMAC-like keyed function of [data], computed inside the hardware.
   Future<Uint8List> mac(Uint8List data);
+
+  /// Deletes the key for good. The next [mac] makes a new one, so nothing
+  /// sealed under the old key can be opened again, even from old copies of
+  /// the files that flash storage may keep.
+  Future<void> destroy();
 }
 
 /// [PinKey] over the platform channel that MainActivity.kt and
@@ -45,6 +50,15 @@ class PlatformPinKey implements PinKey {
       return KeyLevel.none; // a platform without the channel (Linux, tests)
     } on PlatformException {
       return KeyLevel.none;
+    }
+  }
+
+  @override
+  Future<void> destroy() async {
+    try {
+      await _channel.invokeMethod<bool>('destroy');
+    } on MissingPluginException {
+      // no platform key to destroy
     }
   }
 

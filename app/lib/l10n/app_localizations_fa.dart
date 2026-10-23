@@ -31,6 +31,76 @@ class LFa extends L {
   String get lockNow => 'قفل کن';
 
   @override
+  String get panicTooltip =>
+      'برای قفل کردن ضربه بزنید، برای کد اضطراری نگه دارید';
+
+  @override
+  String get panicNoCode => 'ابتدا در تنظیمات یک کد اضطراری تعیین کنید.';
+
+  @override
+  String get panicEnterTitle => 'کد اضطراری';
+
+  @override
+  String get panicEnterHint =>
+      'برای پاک کردن همه چیز در Kilit کد اضطراری را وارد کنید.';
+
+  @override
+  String get panicWrong => 'این کد اضطراری نیست.';
+
+  @override
+  String get settingsPanic => 'کد اضطراری';
+
+  @override
+  String get panicExplain =>
+      'چهار رقم. اگر در صفحهٔ قفل به جای PIN، یا پس از نگه داشتن دکمهٔ قفل وارد شود، همهٔ کلیدها، پیام‌ها و فایل‌های Kilit را برای همیشه پاک می‌کند و گاوصندوقی خالی باز می‌کند، گویی هرگز چیزی در آن نبوده است.';
+
+  @override
+  String get panicStatusOn => 'تعیین شده';
+
+  @override
+  String get panicStatusOff => 'تعیین نشده';
+
+  @override
+  String get panicSet => 'تعیین کد اضطراری';
+
+  @override
+  String get panicChange => 'تغییر کد اضطراری';
+
+  @override
+  String get panicRemove => 'حذف کد اضطراری';
+
+  @override
+  String get panicCreateTitle => 'یک کد اضطراری انتخاب کنید';
+
+  @override
+  String get panicCreateHint =>
+      'چهار رقم. هر کسی که ببیند این کد را وارد می‌کنید می‌تواند Kilit را پاک کند.';
+
+  @override
+  String get panicConfirmTitle => 'کد اضطراری را دوباره وارد کنید';
+
+  @override
+  String get panicMismatch => 'کدها یکسان نبودند. از نو شروع کنید.';
+
+  @override
+  String get panicSaved => 'کد اضطراری تعیین شد.';
+
+  @override
+  String get panicRemoved => 'کد اضطراری حذف شد.';
+
+  @override
+  String get panicRejected => 'این کد قابل استفاده نیست. کد دیگری انتخاب کنید.';
+
+  @override
+  String get keptInVault => 'در گاوصندوق ذخیره شد.';
+
+  @override
+  String get alreadyInVault => 'از قبل در گاوصندوق است.';
+
+  @override
+  String get keptTitleFallback => 'پیام';
+
+  @override
   String get devBanner => 'هسته توسعه: رمزگذاری واقعی ندارد.';
 
   @override

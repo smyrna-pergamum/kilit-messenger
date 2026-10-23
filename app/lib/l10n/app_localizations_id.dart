@@ -31,6 +31,75 @@ class LId extends L {
   String get lockNow => 'Kunci sekarang';
 
   @override
+  String get panicTooltip => 'Ketuk untuk mengunci, tahan untuk kode panik';
+
+  @override
+  String get panicNoCode => 'Atur kode panik di Setelan terlebih dahulu.';
+
+  @override
+  String get panicEnterTitle => 'Kode panik';
+
+  @override
+  String get panicEnterHint =>
+      'Masukkan kode panik untuk menghapus semua isi Kilit.';
+
+  @override
+  String get panicWrong => 'Itu bukan kode panik.';
+
+  @override
+  String get settingsPanic => 'Kode panik';
+
+  @override
+  String get panicExplain =>
+      'Empat digit. Jika dimasukkan di layar kunci sebagai ganti PIN, atau setelah menahan tombol kunci, kode ini menghapus selamanya semua kunci, pesan, dan file di Kilit lalu membuka brankas kosong, seolah-olah tidak pernah ada apa pun.';
+
+  @override
+  String get panicStatusOn => 'Diatur';
+
+  @override
+  String get panicStatusOff => 'Belum diatur';
+
+  @override
+  String get panicSet => 'Atur kode panik';
+
+  @override
+  String get panicChange => 'Ubah kode panik';
+
+  @override
+  String get panicRemove => 'Hapus kode panik';
+
+  @override
+  String get panicCreateTitle => 'Pilih kode panik';
+
+  @override
+  String get panicCreateHint =>
+      'Empat digit. Siapa pun yang melihat Anda memasukkannya dapat menghapus Kilit.';
+
+  @override
+  String get panicConfirmTitle => 'Ulangi kode panik';
+
+  @override
+  String get panicMismatch => 'Kode tidak cocok. Mulai lagi.';
+
+  @override
+  String get panicSaved => 'Kode panik diatur.';
+
+  @override
+  String get panicRemoved => 'Kode panik dihapus.';
+
+  @override
+  String get panicRejected => 'Kode ini tidak bisa dipakai. Pilih yang lain.';
+
+  @override
+  String get keptInVault => 'Disimpan di brankas.';
+
+  @override
+  String get alreadyInVault => 'Sudah ada di brankas.';
+
+  @override
+  String get keptTitleFallback => 'Pesan';
+
+  @override
   String get devBanner => 'Inti pengembangan: tanpa enkripsi sungguhan.';
 
   @override

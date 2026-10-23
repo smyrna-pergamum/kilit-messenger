@@ -7,6 +7,7 @@ import '../state/prefs.dart';
 import '../state/session.dart';
 import '../theme/theme.dart';
 import '../theme/tokens.dart';
+import '../widgets/panic_code.dart';
 
 /// Shown in "About"; kept in step with pubspec.yaml's version.
 const appVersion = '0.1.0-alpha';
@@ -76,6 +77,13 @@ class SettingsScreen extends StatelessWidget {
                 value: l.protNetworkValue,
               ),
             ],
+          ),
+          _Section(
+            open: prefs.openSections,
+            id: 'panic',
+            icon: Icons.gpp_maybe_outlined,
+            title: l.settingsPanic,
+            children: [_PanicSettings(core: core)],
           ),
           _Section(
             open: prefs.openSections,
@@ -246,6 +254,99 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// The panic code: what it does, whether it is set, and setting it.
+class _PanicSettings extends StatefulWidget {
+  const _PanicSettings({required this.core});
+
+  final KilitCore core;
+
+  @override
+  State<_PanicSettings> createState() => _PanicSettingsState();
+}
+
+class _PanicSettingsState extends State<_PanicSettings> {
+  late Future<bool> _set = widget.core.hasPanicCode();
+
+  /// A new message replaces the one on screen instead of queueing.
+  void _say(String message) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(message)));
+
+  Future<void> _choose() async {
+    final l = L.of(context);
+    final code = await askPanicCode(context, confirm: true);
+    if (code == null) return;
+    try {
+      await widget.core.setPanicCode(code);
+      if (mounted) _say(l.panicSaved);
+    } on Object {
+      if (mounted) _say(l.panicRejected);
+    }
+    if (!mounted) return;
+    setState(() {
+      _set = widget.core.hasPanicCode();
+    });
+  }
+
+  Future<void> _remove() async {
+    final l = L.of(context);
+    await widget.core.clearPanicCode();
+    if (!mounted) return;
+    _say(l.panicRemoved);
+    setState(() {
+      _set = widget.core.hasPanicCode();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final l = L.of(context);
+    return FutureBuilder<bool>(
+      future: _set,
+      builder: (context, snap) {
+        final on = snap.data ?? false;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child: Text(l.panicExplain, style: TextStyle(color: t.textMuted)),
+            ),
+            _Status(
+              key: const ValueKey('status-panic'),
+              ok: on ? true : null,
+              title: l.settingsPanic,
+              value: on ? l.panicStatusOn : l.panicStatusOff,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  FilledButton.icon(
+                    key: const ValueKey('panic-set'),
+                    onPressed: snap.hasData ? _choose : null,
+                    icon: const Icon(Icons.pin_outlined),
+                    label: Text(on ? l.panicChange : l.panicSet),
+                  ),
+                  if (on)
+                    OutlinedButton(
+                      key: const ValueKey('panic-remove'),
+                      onPressed: _remove,
+                      child: Text(l.panicRemove),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

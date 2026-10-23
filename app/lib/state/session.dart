@@ -34,6 +34,14 @@ class Session extends ChangeNotifier {
     return r;
   }
 
+  /// The panic button. When [code] is the panic code everything is erased
+  /// and the lock screen shows, in front of a new, empty vault.
+  Future<bool> panicWipe(String code) async {
+    final wiped = await core.panicWipe(code);
+    if (wiped) _set(SessionPhase.locked);
+    return wiped;
+  }
+
   /// Locks at once: on request, and whenever the app leaves the screen.
   void lock() {
     if (_phase != SessionPhase.unlocked) return;

@@ -22,6 +22,11 @@ Future<void> enterPin(WidgetTester tester, String pin) async {
 String titleText(WidgetTester tester) =>
     tester.widget<Text>(find.byKey(const ValueKey('lock-title'))).data!;
 
+String? titleTextOrNull(WidgetTester tester) =>
+    find.byKey(const ValueKey('lock-title')).evaluate().isEmpty
+    ? null
+    : titleText(tester);
+
 /// Picks what the test puts in [next]; records what was saved.
 class FakeFiles implements FileAccess {
   PickedFile? next;
@@ -66,6 +71,72 @@ class DamagedPictures extends DevCore {
   @override
   Future<CleanedFile> cleanMetadata(Uint8List bytes) async =>
       const CleanedFile.failed(CleanOutcome.damaged);
+}
+
+/// A clipboard that remembers what is written to it. Returns a reader of
+/// its current text.
+String? Function() workingClipboard(WidgetTester tester, String? text) {
+  var current = text;
+  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+    SystemChannels.platform,
+    (call) async {
+      switch (call.method) {
+        case 'Clipboard.getData':
+          return current == null || current!.isEmpty ? null : {'text': current};
+        case 'Clipboard.setData':
+          current = (call.arguments as Map)['text'] as String?;
+          return null;
+        case 'Clipboard.hasStrings':
+          return {'value': current?.isNotEmpty ?? false};
+      }
+      return null;
+    },
+  );
+  addTearDown(
+    () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      null,
+    ),
+  );
+  return () => current;
+}
+
+/// Types [code] on the panic dialog's keypad and confirms.
+Future<void> enterPanicCode(WidgetTester tester, String code) async {
+  for (final c in code.split('')) {
+    await tester.tap(find.byKey(ValueKey('pin-digit-$c')));
+    await tester.pump();
+  }
+  await tester.tap(find.byKey(const ValueKey('pin-submit')));
+  await tester.pumpAndSettle();
+}
+
+Future<void> openSettingsSection(WidgetTester tester, String id) async {
+  await tester.tap(find.byIcon(Icons.settings_outlined));
+  await tester.pumpAndSettle();
+  final header = find.byKey(ValueKey('section-$id'));
+  await tester.ensureVisible(header);
+  await tester.pumpAndSettle();
+  await tester.tap(header);
+  await tester.pumpAndSettle();
+}
+
+Future<void> setPanicCode(WidgetTester tester, String code) async {
+  await openSettingsSection(tester, 'panic');
+  await tester.ensureVisible(find.byKey(const ValueKey('panic-set')));
+  await tester.tap(find.byKey(const ValueKey('panic-set')));
+  await tester.pumpAndSettle();
+  await enterPanicCode(tester, code);
+  await enterPanicCode(tester, code);
+}
+
+Future<void> addNote(WidgetTester tester, String title) async {
+  await tester.tap(find.byKey(const ValueKey('add-note')));
+  await tester.pumpAndSettle();
+  await tester.enterText(find.byKey(const ValueKey('note-title')), title);
+  await tester.enterText(find.byKey(const ValueKey('note-text')), 'x');
+  await tester.tap(find.byKey(const ValueKey('note-save')));
+  await tester.pumpAndSettle();
 }
 
 /// Answers Flutter's clipboard calls with [text].
@@ -234,6 +305,98 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('open-clipboard')));
     await tester.pumpAndSettle();
     expect(find.text('merhaba'), findsOneWidget);
+  });
+
+  testWidgets('a message opened from the clipboard is kept, then cleared', (
+    tester,
+  ) async {
+    await startApp(tester);
+    await setUpVault(tester);
+    final clipboard = workingClipboard(tester, 'Ayşe: KLT1:DEVbWVyaGFiYQ. bye');
+    await tester.tap(find.byKey(const ValueKey('open-clipboard')));
+    await tester.pumpAndSettle();
+    expect(find.text('merhaba'), findsOneWidget);
+    expect(find.text('Saved in the vault.'), findsOneWidget);
+    expect(clipboard(), isEmpty);
+    Navigator.of(tester.element(find.text('merhaba'))).pop();
+    await tester.pumpAndSettle();
+    expect(find.text('merhaba.txt'), findsOneWidget);
+
+    // nothing left to offer
+    await tester.tap(find.byKey(const ValueKey('open-clipboard')));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('No Kilit message on the clipboard'),
+      findsOneWidget,
+    );
+
+    // the same message pasted again is not kept twice
+    await tester.tap(find.byKey(const ValueKey('open-pasted')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('paste-input')),
+      'KLT1:DEVbWVyaGFiYQ.',
+    );
+    await tester.tap(find.byKey(const ValueKey('paste-open')));
+    await tester.pumpAndSettle();
+    expect(find.text('Already in the vault.'), findsOneWidget);
+    Navigator.of(tester.element(find.text('Already in the vault.'))).pop();
+    await tester.pumpAndSettle();
+    expect(find.text('merhaba.txt'), findsOneWidget);
+  });
+
+  testWidgets('the panic code on the lock screen leaves an empty vault', (
+    tester,
+  ) async {
+    await startApp(tester, size: const Size(400, 1400));
+    await setUpVault(tester);
+    await addNote(tester, 'secrets');
+    await setPanicCode(tester, '7391');
+    expect(find.text('Panic code set.'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('lock-now')));
+    await tester.pumpAndSettle();
+
+    await enterPin(tester, '7391');
+    expect(find.byKey(const ValueKey('vault-empty')), findsOneWidget);
+    expect(find.text('secrets.txt'), findsNothing);
+    // the old PIN is gone with everything else
+    await tester.tap(find.byKey(const ValueKey('lock-now')));
+    await tester.pumpAndSettle();
+    await enterPin(tester, '482916');
+    expect(find.text('Wrong PIN.'), findsOneWidget);
+  });
+
+  testWidgets('holding the lock button asks for the panic code', (
+    tester,
+  ) async {
+    await startApp(tester, size: const Size(400, 1400));
+    await setUpVault(tester);
+    await tester.longPress(find.byKey(const ValueKey('lock-now')));
+    await tester.pumpAndSettle();
+    expect(find.text('Set a panic code in Settings first.'), findsOneWidget);
+
+    await addNote(tester, 'secrets');
+    await setPanicCode(tester, '7391');
+    await tester.longPress(find.byKey(const ValueKey('lock-now')));
+    await tester.pumpAndSettle();
+    await enterPanicCode(tester, '1111');
+    expect(find.text('That is not the panic code.'), findsOneWidget);
+    expect(titleTextOrNull(tester), isNull);
+
+    await tester.longPress(find.byKey(const ValueKey('lock-now')));
+    await tester.pumpAndSettle();
+    await enterPanicCode(tester, '7391');
+    expect(titleText(tester), 'Unlock');
+    await enterPin(tester, '7391');
+    expect(find.byKey(const ValueKey('vault-empty')), findsOneWidget);
+  });
+
+  testWidgets('a tap on the lock button only locks', (tester) async {
+    await startApp(tester);
+    await setUpVault(tester);
+    await tester.tap(find.byKey(const ValueKey('lock-now')));
+    await tester.pumpAndSettle();
+    expect(titleText(tester), 'Unlock');
   });
 
   testWidgets('with the clipboard hint on, the vault offers the message', (
@@ -518,6 +681,7 @@ void main() {
       expect(find.byKey(const ValueKey('status-tor')), findsOneWidget);
       // open every section: the safety number once crashed only when opened
       for (final id in [
+        'panic',
         'fingerprint',
         'appearance',
         'language',

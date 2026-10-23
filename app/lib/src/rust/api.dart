@@ -35,6 +35,9 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// Seals a note into the vault.
   Future<ItemInfo> addNote({required String title, required String text});
 
+  /// Removes the panic code.
+  Future<void> clearPanic();
+
   /// Makes a new vault sealed under `pin` with the software key, and
   /// leaves it unlocked. Only for devices without a hardware key.
   Future<void> createVault({required String pin});
@@ -64,6 +67,13 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// The vault's items, newest first.
   Future<List<ItemInfo>> items();
 
+  /// Keeps an opened message in the vault, once per packet.
+  Future<KeptReply> keepMessage({
+    required List<int> packet,
+    required String title,
+    required String text,
+  });
+
   /// What protects this vault's PIN.
   PinKeyKind keyKind();
 
@@ -86,6 +96,17 @@ abstract class KilitHandle implements RustOpaqueInterface {
     String? passphrase,
   });
 
+  /// Whether a panic code is set. Needs the open vault.
+  Future<bool> panicSet();
+
+  /// The panic button, software key: erases everything when `code` is the
+  /// panic code and leaves a new, empty, locked vault under it.
+  Future<bool> panicWipe({required String code});
+
+  /// The panic button, hardware key: erases everything when `mac` is the
+  /// panic code's. Then replace the hardware key and make a new vault.
+  Future<bool> panicWipeWithMac({required List<int> mac});
+
   /// An item's content, decrypted into memory: to show an image, or to
   /// save it unencrypted when the user asks for exactly that.
   Future<Uint8List> readFile({required String id});
@@ -95,6 +116,12 @@ abstract class KilitHandle implements RustOpaqueInterface {
 
   /// A message as `KLT1:` text, to a shared passphrase or to this vault.
   Future<String> sealForCarrier({required String message, String? passphrase});
+
+  /// Sets the four-digit panic code of a software-key vault.
+  Future<void> setPanic({required String code});
+
+  /// Sets the panic code of a hardware-key vault from the code's MAC.
+  Future<void> setPanicWithMac({required List<int> mac});
 
   /// Tries `pin` against a software-key vault.
   Future<UnlockReply> unlock({required String pin});
@@ -293,6 +320,28 @@ class ItemInfo {
           signed == other.signed;
 }
 
+/// A message kept in the vault.
+class KeptReply {
+  /// The vault item holding it.
+  final ItemInfo item;
+
+  /// True when the same packet had been kept before; nothing was added.
+  final bool already;
+
+  const KeptReply({required this.item, required this.already});
+
+  @override
+  int get hashCode => item.hashCode ^ already.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is KeptReply &&
+          runtimeType == other.runtimeType &&
+          item == other.item &&
+          already == other.already;
+}
+
 /// The error every fallible call throws in Dart.
 class KilitError implements FrbException {
   /// What went wrong.
@@ -487,6 +536,10 @@ enum UnlockOutcome {
 
   /// Too soon; nothing was tried.
   wait,
+
+  /// The panic code on a hardware-key vault: everything is erased. Replace
+  /// the hardware key, then make a new vault under the same code.
+  wiped,
 }
 
 /// An unlock attempt's result.

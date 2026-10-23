@@ -31,6 +31,76 @@ class LRu extends L {
   String get lockNow => 'Заблокировать';
 
   @override
+  String get panicTooltip =>
+      'Нажмите, чтобы заблокировать; удерживайте для тревожного кода';
+
+  @override
+  String get panicNoCode => 'Сначала задайте тревожный код в настройках.';
+
+  @override
+  String get panicEnterTitle => 'Тревожный код';
+
+  @override
+  String get panicEnterHint =>
+      'Введите тревожный код, чтобы стереть всё в Kilit.';
+
+  @override
+  String get panicWrong => 'Это не тревожный код.';
+
+  @override
+  String get settingsPanic => 'Тревожный код';
+
+  @override
+  String get panicExplain =>
+      'Четыре цифры. Если ввести его на экране блокировки вместо PIN-кода или после удержания кнопки блокировки, он навсегда стирает все ключи, сообщения и файлы в Kilit и открывает пустое хранилище, как будто в нём никогда ничего не было.';
+
+  @override
+  String get panicStatusOn => 'Задан';
+
+  @override
+  String get panicStatusOff => 'Не задан';
+
+  @override
+  String get panicSet => 'Задать тревожный код';
+
+  @override
+  String get panicChange => 'Изменить тревожный код';
+
+  @override
+  String get panicRemove => 'Удалить тревожный код';
+
+  @override
+  String get panicCreateTitle => 'Выберите тревожный код';
+
+  @override
+  String get panicCreateHint =>
+      'Четыре цифры. Любой, кто увидит, как вы его вводите, сможет стереть Kilit.';
+
+  @override
+  String get panicConfirmTitle => 'Повторите тревожный код';
+
+  @override
+  String get panicMismatch => 'Коды не совпали. Начните заново.';
+
+  @override
+  String get panicSaved => 'Тревожный код задан.';
+
+  @override
+  String get panicRemoved => 'Тревожный код удалён.';
+
+  @override
+  String get panicRejected => 'Этот код использовать нельзя. Выберите другой.';
+
+  @override
+  String get keptInVault => 'Сохранено в хранилище.';
+
+  @override
+  String get alreadyInVault => 'Уже в хранилище.';
+
+  @override
+  String get keptTitleFallback => 'Сообщение';
+
+  @override
   String get devBanner => 'Ядро для разработки: настоящего шифрования нет.';
 
   @override

@@ -6,6 +6,7 @@ import '../core/kilit_core.dart';
 import '../l10n/app_localizations.dart';
 import '../state/session.dart';
 import '../theme/tokens.dart';
+import '../widgets/panic_code.dart';
 import '../widgets/pin_pad.dart';
 
 const minPinLength = 6;
@@ -57,6 +58,10 @@ class _LockScreenState extends State<LockScreen> {
 
   bool get _waiting => _retryAt != null && DateTime.now().isBefore(_retryAt!);
 
+  /// A new PIN needs six digits. Unlocking takes four too, always, so the
+  /// keypad never shows whether a panic code is set.
+  int get _shortest => _step == _Step.unlock ? panicCodeLength : minPinLength;
+
   void _digit(int d) {
     if (_entered.length >= maxPinLength) return;
     setState(() {
@@ -92,7 +97,9 @@ class _LockScreenState extends State<LockScreen> {
   }
 
   Future<void> _submit() async {
-    if (_entered.length < minPinLength || _busy || _waiting) return;
+    // during a wait only the panic code does anything; the core checks it
+    // before the wait and answers "wait" to everything else
+    if (_entered.length < _shortest || _busy) return;
     final pin = _entered.join();
     setState(() => _busy = true);
     try {
@@ -189,8 +196,8 @@ class _LockScreenState extends State<LockScreen> {
                   onDigit: _digit,
                   onBackspace: _backspace,
                   onSubmit: _submit,
-                  canSubmit: _entered.length >= minPinLength && !_busy,
-                  enabled: !_busy && !_waiting,
+                  canSubmit: _entered.length >= _shortest && !_busy,
+                  enabled: !_busy,
                 ),
               ],
             ),

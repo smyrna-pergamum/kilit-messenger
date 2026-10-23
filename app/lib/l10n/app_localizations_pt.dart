@@ -31,6 +31,77 @@ class LPt extends L {
   String get lockNow => 'Bloquear agora';
 
   @override
+  String get panicTooltip =>
+      'Toque para bloquear, segure para o código de pânico';
+
+  @override
+  String get panicNoCode =>
+      'Defina primeiro um código de pânico nas Configurações.';
+
+  @override
+  String get panicEnterTitle => 'Código de pânico';
+
+  @override
+  String get panicEnterHint =>
+      'Digite o código de pânico para apagar tudo no Kilit.';
+
+  @override
+  String get panicWrong => 'Esse não é o código de pânico.';
+
+  @override
+  String get settingsPanic => 'Código de pânico';
+
+  @override
+  String get panicExplain =>
+      'Quatro dígitos. Digitado na tela de bloqueio no lugar do seu PIN, ou depois de segurar o botão de bloqueio, ele apaga para sempre todas as chaves, mensagens e arquivos do Kilit e abre um cofre vazio, como se nunca tivesse havido nada nele.';
+
+  @override
+  String get panicStatusOn => 'Definido';
+
+  @override
+  String get panicStatusOff => 'Não definido';
+
+  @override
+  String get panicSet => 'Definir código de pânico';
+
+  @override
+  String get panicChange => 'Alterar código de pânico';
+
+  @override
+  String get panicRemove => 'Remover código de pânico';
+
+  @override
+  String get panicCreateTitle => 'Escolha um código de pânico';
+
+  @override
+  String get panicCreateHint =>
+      'Quatro dígitos. Quem vir você digitá-lo pode apagar o Kilit.';
+
+  @override
+  String get panicConfirmTitle => 'Repita o código de pânico';
+
+  @override
+  String get panicMismatch => 'Os códigos não coincidem. Comece de novo.';
+
+  @override
+  String get panicSaved => 'Código de pânico definido.';
+
+  @override
+  String get panicRemoved => 'Código de pânico removido.';
+
+  @override
+  String get panicRejected => 'Este código não pode ser usado. Escolha outro.';
+
+  @override
+  String get keptInVault => 'Salvo no cofre.';
+
+  @override
+  String get alreadyInVault => 'Já está no cofre.';
+
+  @override
+  String get keptTitleFallback => 'Mensagem';
+
+  @override
   String get devBanner => 'Núcleo de desenvolvimento: sem criptografia real.';
 
   @override

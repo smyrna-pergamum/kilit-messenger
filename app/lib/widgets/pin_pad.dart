@@ -112,15 +112,23 @@ class PinPad extends StatelessWidget {
 
 /// Filled and empty dots for the digits entered so far.
 class PinDots extends StatelessWidget {
-  const PinDots({super.key, required this.count, this.error = false});
+  const PinDots({
+    super.key,
+    required this.count,
+    this.error = false,
+    this.slots = 6,
+  });
 
   final int count;
   final bool error;
 
+  /// Empty dots shown before any digit is entered.
+  final int slots;
+
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final shown = max(count, 6);
+    final shown = max(count, slots);
     return Semantics(
       label: L.of(context).pinDigitsEntered(count),
       child: Row(

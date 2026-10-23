@@ -67,11 +67,24 @@ class RustCore implements KilitCore {
     }
   }
 
+  bool get _hardwareVault => _h.keyKind() == rust.PinKeyKind.hardware;
+
+  /// After a panic on a hardware-key vault: a new hardware key, and a new,
+  /// empty vault under the panic code.
+  Future<void> _replaceKey(String code) async {
+    await _key.destroy();
+    await _h.createVaultWithMac(mac: await _mac(code));
+  }
+
   @override
   Future<UnlockResult> unlock(String pin) async {
     final rust.UnlockReply r;
-    if (_h.keyKind() == rust.PinKeyKind.hardware) {
+    if (_hardwareVault) {
       r = await _h.unlockWithMac(mac: await _mac(pin));
+      if (r.outcome == rust.UnlockOutcome.wiped) {
+        await _replaceKey(pin);
+        return const UnlockResult(UnlockOutcome.unlocked);
+      }
     } else {
       r = await _h.unlock(pin: pin);
       // the right PIN for an old software-key vault: move it to the
@@ -91,7 +104,33 @@ class RustCore implements KilitCore {
         UnlockOutcome.waitBeforeRetry,
         wait: wait,
       ),
+      // handled above; a software vault is replaced inside Rust
+      rust.UnlockOutcome.wiped => const UnlockResult(UnlockOutcome.unlocked),
     };
+  }
+
+  @override
+  Future<bool> hasPanicCode() => _h.panicSet();
+
+  @override
+  Future<void> setPanicCode(String code) async {
+    if (_hardwareVault) {
+      await _h.setPanicWithMac(mac: await _mac(code));
+    } else {
+      await _h.setPanic(code: code);
+    }
+  }
+
+  @override
+  Future<void> clearPanicCode() => _h.clearPanic();
+
+  @override
+  Future<bool> panicWipe(String code) async {
+    if (!_hardwareVault) return _h.panicWipe(code: code);
+    if (!await _h.panicWipeWithMac(mac: await _mac(code))) return false;
+    await _replaceKey(code);
+    _h.lock();
+    return true;
   }
 
   @override
@@ -201,6 +240,16 @@ class RustCore implements KilitCore {
         CleanOutcome.damaged,
       ),
     };
+  }
+
+  @override
+  Future<KeptMessage> keepMessage(
+    Uint8List packet,
+    String title,
+    String text,
+  ) async {
+    final r = await _h.keepMessage(packet: packet, title: title, text: text);
+    return KeptMessage(_item(r.item), already: r.already);
   }
 
   @override

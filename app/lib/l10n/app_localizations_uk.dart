@@ -31,6 +31,75 @@ class LUk extends L {
   String get lockNow => 'Заблокувати';
 
   @override
+  String get panicTooltip =>
+      'Торкніться, щоб заблокувати; утримуйте для тривожного коду';
+
+  @override
+  String get panicNoCode => 'Спершу задайте тривожний код у налаштуваннях.';
+
+  @override
+  String get panicEnterTitle => 'Тривожний код';
+
+  @override
+  String get panicEnterHint => 'Введіть тривожний код, щоб стерти все в Kilit.';
+
+  @override
+  String get panicWrong => 'Це не тривожний код.';
+
+  @override
+  String get settingsPanic => 'Тривожний код';
+
+  @override
+  String get panicExplain =>
+      'Чотири цифри. Якщо ввести його на екрані блокування замість PIN-коду або після утримання кнопки блокування, він назавжди стирає всі ключі, повідомлення й файли в Kilit і відкриває порожнє сховище, ніби в ньому ніколи нічого не було.';
+
+  @override
+  String get panicStatusOn => 'Задано';
+
+  @override
+  String get panicStatusOff => 'Не задано';
+
+  @override
+  String get panicSet => 'Задати тривожний код';
+
+  @override
+  String get panicChange => 'Змінити тривожний код';
+
+  @override
+  String get panicRemove => 'Видалити тривожний код';
+
+  @override
+  String get panicCreateTitle => 'Виберіть тривожний код';
+
+  @override
+  String get panicCreateHint =>
+      'Чотири цифри. Будь-хто, хто побачить, як ви його вводите, зможе стерти Kilit.';
+
+  @override
+  String get panicConfirmTitle => 'Повторіть тривожний код';
+
+  @override
+  String get panicMismatch => 'Коди не збіглися. Почніть спочатку.';
+
+  @override
+  String get panicSaved => 'Тривожний код задано.';
+
+  @override
+  String get panicRemoved => 'Тривожний код видалено.';
+
+  @override
+  String get panicRejected => 'Цей код використати не можна. Виберіть інший.';
+
+  @override
+  String get keptInVault => 'Збережено у сховищі.';
+
+  @override
+  String get alreadyInVault => 'Уже у сховищі.';
+
+  @override
+  String get keptTitleFallback => 'Повідомлення';
+
+  @override
   String get devBanner => 'Ядро для розробки: справжнього шифрування немає.';
 
   @override

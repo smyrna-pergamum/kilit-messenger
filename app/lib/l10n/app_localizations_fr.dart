@@ -31,6 +31,78 @@ class LFr extends L {
   String get lockNow => 'Verrouiller';
 
   @override
+  String get panicTooltip =>
+      'Touchez pour verrouiller, maintenez pour le code de panique';
+
+  @override
+  String get panicNoCode =>
+      'Définissez d\'abord un code de panique dans les Réglages.';
+
+  @override
+  String get panicEnterTitle => 'Code de panique';
+
+  @override
+  String get panicEnterHint =>
+      'Saisissez le code de panique pour tout effacer dans Kilit.';
+
+  @override
+  String get panicWrong => 'Ce n\'est pas le code de panique.';
+
+  @override
+  String get settingsPanic => 'Code de panique';
+
+  @override
+  String get panicExplain =>
+      'Quatre chiffres. Saisi sur l\'écran de verrouillage à la place de votre PIN, ou après un appui long sur le bouton de verrouillage, il efface définitivement toutes les clés, tous les messages et fichiers de Kilit et ouvre un coffre vide, comme s\'il n\'y avait jamais rien eu.';
+
+  @override
+  String get panicStatusOn => 'Défini';
+
+  @override
+  String get panicStatusOff => 'Non défini';
+
+  @override
+  String get panicSet => 'Définir le code de panique';
+
+  @override
+  String get panicChange => 'Changer le code de panique';
+
+  @override
+  String get panicRemove => 'Supprimer le code de panique';
+
+  @override
+  String get panicCreateTitle => 'Choisissez un code de panique';
+
+  @override
+  String get panicCreateHint =>
+      'Quatre chiffres. Quiconque vous voit le saisir peut effacer Kilit.';
+
+  @override
+  String get panicConfirmTitle => 'Répétez le code de panique';
+
+  @override
+  String get panicMismatch => 'Les codes ne correspondent pas. Recommencez.';
+
+  @override
+  String get panicSaved => 'Code de panique défini.';
+
+  @override
+  String get panicRemoved => 'Code de panique supprimé.';
+
+  @override
+  String get panicRejected =>
+      'Ce code ne peut pas être utilisé. Choisissez-en un autre.';
+
+  @override
+  String get keptInVault => 'Enregistré dans le coffre.';
+
+  @override
+  String get alreadyInVault => 'Déjà dans le coffre.';
+
+  @override
+  String get keptTitleFallback => 'Message';
+
+  @override
   String get devBanner => 'Noyau de développement : aucun vrai chiffrement.';
 
   @override

@@ -11,6 +11,8 @@ class DevCore implements KilitCore {
 
   final DateTime Function() _clock;
   String? _pin;
+  String? _panic;
+  final Map<String, VaultItem> _kept = {};
   bool _open = false;
   int _failures = 0;
   DateTime? _retryAt;
@@ -37,8 +39,23 @@ class DevCore implements KilitCore {
     _open = true;
   }
 
+  /// Everything gone; a new, empty vault under [code].
+  void _wipe(String code) {
+    _items.clear();
+    _kept.clear();
+    _pin = code;
+    _panic = null;
+    _failures = 0;
+    _retryAt = null;
+  }
+
   @override
   Future<UnlockResult> unlock(String pin) async {
+    if (_panic != null && pin == _panic) {
+      _wipe(pin);
+      _open = true;
+      return const UnlockResult(UnlockOutcome.unlocked);
+    }
     final now = _clock();
     final retryAt = _retryAt;
     if (retryAt != null && now.isBefore(retryAt)) {
@@ -65,6 +82,47 @@ class DevCore implements KilitCore {
 
   @override
   void lock() => _open = false;
+
+  @override
+  Future<bool> hasPanicCode() async {
+    _requireOpen();
+    return _panic != null;
+  }
+
+  @override
+  Future<void> setPanicCode(String code) async {
+    _requireOpen();
+    if (code == _pin) throw ArgumentError('the panic code is the PIN');
+    _panic = code;
+  }
+
+  @override
+  Future<void> clearPanicCode() async {
+    _requireOpen();
+    _panic = null;
+  }
+
+  @override
+  Future<bool> panicWipe(String code) async {
+    if (_panic == null || code != _panic) return false;
+    _wipe(code);
+    _open = false;
+    return true;
+  }
+
+  @override
+  Future<KeptMessage> keepMessage(
+    Uint8List packet,
+    String title,
+    String text,
+  ) async {
+    final key = base64.encode(packet);
+    final before = _kept[key];
+    if (before != null) return KeptMessage(before, already: true);
+    final item = await addNote(title, text);
+    _kept[key] = item;
+    return KeptMessage(item, already: false);
+  }
 
   void _requireOpen() {
     if (!_open) throw StateError('vault is locked');

@@ -31,6 +31,78 @@ class LDe extends L {
   String get lockNow => 'Jetzt sperren';
 
   @override
+  String get panicTooltip => 'Tippen zum Sperren, halten für den Paniccode';
+
+  @override
+  String get panicNoCode =>
+      'Lege zuerst in den Einstellungen einen Paniccode fest.';
+
+  @override
+  String get panicEnterTitle => 'Paniccode';
+
+  @override
+  String get panicEnterHint =>
+      'Gib den Paniccode ein, um alles in Kilit zu löschen.';
+
+  @override
+  String get panicWrong => 'Das ist nicht der Paniccode.';
+
+  @override
+  String get settingsPanic => 'Paniccode';
+
+  @override
+  String get panicExplain =>
+      'Vier Ziffern. Auf dem Sperrbildschirm statt deiner PIN oder nach langem Drücken der Sperrtaste eingegeben, löscht er alle Schlüssel, Nachrichten und Dateien in Kilit endgültig und öffnet einen leeren Tresor, als wäre nie etwas darin gewesen.';
+
+  @override
+  String get panicStatusOn => 'Festgelegt';
+
+  @override
+  String get panicStatusOff => 'Nicht festgelegt';
+
+  @override
+  String get panicSet => 'Paniccode festlegen';
+
+  @override
+  String get panicChange => 'Paniccode ändern';
+
+  @override
+  String get panicRemove => 'Paniccode entfernen';
+
+  @override
+  String get panicCreateTitle => 'Wähle einen Paniccode';
+
+  @override
+  String get panicCreateHint =>
+      'Vier Ziffern. Wer diesen Code eingeben sieht, kann Kilit löschen.';
+
+  @override
+  String get panicConfirmTitle => 'Paniccode wiederholen';
+
+  @override
+  String get panicMismatch =>
+      'Die Codes stimmen nicht überein. Beginne von vorn.';
+
+  @override
+  String get panicSaved => 'Paniccode festgelegt.';
+
+  @override
+  String get panicRemoved => 'Paniccode entfernt.';
+
+  @override
+  String get panicRejected =>
+      'Dieser Code ist nicht möglich. Wähle einen anderen.';
+
+  @override
+  String get keptInVault => 'Im Tresor gespeichert.';
+
+  @override
+  String get alreadyInVault => 'Bereits im Tresor.';
+
+  @override
+  String get keptTitleFallback => 'Nachricht';
+
+  @override
   String get devBanner => 'Entwicklungskern: keine echte Verschlüsselung.';
 
   @override

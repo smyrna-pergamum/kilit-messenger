@@ -31,6 +31,73 @@ class LZh extends L {
   String get lockNow => '立即锁定';
 
   @override
+  String get panicTooltip => '轻触锁定，长按输入紧急代码';
+
+  @override
+  String get panicNoCode => '请先在设置中设定紧急代码。';
+
+  @override
+  String get panicEnterTitle => '紧急代码';
+
+  @override
+  String get panicEnterHint => '输入紧急代码以清除 Kilit 中的所有内容。';
+
+  @override
+  String get panicWrong => '这不是紧急代码。';
+
+  @override
+  String get settingsPanic => '紧急代码';
+
+  @override
+  String get panicExplain =>
+      '四位数字。在锁屏界面代替 PIN 输入，或长按锁定按钮后输入，它会永久清除 Kilit 中的所有密钥、消息和文件，并打开一个空保险库，就像里面从未有过任何东西。';
+
+  @override
+  String get panicStatusOn => '已设定';
+
+  @override
+  String get panicStatusOff => '未设定';
+
+  @override
+  String get panicSet => '设定紧急代码';
+
+  @override
+  String get panicChange => '更改紧急代码';
+
+  @override
+  String get panicRemove => '移除紧急代码';
+
+  @override
+  String get panicCreateTitle => '选择紧急代码';
+
+  @override
+  String get panicCreateHint => '四位数字。任何看到你输入此代码的人都能清除 Kilit。';
+
+  @override
+  String get panicConfirmTitle => '再次输入紧急代码';
+
+  @override
+  String get panicMismatch => '两次代码不一致，请重新开始。';
+
+  @override
+  String get panicSaved => '紧急代码已设定。';
+
+  @override
+  String get panicRemoved => '紧急代码已移除。';
+
+  @override
+  String get panicRejected => '此代码无法使用，请另选一个。';
+
+  @override
+  String get keptInVault => '已保存到保险库。';
+
+  @override
+  String get alreadyInVault => '已在保险库中。';
+
+  @override
+  String get keptTitleFallback => '消息';
+
+  @override
   String get devBanner => '开发版核心：未进行真正的加密。';
 
   @override

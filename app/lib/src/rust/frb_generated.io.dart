@@ -83,6 +83,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ItemInfo dco_decode_item_info(dynamic raw);
 
   @protected
+  KeptReply dco_decode_kept_reply(dynamic raw);
+
+  @protected
   KilitError dco_decode_kilit_error(dynamic raw);
 
   @protected
@@ -204,6 +207,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ItemInfo sse_decode_item_info(SseDeserializer deserializer);
+
+  @protected
+  KeptReply sse_decode_kept_reply(SseDeserializer deserializer);
 
   @protected
   KilitError sse_decode_kilit_error(SseDeserializer deserializer);
@@ -333,6 +339,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_item_info(ItemInfo self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_kept_reply(KeptReply self, SseSerializer serializer);
 
   @protected
   void sse_encode_kilit_error(KilitError self, SseSerializer serializer);
