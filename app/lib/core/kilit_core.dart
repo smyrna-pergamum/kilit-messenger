@@ -19,20 +19,25 @@ abstract interface class KilitCore {
   Future<bool> hasVault();
   Future<void> createVault(String pin);
 
-  /// Tries [pin]. The panic code instead erases everything and opens a new,
-  /// empty vault under it, and says only "unlocked".
+  /// Tries [pin]. The panic code instead erases everything, the hardware
+  /// key included, and answers [UnlockOutcome.wiped]: Kilit is as if newly
+  /// installed.
   Future<UnlockResult> unlock(String pin);
+
+  /// Changes the open vault's PIN after checking the current one; a wrong
+  /// one counts like a wrong PIN at the lock screen. [UnlockOutcome.unlocked]
+  /// means changed.
+  Future<UnlockResult> changePin(String current, String fresh);
 
   /// Whether a panic code is set. Needs the open vault.
   Future<bool> hasPanicCode();
 
-  /// Sets the four-digit panic code. Throws when it cannot be used (it is
-  /// the PIN of a vault made after a panic).
+  /// Sets the four-digit panic code.
   Future<void> setPanicCode(String code);
   Future<void> clearPanicCode();
 
-  /// The panic button: when [code] is the panic code, erases everything and
-  /// leaves a new, empty, locked vault under it. Returns whether it did.
+  /// The panic button: when [code] is the panic code, erases everything as
+  /// [unlock] does. Returns whether it did.
   Future<bool> panicWipe(String code);
 
   /// Wipes keys and decrypted state from memory.
@@ -140,7 +145,14 @@ class CleanedFile {
   final Set<HiddenData> removed;
 }
 
-enum UnlockOutcome { unlocked, wrongPin, waitBeforeRetry }
+enum UnlockOutcome {
+  unlocked,
+  wrongPin,
+  waitBeforeRetry,
+
+  /// The panic code: everything is gone.
+  wiped,
+}
 
 class UnlockResult {
   const UnlockResult(this.outcome, {this.wait = Duration.zero});

@@ -100,9 +100,8 @@ pub enum Unlock {
         /// Seconds until the next attempt is allowed.
         wait_secs: u64,
     },
-    /// The panic code: everything was erased. The caller replaces the
-    /// hardware key and makes a new, empty vault under the same code with
-    /// [`Engine::create_vault_with_mac`], so it looks like an unlock.
+    /// The panic code: everything was erased, and Kilit is as if newly
+    /// installed. The caller deletes the hardware key too.
     Wiped,
 }
 
@@ -350,7 +349,7 @@ impl Engine {
     }
 
     /// The software key's MAC of a PIN or panic code, with no length rule:
-    /// a vault made after a panic is sealed under the four-digit code.
+    /// a panic code has four digits.
     fn software_mac(&self, pin: &str) -> Result<[u8; 32], EngineError> {
         self.software_key()?
             .mac(&pin_mac_input(&SecretString::from(pin.to_owned())))
@@ -382,16 +381,6 @@ impl Engine {
         Ok(self.store.clear()?)
     }
 
-    /// After a panic on the software key: a new, empty vault under the
-    /// panic code, open, as if the code had unlocked it.
-    fn replace_software_vault(&mut self, code: &str) -> Result<(), EngineError> {
-        let mac = self.software_mac(code)?;
-        let (vault, sealed) =
-            Vault::create_with_mac(&PinMac::from_bytes(mac), self.params).map_err(vault_err)?;
-        self.store.write(VAULT, &sealed)?;
-        self.after_create(vault)
-    }
-
     fn load_config(&self) -> Result<Config, EngineError> {
         let Some(packet) = self.store.read(CONFIG)? else {
             return Ok(Config::default());
@@ -416,17 +405,6 @@ impl Engine {
 
     fn set_panic_mac(&mut self, mac: [u8; 32]) -> Result<(), EngineError> {
         self.require_open()?;
-        // a vault made after a panic is sealed under a four-digit code; that
-        // code cannot also be the one that erases it
-        let blob = if self.key_kind()? == KeyKind::Hardware {
-            VAULT_HW
-        } else {
-            VAULT
-        };
-        let sealed = self.store.read(blob)?.ok_or(EngineError::NoVault)?;
-        if Vault::unlock_with_mac(&sealed, &PinMac::from_bytes(mac)).is_ok() {
-            return Err(EngineError::Rejected("the panic code is the PIN".into()));
-        }
         let salt = random_bytes::<16>()?;
         let mut b = salt.to_vec();
         b.extend_from_slice(&panic_tag(&salt, &mac));
@@ -467,8 +445,8 @@ impl Engine {
     }
 
     /// The panic button on a software-key vault: when `code` is the panic
-    /// code, erases everything and leaves a new, empty, locked vault under
-    /// it. Returns whether it did.
+    /// code, erases everything, as for [`Unlock::Wiped`]. Returns whether it
+    /// did.
     pub fn panic_wipe(&mut self, code: String) -> Result<bool, EngineError> {
         if self.key_kind()? != KeyKind::Software {
             return Err(EngineError::Rejected(
@@ -480,14 +458,12 @@ impl Engine {
             return Ok(false);
         }
         self.wipe()?;
-        self.replace_software_vault(&code)?;
-        self.lock();
         Ok(true)
     }
 
     /// The panic button on a hardware-key vault: when `mac` is the panic
-    /// code's, erases everything. The caller then replaces the hardware key
-    /// and makes the new vault, as after [`Unlock::Wiped`].
+    /// code's, erases everything. The caller then deletes the hardware key,
+    /// as after [`Unlock::Wiped`].
     pub fn panic_wipe_with_mac(&mut self, mac: [u8; 32]) -> Result<bool, EngineError> {
         if self.key_kind()? != KeyKind::Hardware {
             return Err(EngineError::Rejected(
@@ -587,8 +563,7 @@ impl Engine {
         let mac = self.software_mac(&pin)?;
         if self.panic_matches(&mac)? {
             self.wipe()?;
-            self.replace_software_vault(&pin)?;
-            return Ok(Unlock::Unlocked);
+            return Ok(Unlock::Wiped);
         }
         self.attempt(VAULT, |sealed| {
             Vault::unlock_with_mac(sealed, &PinMac::from_bytes(mac))
@@ -618,7 +593,7 @@ impl Engine {
         try_open: impl FnOnce(&[u8]) -> Result<Vault, VaultError>,
     ) -> Result<Unlock, EngineError> {
         let sealed = self.store.read(blob)?.ok_or(EngineError::NoVault)?;
-        let mut a = self.attempts();
+        let a = self.attempts();
         let now = (self.now)();
         if a.retry_at > now {
             return Ok(Unlock::Wait {
@@ -641,23 +616,92 @@ impl Engine {
                 }
                 Ok(Unlock::Unlocked)
             }
-            Err(VaultError::Locked) => {
-                a.failures = a.failures.saturating_add(1);
-                let wait_secs = if a.failures >= FREE_MISSES {
-                    FIRST_WAIT_SECS << (a.failures - FREE_MISSES).min(10)
-                } else {
-                    0
-                };
-                a.retry_at = if wait_secs > 0 {
-                    now + wait_secs as i64
-                } else {
-                    0
-                };
-                self.save_attempts(&a)?;
-                Ok(Unlock::WrongPin { wait_secs })
-            }
+            Err(VaultError::Locked) => Ok(Unlock::WrongPin {
+                wait_secs: self.count_miss(a, now)?,
+            }),
             Err(e) => Err(vault_err(e)),
         }
+    }
+
+    /// Records a wrong PIN; returns the wait before the next try.
+    fn count_miss(&self, mut a: Attempts, now: i64) -> Result<u64, EngineError> {
+        a.failures = a.failures.saturating_add(1);
+        let wait_secs = if a.failures >= FREE_MISSES {
+            FIRST_WAIT_SECS << (a.failures - FREE_MISSES).min(10)
+        } else {
+            0
+        };
+        a.retry_at = if wait_secs > 0 {
+            now + wait_secs as i64
+        } else {
+            0
+        };
+        self.save_attempts(&a)?;
+        Ok(wait_secs)
+    }
+
+    /// Checks the current PIN's MAC like an unlock (misses count the same
+    /// way), then seals the open vault again under the new one. One atomic
+    /// write: a crash leaves the old PIN or the new one, never neither.
+    fn change(&mut self, blob: &str, old: [u8; 32], new: [u8; 32]) -> Result<Unlock, EngineError> {
+        let sealed = self.store.read(blob)?.ok_or(EngineError::NoVault)?;
+        let a = self.attempts();
+        let now = (self.now)();
+        if a.retry_at > now {
+            return Ok(Unlock::Wait {
+                wait_secs: (a.retry_at - now) as u64,
+            });
+        }
+        match Vault::unlock_with_mac(&sealed, &PinMac::from_bytes(old)) {
+            Ok(_) => {
+                if a.failures != 0 || a.retry_at != 0 {
+                    self.save_attempts(&Attempts::default())?;
+                }
+                let resealed = self
+                    .require_open()?
+                    .vault
+                    .seal_with_mac(&PinMac::from_bytes(new), self.params)
+                    .map_err(vault_err)?;
+                self.store.write(blob, &resealed)?;
+                Ok(Unlock::Unlocked)
+            }
+            Err(VaultError::Locked) => Ok(Unlock::WrongPin {
+                wait_secs: self.count_miss(a, now)?,
+            }),
+            Err(e) => Err(vault_err(e)),
+        }
+    }
+
+    /// Changes the PIN of the open software-key vault. Answers `Unlocked`
+    /// when changed, `WrongPin` or `Wait` when `old` was not accepted.
+    pub fn change_pin(&mut self, old: String, new: String) -> Result<Unlock, EngineError> {
+        self.require_open()?;
+        if self.key_kind()? != KeyKind::Software {
+            return Err(EngineError::Rejected(
+                "this vault needs the hardware key".into(),
+            ));
+        }
+        let new_mac =
+            PinMac::compute(&SecretString::from(new), &self.software_key()?).map_err(vault_err)?;
+        let old_mac = self.software_mac(&old)?;
+        let new_bytes = new_mac.to_bytes();
+        self.change(VAULT, old_mac, new_bytes)
+    }
+
+    /// [`Engine::change_pin`] with MACs from the hardware key. The caller
+    /// has checked the new PIN's length.
+    pub fn change_pin_with_mac(
+        &mut self,
+        old: [u8; 32],
+        new: [u8; 32],
+    ) -> Result<Unlock, EngineError> {
+        self.require_open()?;
+        if self.key_kind()? != KeyKind::Hardware {
+            return Err(EngineError::Rejected(
+                "this vault uses the software key".into(),
+            ));
+        }
+        self.change(VAULT_HW, old, new)
     }
 
     /// Drops every key and decrypted entry.
@@ -1167,7 +1211,7 @@ mod tests {
     }
 
     #[test]
-    fn the_panic_code_erases_everything_and_opens_an_empty_vault() {
+    fn the_panic_code_erases_everything_like_a_new_install() {
         let dir = tempfile::tempdir().unwrap();
         let fp = {
             let mut e = ready(&dir);
@@ -1187,23 +1231,71 @@ mod tests {
             e.unlock("000000".into()).unwrap(),
             Unlock::Wait { .. }
         ));
-        assert_eq!(e.unlock("7391".into()).unwrap(), Unlock::Unlocked);
+        assert_eq!(e.unlock("7391".into()).unwrap(), Unlock::Wiped);
+        assert_eq!(fs_count(&dir), 0);
+        assert!(!e.has_vault().unwrap());
+        assert!(matches!(e.items(), Err(EngineError::Locked)));
+
+        // a restart finds nothing, and a new vault starts from scratch
+        let mut e = engine(&dir);
+        assert!(!e.has_vault().unwrap());
+        e.create_vault("246810".into()).unwrap();
         assert!(e.items().unwrap().is_empty());
         assert_ne!(e.fingerprint().unwrap(), fp);
         assert!(!e.panic_set().unwrap());
+    }
 
-        // the new vault opens with the code, and the real PIN is gone
+    #[test]
+    fn the_pin_changes_only_with_the_current_one() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut e = ready(&dir);
+        e.add_note("not", "x").unwrap();
+        assert!(matches!(
+            e.change_pin("482916".into(), "12345".into()),
+            Err(EngineError::Rejected(_))
+        ));
+        assert_eq!(
+            e.change_pin("000000".into(), "135790".into()).unwrap(),
+            Unlock::WrongPin { wait_secs: 0 }
+        );
+        assert_eq!(
+            e.change_pin("482916".into(), "135790".into()).unwrap(),
+            Unlock::Unlocked
+        );
+        // still open, and the items are there
+        assert_eq!(e.items().unwrap().len(), 1);
+        drop(e);
         let mut e = engine(&dir);
         assert_eq!(
             e.unlock("482916".into()).unwrap(),
             Unlock::WrongPin { wait_secs: 0 }
         );
-        assert_eq!(e.unlock("7391".into()).unwrap(), Unlock::Unlocked);
-        // and it cannot also be its own panic code
-        assert!(matches!(
-            e.set_panic("7391".into()),
-            Err(EngineError::Rejected(_))
-        ));
+        assert_eq!(e.unlock("135790".into()).unwrap(), Unlock::Unlocked);
+        assert_eq!(e.items().unwrap().len(), 1);
+    }
+
+    #[test]
+    fn a_hardware_pin_changes_with_macs() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut e = engine(&dir);
+        e.create_vault_with_mac(platform_mac("482916")).unwrap();
+        e.set_panic_with_mac(platform_mac("7391")).unwrap();
+        assert_eq!(
+            e.change_pin_with_mac(platform_mac("482916"), platform_mac("135790"))
+                .unwrap(),
+            Unlock::Unlocked
+        );
+        e.lock();
+        assert_eq!(
+            e.unlock_with_mac(platform_mac("482916")).unwrap(),
+            Unlock::WrongPin { wait_secs: 0 }
+        );
+        assert_eq!(
+            e.unlock_with_mac(platform_mac("135790")).unwrap(),
+            Unlock::Unlocked
+        );
+        // the panic code is untouched by a PIN change
+        assert!(e.panic_set().unwrap());
     }
 
     #[test]
@@ -1235,12 +1327,12 @@ mod tests {
         assert_eq!(e.items().unwrap().len(), 1);
         assert!(e.panic_wipe("7391".into()).unwrap());
         assert!(matches!(e.items(), Err(EngineError::Locked)));
-        assert_eq!(e.unlock("7391".into()).unwrap(), Unlock::Unlocked);
-        assert!(e.items().unwrap().is_empty());
+        assert!(!e.has_vault().unwrap());
+        assert_eq!(fs_count(&dir), 0);
     }
 
     #[test]
-    fn the_hardware_panic_code_leaves_the_new_vault_to_the_caller() {
+    fn the_hardware_panic_code_erases_everything() {
         let dir = tempfile::tempdir().unwrap();
         let mut e = engine(&dir);
         e.create_vault_with_mac(platform_mac("482916")).unwrap();
@@ -1253,12 +1345,12 @@ mod tests {
         );
         assert_eq!(e.key_kind().unwrap(), KeyKind::None);
         assert_eq!(fs_count(&dir), 0);
-        // a new hardware key, the same code
-        let new_key = SoftwareKey::new([0x77; 32])
-            .mac(&pin_mac_input(&SecretString::from("7391".to_owned())))
-            .unwrap();
-        e.create_vault_with_mac(new_key).unwrap();
-        assert!(e.items().unwrap().is_empty());
+        // the panic button finds the code under the hardware key too
+        e.create_vault_with_mac(platform_mac("482916")).unwrap();
+        e.set_panic_with_mac(platform_mac("2580")).unwrap();
+        assert!(!e.panic_wipe_with_mac(platform_mac("1111")).unwrap());
+        assert!(e.panic_wipe_with_mac(platform_mac("2580")).unwrap());
+        assert_eq!(fs_count(&dir), 0);
     }
 
     fn fs_count(dir: &tempfile::TempDir) -> usize {

@@ -53,7 +53,7 @@ class LPt extends L {
 
   @override
   String get panicExplain =>
-      'Quatro dígitos. Digitado na tela de bloqueio no lugar do seu PIN, ou depois de segurar o botão de bloqueio, ele apaga para sempre todas as chaves, mensagens e arquivos do Kilit e abre um cofre vazio, como se nunca tivesse havido nada nele.';
+      'Quatro dígitos. Digitado na tela de bloqueio no lugar do seu PIN, ou depois de segurar o botão de bloqueio, ele apaga para sempre todas as chaves, mensagens e arquivos do Kilit, e o Kilit recomeça como se tivesse acabado de ser instalado.';
 
   @override
   String get panicStatusOn => 'Definido';
@@ -129,6 +129,18 @@ class LPt extends L {
 
   @override
   String get lockWrongPin => 'PIN incorreto.';
+
+  @override
+  String get settingsChangePin => 'Alterar PIN';
+
+  @override
+  String get changePinCurrent => 'Digite seu PIN atual';
+
+  @override
+  String get changePinNew => 'Escolha um novo PIN';
+
+  @override
+  String get changePinDone => 'PIN alterado.';
 
   @override
   String lockWait(int seconds) {

@@ -32,7 +32,10 @@ class KilitApp extends StatefulWidget {
 }
 
 class _KilitAppState extends State<KilitApp> {
-  late final Session _session = Session(widget.core)..start();
+  late final Session _session = Session(
+    widget.core,
+    onWiped: widget.prefs.resetAfterPanic,
+  )..start();
 
   // leaving the app locks it: switching apps, the recents screen, a
   // minimised window. Losing focus alone (a dialog on top) does not.

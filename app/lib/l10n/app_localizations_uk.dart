@@ -51,7 +51,7 @@ class LUk extends L {
 
   @override
   String get panicExplain =>
-      'Чотири цифри. Якщо ввести його на екрані блокування замість PIN-коду або після утримання кнопки блокування, він назавжди стирає всі ключі, повідомлення й файли в Kilit і відкриває порожнє сховище, ніби в ньому ніколи нічого не було.';
+      'Чотири цифри. Якщо ввести його на екрані блокування замість PIN-коду або після утримання кнопки блокування, він назавжди стирає всі ключі, повідомлення й файли в Kilit, і Kilit починає все спочатку, як щойно встановлений.';
 
   @override
   String get panicStatusOn => 'Задано';
@@ -127,6 +127,18 @@ class LUk extends L {
 
   @override
   String get lockWrongPin => 'Неправильний PIN.';
+
+  @override
+  String get settingsChangePin => 'Змінити PIN-код';
+
+  @override
+  String get changePinCurrent => 'Введіть поточний PIN-код';
+
+  @override
+  String get changePinNew => 'Виберіть новий PIN-код';
+
+  @override
+  String get changePinDone => 'PIN-код змінено.';
 
   @override
   String lockWait(int seconds) {

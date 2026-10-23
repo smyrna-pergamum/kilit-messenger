@@ -204,7 +204,7 @@ abstract class L {
   /// No description provided for @panicExplain.
   ///
   /// In en, this message translates to:
-  /// **'Four digits. Entered on the lock screen instead of your PIN, or after holding the lock button, it erases every key, message and file in Kilit for good and opens an empty vault, as if there had never been anything in it.'**
+  /// **'Four digits. Entered on the lock screen instead of your PIN, or after holding the lock button, it erases every key, message and file in Kilit for good, and Kilit starts over as if it had just been installed.'**
   String get panicExplain;
 
   /// No description provided for @panicStatusOn.
@@ -350,6 +350,30 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Wrong PIN.'**
   String get lockWrongPin;
+
+  /// No description provided for @settingsChangePin.
+  ///
+  /// In en, this message translates to:
+  /// **'Change PIN'**
+  String get settingsChangePin;
+
+  /// No description provided for @changePinCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your current PIN'**
+  String get changePinCurrent;
+
+  /// No description provided for @changePinNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a new PIN'**
+  String get changePinNew;
+
+  /// No description provided for @changePinDone.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN changed.'**
+  String get changePinDone;
 
   /// No description provided for @lockWait.
   ///

@@ -69,11 +69,10 @@ class RustCore implements KilitCore {
 
   bool get _hardwareVault => _h.keyKind() == rust.PinKeyKind.hardware;
 
-  /// After a panic on a hardware-key vault: a new hardware key, and a new,
-  /// empty vault under the panic code.
-  Future<void> _replaceKey(String code) async {
-    await _key.destroy();
-    await _h.createVaultWithMac(mac: await _mac(code));
+  /// After a panic: the platform key goes too, so old copies of the vault
+  /// file that flash storage may keep can never be opened.
+  Future<void> _destroyKey() async {
+    if (_platformKey) await _key.destroy();
   }
 
   @override
@@ -81,10 +80,6 @@ class RustCore implements KilitCore {
     final rust.UnlockReply r;
     if (_hardwareVault) {
       r = await _h.unlockWithMac(mac: await _mac(pin));
-      if (r.outcome == rust.UnlockOutcome.wiped) {
-        await _replaceKey(pin);
-        return const UnlockResult(UnlockOutcome.unlocked);
-      }
     } else {
       r = await _h.unlock(pin: pin);
       // the right PIN for an old software-key vault: move it to the
@@ -93,6 +88,11 @@ class RustCore implements KilitCore {
         await _h.moveToHardware(mac: await _mac(pin));
       }
     }
+    if (r.outcome == rust.UnlockOutcome.wiped) await _destroyKey();
+    return _result(r);
+  }
+
+  static UnlockResult _result(rust.UnlockReply r) {
     final wait = Duration(seconds: r.waitSecs.toInt());
     return switch (r.outcome) {
       rust.UnlockOutcome.unlocked => const UnlockResult(UnlockOutcome.unlocked),
@@ -104,10 +104,19 @@ class RustCore implements KilitCore {
         UnlockOutcome.waitBeforeRetry,
         wait: wait,
       ),
-      // handled above; a software vault is replaced inside Rust
-      rust.UnlockOutcome.wiped => const UnlockResult(UnlockOutcome.unlocked),
+      rust.UnlockOutcome.wiped => const UnlockResult(UnlockOutcome.wiped),
     };
   }
+
+  @override
+  Future<UnlockResult> changePin(String current, String fresh) async => _result(
+    _hardwareVault
+        ? await _h.changePinWithMac(
+            current: await _mac(current),
+            fresh: await _mac(fresh),
+          )
+        : await _h.changePin(current: current, fresh: fresh),
+  );
 
   @override
   Future<bool> hasPanicCode() => _h.panicSet();
@@ -126,11 +135,11 @@ class RustCore implements KilitCore {
 
   @override
   Future<bool> panicWipe(String code) async {
-    if (!_hardwareVault) return _h.panicWipe(code: code);
-    if (!await _h.panicWipeWithMac(mac: await _mac(code))) return false;
-    await _replaceKey(code);
-    _h.lock();
-    return true;
+    final wiped = _hardwareVault
+        ? await _h.panicWipeWithMac(mac: await _mac(code))
+        : await _h.panicWipe(code: code);
+    if (wiped) await _destroyKey();
+    return wiped;
   }
 
   @override

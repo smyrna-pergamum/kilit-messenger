@@ -345,10 +345,12 @@ void main() {
     expect(find.text('merhaba.txt'), findsOneWidget);
   });
 
-  testWidgets('the panic code on the lock screen leaves an empty vault', (
-    tester,
-  ) async {
-    await startApp(tester, size: const Size(400, 1400));
+  testWidgets('the panic code on the lock screen resets Kilit', (tester) async {
+    final (_, prefs) = await startApp(
+      tester,
+      size: const Size(400, 1400),
+      prefs: {'language': 'en', 'theme': 'dark', 'clipboardHint': true},
+    );
     await setUpVault(tester);
     await addNote(tester, 'secrets');
     await setPanicCode(tester, '7391');
@@ -357,13 +359,14 @@ void main() {
     await tester.pumpAndSettle();
 
     await enterPin(tester, '7391');
+    // as if newly installed: choose a PIN, settings back to their defaults
+    expect(titleText(tester), 'Choose a PIN');
+    expect(prefs.themeMode, ThemeMode.system);
+    expect(prefs.clipboardHint, isFalse);
+    expect(prefs.language, 'en');
+    await setUpVault(tester);
     expect(find.byKey(const ValueKey('vault-empty')), findsOneWidget);
     expect(find.text('secrets.txt'), findsNothing);
-    // the old PIN is gone with everything else
-    await tester.tap(find.byKey(const ValueKey('lock-now')));
-    await tester.pumpAndSettle();
-    await enterPin(tester, '482916');
-    expect(find.text('Wrong PIN.'), findsOneWidget);
   });
 
   testWidgets('holding the lock button asks for the panic code', (
@@ -386,9 +389,43 @@ void main() {
     await tester.longPress(find.byKey(const ValueKey('lock-now')));
     await tester.pumpAndSettle();
     await enterPanicCode(tester, '7391');
-    expect(titleText(tester), 'Unlock');
-    await enterPin(tester, '7391');
+    expect(titleText(tester), 'Choose a PIN');
+    await setUpVault(tester);
     expect(find.byKey(const ValueKey('vault-empty')), findsOneWidget);
+  });
+
+  testWidgets('the PIN is changed in settings, after the current one', (
+    tester,
+  ) async {
+    await startApp(tester, size: const Size(400, 1400));
+    await setUpVault(tester);
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('change-pin')));
+    await tester.pumpAndSettle();
+    expect(find.text('Enter your current PIN'), findsOneWidget);
+
+    // a wrong current PIN starts over
+    await enterPin(tester, '000000');
+    await enterPin(tester, '135790');
+    await enterPin(tester, '135790');
+    expect(find.text('Wrong PIN.'), findsOneWidget);
+    expect(find.text('Enter your current PIN'), findsOneWidget);
+
+    await enterPin(tester, '482916');
+    await enterPin(tester, '135790');
+    await enterPin(tester, '135791');
+    expect(find.text('The PINs did not match. Start again.'), findsOneWidget);
+    await enterPin(tester, '135790');
+    await enterPin(tester, '135790');
+    expect(find.text('PIN changed.'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('lock-now')));
+    await tester.pumpAndSettle();
+    await enterPin(tester, '482916');
+    expect(find.text('Wrong PIN.'), findsOneWidget);
+    await enterPin(tester, '135790');
+    expect(titleTextOrNull(tester), isNull);
   });
 
   testWidgets('a tap on the lock button only locks', (tester) async {

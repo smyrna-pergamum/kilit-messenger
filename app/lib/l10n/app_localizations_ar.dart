@@ -50,7 +50,7 @@ class LAr extends L {
 
   @override
   String get panicExplain =>
-      'أربعة أرقام. إذا أُدخل في شاشة القفل بدل رقم PIN، أو بعد الضغط مطولًا على زر القفل، يمسح نهائيًا كل المفاتيح والرسائل والملفات في Kilit ويفتح خزنة فارغة، كأنه لم يكن فيها شيء قط.';
+      'أربعة أرقام. إذا أُدخل في شاشة القفل بدل رقم PIN، أو بعد الضغط مطولًا على زر القفل، يمسح نهائيًا كل المفاتيح والرسائل والملفات في Kilit، ويبدأ Kilit من جديد كأنه ثُبّت للتو.';
 
   @override
   String get panicStatusOn => 'مُعيَّن';
@@ -126,6 +126,18 @@ class LAr extends L {
 
   @override
   String get lockWrongPin => 'رمز PIN خاطئ.';
+
+  @override
+  String get settingsChangePin => 'تغيير رقم PIN';
+
+  @override
+  String get changePinCurrent => 'أدخل رقم PIN الحالي';
+
+  @override
+  String get changePinNew => 'اختر رقم PIN جديدًا';
+
+  @override
+  String get changePinDone => 'تم تغيير رقم PIN.';
 
   @override
   String lockWait(int seconds) {

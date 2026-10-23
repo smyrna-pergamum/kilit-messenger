@@ -53,7 +53,7 @@ class LFr extends L {
 
   @override
   String get panicExplain =>
-      'Quatre chiffres. Saisi sur l\'écran de verrouillage à la place de votre PIN, ou après un appui long sur le bouton de verrouillage, il efface définitivement toutes les clés, tous les messages et fichiers de Kilit et ouvre un coffre vide, comme s\'il n\'y avait jamais rien eu.';
+      'Quatre chiffres. Saisi sur l\'écran de verrouillage à la place de votre PIN, ou après un appui long sur le bouton de verrouillage, il efface définitivement toutes les clés, tous les messages et fichiers de Kilit, et Kilit repart comme s\'il venait d\'être installé.';
 
   @override
   String get panicStatusOn => 'Défini';
@@ -130,6 +130,18 @@ class LFr extends L {
 
   @override
   String get lockWrongPin => 'PIN incorrect.';
+
+  @override
+  String get settingsChangePin => 'Changer le PIN';
+
+  @override
+  String get changePinCurrent => 'Saisissez votre PIN actuel';
+
+  @override
+  String get changePinNew => 'Choisissez un nouveau PIN';
+
+  @override
+  String get changePinDone => 'PIN modifié.';
 
   @override
   String lockWait(int seconds) {

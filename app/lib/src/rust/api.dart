@@ -35,6 +35,18 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// Seals a note into the vault.
   Future<ItemInfo> addNote({required String title, required String text});
 
+  /// Changes the open software-key vault's PIN. `Unlocked` means changed.
+  Future<UnlockReply> changePin({
+    required String current,
+    required String fresh,
+  });
+
+  /// Changes the open hardware-key vault's PIN from the two PIN MACs.
+  Future<UnlockReply> changePinWithMac({
+    required List<int> current,
+    required List<int> fresh,
+  });
+
   /// Removes the panic code.
   Future<void> clearPanic();
 
@@ -100,11 +112,11 @@ abstract class KilitHandle implements RustOpaqueInterface {
   Future<bool> panicSet();
 
   /// The panic button, software key: erases everything when `code` is the
-  /// panic code and leaves a new, empty, locked vault under it.
+  /// panic code.
   Future<bool> panicWipe({required String code});
 
   /// The panic button, hardware key: erases everything when `mac` is the
-  /// panic code's. Then replace the hardware key and make a new vault.
+  /// panic code's. Then delete the hardware key.
   Future<bool> panicWipeWithMac({required List<int> mac});
 
   /// An item's content, decrypted into memory: to show an image, or to
@@ -537,8 +549,8 @@ enum UnlockOutcome {
   /// Too soon; nothing was tried.
   wait,
 
-  /// The panic code on a hardware-key vault: everything is erased. Replace
-  /// the hardware key, then make a new vault under the same code.
+  /// The panic code: everything is erased and Kilit is as if newly
+  /// installed. Delete the hardware key too.
   wiped,
 }
 

@@ -52,7 +52,7 @@ class LEs extends L {
 
   @override
   String get panicExplain =>
-      'Cuatro dígitos. Si se introduce en la pantalla de bloqueo en lugar de tu PIN, o tras mantener pulsado el botón de bloqueo, borra para siempre todas las claves, mensajes y archivos de Kilit y abre una bóveda vacía, como si nunca hubiera tenido nada.';
+      'Cuatro dígitos. Si se introduce en la pantalla de bloqueo en lugar de tu PIN, o tras mantener pulsado el botón de bloqueo, borra para siempre todas las claves, mensajes y archivos de Kilit, y Kilit vuelve a empezar como recién instalado.';
 
   @override
   String get panicStatusOn => 'Definido';
@@ -128,6 +128,18 @@ class LEs extends L {
 
   @override
   String get lockWrongPin => 'PIN incorrecto.';
+
+  @override
+  String get settingsChangePin => 'Cambiar PIN';
+
+  @override
+  String get changePinCurrent => 'Introduce tu PIN actual';
+
+  @override
+  String get changePinNew => 'Elige un PIN nuevo';
+
+  @override
+  String get changePinDone => 'PIN cambiado.';
 
   @override
   String lockWait(int seconds) {

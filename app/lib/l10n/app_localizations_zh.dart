@@ -50,7 +50,7 @@ class LZh extends L {
 
   @override
   String get panicExplain =>
-      '四位数字。在锁屏界面代替 PIN 输入，或长按锁定按钮后输入，它会永久清除 Kilit 中的所有密钥、消息和文件，并打开一个空保险库，就像里面从未有过任何东西。';
+      '四位数字。在锁屏界面代替 PIN 输入，或长按锁定按钮后输入，它会永久清除 Kilit 中的所有密钥、消息和文件，Kilit 会像刚安装时一样重新开始。';
 
   @override
   String get panicStatusOn => '已设定';
@@ -125,6 +125,18 @@ class LZh extends L {
 
   @override
   String get lockWrongPin => 'PIN 错误。';
+
+  @override
+  String get settingsChangePin => '更改 PIN';
+
+  @override
+  String get changePinCurrent => '输入当前 PIN';
+
+  @override
+  String get changePinNew => '选择新 PIN';
+
+  @override
+  String get changePinDone => 'PIN 已更改。';
 
   @override
   String lockWait(int seconds) {

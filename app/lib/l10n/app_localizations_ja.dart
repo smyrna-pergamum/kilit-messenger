@@ -50,7 +50,7 @@ class LJa extends L {
 
   @override
   String get panicExplain =>
-      '4桁の数字です。ロック画面で PIN の代わりに入力するか、ロックボタンを長押ししてから入力すると、Kilit のすべての鍵・メッセージ・ファイルを完全に消去し、最初から何もなかったかのように空の金庫を開きます。';
+      '4桁の数字です。ロック画面で PIN の代わりに入力するか、ロックボタンを長押ししてから入力すると、Kilit のすべての鍵・メッセージ・ファイルを完全に消去し、Kilit はインストール直後の状態からやり直します。';
 
   @override
   String get panicStatusOn => '設定済み';
@@ -125,6 +125,18 @@ class LJa extends L {
 
   @override
   String get lockWrongPin => 'PINが違います。';
+
+  @override
+  String get settingsChangePin => 'PIN を変更';
+
+  @override
+  String get changePinCurrent => '現在の PIN を入力';
+
+  @override
+  String get changePinNew => '新しい PIN を選択';
+
+  @override
+  String get changePinDone => 'PIN を変更しました。';
 
   @override
   String lockWait(int seconds) {

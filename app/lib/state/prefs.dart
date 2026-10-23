@@ -128,4 +128,15 @@ class Prefs extends ChangeNotifier {
     _clipboardHint = on;
     return _save();
   }
+
+  /// After the panic code: everything back to a new install's settings,
+  /// except the language, so the person can still read the screen.
+  Future<void> resetAfterPanic() {
+    _theme = ThemeMode.system;
+    _clipboardHint = false;
+    openSections
+      ..clear()
+      ..add('protections');
+    return _save();
+  }
 }

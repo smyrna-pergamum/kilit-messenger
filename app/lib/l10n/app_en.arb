@@ -13,7 +13,7 @@
   "panicEnterHint": "Enter the panic code to erase everything in Kilit.",
   "panicWrong": "That is not the panic code.",
   "settingsPanic": "Panic code",
-  "panicExplain": "Four digits. Entered on the lock screen instead of your PIN, or after holding the lock button, it erases every key, message and file in Kilit for good and opens an empty vault, as if there had never been anything in it.",
+  "panicExplain": "Four digits. Entered on the lock screen instead of your PIN, or after holding the lock button, it erases every key, message and file in Kilit for good, and Kilit starts over as if it had just been installed.",
   "panicStatusOn": "Set",
   "panicStatusOff": "Not set",
   "panicSet": "Set panic code",
@@ -45,6 +45,10 @@
   "lockHintConfirm": "Enter the same PIN once more.",
   "lockMismatch": "The PINs did not match. Start again.",
   "lockWrongPin": "Wrong PIN.",
+  "settingsChangePin": "Change PIN",
+  "changePinCurrent": "Enter your current PIN",
+  "changePinNew": "Choose a new PIN",
+  "changePinDone": "PIN changed.",
   "lockWait": "Wait {seconds} s before trying again.",
   "@lockWait": {
     "placeholders": {

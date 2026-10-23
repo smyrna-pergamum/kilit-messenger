@@ -50,7 +50,7 @@ class LVi extends L {
 
   @override
   String get panicExplain =>
-      'Bốn chữ số. Nếu được nhập ở màn hình khóa thay cho mã PIN, hoặc sau khi giữ nút khóa, mã này xóa vĩnh viễn mọi khóa, tin nhắn và tệp trong Kilit rồi mở một kho trống, như thể chưa từng có gì.';
+      'Bốn chữ số. Nếu được nhập ở màn hình khóa thay cho mã PIN, hoặc sau khi giữ nút khóa, mã này xóa vĩnh viễn mọi khóa, tin nhắn và tệp trong Kilit, và Kilit bắt đầu lại như vừa được cài đặt.';
 
   @override
   String get panicStatusOn => 'Đã đặt';
@@ -126,6 +126,18 @@ class LVi extends L {
 
   @override
   String get lockWrongPin => 'Sai mã PIN.';
+
+  @override
+  String get settingsChangePin => 'Đổi mã PIN';
+
+  @override
+  String get changePinCurrent => 'Nhập mã PIN hiện tại';
+
+  @override
+  String get changePinNew => 'Chọn mã PIN mới';
+
+  @override
+  String get changePinDone => 'Đã đổi mã PIN.';
 
   @override
   String lockWait(int seconds) {

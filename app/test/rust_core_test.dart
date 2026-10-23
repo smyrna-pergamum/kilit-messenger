@@ -202,7 +202,7 @@ void main() {
     expect(junk.outcome, ImportOutcome.notKlt);
   }, skip: skip);
 
-  test('the panic code erases a hardware vault and replaces its key', () async {
+  test('the panic code erases a hardware vault and its key', () async {
     final dir = await Directory.systemTemp.createTemp('kilit-p-');
     addTearDown(() => dir.delete(recursive: true));
     final key = FakeHardwareKey(42);
@@ -215,27 +215,24 @@ void main() {
     core.lock();
 
     final r = await core.unlock('7391');
-    expect(r.outcome, UnlockOutcome.unlocked);
-    expect(await core.items(), isEmpty);
+    expect(r.outcome, UnlockOutcome.wiped);
     expect(key.destroyed, 1);
-    expect(await core.hasPanicCode(), isFalse);
-    core.lock();
-    expect((await core.unlock('482916')).outcome, UnlockOutcome.wrongPin);
-    expect((await core.unlock('7391')).outcome, UnlockOutcome.unlocked);
+    expect(await core.hasVault(), isFalse);
+    expect(dir.listSync(), isEmpty);
 
-    // the panic button, on the vault made after the panic
+    // a fresh start, then the panic button
+    await core.createVault('246810');
+    expect(await core.items(), isEmpty);
     await core.addNote('yeni', 'x');
     await core.setPanicCode('2580');
     expect(await core.panicWipe('1111'), isFalse);
     expect(await core.items(), hasLength(1));
     expect(await core.panicWipe('2580'), isTrue);
     expect(key.destroyed, 2);
-    expect(() => core.items(), throwsA(anything));
-    expect((await core.unlock('2580')).outcome, UnlockOutcome.unlocked);
-    expect(await core.items(), isEmpty);
+    expect(await core.hasVault(), isFalse);
   }, skip: skip);
 
-  test('a software vault panics inside Rust', () async {
+  test('a software vault is erased inside Rust', () async {
     final dir = await Directory.systemTemp.createTemp('kilit-ps-');
     addTearDown(() => dir.delete(recursive: true));
     final core = await RustCore.open(dir.path, desktop: false, key: NoKey());
@@ -243,8 +240,30 @@ void main() {
     await core.addNote('gizli', 'x');
     await core.setPanicCode('7391');
     core.lock();
-    expect((await core.unlock('7391')).outcome, UnlockOutcome.unlocked);
-    expect(await core.items(), isEmpty);
+    expect((await core.unlock('7391')).outcome, UnlockOutcome.wiped);
+    expect(await core.hasVault(), isFalse);
+  }, skip: skip);
+
+  test('a hardware vault PIN changes through the key', () async {
+    final dir = await Directory.systemTemp.createTemp('kilit-c-');
+    addTearDown(() => dir.delete(recursive: true));
+    final core = await RustCore.open(
+      dir.path,
+      desktop: false,
+      key: FakeHardwareKey(7),
+    );
+    await core.createVault('482916');
+    expect(
+      (await core.changePin('000000', '135790')).outcome,
+      UnlockOutcome.wrongPin,
+    );
+    expect(
+      (await core.changePin('482916', '135790')).outcome,
+      UnlockOutcome.unlocked,
+    );
+    core.lock();
+    expect((await core.unlock('482916')).outcome, UnlockOutcome.wrongPin);
+    expect((await core.unlock('135790')).outcome, UnlockOutcome.unlocked);
   }, skip: skip);
 
   test('an opened message is kept once', () async {

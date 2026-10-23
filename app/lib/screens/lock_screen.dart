@@ -125,7 +125,9 @@ class _LockScreenState extends State<LockScreen> {
         case _Step.unlock:
           final r = await widget.session.unlock(pin);
           if (!mounted) return;
-          if (r.outcome == UnlockOutcome.unlocked) {
+          // after the panic code the session starts over with a new screen
+          if (r.outcome == UnlockOutcome.unlocked ||
+              r.outcome == UnlockOutcome.wiped) {
             _entered.clear();
             return;
           }

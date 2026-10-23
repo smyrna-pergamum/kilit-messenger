@@ -52,7 +52,7 @@ class LTr extends L {
 
   @override
   String get panicExplain =>
-      'Dört haneli bir kod. Kilit ekranında PIN yerine ya da kilit düğmesine basılı tuttuktan sonra girilirse Kilit\'teki tüm anahtarları, mesajları ve dosyaları kalıcı olarak siler ve hiç içinde bir şey olmamış gibi boş bir kasa açar.';
+      'Dört haneli bir kod. Kilit ekranında PIN yerine ya da kilit düğmesine basılı tuttuktan sonra girilirse Kilit\'teki tüm anahtarları, mesajları ve dosyaları kalıcı olarak siler; Kilit yeni kurulmuş gibi baştan başlar.';
 
   @override
   String get panicStatusOn => 'Belirlendi';
@@ -128,6 +128,18 @@ class LTr extends L {
 
   @override
   String get lockWrongPin => 'PIN yanlış.';
+
+  @override
+  String get settingsChangePin => 'PIN\'i değiştir';
+
+  @override
+  String get changePinCurrent => 'Şu anki PIN\'inizi girin';
+
+  @override
+  String get changePinNew => 'Yeni bir PIN seçin';
+
+  @override
+  String get changePinDone => 'PIN değiştirildi.';
 
   @override
   String lockWait(int seconds) {

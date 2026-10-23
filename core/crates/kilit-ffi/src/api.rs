@@ -67,8 +67,8 @@ pub enum UnlockOutcome {
     WrongPin,
     /// Too soon; nothing was tried.
     Wait,
-    /// The panic code on a hardware-key vault: everything is erased. Replace
-    /// the hardware key, then make a new vault under the same code.
+    /// The panic code: everything is erased and Kilit is as if newly
+    /// installed. Delete the hardware key too.
     Wiped,
 }
 
@@ -419,6 +419,23 @@ impl KilitHandle {
         Ok(reply(self.engine()?.unlock_with_mac(mac32(mac)?)?))
     }
 
+    /// Changes the open software-key vault's PIN. `Unlocked` means changed.
+    pub fn change_pin(&self, current: String, fresh: String) -> Result<UnlockReply, KilitError> {
+        Ok(reply(self.engine()?.change_pin(current, fresh)?))
+    }
+
+    /// Changes the open hardware-key vault's PIN from the two PIN MACs.
+    pub fn change_pin_with_mac(
+        &self,
+        current: Vec<u8>,
+        fresh: Vec<u8>,
+    ) -> Result<UnlockReply, KilitError> {
+        Ok(reply(
+            self.engine()?
+                .change_pin_with_mac(mac32(current)?, mac32(fresh)?)?,
+        ))
+    }
+
     /// Moves the unlocked software-key vault to the hardware key.
     pub fn move_to_hardware(&self, mac: Vec<u8>) -> Result<(), KilitError> {
         Ok(self.engine()?.move_to_hardware(mac32(mac)?)?)
@@ -445,13 +462,13 @@ impl KilitHandle {
     }
 
     /// The panic button, software key: erases everything when `code` is the
-    /// panic code and leaves a new, empty, locked vault under it.
+    /// panic code.
     pub fn panic_wipe(&self, code: String) -> Result<bool, KilitError> {
         Ok(self.engine()?.panic_wipe(code)?)
     }
 
     /// The panic button, hardware key: erases everything when `mac` is the
-    /// panic code's. Then replace the hardware key and make a new vault.
+    /// panic code's. Then delete the hardware key.
     pub fn panic_wipe_with_mac(&self, mac: Vec<u8>) -> Result<bool, KilitError> {
         Ok(self.engine()?.panic_wipe_with_mac(mac32(mac)?)?)
     }

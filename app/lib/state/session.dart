@@ -7,9 +7,12 @@ enum SessionPhase { starting, needsSetup, locked, unlocked }
 /// Whether the vault is open. The only app-wide state; screens read the
 /// core directly for everything else.
 class Session extends ChangeNotifier {
-  Session(this.core);
+  Session(this.core, {this.onWiped});
 
   final KilitCore core;
+
+  /// After the panic code: puts app settings back as a new install has them.
+  final Future<void> Function()? onWiped;
   SessionPhase _phase = SessionPhase.starting;
 
   SessionPhase get phase => _phase;
@@ -30,15 +33,28 @@ class Session extends ChangeNotifier {
 
   Future<UnlockResult> unlock(String pin) async {
     final r = await core.unlock(pin);
-    if (r.outcome == UnlockOutcome.unlocked) _set(SessionPhase.unlocked);
+    switch (r.outcome) {
+      case UnlockOutcome.unlocked:
+        _set(SessionPhase.unlocked);
+      case UnlockOutcome.wiped:
+        await _reset();
+      case UnlockOutcome.wrongPin || UnlockOutcome.waitBeforeRetry:
+        break;
+    }
     return r;
   }
 
+  /// Everything was erased: start over as a new install, choosing a PIN.
+  Future<void> _reset() async {
+    await onWiped?.call();
+    _set(SessionPhase.needsSetup);
+  }
+
   /// The panic button. When [code] is the panic code everything is erased
-  /// and the lock screen shows, in front of a new, empty vault.
+  /// and Kilit starts over as if newly installed.
   Future<bool> panicWipe(String code) async {
     final wiped = await core.panicWipe(code);
-    if (wiped) _set(SessionPhase.locked);
+    if (wiped) await _reset();
     return wiped;
   }
 

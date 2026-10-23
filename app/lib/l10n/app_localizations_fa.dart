@@ -52,7 +52,7 @@ class LFa extends L {
 
   @override
   String get panicExplain =>
-      'چهار رقم. اگر در صفحهٔ قفل به جای PIN، یا پس از نگه داشتن دکمهٔ قفل وارد شود، همهٔ کلیدها، پیام‌ها و فایل‌های Kilit را برای همیشه پاک می‌کند و گاوصندوقی خالی باز می‌کند، گویی هرگز چیزی در آن نبوده است.';
+      'چهار رقم. اگر در صفحهٔ قفل به جای PIN، یا پس از نگه داشتن دکمهٔ قفل وارد شود، همهٔ کلیدها، پیام‌ها و فایل‌های Kilit را برای همیشه پاک می‌کند و Kilit مثل تازه نصب‌شده از نو شروع می‌شود.';
 
   @override
   String get panicStatusOn => 'تعیین شده';
@@ -128,6 +128,18 @@ class LFa extends L {
 
   @override
   String get lockWrongPin => 'PIN اشتباه است.';
+
+  @override
+  String get settingsChangePin => 'تغییر PIN';
+
+  @override
+  String get changePinCurrent => 'PIN فعلی خود را وارد کنید';
+
+  @override
+  String get changePinNew => 'یک PIN تازه انتخاب کنید';
+
+  @override
+  String get changePinDone => 'PIN تغییر کرد.';
 
   @override
   String lockWait(int seconds) {

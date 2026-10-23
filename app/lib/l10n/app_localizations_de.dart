@@ -52,7 +52,7 @@ class LDe extends L {
 
   @override
   String get panicExplain =>
-      'Vier Ziffern. Auf dem Sperrbildschirm statt deiner PIN oder nach langem Drücken der Sperrtaste eingegeben, löscht er alle Schlüssel, Nachrichten und Dateien in Kilit endgültig und öffnet einen leeren Tresor, als wäre nie etwas darin gewesen.';
+      'Vier Ziffern. Auf dem Sperrbildschirm statt deiner PIN oder nach langem Drücken der Sperrtaste eingegeben, löscht er alle Schlüssel, Nachrichten und Dateien in Kilit endgültig, und Kilit beginnt neu, als wäre es gerade installiert worden.';
 
   @override
   String get panicStatusOn => 'Festgelegt';
@@ -130,6 +130,18 @@ class LDe extends L {
 
   @override
   String get lockWrongPin => 'Falsche PIN.';
+
+  @override
+  String get settingsChangePin => 'PIN ändern';
+
+  @override
+  String get changePinCurrent => 'Gib deine aktuelle PIN ein';
+
+  @override
+  String get changePinNew => 'Wähle eine neue PIN';
+
+  @override
+  String get changePinDone => 'PIN geändert.';
 
   @override
   String lockWait(int seconds) {

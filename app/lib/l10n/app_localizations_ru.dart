@@ -52,7 +52,7 @@ class LRu extends L {
 
   @override
   String get panicExplain =>
-      'Четыре цифры. Если ввести его на экране блокировки вместо PIN-кода или после удержания кнопки блокировки, он навсегда стирает все ключи, сообщения и файлы в Kilit и открывает пустое хранилище, как будто в нём никогда ничего не было.';
+      'Четыре цифры. Если ввести его на экране блокировки вместо PIN-кода или после удержания кнопки блокировки, он навсегда стирает все ключи, сообщения и файлы в Kilit, и Kilit начинает всё заново, как после установки.';
 
   @override
   String get panicStatusOn => 'Задан';
@@ -128,6 +128,18 @@ class LRu extends L {
 
   @override
   String get lockWrongPin => 'Неверный PIN.';
+
+  @override
+  String get settingsChangePin => 'Изменить PIN-код';
+
+  @override
+  String get changePinCurrent => 'Введите текущий PIN-код';
+
+  @override
+  String get changePinNew => 'Выберите новый PIN-код';
+
+  @override
+  String get changePinDone => 'PIN-код изменён.';
 
   @override
   String lockWait(int seconds) {

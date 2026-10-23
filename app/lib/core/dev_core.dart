@@ -39,22 +39,22 @@ class DevCore implements KilitCore {
     _open = true;
   }
 
-  /// Everything gone; a new, empty vault under [code].
-  void _wipe(String code) {
+  /// Everything gone, as if newly installed.
+  void _wipe() {
     _items.clear();
     _kept.clear();
-    _pin = code;
+    _pin = null;
     _panic = null;
     _failures = 0;
     _retryAt = null;
+    _open = false;
   }
 
   @override
   Future<UnlockResult> unlock(String pin) async {
     if (_panic != null && pin == _panic) {
-      _wipe(pin);
-      _open = true;
-      return const UnlockResult(UnlockOutcome.unlocked);
+      _wipe();
+      return const UnlockResult(UnlockOutcome.wiped);
     }
     final now = _clock();
     final retryAt = _retryAt;
@@ -84,6 +84,14 @@ class DevCore implements KilitCore {
   void lock() => _open = false;
 
   @override
+  Future<UnlockResult> changePin(String current, String fresh) async {
+    _requireOpen();
+    if (current != _pin) return const UnlockResult(UnlockOutcome.wrongPin);
+    _pin = fresh;
+    return const UnlockResult(UnlockOutcome.unlocked);
+  }
+
+  @override
   Future<bool> hasPanicCode() async {
     _requireOpen();
     return _panic != null;
@@ -105,8 +113,7 @@ class DevCore implements KilitCore {
   @override
   Future<bool> panicWipe(String code) async {
     if (_panic == null || code != _panic) return false;
-    _wipe(code);
-    _open = false;
+    _wipe();
     return true;
   }
 

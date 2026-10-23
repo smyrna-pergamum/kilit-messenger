@@ -8,6 +8,7 @@ import '../state/session.dart';
 import '../theme/theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/panic_code.dart';
+import 'change_pin_dialog.dart';
 
 /// Shown in "About"; kept in step with pubspec.yaml's version.
 const appVersion = '0.1.0-alpha';
@@ -59,6 +60,27 @@ class SettingsScreen extends StatelessWidget {
                 detail: core.isHardwareBacked
                     ? l.hwBoundHint
                     : l.hwNotBoundHint,
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: OutlinedButton.icon(
+                    key: const ValueKey('change-pin'),
+                    onPressed: () async {
+                      final done = await changePin(context, core);
+                      if (done == true && context.mounted) {
+                        ScaffoldMessenger.of(context)
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(
+                            SnackBar(content: Text(l.changePinDone)),
+                          );
+                      }
+                    },
+                    icon: const Icon(Icons.password_rounded),
+                    label: Text(l.settingsChangePin),
+                  ),
+                ),
               ),
               _Status(
                 ok: true,

@@ -51,7 +51,7 @@ class LId extends L {
 
   @override
   String get panicExplain =>
-      'Empat digit. Jika dimasukkan di layar kunci sebagai ganti PIN, atau setelah menahan tombol kunci, kode ini menghapus selamanya semua kunci, pesan, dan file di Kilit lalu membuka brankas kosong, seolah-olah tidak pernah ada apa pun.';
+      'Empat digit. Jika dimasukkan di layar kunci sebagai ganti PIN, atau setelah menahan tombol kunci, kode ini menghapus selamanya semua kunci, pesan, dan file di Kilit, lalu Kilit mulai dari awal seperti baru dipasang.';
 
   @override
   String get panicStatusOn => 'Diatur';
@@ -127,6 +127,18 @@ class LId extends L {
 
   @override
   String get lockWrongPin => 'PIN salah.';
+
+  @override
+  String get settingsChangePin => 'Ubah PIN';
+
+  @override
+  String get changePinCurrent => 'Masukkan PIN Anda saat ini';
+
+  @override
+  String get changePinNew => 'Pilih PIN baru';
+
+  @override
+  String get changePinDone => 'PIN diubah.';
 
   @override
   String lockWait(int seconds) {

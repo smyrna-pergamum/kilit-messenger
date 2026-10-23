@@ -51,7 +51,7 @@ class LEn extends L {
 
   @override
   String get panicExplain =>
-      'Four digits. Entered on the lock screen instead of your PIN, or after holding the lock button, it erases every key, message and file in Kilit for good and opens an empty vault, as if there had never been anything in it.';
+      'Four digits. Entered on the lock screen instead of your PIN, or after holding the lock button, it erases every key, message and file in Kilit for good, and Kilit starts over as if it had just been installed.';
 
   @override
   String get panicStatusOn => 'Set';
@@ -127,6 +127,18 @@ class LEn extends L {
 
   @override
   String get lockWrongPin => 'Wrong PIN.';
+
+  @override
+  String get settingsChangePin => 'Change PIN';
+
+  @override
+  String get changePinCurrent => 'Enter your current PIN';
+
+  @override
+  String get changePinNew => 'Choose a new PIN';
+
+  @override
+  String get changePinDone => 'PIN changed.';
 
   @override
   String lockWait(int seconds) {

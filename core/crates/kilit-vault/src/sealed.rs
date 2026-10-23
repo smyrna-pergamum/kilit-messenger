@@ -87,6 +87,11 @@ impl PinMac {
     pub fn from_bytes(mac: [u8; 32]) -> Self {
         Self(Zeroizing::new(mac))
     }
+
+    /// The MAC's bytes.
+    pub fn to_bytes(&self) -> [u8; 32] {
+        *self.0
+    }
 }
 
 fn kek(pre: &PinMac, salt: &[u8], params: KdfParams) -> Result<Zeroizing<[u8; 32]>, VaultError> {

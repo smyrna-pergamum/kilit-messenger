@@ -53,7 +53,7 @@ class LIt extends L {
 
   @override
   String get panicExplain =>
-      'Quattro cifre. Inserito nella schermata di blocco al posto del PIN, o dopo aver tenuto premuto il pulsante di blocco, cancella per sempre tutte le chiavi, i messaggi e i file di Kilit e apre una cassaforte vuota, come se non ci fosse mai stato nulla.';
+      'Quattro cifre. Inserito nella schermata di blocco al posto del PIN, o dopo aver tenuto premuto il pulsante di blocco, cancella per sempre tutte le chiavi, i messaggi e i file di Kilit, e Kilit riparte come appena installato.';
 
   @override
   String get panicStatusOn => 'Impostato';
@@ -131,6 +131,18 @@ class LIt extends L {
 
   @override
   String get lockWrongPin => 'PIN errato.';
+
+  @override
+  String get settingsChangePin => 'Cambia PIN';
+
+  @override
+  String get changePinCurrent => 'Inserisci il PIN attuale';
+
+  @override
+  String get changePinNew => 'Scegli un nuovo PIN';
+
+  @override
+  String get changePinDone => 'PIN cambiato.';
 
   @override
   String lockWait(int seconds) {
