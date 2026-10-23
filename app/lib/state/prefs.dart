@@ -101,6 +101,10 @@ class Prefs extends ChangeNotifier {
 
   Locale? get locale => _language == null ? null : Locale(_language!);
 
+  /// Settings sections the user has open. Kept for as long as the app
+  /// runs, not saved.
+  final Set<String> openSections = {'protections'};
+
   Future<void> _save() async {
     notifyListeners();
     await _store.write({

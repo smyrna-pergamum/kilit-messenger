@@ -41,9 +41,13 @@ class SettingsScreen extends StatelessWidget {
     return ListenableBuilder(
       listenable: prefs,
       builder: (context, _) => ListView(
+        key: const ValueKey('settings-list'),
         padding: const EdgeInsets.all(16),
         children: [
           _Section(
+            open: prefs.openSections,
+            id: 'protections',
+            icon: Icons.shield_outlined,
             title: l.settingsProtections,
             children: [
               _Status(
@@ -74,6 +78,9 @@ class SettingsScreen extends StatelessWidget {
             ],
           ),
           _Section(
+            open: prefs.openSections,
+            id: 'fingerprint',
+            icon: Icons.fingerprint,
             title: l.settingsFingerprint,
             children: [
               Padding(
@@ -105,6 +112,9 @@ class SettingsScreen extends StatelessWidget {
             ],
           ),
           _Section(
+            open: prefs.openSections,
+            id: 'appearance',
+            icon: Icons.palette_outlined,
             title: l.settingsAppearance,
             children: [
               Padding(
@@ -135,6 +145,9 @@ class SettingsScreen extends StatelessWidget {
             ],
           ),
           _Section(
+            open: prefs.openSections,
+            id: 'language',
+            icon: Icons.translate,
             title: l.settingsLanguage,
             children: [
               RadioGroup<String>(
@@ -159,6 +172,9 @@ class SettingsScreen extends StatelessWidget {
             ],
           ),
           _Section(
+            open: prefs.openSections,
+            id: 'privacy',
+            icon: Icons.visibility_off_outlined,
             title: l.settingsPrivacy,
             children: [
               SwitchListTile(
@@ -171,6 +187,9 @@ class SettingsScreen extends StatelessWidget {
             ],
           ),
           _Section(
+            open: prefs.openSections,
+            id: 'permissions',
+            icon: Icons.admin_panel_settings_outlined,
             title: l.settingsPermissions,
             children: [
               Padding(
@@ -200,6 +219,9 @@ class SettingsScreen extends StatelessWidget {
             ],
           ),
           _Section(
+            open: prefs.openSections,
+            id: 'about',
+            icon: Icons.info_outline,
             title: l.settingsAbout,
             children: [
               ListTile(
@@ -228,9 +250,25 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
+/// A card that opens and closes.
+///
+/// Which ones are open lives in [Prefs.openSections] for as long as the app
+/// runs, so a trip to another tab leaves them as they were. Not PageStorage:
+/// a PageStorageKey on the tile made the scrollable inside the safety
+/// number's SelectableText read the tile's bool as a scroll offset, and the
+/// section crashed when opened.
 class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.children});
+  const _Section({
+    required this.open,
+    required this.id,
+    required this.icon,
+    required this.title,
+    required this.children,
+  });
 
+  final Set<String> open;
+  final String id;
+  final IconData icon;
   final String title;
   final List<Widget> children;
 
@@ -241,18 +279,25 @@ class _Section extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Card(
         margin: EdgeInsets.zero,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-              child: Text(
-                title,
-                style: TextStyle(color: t.text, fontWeight: FontWeight.w600),
-              ),
-            ),
-            ...children,
-          ],
+        clipBehavior: Clip.antiAlias,
+        child: ExpansionTile(
+          initiallyExpanded: open.contains(id),
+          onExpansionChanged: (isOpen) =>
+              isOpen ? open.add(id) : open.remove(id),
+          leading: Icon(icon, color: t.accent),
+          title: Text(
+            title,
+            key: ValueKey('section-$id'),
+            style: TextStyle(color: t.text, fontWeight: FontWeight.w600),
+          ),
+          iconColor: t.accent,
+          collapsedIconColor: t.textMuted,
+          // the card draws the frame; no extra lines when open
+          shape: const Border(),
+          collapsedShape: const Border(),
+          expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
+          childrenPadding: const EdgeInsets.only(bottom: 4),
+          children: children,
         ),
       ),
     );

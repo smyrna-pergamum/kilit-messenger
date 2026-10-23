@@ -283,17 +283,30 @@ void main() {
     expect(find.byKey(const ValueKey('status-tor')), findsOneWidget);
     expect(find.textContaining('None (development core)'), findsOneWidget);
 
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('section-appearance')),
+    );
+    await tester.tap(find.byKey(const ValueKey('section-appearance')));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Dark'));
     await tester.pumpAndSettle();
     expect(prefs.themeMode, ThemeMode.dark);
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
     expect(app.themeMode, ThemeMode.dark);
 
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('section-permissions')),
+    );
+    await tester.tap(find.byKey(const ValueKey('section-permissions')));
+    await tester.pumpAndSettle();
     await tester.ensureVisible(find.byKey(const ValueKey('open-permissions')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('open-permissions')));
     expect(files.settingsOpened, 1);
 
+    await tester.ensureVisible(find.byKey(const ValueKey('section-language')));
+    await tester.tap(find.byKey(const ValueKey('section-language')));
+    await tester.pumpAndSettle();
     await tester.ensureVisible(find.byKey(const ValueKey('language-tr')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('language-tr')));
@@ -302,6 +315,9 @@ void main() {
     // the list is scrolled down to the languages; the title bar shows it
     expect(find.text('Ayarlar'), findsWidgets);
 
+    await tester.ensureVisible(find.byKey(const ValueKey('section-privacy')));
+    await tester.tap(find.byKey(const ValueKey('section-privacy')));
+    await tester.pumpAndSettle();
     await tester.ensureVisible(find.byKey(const ValueKey('clipboard-hint')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('clipboard-hint')));
@@ -428,27 +444,86 @@ void main() {
       await tester.tap(find.byIcon(Icons.settings_outlined));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('status-tor')), findsOneWidget);
-      expect(tester.takeException(), isNull);
+      // open every section: the safety number once crashed only when opened
+      for (final id in [
+        'fingerprint',
+        'appearance',
+        'language',
+        'privacy',
+        'permissions',
+        'about',
+      ]) {
+        final header = find.byKey(ValueKey('section-$id'));
+        // the list builds lazily: scroll until the header exists
+        await tester.scrollUntilVisible(
+          header,
+          300,
+          scrollable: find
+              .descendant(
+                of: find.byKey(const ValueKey('settings-list')),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(header);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull, reason: 'opening $id in $lang');
+      }
+      expect(find.byKey(const ValueKey('fingerprint')), findsOneWidget);
     });
   }
 
-  testWidgets('switching the theme fades out and back in', (tester) async {
-    final (_, prefs) = await startApp(tester);
-    FadeTransition fade() => tester.widget<FadeTransition>(
-      find.byWidgetPredicate(
-        (w) => w is FadeTransition && w.child is MaterialApp,
-      ),
-    );
-    expect(fade().opacity.value, 1);
-    unawaited(prefs.setThemeMode(ThemeMode.dark));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 150));
-    expect(fade().opacity.value, lessThan(1));
+  testWidgets(
+    'switching the theme shifts colours smoothly, never through black',
+    (tester) async {
+      final (_, prefs) = await startApp(
+        tester,
+        prefs: {'language': 'en', 'theme': 'light'},
+      );
+      Color background() =>
+          Theme.of(tester.element(find.byKey(const ValueKey('lock-title'))))
+              .scaffoldBackgroundColor;
+      final light = background();
+      unawaited(prefs.setThemeMode(ThemeMode.dark));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
+      final middle = background();
+      expect(middle, isNot(light));
+      expect(middle, isNot(const Color(0xFF0D1117)));
+      // halfway between night blue and paper, not black
+      expect(middle.computeLuminance(), greaterThan(0.05));
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is FadeTransition && w.child is MaterialApp,
+        ),
+        findsNothing,
+      );
+      await tester.pumpAndSettle();
+      expect(background(), const Color(0xFF0D1117));
+    },
+  );
+
+  testWidgets('settings sections open and close', (tester) async {
+    await startApp(tester, size: const Size(400, 1600));
+    await setUpVault(tester);
+    await tester.tap(find.byIcon(Icons.settings_outlined));
     await tester.pumpAndSettle();
-    expect(fade().opacity.value, 1);
-    expect(
-      tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
-      ThemeMode.dark,
-    );
+    // protections start open, the rest closed
+    expect(find.byKey(const ValueKey('status-tor')), findsOneWidget);
+    expect(find.byKey(const ValueKey('theme-choice')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('section-appearance')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('theme-choice')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('section-protections')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('status-tor')), findsNothing);
+    // and stay as they were after a trip to another tab
+    await tester.tap(find.text('Vault'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('theme-choice')), findsOneWidget);
+    expect(find.byKey(const ValueKey('status-tor')), findsNothing);
   });
 }
