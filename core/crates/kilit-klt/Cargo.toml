@@ -9,7 +9,25 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+age = { version = "=0.12.1", default-features = false }
+age-core = "=0.12.0"
+hpke-rs = "=0.8.0"
+hpke-rs-crypto = "=0.8.0"
+hpke-rs-libcrux = "=0.8.0"
+libcrux-ml-dsa = { version = "=0.0.11", default-features = false, features = ["std", "mldsa65"] }
+ed25519-dalek = "3.0.0"
+argon2 = { version = "0.6.0", default-features = false, features = ["alloc"] }
+chacha20poly1305 = { version = "0.11.0", default-features = false, features = ["alloc"] }
+sha2 = "0.11.1"
+ciborium = "0.2.2"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_bytes = "0.11.19"
+base64 = "0.22"
+zeroize = "1.9.1"
+getrandom = "0.4.3"
 
+[dev-dependencies]
+hex = "0.4"
 
 [lints]
 workspace = true

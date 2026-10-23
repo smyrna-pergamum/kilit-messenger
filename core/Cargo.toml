@@ -23,6 +23,10 @@ unwrap_used = "deny"
 expect_used = "deny"
 panic = "deny"
 
+# crypto dependencies are far too slow unoptimised (Argon2 at 256 MiB)
+[profile.dev.package."*"]
+opt-level = 3
+
 [profile.release]
 lto = true
 codegen-units = 1

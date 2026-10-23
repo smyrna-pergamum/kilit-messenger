@@ -1,14 +1,35 @@
 //! The KLT1 encrypted file format.
 //!
-//! A `.klt` file is the 4-byte magic `KLT1` followed by an age v1 payload
-//! (see `spec/KLT1.md`). This crate only recognises the envelope for now;
-//! sealing and opening land in Aşama 1.
+//! A `.klt` file is the 4-byte magic `KLT1` followed by an age v1 file whose
+//! recipients are Kilit's own post-quantum stanza types. `spec/KLT1.md` is
+//! the authoritative description; this crate follows it.
+
+mod armor;
+mod error;
+mod manifest;
+mod packet;
+mod padme;
+mod passphrase;
+mod sign;
+mod xwing;
+
+pub use armor::{from_text, to_text};
+pub use error::KltError;
+pub use manifest::{Manifest, SignerKeys};
+pub use packet::{Opened, Signature, open, seal};
+pub use passphrase::{KdfParams, PassphraseIdentity, PassphraseRecipient};
+pub use sign::{HybridSignature, PacketSigner, verify};
+pub use xwing::{XWingIdentity, XWingRecipient};
 
 /// The first four bytes of every `.klt` file.
 pub const MAGIC: &[u8; 4] = b"KLT1";
 
 /// The prefix of a text-armored packet pasted into another app.
 pub const TEXT_PREFIX: &str = "KLT1:";
+
+/// The age label every Kilit recipient carries, so they can only be mixed
+/// with other post-quantum recipients.
+pub(crate) const PQ_LABEL: &str = "postquantum";
 
 /// Why some bytes are not a `.klt` file.
 #[derive(Debug, PartialEq, Eq)]

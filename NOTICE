@@ -26,7 +26,11 @@ Third-party components (to be completed as they are added)
 -------------------------------------------------------------------------------
 
 libsignal       AGPL-3.0-only   https://github.com/signalapp/libsignal
-age / rage      BSD-3 / MIT-or-Apache-2.0
+age (rage)      MIT OR Apache-2.0   https://github.com/str4d/rage
+hpke-rs         MPL-2.0             https://github.com/cryspen/hpke-rs
+libcrux         Apache-2.0          https://github.com/cryspen/libcrux
+RustCrypto      MIT OR Apache-2.0   argon2, chacha20poly1305, sha2, hkdf, hmac
+ed25519-dalek   BSD-3-Clause        https://github.com/dalek-cryptography
 Tor             BSD-3-Clause    https://www.torproject.org/
 SQLCipher       BSD-3-Clause    https://www.zetetic.net/sqlcipher/
 
