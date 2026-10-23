@@ -1,0 +1,33 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  core:
+    runs-on: ubuntu-24.04
+    steps:
+      # actions are pinned by commit, not by tag (v7.0.1)
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: fmt, clippy and tests in the pinned container
+        run: ./repro/build.sh test
+
+  no-secrets:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: no signing material in the tree
+        run: |
+          if git ls-files | grep -E '\.(jks|keystore|p12|pfx|pem|key)$|key\.properties$'; then
+            echo "signing material is tracked" >&2
+            exit 1
+          fi

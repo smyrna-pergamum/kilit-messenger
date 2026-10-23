@@ -1,0 +1,35 @@
+Kilit
+Copyright (C) 2026 Kilit contributors
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version. See LICENSE.
+
+-------------------------------------------------------------------------------
+Derived work: Kryfo
+-------------------------------------------------------------------------------
+
+Parts of Kilit are derived from Kryfo, a private messenger for Android:
+  https://github.com/GnosiWorks/Kryfo
+  reviewed and taken at commit 2660ae8 (2026-10-22)
+Kryfo is licensed GPL-3.0-or-later. Copyright of the derived parts remains
+with the Kryfo authors; modifications are by the Kilit contributors.
+
+Kilit is not Kryfo and is not endorsed by its authors. The names "Kryfo" and
+"Fokia" belong to the Kryfo project and are not used by Kilit.
+
+Files derived from Kryfo carry a header that names the source file.
+
+-------------------------------------------------------------------------------
+Third-party components (to be completed as they are added)
+-------------------------------------------------------------------------------
+
+libsignal       AGPL-3.0-only   https://github.com/signalapp/libsignal
+age / rage      BSD-3 / MIT-or-Apache-2.0
+Tor             BSD-3-Clause    https://www.torproject.org/
+SQLCipher       BSD-3-Clause    https://www.zetetic.net/sqlcipher/
+
+libsignal is AGPL-3.0. Combining it with this GPL-3.0-or-later program is
+permitted by section 13 of both licenses; the combined work carries the
+AGPL-3.0 network-interaction terms.

@@ -1,0 +1,15 @@
+[package]
+name = "kilit-parse"
+description = "Disposable parser compartment: thumbnails and metadata stripping"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+kilit-ipc.workspace = true
+
+[lints]
+workspace = true
