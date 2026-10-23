@@ -176,6 +176,125 @@ class LIt extends L {
   String get chatsLater => 'La messaggistica tramite Tor arriva nella fase 2.';
 
   @override
+  String get chatsIntro =>
+      'I messaggi sono cifrati end-to-end con il protocollo Signal (PQXDH e SPQR, post-quantistico). Finché non arriva la rete di Kilit, viaggiano come testo che copi in qualsiasi app di chat.';
+
+  @override
+  String get chatsEmpty =>
+      'Ancora nessun contatto. Dai la tua scheda a qualcuno o aggiungi la sua.';
+
+  @override
+  String get chatsShareCard => 'La mia scheda';
+
+  @override
+  String get chatsAddContact => 'Aggiungi contatto';
+
+  @override
+  String get chatsOpenClipboard => 'Apri dagli appunti';
+
+  @override
+  String get chatsNothingOnClipboard =>
+      'Negli appunti non c\'è nessun messaggio Kilit né scheda contatto.';
+
+  @override
+  String get cardTitle => 'La tua scheda contatto';
+
+  @override
+  String get cardName => 'Nome da mostrare (facoltativo)';
+
+  @override
+  String get cardShow => 'Crea scheda';
+
+  @override
+  String get cardHint =>
+      'Invia questo testo alla persona con cui vuoi parlare. Non contiene segreti. Una volta collegati, confrontate i numeri di sicurezza.';
+
+  @override
+  String get addContactTitle => 'Aggiungi un contatto';
+
+  @override
+  String get addContactCard => 'La sua scheda contatto (KLC1:…)';
+
+  @override
+  String get addContactName => 'Nome (facoltativo)';
+
+  @override
+  String get addContactGo => 'Aggiungi';
+
+  @override
+  String get addContactRefused =>
+      'Questa non è una scheda contatto, oppure è la tua.';
+
+  @override
+  String get contactUnnamed => 'Contatto senza nome';
+
+  @override
+  String get chatEmpty =>
+      'Ancora nessun messaggio. Il primo che scrivi avvia la sessione cifrata.';
+
+  @override
+  String get chatInput => 'Messaggio';
+
+  @override
+  String get chatSend => 'Cifra';
+
+  @override
+  String get chatPaste => 'Apri una risposta dagli appunti';
+
+  @override
+  String get chatSealedTitle => 'Messaggio cifrato';
+
+  @override
+  String chatSealedHint(String name) {
+    return 'Copia questo nella tua app di chat e invialo a $name. Solo questa persona può aprirlo.';
+  }
+
+  @override
+  String get chatNewContact =>
+      'Qualcuno che ha la tua scheda ti ha scritto. Dagli un nome e confrontate i numeri di sicurezza prima di fidarti.';
+
+  @override
+  String get chatOtherContact =>
+      'È stato aperto anche un messaggio di un altro contatto; è nella sua conversazione.';
+
+  @override
+  String get chatDuplicate => 'Questo messaggio è già stato aperto.';
+
+  @override
+  String get chatUnknown =>
+      'Questo messaggio non è di nessuno con cui hai una sessione.';
+
+  @override
+  String get chatDamaged => 'Il messaggio è danneggiato.';
+
+  @override
+  String get safetyTitle => 'Numero di sicurezza';
+
+  @override
+  String safetyHint(String name) {
+    return 'Confronta queste 60 cifre con $name, di persona o al telefono. Se sono uguali su entrambi i telefoni, non c\'è nessuno nel mezzo.';
+  }
+
+  @override
+  String get contactRename => 'Rinomina';
+
+  @override
+  String get contactRemove => 'Elimina contatto';
+
+  @override
+  String get contactRemoveTitle => 'Eliminare questo contatto?';
+
+  @override
+  String get contactRemoveBody =>
+      'Vengono eliminate la sessione e tutta la conversazione. Per scrivervi di nuovo vi servono le vostre schede.';
+
+  @override
+  String get contactRemoveGo => 'Elimina';
+
+  @override
+  String get save => 'Salva';
+
+  @override
   String get cameraLater =>
       'Una fotocamera che non scrive mai dati in chiaro sulla memoria arriva nella fase 2.';
 

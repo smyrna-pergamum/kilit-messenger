@@ -170,6 +170,118 @@ class LJa extends L {
   String get chatsLater => 'Tor経由のメッセージ機能はステージ2で提供されます。';
 
   @override
+  String get chatsIntro =>
+      'メッセージは Signal プロトコル（PQXDH と SPQR、耐量子）でエンドツーエンド暗号化されます。Kilit 独自のネットワークができるまでは、任意のチャットアプリにコピーするテキストとして届けます。';
+
+  @override
+  String get chatsEmpty => 'まだ連絡先がありません。自分のカードを渡すか、相手のカードを追加してください。';
+
+  @override
+  String get chatsShareCard => '自分のカード';
+
+  @override
+  String get chatsAddContact => '連絡先を追加';
+
+  @override
+  String get chatsOpenClipboard => 'クリップボードから開く';
+
+  @override
+  String get chatsNothingOnClipboard => 'クリップボードに Kilit のメッセージも連絡先カードもありません。';
+
+  @override
+  String get cardTitle => 'あなたの連絡先カード';
+
+  @override
+  String get cardName => '表示名（任意）';
+
+  @override
+  String get cardShow => 'カードを作成';
+
+  @override
+  String get cardHint =>
+      'このテキストを話したい相手に送ってください。秘密は含まれていません。つながったら安全番号を照合してください。';
+
+  @override
+  String get addContactTitle => '連絡先を追加';
+
+  @override
+  String get addContactCard => '相手の連絡先カード（KLC1:…）';
+
+  @override
+  String get addContactName => '名前（任意）';
+
+  @override
+  String get addContactGo => '追加';
+
+  @override
+  String get addContactRefused => 'これは連絡先カードではないか、あなた自身のカードです。';
+
+  @override
+  String get contactUnnamed => '名前のない連絡先';
+
+  @override
+  String get chatEmpty => 'まだメッセージはありません。最初に書いたメッセージで暗号化セッションが始まります。';
+
+  @override
+  String get chatInput => 'メッセージ';
+
+  @override
+  String get chatSend => '暗号化';
+
+  @override
+  String get chatPaste => '返信をクリップボードから開く';
+
+  @override
+  String get chatSealedTitle => '暗号化されたメッセージ';
+
+  @override
+  String chatSealedHint(String name) {
+    return 'これをチャットアプリにコピーして $name に送ってください。開けるのはその人だけです。';
+  }
+
+  @override
+  String get chatNewContact =>
+      'あなたのカードを持つ人からメッセージが届きました。名前を付け、信頼する前に安全番号を照合してください。';
+
+  @override
+  String get chatOtherContact => '別の連絡先からのメッセージも開きました。その人との会話にあります。';
+
+  @override
+  String get chatDuplicate => 'このメッセージはすでに開かれています。';
+
+  @override
+  String get chatUnknown => 'このメッセージはセッションのある相手からのものではありません。';
+
+  @override
+  String get chatDamaged => 'メッセージが壊れています。';
+
+  @override
+  String get safetyTitle => '安全番号';
+
+  @override
+  String safetyHint(String name) {
+    return 'この60桁を $name と、会って、または通話で照合してください。両方の電話で同じなら、間に誰もいません。';
+  }
+
+  @override
+  String get contactRename => '名前を変更';
+
+  @override
+  String get contactRemove => '連絡先を削除';
+
+  @override
+  String get contactRemoveTitle => 'この連絡先を削除しますか？';
+
+  @override
+  String get contactRemoveBody => 'セッションと会話全体が削除されます。再びやり取りするにはお互いのカードが必要です。';
+
+  @override
+  String get contactRemoveGo => '削除';
+
+  @override
+  String get save => '保存';
+
+  @override
   String get cameraLater => '平文をディスクに書き込まないカメラはステージ2で提供されます。';
 
   @override

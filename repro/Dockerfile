@@ -30,6 +30,12 @@ RUN cd /tmp/toolchain && rustup toolchain install \
     && rustup show active-toolchain \
     && chmod -R a+rwX /opt/cargo /opt/rustup
 
+# protoc: libsignal turns its .proto files into Rust (prost-build) while it
+# builds. Debian's package, from the release the pinned base image names.
+RUN apt-get update && apt-get install -y --no-install-recommends protobuf-compiler \
+    && rm -rf /var/lib/apt/lists/* \
+    && protoc --version
+
 WORKDIR /src/core
 
 FROM core AS android

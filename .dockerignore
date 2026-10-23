@@ -1,0 +1,5 @@
+# The images copy only the Rust toolchain file; the repository itself is
+# mounted at run time. Sending build output (core/target, app/build) as
+# build context would only slow every image build down.
+*
+!core/rust-toolchain.toml

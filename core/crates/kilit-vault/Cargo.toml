@@ -24,6 +24,12 @@ serde_bytes = "0.11.19"
 secrecy = "0.10.3"
 zeroize = "1.9.1"
 getrandom = "0.4.3"
+# Signal's own implementation (AGPL-3.0-only, which GPLv3 section 13 lets
+# Kilit combine with), pinned to a release commit
+libsignal-protocol = { git = "https://github.com/signalapp/libsignal", rev = "b2a5c30f3245c1bcad04b27b1e752a38321c793d" }
+async-trait = "0.1.79"
+rand = "0.9.4"
+base64 = "0.22"
 
 [dev-dependencies]
 age = { version = "=0.12.1", default-features = false }

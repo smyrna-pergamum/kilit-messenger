@@ -82,6 +82,93 @@ abstract interface class KilitCore {
 
   /// Keeps an opened message in the vault as a note, once per packet.
   Future<KeptMessage> keepMessage(Uint8List packet, String title, String text);
+
+  /// This vault's contact card, `KLC1:` text, showing [name] first. It
+  /// holds no secret: what a contact needs to start a Signal session.
+  Future<String> myCard(String name);
+
+  /// Adds the contact whose card is in [text], named [name] or as the card
+  /// says, and starts a PQXDH session with them. Throws [ContactRefused].
+  Future<Contact> addContact(String text, {String? name});
+
+  /// The contacts, newest conversation first.
+  Future<List<Contact>> contacts();
+  Future<void> renameContact(String id, String name);
+
+  /// Forgets a contact: session, identity key and conversation.
+  Future<void> removeContact(String id);
+
+  /// The 60 digits two people compare: 12 groups of 5.
+  Future<String> safetyNumber(String id);
+
+  /// A conversation, oldest line first.
+  Future<List<ChatLine>> chat(String id);
+
+  /// Seals [text] for a contact; returns the `KLM1:` text to send.
+  Future<String> sendMessage(String id, String text);
+
+  /// Opens every `KLM1:` message in pasted text into its conversation.
+  Future<List<IncomingMessage>> receive(String text);
+}
+
+/// The card was not one, or was this vault's own.
+class ContactRefused implements Exception {
+  const ContactRefused();
+}
+
+class ChatLine {
+  const ChatLine({
+    required this.outgoing,
+    required this.text,
+    required this.at,
+    required this.sent,
+  });
+
+  /// Written on this device.
+  final bool outgoing;
+  final String text;
+
+  /// When it was written or opened here.
+  final DateTime at;
+
+  /// When the sender says they wrote it.
+  final DateTime sent;
+}
+
+class Contact {
+  const Contact({
+    required this.id,
+    required this.name,
+    required this.added,
+    this.last,
+  });
+
+  /// 32 hex digits: a hash of their identity key, nothing else.
+  final String id;
+
+  /// Empty until the user gives one.
+  final String name;
+  final DateTime added;
+  final ChatLine? last;
+}
+
+enum IncomingKind { opened, duplicate, unknown, damaged, truncated }
+
+class IncomingMessage {
+  const IncomingMessage(
+    this.kind, {
+    this.contact = '',
+    this.newContact = false,
+    this.text = '',
+  });
+  final IncomingKind kind;
+
+  /// Who sent it, when opened.
+  final String contact;
+
+  /// The message made them a contact: they had this vault's card.
+  final bool newContact;
+  final String text;
 }
 
 class KeptMessage {

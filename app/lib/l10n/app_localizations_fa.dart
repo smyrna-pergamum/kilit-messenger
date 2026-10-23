@@ -173,6 +173,123 @@ class LFa extends L {
   String get chatsLater => 'پیام‌رسانی از طریق Tor در مرحله 2 می‌آید.';
 
   @override
+  String get chatsIntro =>
+      'پیام‌ها با پروتکل Signal ‏(PQXDH و SPQR، پساکوانتومی) سرتاسری رمزگذاری می‌شوند. تا وقتی شبکهٔ خود Kilit برسد، به‌صورت متنی منتقل می‌شوند که در هر برنامهٔ گفتگو کپی می‌کنید.';
+
+  @override
+  String get chatsEmpty =>
+      'هنوز مخاطبی ندارید. کارت خود را به کسی بدهید یا کارت او را اضافه کنید.';
+
+  @override
+  String get chatsShareCard => 'کارت من';
+
+  @override
+  String get chatsAddContact => 'افزودن مخاطب';
+
+  @override
+  String get chatsOpenClipboard => 'باز کردن از کلیپ‌بورد';
+
+  @override
+  String get chatsNothingOnClipboard =>
+      'در کلیپ‌بورد پیام Kilit یا کارت مخاطب نیست.';
+
+  @override
+  String get cardTitle => 'کارت مخاطب شما';
+
+  @override
+  String get cardName => 'نام نمایشی (اختیاری)';
+
+  @override
+  String get cardShow => 'ساخت کارت';
+
+  @override
+  String get cardHint =>
+      'این متن را برای کسی بفرستید که می‌خواهید با او گفتگو کنید. هیچ رازی در آن نیست. پس از اتصال، شماره‌های امنیتی را مقایسه کنید.';
+
+  @override
+  String get addContactTitle => 'افزودن مخاطب';
+
+  @override
+  String get addContactCard => 'کارت مخاطب او (KLC1:…)';
+
+  @override
+  String get addContactName => 'نام (اختیاری)';
+
+  @override
+  String get addContactGo => 'افزودن';
+
+  @override
+  String get addContactRefused => 'این کارت مخاطب نیست، یا کارت خود شماست.';
+
+  @override
+  String get contactUnnamed => 'مخاطب بی‌نام';
+
+  @override
+  String get chatEmpty =>
+      'هنوز پیامی نیست. نخستین پیامی که بنویسید نشست رمزگذاری‌شده را آغاز می‌کند.';
+
+  @override
+  String get chatInput => 'پیام';
+
+  @override
+  String get chatSend => 'رمزگذاری';
+
+  @override
+  String get chatPaste => 'باز کردن پاسخ از کلیپ‌بورد';
+
+  @override
+  String get chatSealedTitle => 'پیام رمزگذاری‌شده';
+
+  @override
+  String chatSealedHint(String name) {
+    return 'این را در برنامهٔ گفتگو کپی کنید و برای $name بفرستید. فقط او می‌تواند بازش کند.';
+  }
+
+  @override
+  String get chatNewContact =>
+      'کسی که کارت شما را دارد برایتان نوشته است. نامی به او بدهید و پیش از اعتماد، شماره‌های امنیتی را مقایسه کنید.';
+
+  @override
+  String get chatOtherContact =>
+      'پیامی از مخاطب دیگری هم باز شد؛ در گفتگوی با اوست.';
+
+  @override
+  String get chatDuplicate => 'این پیام پیش‌تر باز شده است.';
+
+  @override
+  String get chatUnknown => 'این پیام از کسی نیست که با او نشستی دارید.';
+
+  @override
+  String get chatDamaged => 'پیام آسیب دیده است.';
+
+  @override
+  String get safetyTitle => 'شمارهٔ امنیتی';
+
+  @override
+  String safetyHint(String name) {
+    return 'این ۶۰ رقم را با $name حضوری یا در تماس مقایسه کنید. اگر در هر دو گوشی یکسان باشد، کسی در میان نیست.';
+  }
+
+  @override
+  String get contactRename => 'تغییر نام';
+
+  @override
+  String get contactRemove => 'حذف مخاطب';
+
+  @override
+  String get contactRemoveTitle => 'این مخاطب حذف شود؟';
+
+  @override
+  String get contactRemoveBody =>
+      'نشست و کل گفتگو حذف می‌شود. برای نوشتن دوباره به کارت‌های یکدیگر نیاز دارید.';
+
+  @override
+  String get contactRemoveGo => 'حذف';
+
+  @override
+  String get save => 'ذخیره';
+
+  @override
   String get cameraLater =>
       'دوربینی که هرگز داده رمزنشده روی دیسک نمی‌نویسد در مرحله 2 می‌آید.';
 

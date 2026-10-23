@@ -173,6 +173,124 @@ class LRu extends L {
   String get chatsLater => 'Переписка через Tor появится на этапе 2.';
 
   @override
+  String get chatsIntro =>
+      'Сообщения шифруются сквозным шифрованием по протоколу Signal (PQXDH и SPQR, постквантовые). Пока у Kilit нет своей сети, они передаются как текст, который вы копируете в любой мессенджер.';
+
+  @override
+  String get chatsEmpty =>
+      'Контактов пока нет. Дайте кому-нибудь свою карточку или добавьте чужую.';
+
+  @override
+  String get chatsShareCard => 'Моя карточка';
+
+  @override
+  String get chatsAddContact => 'Добавить контакт';
+
+  @override
+  String get chatsOpenClipboard => 'Открыть из буфера обмена';
+
+  @override
+  String get chatsNothingOnClipboard =>
+      'В буфере обмена нет сообщения Kilit или карточки контакта.';
+
+  @override
+  String get cardTitle => 'Ваша карточка контакта';
+
+  @override
+  String get cardName => 'Отображаемое имя (необязательно)';
+
+  @override
+  String get cardShow => 'Создать карточку';
+
+  @override
+  String get cardHint =>
+      'Отправьте этот текст тому, с кем хотите общаться. В нём нет секретов. После подключения сравните коды безопасности.';
+
+  @override
+  String get addContactTitle => 'Добавить контакт';
+
+  @override
+  String get addContactCard => 'Его карточка контакта (KLC1:…)';
+
+  @override
+  String get addContactName => 'Имя (необязательно)';
+
+  @override
+  String get addContactGo => 'Добавить';
+
+  @override
+  String get addContactRefused =>
+      'Это не карточка контакта или это ваша собственная.';
+
+  @override
+  String get contactUnnamed => 'Контакт без имени';
+
+  @override
+  String get chatEmpty =>
+      'Сообщений пока нет. Первое написанное вами сообщение начнёт зашифрованный сеанс.';
+
+  @override
+  String get chatInput => 'Сообщение';
+
+  @override
+  String get chatSend => 'Зашифровать';
+
+  @override
+  String get chatPaste => 'Открыть ответ из буфера обмена';
+
+  @override
+  String get chatSealedTitle => 'Зашифрованное сообщение';
+
+  @override
+  String chatSealedHint(String name) {
+    return 'Скопируйте это в мессенджер и отправьте контакту $name. Открыть его сможет только он.';
+  }
+
+  @override
+  String get chatNewContact =>
+      'Вам написал кто-то, у кого есть ваша карточка. Дайте ему имя и сравните коды безопасности, прежде чем доверять.';
+
+  @override
+  String get chatOtherContact =>
+      'Также открыто сообщение от другого контакта; оно в переписке с ним.';
+
+  @override
+  String get chatDuplicate => 'Это сообщение уже открывали.';
+
+  @override
+  String get chatUnknown => 'Это сообщение не от того, с кем у вас есть сеанс.';
+
+  @override
+  String get chatDamaged => 'Сообщение повреждено.';
+
+  @override
+  String get safetyTitle => 'Код безопасности';
+
+  @override
+  String safetyHint(String name) {
+    return 'Сравните эти 60 цифр с контактом $name лично или по телефону. Если на обоих телефонах они совпадают, посередине никого нет.';
+  }
+
+  @override
+  String get contactRename => 'Переименовать';
+
+  @override
+  String get contactRemove => 'Удалить контакт';
+
+  @override
+  String get contactRemoveTitle => 'Удалить этот контакт?';
+
+  @override
+  String get contactRemoveBody =>
+      'Сеанс и вся переписка будут удалены. Чтобы снова писать друг другу, понадобятся ваши карточки.';
+
+  @override
+  String get contactRemoveGo => 'Удалить';
+
+  @override
+  String get save => 'Сохранить';
+
+  @override
   String get cameraLater =>
       'Камера, которая никогда не пишет открытые данные на диск, появится на этапе 2.';
 

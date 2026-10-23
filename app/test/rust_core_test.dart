@@ -304,4 +304,40 @@ void main() {
     },
     skip: skip,
   );
+
+  test('two Rust vaults talk through cards and messages', () async {
+    final a = await Directory.systemTemp.createTemp('kilit-ma-');
+    final b = await Directory.systemTemp.createTemp('kilit-mb-');
+    addTearDown(() => a.delete(recursive: true));
+    addTearDown(() => b.delete(recursive: true));
+    final ayse = await RustCore.open(a.path, desktop: false, key: NoKey());
+    final bora = await RustCore.open(b.path, desktop: false, key: NoKey());
+    await ayse.createVault('482916');
+    await bora.createVault('739204');
+
+    final card = await bora.myCard('Bora');
+    expect(card, startsWith('KLC1:'));
+    expect(() => ayse.addContact('not a card'), throwsA(isA<ContactRefused>()));
+    final c = await ayse.addContact(card);
+    expect(c.name, 'Bora');
+
+    final m = await ayse.sendMessage(c.id, 'selam');
+    final got = await bora.receive('Ayşe: $m');
+    expect(got.single.kind, IncomingKind.opened);
+    expect(got.single.text, 'selam');
+    expect(got.single.newContact, isTrue);
+    expect((await bora.receive(m)).single.kind, IncomingKind.duplicate);
+
+    final reply = await bora.sendMessage(got.single.contact, 'aleyküm selam');
+    expect((await ayse.receive(reply)).single.kind, IncomingKind.opened);
+    final lines = await ayse.chat(c.id);
+    expect(
+      [for (final l in lines) (l.outgoing, l.text)],
+      [(true, 'selam'), (false, 'aleyküm selam')],
+    );
+    expect(
+      await ayse.safetyNumber(c.id),
+      await bora.safetyNumber(got.single.contact),
+    );
+  }, skip: skip);
 }

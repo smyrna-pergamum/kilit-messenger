@@ -6,6 +6,7 @@ import '../state/prefs.dart';
 import '../state/session.dart';
 import '../theme/tokens.dart';
 import '../widgets/panic_code.dart';
+import 'chats_screen.dart';
 import 'settings_screen.dart';
 import 'vault_screen.dart';
 
@@ -70,7 +71,7 @@ class _ShellState extends State<Shell> {
   }
 
   Widget _page(L l) => switch (_index) {
-    0 => _ComingLater(text: l.chatsLater),
+    0 => ChatsScreen(core: widget.session.core, files: widget.files),
     1 => VaultScreen(
       core: widget.session.core,
       files: widget.files,

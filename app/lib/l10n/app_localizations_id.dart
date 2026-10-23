@@ -172,6 +172,125 @@ class LId extends L {
   String get chatsLater => 'Perpesanan lewat Tor hadir di tahap 2.';
 
   @override
+  String get chatsIntro =>
+      'Pesan dienkripsi ujung ke ujung dengan protokol Signal (PQXDH dan SPQR, pascakuantum). Sampai jaringan Kilit sendiri hadir, pesan dikirim sebagai teks yang Anda salin ke aplikasi obrolan apa pun.';
+
+  @override
+  String get chatsEmpty =>
+      'Belum ada kontak. Berikan kartu Anda kepada seseorang, atau tambahkan kartunya.';
+
+  @override
+  String get chatsShareCard => 'Kartu saya';
+
+  @override
+  String get chatsAddContact => 'Tambah kontak';
+
+  @override
+  String get chatsOpenClipboard => 'Buka dari papan klip';
+
+  @override
+  String get chatsNothingOnClipboard =>
+      'Tidak ada pesan Kilit atau kartu kontak di papan klip.';
+
+  @override
+  String get cardTitle => 'Kartu kontak Anda';
+
+  @override
+  String get cardName => 'Nama yang ditampilkan (opsional)';
+
+  @override
+  String get cardShow => 'Buat kartu';
+
+  @override
+  String get cardHint =>
+      'Kirim teks ini kepada orang yang ingin Anda ajak bicara. Teks ini tidak berisi rahasia. Setelah terhubung, bandingkan nomor keamanan.';
+
+  @override
+  String get addContactTitle => 'Tambah kontak';
+
+  @override
+  String get addContactCard => 'Kartu kontaknya (KLC1:…)';
+
+  @override
+  String get addContactName => 'Nama (opsional)';
+
+  @override
+  String get addContactGo => 'Tambah';
+
+  @override
+  String get addContactRefused =>
+      'Ini bukan kartu kontak, atau ini kartu Anda sendiri.';
+
+  @override
+  String get contactUnnamed => 'Kontak tanpa nama';
+
+  @override
+  String get chatEmpty =>
+      'Belum ada pesan. Pesan pertama yang Anda tulis memulai sesi terenkripsi.';
+
+  @override
+  String get chatInput => 'Pesan';
+
+  @override
+  String get chatSend => 'Enkripsi';
+
+  @override
+  String get chatPaste => 'Buka balasan dari papan klip';
+
+  @override
+  String get chatSealedTitle => 'Pesan terenkripsi';
+
+  @override
+  String chatSealedHint(String name) {
+    return 'Salin ini ke aplikasi obrolan Anda dan kirim ke $name. Hanya dia yang dapat membukanya.';
+  }
+
+  @override
+  String get chatNewContact =>
+      'Seseorang yang punya kartu Anda menulis kepada Anda. Beri dia nama, dan bandingkan nomor keamanan sebelum mempercayainya.';
+
+  @override
+  String get chatOtherContact =>
+      'Pesan dari kontak lain juga terbuka; pesan itu ada di percakapannya.';
+
+  @override
+  String get chatDuplicate => 'Pesan ini sudah pernah dibuka.';
+
+  @override
+  String get chatUnknown =>
+      'Pesan ini bukan dari siapa pun yang memiliki sesi dengan Anda.';
+
+  @override
+  String get chatDamaged => 'Pesan rusak.';
+
+  @override
+  String get safetyTitle => 'Nomor keamanan';
+
+  @override
+  String safetyHint(String name) {
+    return 'Bandingkan 60 digit ini dengan $name, secara langsung atau lewat telepon. Jika sama di kedua ponsel, tidak ada siapa pun di antara kalian.';
+  }
+
+  @override
+  String get contactRename => 'Ganti nama';
+
+  @override
+  String get contactRemove => 'Hapus kontak';
+
+  @override
+  String get contactRemoveTitle => 'Hapus kontak ini?';
+
+  @override
+  String get contactRemoveBody =>
+      'Sesi dan seluruh percakapan dihapus. Untuk menulis lagi, kalian memerlukan kartu masing-masing.';
+
+  @override
+  String get contactRemoveGo => 'Hapus';
+
+  @override
+  String get save => 'Simpan';
+
+  @override
   String get cameraLater =>
       'Kamera yang tidak pernah menulis data tak terenkripsi ke disk hadir di tahap 2.';
 

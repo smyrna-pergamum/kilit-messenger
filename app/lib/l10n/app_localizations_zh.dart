@@ -170,6 +170,116 @@ class LZh extends L {
   String get chatsLater => '通过 Tor 收发消息将在第 2 阶段推出。';
 
   @override
+  String get chatsIntro =>
+      '消息使用 Signal 协议（PQXDH 和 SPQR，抗量子）端到端加密。在 Kilit 自己的网络上线之前，消息以文本形式传送，你可以把它复制到任意聊天应用中。';
+
+  @override
+  String get chatsEmpty => '还没有联系人。把你的名片给别人，或添加对方的名片。';
+
+  @override
+  String get chatsShareCard => '我的名片';
+
+  @override
+  String get chatsAddContact => '添加联系人';
+
+  @override
+  String get chatsOpenClipboard => '从剪贴板打开';
+
+  @override
+  String get chatsNothingOnClipboard => '剪贴板中没有 Kilit 消息或联系人名片。';
+
+  @override
+  String get cardTitle => '你的联系人名片';
+
+  @override
+  String get cardName => '显示名称（可选）';
+
+  @override
+  String get cardShow => '生成名片';
+
+  @override
+  String get cardHint => '把这段文本发给你想交谈的人。其中不含任何机密。连接后请核对安全码。';
+
+  @override
+  String get addContactTitle => '添加联系人';
+
+  @override
+  String get addContactCard => '对方的联系人名片（KLC1:…）';
+
+  @override
+  String get addContactName => '名称（可选）';
+
+  @override
+  String get addContactGo => '添加';
+
+  @override
+  String get addContactRefused => '这不是联系人名片，或者是你自己的名片。';
+
+  @override
+  String get contactUnnamed => '未命名联系人';
+
+  @override
+  String get chatEmpty => '还没有消息。你写下的第一条消息会开启加密会话。';
+
+  @override
+  String get chatInput => '消息';
+
+  @override
+  String get chatSend => '加密';
+
+  @override
+  String get chatPaste => '从剪贴板打开回复';
+
+  @override
+  String get chatSealedTitle => '加密消息';
+
+  @override
+  String chatSealedHint(String name) {
+    return '把这段内容复制到聊天应用并发送给 $name。只有对方能打开。';
+  }
+
+  @override
+  String get chatNewContact => '持有你名片的人给你发了消息。请给对方命名，并在信任前核对安全码。';
+
+  @override
+  String get chatOtherContact => '另一位联系人的消息也已打开，位于与其的对话中。';
+
+  @override
+  String get chatDuplicate => '这条消息之前已打开过。';
+
+  @override
+  String get chatUnknown => '这条消息不是来自与你有会话的人。';
+
+  @override
+  String get chatDamaged => '消息已损坏。';
+
+  @override
+  String get safetyTitle => '安全码';
+
+  @override
+  String safetyHint(String name) {
+    return '与 $name 当面或通话核对这 60 位数字。如果两部手机上一致，就说明中间没有他人。';
+  }
+
+  @override
+  String get contactRename => '重命名';
+
+  @override
+  String get contactRemove => '删除联系人';
+
+  @override
+  String get contactRemoveTitle => '删除此联系人？';
+
+  @override
+  String get contactRemoveBody => '会话和整个对话都会被删除。要再次通信，需要双方重新交换名片。';
+
+  @override
+  String get contactRemoveGo => '删除';
+
+  @override
+  String get save => '保存';
+
+  @override
   String get cameraLater => '从不将明文写入磁盘的相机将在第 2 阶段推出。';
 
   @override

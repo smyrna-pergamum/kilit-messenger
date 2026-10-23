@@ -19,6 +19,7 @@
 
 mod hardware;
 mod identity;
+pub mod messaging;
 mod sealed;
 
 pub use hardware::{HardwareKey, SoftwareKey};

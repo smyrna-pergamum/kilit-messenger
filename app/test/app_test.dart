@@ -428,6 +428,143 @@ void main() {
     expect(titleTextOrNull(tester), isNull);
   });
 
+  const boraId = 'b0ba0000000000000000000000000001';
+
+  Future<void> openChats(WidgetTester tester) async {
+    await tester.tap(find.byIcon(Icons.chat_bubble_outline));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('a contact is added from a card and gets a message', (
+    tester,
+  ) async {
+    final files = FakeFiles();
+    await startApp(tester, files: files);
+    await setUpVault(tester);
+    await openChats(tester);
+    expect(find.byKey(const ValueKey('chats-empty')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('add-contact')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('contact-card')),
+      'here is my card: ${DevCore.cardFor(boraId, 'Bora')}',
+    );
+    await tester.tap(find.byKey(const ValueKey('contact-add')));
+    await tester.pumpAndSettle();
+    // the new contact's conversation opens
+    expect(
+      tester.widget<Text>(find.byKey(const ValueKey('chat-title'))).data,
+      'Bora',
+    );
+    expect(find.byKey(const ValueKey('chat-empty')), findsOneWidget);
+
+    await tester.enterText(find.byKey(const ValueKey('chat-input')), 'selam');
+    await tester.tap(find.byKey(const ValueKey('chat-send')));
+    await tester.pumpAndSettle();
+    final sealed = tester
+        .widget<SelectableText>(find.byKey(const ValueKey('sealed-text')))
+        .data!;
+    expect(sealed, startsWith('KLM1:'));
+    await tester.tap(find.byKey(const ValueKey('sealed-share')));
+    expect(files.shared.single, sealed);
+    Navigator.of(tester.element(find.byKey(const ValueKey('sealed-text'))))
+        .pop();
+    await tester.pumpAndSettle();
+    expect(find.text('selam'), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('→ selam'), findsOneWidget);
+  });
+
+  testWidgets('a card that is not one is refused', (tester) async {
+    await startApp(tester);
+    await setUpVault(tester);
+    await openChats(tester);
+    await tester.tap(find.byKey(const ValueKey('add-contact')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('contact-card')), 'hi');
+    await tester.tap(find.byKey(const ValueKey('contact-add')));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('This is not a contact card, or it is your own.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a first message from the clipboard makes a new contact', (
+    tester,
+  ) async {
+    await startApp(tester);
+    await setUpVault(tester);
+    await openChats(tester);
+    final clipboard = workingClipboard(
+      tester,
+      'Bora: ${DevCore.messageFrom(boraId, 'merhaba, kartını aldım')}',
+    );
+    await tester.tap(find.byKey(const ValueKey('chat-open-clipboard')));
+    await tester.pumpAndSettle();
+    expect(find.text('merhaba, kartını aldım'), findsOneWidget);
+    expect(find.byKey(const ValueKey('new-contact-banner')), findsOneWidget);
+    expect(clipboard(), isEmpty);
+
+    // name them, and look at the safety number
+    await tester.tap(find.byKey(const ValueKey('chat-menu')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('menu-rename')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('rename-input')), 'Bora');
+    await tester.tap(find.byKey(const ValueKey('rename-save')));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<Text>(find.byKey(const ValueKey('chat-title'))).data,
+      'Bora',
+    );
+    expect(find.byKey(const ValueKey('new-contact-banner')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('chat-safety')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('safety-number')), findsOneWidget);
+    await tester.tap(find.text('Close'));
+    await tester.pumpAndSettle();
+
+    // the same message again is not read twice
+    workingClipboard(
+      tester,
+      DevCore.messageFrom(boraId, 'merhaba, kartını aldım'),
+    );
+    await tester.tap(find.byKey(const ValueKey('chat-paste')));
+    await tester.pumpAndSettle();
+    expect(find.text('This message was opened before.'), findsOneWidget);
+
+    // and the contact can go, with the conversation
+    await tester.tap(find.byKey(const ValueKey('chat-menu')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('menu-remove')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('remove-contact-go')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('chats-empty')), findsOneWidget);
+  });
+
+  testWidgets('my card is made with the name to show', (tester) async {
+    final files = FakeFiles();
+    await startApp(tester, files: files);
+    await setUpVault(tester);
+    await openChats(tester);
+    await tester.tap(find.byKey(const ValueKey('share-card')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('card-name')), 'Ayşe');
+    await tester.tap(find.byKey(const ValueKey('card-make')));
+    await tester.pumpAndSettle();
+    final card = tester
+        .widget<SelectableText>(find.byKey(const ValueKey('card-text')))
+        .data!;
+    expect(card, startsWith('KLC1:'));
+    await tester.tap(find.byKey(const ValueKey('card-share')));
+    expect(files.shared.single, card);
+  });
+
   testWidgets('a tap on the lock button only locks', (tester) async {
     await startApp(tester);
     await setUpVault(tester);
@@ -744,6 +881,10 @@ void main() {
         expect(tester.takeException(), isNull, reason: 'opening $id in $lang');
       }
       expect(find.byKey(const ValueKey('fingerprint')), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.chat_bubble_outline));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('chats-empty')), findsOneWidget);
+      expect(tester.takeException(), isNull, reason: 'chats in $lang');
     });
   }
 

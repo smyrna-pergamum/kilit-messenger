@@ -172,6 +172,125 @@ class LEn extends L {
   String get chatsLater => 'Messaging over Tor arrives in stage 2.';
 
   @override
+  String get chatsIntro =>
+      'Messages are end-to-end encrypted with Signal\'s protocol (PQXDH and SPQR, post-quantum). Until Kilit\'s own network arrives, they travel as text you copy into any chat app.';
+
+  @override
+  String get chatsEmpty =>
+      'No contacts yet. Give your card to someone, or add theirs.';
+
+  @override
+  String get chatsShareCard => 'My card';
+
+  @override
+  String get chatsAddContact => 'Add contact';
+
+  @override
+  String get chatsOpenClipboard => 'Open from clipboard';
+
+  @override
+  String get chatsNothingOnClipboard =>
+      'No Kilit message or contact card on the clipboard.';
+
+  @override
+  String get cardTitle => 'Your contact card';
+
+  @override
+  String get cardName => 'Name to show (optional)';
+
+  @override
+  String get cardShow => 'Make card';
+
+  @override
+  String get cardHint =>
+      'Send this text to the person you want to talk to. It holds no secret. Once you are connected, compare safety numbers.';
+
+  @override
+  String get addContactTitle => 'Add a contact';
+
+  @override
+  String get addContactCard => 'Their contact card (KLC1:…)';
+
+  @override
+  String get addContactName => 'Name (optional)';
+
+  @override
+  String get addContactGo => 'Add';
+
+  @override
+  String get addContactRefused =>
+      'This is not a contact card, or it is your own.';
+
+  @override
+  String get contactUnnamed => 'Unnamed contact';
+
+  @override
+  String get chatEmpty =>
+      'No messages yet. The first one you write starts the encrypted session.';
+
+  @override
+  String get chatInput => 'Message';
+
+  @override
+  String get chatSend => 'Encrypt';
+
+  @override
+  String get chatPaste => 'Open a reply from the clipboard';
+
+  @override
+  String get chatSealedTitle => 'Encrypted message';
+
+  @override
+  String chatSealedHint(String name) {
+    return 'Copy this into your chat app and send it to $name. Only they can open it.';
+  }
+
+  @override
+  String get chatNewContact =>
+      'Someone who has your card wrote to you. Give them a name, and compare safety numbers before you trust them.';
+
+  @override
+  String get chatOtherContact =>
+      'A message from another contact was opened too; it is in their conversation.';
+
+  @override
+  String get chatDuplicate => 'This message was opened before.';
+
+  @override
+  String get chatUnknown =>
+      'This message is from no one you have a session with.';
+
+  @override
+  String get chatDamaged => 'The message is damaged.';
+
+  @override
+  String get safetyTitle => 'Safety number';
+
+  @override
+  String safetyHint(String name) {
+    return 'Compare these 60 digits with $name, in person or on a call. If they are the same on both phones, no one is in between.';
+  }
+
+  @override
+  String get contactRename => 'Rename';
+
+  @override
+  String get contactRemove => 'Delete contact';
+
+  @override
+  String get contactRemoveTitle => 'Delete this contact?';
+
+  @override
+  String get contactRemoveBody =>
+      'The session and the whole conversation are deleted. To write again you need each other\'s cards.';
+
+  @override
+  String get contactRemoveGo => 'Delete';
+
+  @override
+  String get save => 'Save';
+
+  @override
   String get cameraLater =>
       'A camera that never writes plaintext to disk arrives in stage 2.';
 

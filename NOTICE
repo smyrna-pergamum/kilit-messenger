@@ -26,6 +26,9 @@ Third-party components (to be completed as they are added)
 -------------------------------------------------------------------------------
 
 libsignal       AGPL-3.0-only   https://github.com/signalapp/libsignal
+                (libsignal-protocol at v0.105.4, commit b2a5c30)
+SPQR            AGPL-3.0-only   https://github.com/signalapp/SparsePostQuantumRatchet
+                (the post-quantum ratchet libsignal runs, v1.6.0)
 age (rage)      MIT OR Apache-2.0   https://github.com/str4d/rage
 hpke-rs         MPL-2.0             https://github.com/cryspen/hpke-rs
 libcrux         Apache-2.0          https://github.com/cryspen/libcrux

@@ -117,6 +117,13 @@ pub struct Vault {
 }
 
 impl Vault {
+    /// The master secret, for keys derived elsewhere in this crate.
+    pub(crate) fn master(&self) -> &[u8; 32] {
+        &self.master
+    }
+}
+
+impl Vault {
     /// Makes a new identity and returns it with its sealed form, which the
     /// store keeps.
     pub fn create(

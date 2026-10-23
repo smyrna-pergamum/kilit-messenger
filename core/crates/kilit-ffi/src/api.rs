@@ -353,6 +353,105 @@ pub struct ImportReply {
     pub signed_by: SignedBy,
 }
 
+/// One line of a conversation.
+pub struct ChatLine {
+    /// Written on this device (true) or received.
+    pub outgoing: bool,
+    /// The text.
+    pub text: String,
+    /// When it was written here or opened here, Unix seconds.
+    pub at_unix: i64,
+    /// When the sender says they wrote it, Unix seconds.
+    pub sent_unix: i64,
+}
+
+impl From<engine::Line> for ChatLine {
+    fn from(l: engine::Line) -> Self {
+        Self {
+            outgoing: l.outgoing,
+            text: l.text,
+            at_unix: l.at,
+            sent_unix: l.sent,
+        }
+    }
+}
+
+/// A contact, with the newest line of the conversation.
+pub struct ContactItem {
+    /// The address (32 hex digits).
+    pub id: String,
+    /// The name given; empty until one is.
+    pub name: String,
+    /// When they were added, Unix seconds.
+    pub added_unix: i64,
+    /// The newest line, if any.
+    pub last: Option<ChatLine>,
+}
+
+impl From<engine::Contact> for ContactItem {
+    fn from(c: engine::Contact) -> Self {
+        Self {
+            id: c.id,
+            name: c.name,
+            added_unix: c.added,
+            last: c.last.map(Into::into),
+        }
+    }
+}
+
+/// What a message found in pasted text came to.
+pub enum IncomingKind {
+    /// Opened; see `contact` and `text`.
+    Opened,
+    /// Opened before.
+    Duplicate,
+    /// From no one with a session here.
+    Unknown,
+    /// Damaged, or not a message.
+    Damaged,
+    /// The chat app cut it off.
+    Truncated,
+}
+
+/// One message found in pasted text.
+pub struct IncomingReply {
+    /// What it came to.
+    pub kind: IncomingKind,
+    /// Who sent it, when opened.
+    pub contact: String,
+    /// It made the sender a contact.
+    pub new_contact: bool,
+    /// The text, when opened.
+    pub text: String,
+}
+
+impl From<engine::Incoming> for IncomingReply {
+    fn from(i: engine::Incoming) -> Self {
+        let only = |kind| Self {
+            kind,
+            contact: String::new(),
+            new_contact: false,
+            text: String::new(),
+        };
+        match i {
+            engine::Incoming::Opened {
+                contact,
+                new_contact,
+                text,
+            } => Self {
+                kind: IncomingKind::Opened,
+                contact,
+                new_contact,
+                text,
+            },
+            engine::Incoming::Duplicate => only(IncomingKind::Duplicate),
+            engine::Incoming::Unknown => only(IncomingKind::Unknown),
+            engine::Incoming::Damaged => only(IncomingKind::Damaged),
+            engine::Incoming::Truncated => only(IncomingKind::Truncated),
+        }
+    }
+}
+
 /// A message kept in the vault.
 pub struct KeptReply {
     /// The vault item holding it.
@@ -471,6 +570,70 @@ impl KilitHandle {
     /// panic code's. Then delete the hardware key.
     pub fn panic_wipe_with_mac(&self, mac: Vec<u8>) -> Result<bool, KilitError> {
         Ok(self.engine()?.panic_wipe_with_mac(mac32(mac)?)?)
+    }
+
+    /// This vault's contact card (`KLC1:` text) with the name to show.
+    pub fn my_card(&self, name: String) -> Result<String, KilitError> {
+        Ok(self.engine()?.my_card(&name)?)
+    }
+
+    /// Adds the contact whose card is in `text`; `name` overrides the card's.
+    pub fn add_contact(
+        &self,
+        text: String,
+        name: Option<String>,
+    ) -> Result<ContactItem, KilitError> {
+        Ok(self.engine()?.add_contact(&text, name.as_deref())?.into())
+    }
+
+    /// The contacts, newest conversation first.
+    pub fn contacts(&self) -> Result<Vec<ContactItem>, KilitError> {
+        Ok(self
+            .engine()?
+            .contacts()?
+            .into_iter()
+            .map(Into::into)
+            .collect())
+    }
+
+    /// Names a contact.
+    pub fn rename_contact(&self, id: String, name: String) -> Result<(), KilitError> {
+        Ok(self.engine()?.rename_contact(&id, &name)?)
+    }
+
+    /// Forgets a contact and the conversation.
+    pub fn remove_contact(&self, id: String) -> Result<(), KilitError> {
+        Ok(self.engine()?.remove_contact(&id)?)
+    }
+
+    /// The safety number to compare with a contact.
+    pub fn safety_number(&self, id: String) -> Result<String, KilitError> {
+        Ok(self.engine()?.safety_number(&id)?)
+    }
+
+    /// A conversation, oldest line first.
+    pub fn chat(&self, id: String) -> Result<Vec<ChatLine>, KilitError> {
+        Ok(self
+            .engine()?
+            .chat(&id)?
+            .into_iter()
+            .map(Into::into)
+            .collect())
+    }
+
+    /// Seals a message for a contact; returns the `KLM1:` text to send.
+    pub fn send_message(&self, id: String, text: String) -> Result<String, KilitError> {
+        Ok(self.engine()?.send_message(&id, &text)?)
+    }
+
+    /// Opens every `KLM1:` message in pasted text.
+    pub fn receive(&self, text: String) -> Result<Vec<IncomingReply>, KilitError> {
+        Ok(self
+            .engine()?
+            .receive(&text)?
+            .into_iter()
+            .map(Into::into)
+            .collect())
     }
 
     /// Keeps an opened message in the vault, once per packet.

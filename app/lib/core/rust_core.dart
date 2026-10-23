@@ -261,6 +261,77 @@ class RustCore implements KilitCore {
     return KeptMessage(_item(r.item), already: r.already);
   }
 
+  static DateTime _time(int unix) =>
+      DateTime.fromMillisecondsSinceEpoch(unix * 1000);
+
+  static ChatLine _line(rust.ChatLine l) => ChatLine(
+    outgoing: l.outgoing,
+    text: l.text,
+    at: _time(l.atUnix.toInt()),
+    sent: _time(l.sentUnix.toInt()),
+  );
+
+  static Contact _contact(rust.ContactItem c) => Contact(
+    id: c.id,
+    name: c.name,
+    added: _time(c.addedUnix.toInt()),
+    last: c.last == null ? null : _line(c.last!),
+  );
+
+  @override
+  Future<String> myCard(String name) => _h.myCard(name: name);
+
+  @override
+  Future<Contact> addContact(String text, {String? name}) async {
+    try {
+      return _contact(await _h.addContact(text: text, name: name));
+    } on rust.KilitError catch (e) {
+      if (e.kind == rust.KilitErrorKind.rejected) throw const ContactRefused();
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<Contact>> contacts() async => [
+    for (final c in await _h.contacts()) _contact(c),
+  ];
+
+  @override
+  Future<void> renameContact(String id, String name) =>
+      _h.renameContact(id: id, name: name);
+
+  @override
+  Future<void> removeContact(String id) => _h.removeContact(id: id);
+
+  @override
+  Future<String> safetyNumber(String id) => _h.safetyNumber(id: id);
+
+  @override
+  Future<List<ChatLine>> chat(String id) async => [
+    for (final l in await _h.chat(id: id)) _line(l),
+  ];
+
+  @override
+  Future<String> sendMessage(String id, String text) =>
+      _h.sendMessage(id: id, text: text);
+
+  @override
+  Future<List<IncomingMessage>> receive(String text) async => [
+    for (final m in await _h.receive(text: text))
+      IncomingMessage(
+        switch (m.kind) {
+          rust.IncomingKind.opened => IncomingKind.opened,
+          rust.IncomingKind.duplicate => IncomingKind.duplicate,
+          rust.IncomingKind.unknown => IncomingKind.unknown,
+          rust.IncomingKind.damaged => IncomingKind.damaged,
+          rust.IncomingKind.truncated => IncomingKind.truncated,
+        },
+        contact: m.contact,
+        newContact: m.newContact,
+        text: m.text,
+      ),
+  ];
+
   @override
   List<FoundPacket> findPackets(String pasted) => [
     for (final f in rust.findPackets(text: pasted))

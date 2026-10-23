@@ -173,6 +173,124 @@ class LTr extends L {
   String get chatsLater => 'Tor üzerinden mesajlaşma Aşama 2\'de geliyor.';
 
   @override
+  String get chatsIntro =>
+      'Mesajlar Signal protokolüyle (PQXDH ve SPQR, kuantum sonrası) uçtan uca şifrelenir. Kilit\'in kendi ağı gelene kadar, herhangi bir sohbet uygulamasına kopyaladığınız metin olarak gider.';
+
+  @override
+  String get chatsEmpty =>
+      'Henüz kişi yok. Kartınızı birine verin ya da onunkini ekleyin.';
+
+  @override
+  String get chatsShareCard => 'Kartım';
+
+  @override
+  String get chatsAddContact => 'Kişi ekle';
+
+  @override
+  String get chatsOpenClipboard => 'Panodan aç';
+
+  @override
+  String get chatsNothingOnClipboard =>
+      'Panoda Kilit mesajı ya da kişi kartı yok.';
+
+  @override
+  String get cardTitle => 'Kişi kartınız';
+
+  @override
+  String get cardName => 'Gösterilecek ad (isteğe bağlı)';
+
+  @override
+  String get cardShow => 'Kart oluştur';
+
+  @override
+  String get cardHint =>
+      'Bu metni konuşmak istediğiniz kişiye gönderin. Gizli bir şey içermez. Bağlandıktan sonra güvenlik numaralarını karşılaştırın.';
+
+  @override
+  String get addContactTitle => 'Kişi ekle';
+
+  @override
+  String get addContactCard => 'Kişinin kartı (KLC1:…)';
+
+  @override
+  String get addContactName => 'Ad (isteğe bağlı)';
+
+  @override
+  String get addContactGo => 'Ekle';
+
+  @override
+  String get addContactRefused =>
+      'Bu bir kişi kartı değil ya da sizin kendi kartınız.';
+
+  @override
+  String get contactUnnamed => 'Adsız kişi';
+
+  @override
+  String get chatEmpty =>
+      'Henüz mesaj yok. Yazdığınız ilk mesaj şifreli oturumu başlatır.';
+
+  @override
+  String get chatInput => 'Mesaj';
+
+  @override
+  String get chatSend => 'Şifrele';
+
+  @override
+  String get chatPaste => 'Yanıtı panodan aç';
+
+  @override
+  String get chatSealedTitle => 'Şifreli mesaj';
+
+  @override
+  String chatSealedHint(String name) {
+    return 'Bunu sohbet uygulamanıza kopyalayıp $name kişisine gönderin. Yalnızca o açabilir.';
+  }
+
+  @override
+  String get chatNewContact =>
+      'Kartınıza sahip biri size yazdı. Ona bir ad verin ve güvenmeden önce güvenlik numaralarını karşılaştırın.';
+
+  @override
+  String get chatOtherContact =>
+      'Başka bir kişiden gelen mesaj da açıldı; onunla olan sohbette.';
+
+  @override
+  String get chatDuplicate => 'Bu mesaj daha önce açıldı.';
+
+  @override
+  String get chatUnknown => 'Bu mesaj, oturumunuz olan kimseden gelmiyor.';
+
+  @override
+  String get chatDamaged => 'Mesaj bozuk.';
+
+  @override
+  String get safetyTitle => 'Güvenlik numarası';
+
+  @override
+  String safetyHint(String name) {
+    return 'Bu 60 haneyi $name ile yüz yüze ya da telefonda karşılaştırın. İki telefonda da aynıysa arada kimse yoktur.';
+  }
+
+  @override
+  String get contactRename => 'Yeniden adlandır';
+
+  @override
+  String get contactRemove => 'Kişiyi sil';
+
+  @override
+  String get contactRemoveTitle => 'Bu kişi silinsin mi?';
+
+  @override
+  String get contactRemoveBody =>
+      'Oturum ve tüm sohbet silinir. Yeniden yazışmak için birbirinizin kartı gerekir.';
+
+  @override
+  String get contactRemoveGo => 'Sil';
+
+  @override
+  String get save => 'Kaydet';
+
+  @override
   String get cameraLater =>
       'Diske şifresiz yazmayan kamera Aşama 2\'de geliyor.';
 

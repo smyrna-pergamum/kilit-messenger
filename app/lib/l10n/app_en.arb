@@ -72,6 +72,55 @@
   "navCamera": "Camera",
   "navSettings": "Settings",
   "chatsLater": "Messaging over Tor arrives in stage 2.",
+  "chatsIntro": "Messages are end-to-end encrypted with Signal's protocol (PQXDH and SPQR, post-quantum). Until Kilit's own network arrives, they travel as text you copy into any chat app.",
+  "chatsEmpty": "No contacts yet. Give your card to someone, or add theirs.",
+  "chatsShareCard": "My card",
+  "chatsAddContact": "Add contact",
+  "chatsOpenClipboard": "Open from clipboard",
+  "chatsNothingOnClipboard": "No Kilit message or contact card on the clipboard.",
+  "cardTitle": "Your contact card",
+  "cardName": "Name to show (optional)",
+  "cardShow": "Make card",
+  "cardHint": "Send this text to the person you want to talk to. It holds no secret. Once you are connected, compare safety numbers.",
+  "addContactTitle": "Add a contact",
+  "addContactCard": "Their contact card (KLC1:…)",
+  "addContactName": "Name (optional)",
+  "addContactGo": "Add",
+  "addContactRefused": "This is not a contact card, or it is your own.",
+  "contactUnnamed": "Unnamed contact",
+  "chatEmpty": "No messages yet. The first one you write starts the encrypted session.",
+  "chatInput": "Message",
+  "chatSend": "Encrypt",
+  "chatPaste": "Open a reply from the clipboard",
+  "chatSealedTitle": "Encrypted message",
+  "chatSealedHint": "Copy this into your chat app and send it to {name}. Only they can open it.",
+  "@chatSealedHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chatNewContact": "Someone who has your card wrote to you. Give them a name, and compare safety numbers before you trust them.",
+  "chatOtherContact": "A message from another contact was opened too; it is in their conversation.",
+  "chatDuplicate": "This message was opened before.",
+  "chatUnknown": "This message is from no one you have a session with.",
+  "chatDamaged": "The message is damaged.",
+  "safetyTitle": "Safety number",
+  "safetyHint": "Compare these 60 digits with {name}, in person or on a call. If they are the same on both phones, no one is in between.",
+  "@safetyHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "contactRename": "Rename",
+  "contactRemove": "Delete contact",
+  "contactRemoveTitle": "Delete this contact?",
+  "contactRemoveBody": "The session and the whole conversation are deleted. To write again you need each other's cards.",
+  "contactRemoveGo": "Delete",
+  "save": "Save",
   "cameraLater": "A camera that never writes plaintext to disk arrives in stage 2.",
   "vaultAddNote": "Add note",
   "vaultCompose": "Carrier message",

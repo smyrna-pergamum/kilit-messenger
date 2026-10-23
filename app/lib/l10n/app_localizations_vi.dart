@@ -171,6 +171,124 @@ class LVi extends L {
   String get chatsLater => 'Nhắn tin qua Tor sẽ có ở giai đoạn 2.';
 
   @override
+  String get chatsIntro =>
+      'Tin nhắn được mã hóa đầu cuối bằng giao thức Signal (PQXDH và SPQR, hậu lượng tử). Cho đến khi mạng riêng của Kilit ra mắt, chúng được gửi dưới dạng văn bản bạn sao chép vào bất kỳ ứng dụng trò chuyện nào.';
+
+  @override
+  String get chatsEmpty =>
+      'Chưa có liên hệ. Hãy đưa thẻ của bạn cho ai đó, hoặc thêm thẻ của họ.';
+
+  @override
+  String get chatsShareCard => 'Thẻ của tôi';
+
+  @override
+  String get chatsAddContact => 'Thêm liên hệ';
+
+  @override
+  String get chatsOpenClipboard => 'Mở từ bảng nhớ tạm';
+
+  @override
+  String get chatsNothingOnClipboard =>
+      'Không có tin nhắn Kilit hay thẻ liên hệ trong bảng nhớ tạm.';
+
+  @override
+  String get cardTitle => 'Thẻ liên hệ của bạn';
+
+  @override
+  String get cardName => 'Tên hiển thị (không bắt buộc)';
+
+  @override
+  String get cardShow => 'Tạo thẻ';
+
+  @override
+  String get cardHint =>
+      'Gửi văn bản này cho người bạn muốn trò chuyện. Nó không chứa bí mật nào. Sau khi kết nối, hãy so sánh số an toàn.';
+
+  @override
+  String get addContactTitle => 'Thêm liên hệ';
+
+  @override
+  String get addContactCard => 'Thẻ liên hệ của họ (KLC1:…)';
+
+  @override
+  String get addContactName => 'Tên (không bắt buộc)';
+
+  @override
+  String get addContactGo => 'Thêm';
+
+  @override
+  String get addContactRefused =>
+      'Đây không phải thẻ liên hệ, hoặc là thẻ của chính bạn.';
+
+  @override
+  String get contactUnnamed => 'Liên hệ chưa đặt tên';
+
+  @override
+  String get chatEmpty =>
+      'Chưa có tin nhắn. Tin đầu tiên bạn viết sẽ bắt đầu phiên mã hóa.';
+
+  @override
+  String get chatInput => 'Tin nhắn';
+
+  @override
+  String get chatSend => 'Mã hóa';
+
+  @override
+  String get chatPaste => 'Mở câu trả lời từ bảng nhớ tạm';
+
+  @override
+  String get chatSealedTitle => 'Tin nhắn đã mã hóa';
+
+  @override
+  String chatSealedHint(String name) {
+    return 'Sao chép nội dung này vào ứng dụng trò chuyện và gửi cho $name. Chỉ người đó mở được.';
+  }
+
+  @override
+  String get chatNewContact =>
+      'Một người có thẻ của bạn đã nhắn cho bạn. Hãy đặt tên cho họ và so sánh số an toàn trước khi tin tưởng.';
+
+  @override
+  String get chatOtherContact =>
+      'Một tin nhắn từ liên hệ khác cũng đã được mở; nó nằm trong cuộc trò chuyện với người đó.';
+
+  @override
+  String get chatDuplicate => 'Tin nhắn này đã được mở trước đó.';
+
+  @override
+  String get chatUnknown => 'Tin nhắn này không đến từ ai có phiên với bạn.';
+
+  @override
+  String get chatDamaged => 'Tin nhắn bị hỏng.';
+
+  @override
+  String get safetyTitle => 'Số an toàn';
+
+  @override
+  String safetyHint(String name) {
+    return 'So sánh 60 chữ số này với $name, trực tiếp hoặc qua cuộc gọi. Nếu giống nhau trên cả hai điện thoại thì không có ai ở giữa.';
+  }
+
+  @override
+  String get contactRename => 'Đổi tên';
+
+  @override
+  String get contactRemove => 'Xóa liên hệ';
+
+  @override
+  String get contactRemoveTitle => 'Xóa liên hệ này?';
+
+  @override
+  String get contactRemoveBody =>
+      'Phiên và toàn bộ cuộc trò chuyện sẽ bị xóa. Để nhắn lại, hai bạn cần thẻ của nhau.';
+
+  @override
+  String get contactRemoveGo => 'Xóa';
+
+  @override
+  String get save => 'Lưu';
+
+  @override
   String get cameraLater =>
       'Máy ảnh không bao giờ ghi dữ liệu chưa mã hóa ra bộ nhớ sẽ có ở giai đoạn 2.';
 

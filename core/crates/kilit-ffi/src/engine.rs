@@ -4,7 +4,11 @@
 
 #![deny(unsafe_code)]
 
+mod chats;
+
 use std::time::{SystemTime, UNIX_EPOCH};
+
+pub use chats::{Contact, Incoming, Line};
 
 use kilit_klt::PacketSigner;
 use kilit_klt::{

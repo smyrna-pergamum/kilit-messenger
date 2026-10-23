@@ -175,6 +175,125 @@ class LFr extends L {
   String get chatsLater => 'La messagerie via Tor arrive à l\'étape 2.';
 
   @override
+  String get chatsIntro =>
+      'Les messages sont chiffrés de bout en bout avec le protocole Signal (PQXDH et SPQR, post-quantique). En attendant le réseau propre à Kilit, ils voyagent sous forme de texte que vous copiez dans n\'importe quelle messagerie.';
+
+  @override
+  String get chatsEmpty =>
+      'Aucun contact pour l\'instant. Donnez votre carte à quelqu\'un ou ajoutez la sienne.';
+
+  @override
+  String get chatsShareCard => 'Ma carte';
+
+  @override
+  String get chatsAddContact => 'Ajouter un contact';
+
+  @override
+  String get chatsOpenClipboard => 'Ouvrir depuis le presse-papiers';
+
+  @override
+  String get chatsNothingOnClipboard =>
+      'Aucun message Kilit ni carte de contact dans le presse-papiers.';
+
+  @override
+  String get cardTitle => 'Votre carte de contact';
+
+  @override
+  String get cardName => 'Nom à afficher (facultatif)';
+
+  @override
+  String get cardShow => 'Créer la carte';
+
+  @override
+  String get cardHint =>
+      'Envoyez ce texte à la personne avec qui vous voulez échanger. Il ne contient aucun secret. Une fois connectés, comparez vos numéros de sécurité.';
+
+  @override
+  String get addContactTitle => 'Ajouter un contact';
+
+  @override
+  String get addContactCard => 'Sa carte de contact (KLC1:…)';
+
+  @override
+  String get addContactName => 'Nom (facultatif)';
+
+  @override
+  String get addContactGo => 'Ajouter';
+
+  @override
+  String get addContactRefused =>
+      'Ce n\'est pas une carte de contact, ou c\'est la vôtre.';
+
+  @override
+  String get contactUnnamed => 'Contact sans nom';
+
+  @override
+  String get chatEmpty =>
+      'Aucun message pour l\'instant. Le premier que vous écrivez ouvre la session chiffrée.';
+
+  @override
+  String get chatInput => 'Message';
+
+  @override
+  String get chatSend => 'Chiffrer';
+
+  @override
+  String get chatPaste => 'Ouvrir une réponse depuis le presse-papiers';
+
+  @override
+  String get chatSealedTitle => 'Message chiffré';
+
+  @override
+  String chatSealedHint(String name) {
+    return 'Copiez ceci dans votre messagerie et envoyez-le à $name. Seule cette personne peut l\'ouvrir.';
+  }
+
+  @override
+  String get chatNewContact =>
+      'Quelqu\'un qui a votre carte vous a écrit. Donnez-lui un nom et comparez vos numéros de sécurité avant de lui faire confiance.';
+
+  @override
+  String get chatOtherContact =>
+      'Un message d\'un autre contact a aussi été ouvert ; il est dans sa conversation.';
+
+  @override
+  String get chatDuplicate => 'Ce message a déjà été ouvert.';
+
+  @override
+  String get chatUnknown =>
+      'Ce message ne vient de personne avec qui vous avez une session.';
+
+  @override
+  String get chatDamaged => 'Le message est endommagé.';
+
+  @override
+  String get safetyTitle => 'Numéro de sécurité';
+
+  @override
+  String safetyHint(String name) {
+    return 'Comparez ces 60 chiffres avec $name, en personne ou par téléphone. S\'ils sont identiques sur les deux téléphones, personne n\'est entre vous.';
+  }
+
+  @override
+  String get contactRename => 'Renommer';
+
+  @override
+  String get contactRemove => 'Supprimer le contact';
+
+  @override
+  String get contactRemoveTitle => 'Supprimer ce contact ?';
+
+  @override
+  String get contactRemoveBody =>
+      'La session et toute la conversation sont supprimées. Pour vous réécrire, il vous faudra vos cartes.';
+
+  @override
+  String get contactRemoveGo => 'Supprimer';
+
+  @override
+  String get save => 'Enregistrer';
+
+  @override
   String get cameraLater =>
       'Une caméra qui n\'écrit jamais de données en clair sur le stockage arrive à l\'étape 2.';
 

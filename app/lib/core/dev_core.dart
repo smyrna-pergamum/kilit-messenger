@@ -43,6 +43,9 @@ class DevCore implements KilitCore {
   void _wipe() {
     _items.clear();
     _kept.clear();
+    _contacts.clear();
+    _chats.clear();
+    _opened.clear();
     _pin = null;
     _panic = null;
     _failures = 0;
@@ -258,6 +261,127 @@ class DevCore implements KilitCore {
       bytes.length >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8
       ? CleanedFile.cleaned(bytes, const {HiddenData.exif, HiddenData.location})
       : const CleanedFile.failed(CleanOutcome.unsupported);
+
+  // ---- contacts: a stand-in that encrypts nothing. A card is
+  // `KLC1:DEV<base64 of id|name>.`; a message `KLM1:DEV<base64 of
+  // from|text>.` and opens on any DevCore.
+
+  static const _myId = '0123456789abcdef0123456789abcdef';
+  final Map<String, Contact> _contacts = {};
+  final Map<String, List<ChatLine>> _chats = {};
+  final Set<String> _opened = {};
+
+  /// A card as another DevCore would make it, for tests.
+  static String cardFor(String id, String name) =>
+      'KLC1:DEV${base64Url.encode(utf8.encode('$id|$name'))}.';
+
+  /// A message as another DevCore would send it, for tests.
+  static String messageFrom(String id, String text) =>
+      'KLM1:DEV${base64Url.encode(utf8.encode('$id|$text'))}.';
+
+  static (String, String)? _decode(String text, String prefix) {
+    final m = RegExp('$prefix:DEV([A-Za-z0-9_=-]*)\\.').firstMatch(text);
+    if (m == null) return null;
+    final s = utf8.decode(base64Url.decode(m.group(1)!));
+    final bar = s.indexOf('|');
+    return bar < 0 ? null : (s.substring(0, bar), s.substring(bar + 1));
+  }
+
+  Contact _withLast(Contact c) => Contact(
+    id: c.id,
+    name: c.name,
+    added: c.added,
+    last: (_chats[c.id] ?? const []).lastOrNull,
+  );
+
+  @override
+  Future<String> myCard(String name) async {
+    _requireOpen();
+    return cardFor(_myId, name);
+  }
+
+  @override
+  Future<Contact> addContact(String text, {String? name}) async {
+    _requireOpen();
+    final card = _decode(text, 'KLC1');
+    if (card == null || card.$1 == _myId) throw const ContactRefused();
+    final c = Contact(
+      id: card.$1,
+      name: (name == null || name.trim().isEmpty) ? card.$2 : name.trim(),
+      added: _clock(),
+    );
+    _contacts[c.id] = c;
+    return _withLast(c);
+  }
+
+  @override
+  Future<List<Contact>> contacts() async {
+    _requireOpen();
+    final v = [for (final c in _contacts.values) _withLast(c)];
+    v.sort((a, b) => (b.last?.at ?? b.added).compareTo(a.last?.at ?? a.added));
+    return v;
+  }
+
+  @override
+  Future<void> renameContact(String id, String name) async {
+    final c = _contacts[id]!;
+    _contacts[id] = Contact(id: id, name: name.trim(), added: c.added);
+  }
+
+  @override
+  Future<void> removeContact(String id) async {
+    _contacts.remove(id);
+    _chats.remove(id);
+  }
+
+  @override
+  Future<String> safetyNumber(String id) async =>
+      List.filled(12, id.substring(0, 5)).join(' ');
+
+  @override
+  Future<List<ChatLine>> chat(String id) async =>
+      List.of(_chats[id] ?? const []);
+
+  @override
+  Future<String> sendMessage(String id, String text) async {
+    _requireOpen();
+    final now = _clock();
+    (_chats[id] ??= []).add(
+      ChatLine(outgoing: true, text: text, at: now, sent: now),
+    );
+    return messageFrom(_myId, text);
+  }
+
+  @override
+  Future<List<IncomingMessage>> receive(String text) async {
+    _requireOpen();
+    final m = _decode(text, 'KLM1');
+    if (m == null) {
+      return text.contains('KLM1:')
+          ? const [IncomingMessage(IncomingKind.damaged)]
+          : const [];
+    }
+    final (from, body) = m;
+    if (!_opened.add('$from|$body')) {
+      return const [IncomingMessage(IncomingKind.duplicate)];
+    }
+    final isNew = !_contacts.containsKey(from);
+    if (isNew) {
+      _contacts[from] = Contact(id: from, name: '', added: _clock());
+    }
+    final now = _clock();
+    (_chats[from] ??= []).add(
+      ChatLine(outgoing: false, text: body, at: now, sent: now),
+    );
+    return [
+      IncomingMessage(
+        IncomingKind.opened,
+        contact: from,
+        newContact: isNew,
+        text: body,
+      ),
+    ];
+  }
 
   @override
   List<FoundPacket> findPackets(String pasted) {

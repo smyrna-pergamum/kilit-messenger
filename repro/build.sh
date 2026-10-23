@@ -19,6 +19,8 @@ run() { # image, command...
   docker run --rm \
     -u "$(id -u):$(id -g)" \
     -v "$root:/src" \
+    -v kilit-cargo-registry:/opt/cargo/registry \
+    -v kilit-cargo-git:/opt/cargo/git \
     -w /src/core "$img" "$@"
 }
 

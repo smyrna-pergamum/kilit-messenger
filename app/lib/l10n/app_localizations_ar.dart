@@ -171,6 +171,123 @@ class LAr extends L {
   String get chatsLater => 'المراسلة عبر Tor تأتي في المرحلة 2.';
 
   @override
+  String get chatsIntro =>
+      'تُشفَّر الرسائل من طرف إلى طرف ببروتوكول Signal (‏PQXDH وSPQR، ما بعد الكم). إلى أن تصل شبكة Kilit الخاصة، تنتقل نصًّا تنسخه إلى أي تطبيق دردشة.';
+
+  @override
+  String get chatsEmpty =>
+      'لا جهات اتصال بعد. أعطِ بطاقتك لأحد، أو أضف بطاقته.';
+
+  @override
+  String get chatsShareCard => 'بطاقتي';
+
+  @override
+  String get chatsAddContact => 'إضافة جهة اتصال';
+
+  @override
+  String get chatsOpenClipboard => 'فتح من الحافظة';
+
+  @override
+  String get chatsNothingOnClipboard =>
+      'لا توجد رسالة Kilit ولا بطاقة جهة اتصال في الحافظة.';
+
+  @override
+  String get cardTitle => 'بطاقة جهة اتصالك';
+
+  @override
+  String get cardName => 'الاسم المعروض (اختياري)';
+
+  @override
+  String get cardShow => 'إنشاء البطاقة';
+
+  @override
+  String get cardHint =>
+      'أرسل هذا النص إلى من تريد التحدث معه. لا يحتوي على أي سر. بعد الاتصال، قارنا رقمي الأمان.';
+
+  @override
+  String get addContactTitle => 'إضافة جهة اتصال';
+
+  @override
+  String get addContactCard => 'بطاقة جهة اتصاله (KLC1:…)';
+
+  @override
+  String get addContactName => 'الاسم (اختياري)';
+
+  @override
+  String get addContactGo => 'إضافة';
+
+  @override
+  String get addContactRefused =>
+      'هذه ليست بطاقة جهة اتصال، أو أنها بطاقتك أنت.';
+
+  @override
+  String get contactUnnamed => 'جهة اتصال بلا اسم';
+
+  @override
+  String get chatEmpty => 'لا رسائل بعد. أول رسالة تكتبها تبدأ الجلسة المشفرة.';
+
+  @override
+  String get chatInput => 'رسالة';
+
+  @override
+  String get chatSend => 'تشفير';
+
+  @override
+  String get chatPaste => 'فتح رد من الحافظة';
+
+  @override
+  String get chatSealedTitle => 'رسالة مشفرة';
+
+  @override
+  String chatSealedHint(String name) {
+    return 'انسخ هذا إلى تطبيق الدردشة وأرسله إلى $name. وحده يستطيع فتحه.';
+  }
+
+  @override
+  String get chatNewContact =>
+      'كتب إليك شخص لديه بطاقتك. أعطه اسمًا، وقارنا رقمي الأمان قبل أن تثق به.';
+
+  @override
+  String get chatOtherContact =>
+      'فُتحت أيضًا رسالة من جهة اتصال أخرى؛ إنها في محادثتها.';
+
+  @override
+  String get chatDuplicate => 'فُتحت هذه الرسالة من قبل.';
+
+  @override
+  String get chatUnknown => 'هذه الرسالة ليست من أحد لديك جلسة معه.';
+
+  @override
+  String get chatDamaged => 'الرسالة تالفة.';
+
+  @override
+  String get safetyTitle => 'رقم الأمان';
+
+  @override
+  String safetyHint(String name) {
+    return 'قارن هذه الأرقام الستين مع $name، وجهًا لوجه أو في مكالمة. إذا تطابقت على الهاتفين فلا أحد بينكما.';
+  }
+
+  @override
+  String get contactRename => 'إعادة التسمية';
+
+  @override
+  String get contactRemove => 'حذف جهة الاتصال';
+
+  @override
+  String get contactRemoveTitle => 'هل تريد حذف جهة الاتصال هذه؟';
+
+  @override
+  String get contactRemoveBody =>
+      'تُحذف الجلسة والمحادثة كلها. لتتراسلا من جديد تحتاجان إلى بطاقتي بعضكما.';
+
+  @override
+  String get contactRemoveGo => 'حذف';
+
+  @override
+  String get save => 'حفظ';
+
+  @override
   String get cameraLater =>
       'كاميرا لا تكتب أي بيانات غير مشفرة على القرص تأتي في المرحلة 2.';
 

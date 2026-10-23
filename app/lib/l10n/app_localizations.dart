@@ -429,6 +429,216 @@ abstract class L {
   /// **'Messaging over Tor arrives in stage 2.'**
   String get chatsLater;
 
+  /// No description provided for @chatsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages are end-to-end encrypted with Signal\'s protocol (PQXDH and SPQR, post-quantum). Until Kilit\'s own network arrives, they travel as text you copy into any chat app.'**
+  String get chatsIntro;
+
+  /// No description provided for @chatsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No contacts yet. Give your card to someone, or add theirs.'**
+  String get chatsEmpty;
+
+  /// No description provided for @chatsShareCard.
+  ///
+  /// In en, this message translates to:
+  /// **'My card'**
+  String get chatsShareCard;
+
+  /// No description provided for @chatsAddContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Add contact'**
+  String get chatsAddContact;
+
+  /// No description provided for @chatsOpenClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Open from clipboard'**
+  String get chatsOpenClipboard;
+
+  /// No description provided for @chatsNothingOnClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'No Kilit message or contact card on the clipboard.'**
+  String get chatsNothingOnClipboard;
+
+  /// No description provided for @cardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your contact card'**
+  String get cardTitle;
+
+  /// No description provided for @cardName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name to show (optional)'**
+  String get cardName;
+
+  /// No description provided for @cardShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Make card'**
+  String get cardShow;
+
+  /// No description provided for @cardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Send this text to the person you want to talk to. It holds no secret. Once you are connected, compare safety numbers.'**
+  String get cardHint;
+
+  /// No description provided for @addContactTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a contact'**
+  String get addContactTitle;
+
+  /// No description provided for @addContactCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Their contact card (KLC1:…)'**
+  String get addContactCard;
+
+  /// No description provided for @addContactName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (optional)'**
+  String get addContactName;
+
+  /// No description provided for @addContactGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addContactGo;
+
+  /// No description provided for @addContactRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'This is not a contact card, or it is your own.'**
+  String get addContactRefused;
+
+  /// No description provided for @contactUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed contact'**
+  String get contactUnnamed;
+
+  /// No description provided for @chatEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet. The first one you write starts the encrypted session.'**
+  String get chatEmpty;
+
+  /// No description provided for @chatInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get chatInput;
+
+  /// No description provided for @chatSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypt'**
+  String get chatSend;
+
+  /// No description provided for @chatPaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a reply from the clipboard'**
+  String get chatPaste;
+
+  /// No description provided for @chatSealedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted message'**
+  String get chatSealedTitle;
+
+  /// No description provided for @chatSealedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy this into your chat app and send it to {name}. Only they can open it.'**
+  String chatSealedHint(String name);
+
+  /// No description provided for @chatNewContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone who has your card wrote to you. Give them a name, and compare safety numbers before you trust them.'**
+  String get chatNewContact;
+
+  /// No description provided for @chatOtherContact.
+  ///
+  /// In en, this message translates to:
+  /// **'A message from another contact was opened too; it is in their conversation.'**
+  String get chatOtherContact;
+
+  /// No description provided for @chatDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'This message was opened before.'**
+  String get chatDuplicate;
+
+  /// No description provided for @chatUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'This message is from no one you have a session with.'**
+  String get chatUnknown;
+
+  /// No description provided for @chatDamaged.
+  ///
+  /// In en, this message translates to:
+  /// **'The message is damaged.'**
+  String get chatDamaged;
+
+  /// No description provided for @safetyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety number'**
+  String get safetyTitle;
+
+  /// No description provided for @safetyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare these 60 digits with {name}, in person or on a call. If they are the same on both phones, no one is in between.'**
+  String safetyHint(String name);
+
+  /// No description provided for @contactRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get contactRename;
+
+  /// No description provided for @contactRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete contact'**
+  String get contactRemove;
+
+  /// No description provided for @contactRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this contact?'**
+  String get contactRemoveTitle;
+
+  /// No description provided for @contactRemoveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The session and the whole conversation are deleted. To write again you need each other\'s cards.'**
+  String get contactRemoveBody;
+
+  /// No description provided for @contactRemoveGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get contactRemoveGo;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
   /// No description provided for @cameraLater.
   ///
   /// In en, this message translates to:

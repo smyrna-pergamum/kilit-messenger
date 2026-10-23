@@ -173,6 +173,125 @@ class LEs extends L {
   String get chatsLater => 'La mensajería a través de Tor llega en la fase 2.';
 
   @override
+  String get chatsIntro =>
+      'Los mensajes se cifran de extremo a extremo con el protocolo de Signal (PQXDH y SPQR, poscuántico). Hasta que llegue la red propia de Kilit, viajan como texto que copias en cualquier app de chat.';
+
+  @override
+  String get chatsEmpty =>
+      'Aún no hay contactos. Da tu tarjeta a alguien o añade la suya.';
+
+  @override
+  String get chatsShareCard => 'Mi tarjeta';
+
+  @override
+  String get chatsAddContact => 'Añadir contacto';
+
+  @override
+  String get chatsOpenClipboard => 'Abrir desde el portapapeles';
+
+  @override
+  String get chatsNothingOnClipboard =>
+      'No hay ningún mensaje de Kilit ni tarjeta de contacto en el portapapeles.';
+
+  @override
+  String get cardTitle => 'Tu tarjeta de contacto';
+
+  @override
+  String get cardName => 'Nombre visible (opcional)';
+
+  @override
+  String get cardShow => 'Crear tarjeta';
+
+  @override
+  String get cardHint =>
+      'Envía este texto a la persona con quien quieres hablar. No contiene secretos. Cuando estéis conectados, comparad los números de seguridad.';
+
+  @override
+  String get addContactTitle => 'Añadir un contacto';
+
+  @override
+  String get addContactCard => 'Su tarjeta de contacto (KLC1:…)';
+
+  @override
+  String get addContactName => 'Nombre (opcional)';
+
+  @override
+  String get addContactGo => 'Añadir';
+
+  @override
+  String get addContactRefused =>
+      'Esto no es una tarjeta de contacto, o es la tuya.';
+
+  @override
+  String get contactUnnamed => 'Contacto sin nombre';
+
+  @override
+  String get chatEmpty =>
+      'Aún no hay mensajes. El primero que escribas inicia la sesión cifrada.';
+
+  @override
+  String get chatInput => 'Mensaje';
+
+  @override
+  String get chatSend => 'Cifrar';
+
+  @override
+  String get chatPaste => 'Abrir una respuesta desde el portapapeles';
+
+  @override
+  String get chatSealedTitle => 'Mensaje cifrado';
+
+  @override
+  String chatSealedHint(String name) {
+    return 'Copia esto en tu app de chat y envíaselo a $name. Solo esa persona puede abrirlo.';
+  }
+
+  @override
+  String get chatNewContact =>
+      'Alguien que tiene tu tarjeta te ha escrito. Ponle un nombre y comparad los números de seguridad antes de confiar.';
+
+  @override
+  String get chatOtherContact =>
+      'También se abrió un mensaje de otro contacto; está en su conversación.';
+
+  @override
+  String get chatDuplicate => 'Este mensaje ya se abrió antes.';
+
+  @override
+  String get chatUnknown =>
+      'Este mensaje no es de nadie con quien tengas una sesión.';
+
+  @override
+  String get chatDamaged => 'El mensaje está dañado.';
+
+  @override
+  String get safetyTitle => 'Número de seguridad';
+
+  @override
+  String safetyHint(String name) {
+    return 'Compara estos 60 dígitos con $name, en persona o por teléfono. Si coinciden en ambos teléfonos, no hay nadie en medio.';
+  }
+
+  @override
+  String get contactRename => 'Renombrar';
+
+  @override
+  String get contactRemove => 'Eliminar contacto';
+
+  @override
+  String get contactRemoveTitle => '¿Eliminar este contacto?';
+
+  @override
+  String get contactRemoveBody =>
+      'Se eliminan la sesión y toda la conversación. Para volver a escribiros necesitáis vuestras tarjetas.';
+
+  @override
+  String get contactRemoveGo => 'Eliminar';
+
+  @override
+  String get save => 'Guardar';
+
+  @override
   String get cameraLater =>
       'Una cámara que nunca escribe texto sin cifrar en el almacenamiento llega en la fase 2.';
 

@@ -8,7 +8,7 @@ import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `engine`, `mac32`, `reply`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `from`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `from`, `from`, `from`, `from`, `from`, `from`, `from`
 
 /// The bytes the platform's hardware key must MAC for `pin`.
 Uint8List pinMacInput({required String pin}) =>
@@ -25,6 +25,9 @@ Future<CleanReply> cleanMetadata({required List<int> data}) =>
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<KilitHandle>>
 abstract class KilitHandle implements RustOpaqueInterface {
+  /// Adds the contact whose card is in `text`; `name` overrides the card's.
+  Future<ContactItem> addContact({required String text, String? name});
+
   /// Seals a file into the vault. At most 64 MiB.
   Future<ItemInfo> addFile({
     required String name,
@@ -47,8 +50,14 @@ abstract class KilitHandle implements RustOpaqueInterface {
     required List<int> fresh,
   });
 
+  /// A conversation, oldest line first.
+  Future<List<ChatLine>> chat({required String id});
+
   /// Removes the panic code.
   Future<void> clearPanic();
+
+  /// The contacts, newest conversation first.
+  Future<List<ContactItem>> contacts();
 
   /// Makes a new vault sealed under `pin` with the software key, and
   /// leaves it unlocked. Only for devices without a hardware key.
@@ -95,6 +104,9 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// Moves the unlocked software-key vault to the hardware key.
   Future<void> moveToHardware({required List<int> mac});
 
+  /// This vault's contact card (`KLC1:` text) with the name to show.
+  Future<String> myCard({required String name});
+
   /// Opens the store in `dir`; `desktop` picks the larger Argon2id cost.
   static Future<KilitHandle> open({
     required String dir,
@@ -126,8 +138,23 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// A text item's content, decrypted into memory to show it.
   Future<String> readText({required String id});
 
+  /// Opens every `KLM1:` message in pasted text.
+  Future<List<IncomingReply>> receive({required String text});
+
+  /// Forgets a contact and the conversation.
+  Future<void> removeContact({required String id});
+
+  /// Names a contact.
+  Future<void> renameContact({required String id, required String name});
+
+  /// The safety number to compare with a contact.
+  Future<String> safetyNumber({required String id});
+
   /// A message as `KLT1:` text, to a shared passphrase or to this vault.
   Future<String> sealForCarrier({required String message, String? passphrase});
+
+  /// Seals a message for a contact; returns the `KLM1:` text to send.
+  Future<String> sendMessage({required String id, required String text});
 
   /// Sets the four-digit panic code of a software-key vault.
   Future<void> setPanic({required String code});
@@ -140,6 +167,42 @@ abstract class KilitHandle implements RustOpaqueInterface {
 
   /// Tries a hardware PIN MAC against a hardware-key vault.
   Future<UnlockReply> unlockWithMac({required List<int> mac});
+}
+
+/// One line of a conversation.
+class ChatLine {
+  /// Written on this device (true) or received.
+  final bool outgoing;
+
+  /// The text.
+  final String text;
+
+  /// When it was written here or opened here, Unix seconds.
+  final PlatformInt64 atUnix;
+
+  /// When the sender says they wrote it, Unix seconds.
+  final PlatformInt64 sentUnix;
+
+  const ChatLine({
+    required this.outgoing,
+    required this.text,
+    required this.atUnix,
+    required this.sentUnix,
+  });
+
+  @override
+  int get hashCode =>
+      outgoing.hashCode ^ text.hashCode ^ atUnix.hashCode ^ sentUnix.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ChatLine &&
+          runtimeType == other.runtimeType &&
+          outgoing == other.outgoing &&
+          text == other.text &&
+          atUnix == other.atUnix &&
+          sentUnix == other.sentUnix;
 }
 
 /// How cleaning a file went.
@@ -182,6 +245,42 @@ class CleanReply {
           outcome == other.outcome &&
           data == other.data &&
           removed == other.removed;
+}
+
+/// A contact, with the newest line of the conversation.
+class ContactItem {
+  /// The address (32 hex digits).
+  final String id;
+
+  /// The name given; empty until one is.
+  final String name;
+
+  /// When they were added, Unix seconds.
+  final PlatformInt64 addedUnix;
+
+  /// The newest line, if any.
+  final ChatLine? last;
+
+  const ContactItem({
+    required this.id,
+    required this.name,
+    required this.addedUnix,
+    this.last,
+  });
+
+  @override
+  int get hashCode =>
+      id.hashCode ^ name.hashCode ^ addedUnix.hashCode ^ last.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ContactItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          addedUnix == other.addedUnix &&
+          last == other.last;
 }
 
 /// A `.klt` file ready to save or share.
@@ -279,6 +378,60 @@ class ImportReply {
           kind == other.kind &&
           item == other.item &&
           signedBy == other.signedBy;
+}
+
+/// What a message found in pasted text came to.
+enum IncomingKind {
+  /// Opened; see `contact` and `text`.
+  opened,
+
+  /// Opened before.
+  duplicate,
+
+  /// From no one with a session here.
+  unknown,
+
+  /// Damaged, or not a message.
+  damaged,
+
+  /// The chat app cut it off.
+  truncated,
+}
+
+/// One message found in pasted text.
+class IncomingReply {
+  /// What it came to.
+  final IncomingKind kind;
+
+  /// Who sent it, when opened.
+  final String contact;
+
+  /// It made the sender a contact.
+  final bool newContact;
+
+  /// The text, when opened.
+  final String text;
+
+  const IncomingReply({
+    required this.kind,
+    required this.contact,
+    required this.newContact,
+    required this.text,
+  });
+
+  @override
+  int get hashCode =>
+      kind.hashCode ^ contact.hashCode ^ newContact.hashCode ^ text.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is IncomingReply &&
+          runtimeType == other.runtimeType &&
+          kind == other.kind &&
+          contact == other.contact &&
+          newContact == other.newContact &&
+          text == other.text;
 }
 
 /// One vault item as the list shows it.
