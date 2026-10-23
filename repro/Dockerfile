@@ -75,4 +75,14 @@ RUN git clone --depth 1 --branch "${FLUTTER_VERSION}" https://github.com/flutter
     && chmod -R a+rwX /opt/flutter
 ENV PATH=/opt/flutter/bin:$PATH
 
+# the Dart <-> Rust binding generator and the cargo-expand it calls, from
+# crates.io at exact versions with their own lock files; pinned here so the
+# generator never installs an unpinned copy itself
+ENV FRB_VERSION=2.13.0 CARGO_EXPAND_VERSION=1.0.127
+ENV RUSTUP_TOOLCHAIN=1.99.1
+RUN cargo install flutter_rust_bridge_codegen --version "${FRB_VERSION}" --locked \
+    && cargo install cargo-expand --version "${CARGO_EXPAND_VERSION}" --locked \
+    && rm -rf /opt/cargo/registry \
+    && chmod -R a+rwX /opt/cargo
+
 WORKDIR /src

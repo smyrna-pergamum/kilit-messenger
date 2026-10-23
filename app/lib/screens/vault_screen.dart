@@ -563,6 +563,31 @@ class _PacketSheet extends StatelessWidget {
                       ),
                     ),
                   const SizedBox(height: 20),
+                  if (info.mime.startsWith('text/')) ...[
+                    FilledButton.icon(
+                      key: const ValueKey('item-open'),
+                      onPressed: () async {
+                        final text = await core.readText(item.id);
+                        if (!context.mounted) return;
+                        await showDialog<void>(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: Text(info.name),
+                            content: SingleChildScrollView(child: Text(text)),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Kapat'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.lock_open_outlined),
+                      label: const Text('Aç'),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                   OutlinedButton.icon(
                     key: const ValueKey('item-delete'),
                     style: OutlinedButton.styleFrom(foregroundColor: t.danger),

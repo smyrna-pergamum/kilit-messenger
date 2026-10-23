@@ -31,6 +31,9 @@ hpke-rs         MPL-2.0             https://github.com/cryspen/hpke-rs
 libcrux         Apache-2.0          https://github.com/cryspen/libcrux
 RustCrypto      MIT OR Apache-2.0   argon2, chacha20poly1305, sha2, hkdf, hmac
 ed25519-dalek   BSD-3-Clause        https://github.com/dalek-cryptography
+flutter_rust_bridge MIT             https://github.com/fzyzcjy/flutter_rust_bridge
+Cargokit        MIT                 app/rust_builder/cargokit (copied by the bridge)
+JetBrains Mono  OFL-1.1             app/assets/fonts/OFL-JetBrainsMono.txt
 Tor             BSD-3-Clause    https://www.torproject.org/
 SQLCipher       BSD-3-Clause    https://www.zetetic.net/sqlcipher/
 

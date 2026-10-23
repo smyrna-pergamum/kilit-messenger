@@ -10,6 +10,10 @@ publish.workspace = true
 
 [dependencies]
 kilit-ipc.workspace = true
+getrandom = "0.4.3"
+
+[dev-dependencies]
+tempfile = "3.27.0"
 
 [lints]
 workspace = true

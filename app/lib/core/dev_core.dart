@@ -3,8 +3,8 @@ import 'dart:typed_data';
 
 import 'kilit_core.dart';
 
-/// An in-memory stand-in for the Rust core, for building the UI before the
-/// bridge exists. **It encrypts nothing.** Packets it makes are plain base64
+/// An in-memory stand-in for the Rust core, for widget tests.
+/// **It encrypts nothing.** Packets it makes are plain base64
 /// behind a `KLT1:DEV` marker that the real core will refuse to open.
 class DevCore implements KilitCore {
   DevCore({DateTime Function()? clock}) : _clock = clock ?? DateTime.now;
@@ -93,6 +93,12 @@ class DevCore implements KilitCore {
     );
     _items.add(_Item(item, bytes));
     return item;
+  }
+
+  @override
+  Future<String> readText(String id) async {
+    _requireOpen();
+    return utf8.decode(_items.firstWhere((i) => i.item.id == id).bytes);
   }
 
   @override

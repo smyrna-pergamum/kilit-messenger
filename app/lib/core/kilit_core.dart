@@ -4,8 +4,8 @@ import 'dart:typed_data';
 /// the call, or decrypted files longer than it shows them; everything else
 /// stays behind this interface.
 ///
-/// The real implementation talks to `core/crates/kilit-ffi` through
-/// flutter_rust_bridge (next step). [DevCore] stands in until then.
+/// [RustCore] talks to `core/crates/kilit-ffi` through flutter_rust_bridge.
+/// [DevCore] is an in-memory stand-in for widget tests.
 abstract interface class KilitCore {
   /// True only for the in-memory stand-in. The UI shows a warning banner.
   bool get isDevelopmentStub;
@@ -25,6 +25,9 @@ abstract interface class KilitCore {
 
   Future<List<VaultItem>> items();
   Future<VaultItem> addNote(String title, String text);
+
+  /// A text item, decrypted into memory to show it.
+  Future<String> readText(String id);
   Future<void> deleteItem(String id);
   Future<PacketInfo> inspect(String id);
 

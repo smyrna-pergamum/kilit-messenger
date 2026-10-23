@@ -30,6 +30,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # the Rust core, compiled by cargokit (rust_builder/) for each platform
+  kilit_ffi:
+    path: rust_builder
+  flutter_rust_bridge: 2.13.0
+  path_provider: 2.1.6
 
 dev_dependencies:
   flutter_test:
