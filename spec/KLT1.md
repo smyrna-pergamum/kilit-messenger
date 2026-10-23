@@ -90,11 +90,46 @@ dönene kadar çıktıyı güvenilmez saymalı ve hata durumunda çıktıyı atm
 Kilit içeriği önce bellekte açar, diske yalnızca kullanıcı dışa aktarınca
 yazar.
 
-## Metin zırhı
+## Taşıyıcı modu
 
-64 KiB'a kadar olan paketler `KLT1:` önekiyle ve dolgusuz base64url
-kodlamasıyla metne çevrilir. Böylece WhatsApp gibi uygulamalara
-yapıştırılabilir.
+Taşıyıcı modu, bir paketi Kilit dışındaki bir kanaldan (WhatsApp, e-posta,
+USB) taşır. Kanal yalnızca şifreli baytları görür.
+
+### Metin zırhı
+
+```
+KLT1:<dolgusuz base64url>.
+```
+
+- Sondaki `.` bitiş işaretidir. base64url alfabesinde `.` olmadığı için
+  belirsizlik yaratmaz. Bitiş işareti yoksa metin kesilmiş sayılır ve kullanıcıya
+  "mesaj kesilmiş" denir.
+- Önek ile bitiş işareti arasındaki boşluklar, satır sonları ve sıfır
+  genişlikli karakterler (U+200B, U+200C, U+200D, U+2060, U+FEFF, U+00AD) yok
+  sayılır. Sohbet uygulamaları bunları ekleyebilir.
+- Bunların dışında bir karakter görülürse paket bozuk sayılır.
+- En büyük zırhlı paket 45.000 bayttır, yani yaklaşık 60.000 karakter. Bu sınır,
+  WhatsApp'ın tek mesaj sınırının (yaklaşık 65.000 karakter, tahmini) altında
+  kalmak için seçildi. Daha büyük paketler `.klt` dosyası olarak gönderilir.
+- Yapıştırılan bir metin birden fazla paket içerebilir. Okuyucu en fazla 16
+  paket arar; paketlerin çevresindeki yazılar yok sayılır.
+
+### Mesajlar
+
+Kısa bir yazılı mesaj, dosya adı `mesaj.txt` ve MIME türü
+`text/x-kilit-message; charset=utf-8` olan bir pakettir. İçerik UTF-8 olmalıdır
+ve en fazla 16 KiB olabilir. Aynı özellikleri taşımayan bir paket mesaj olarak
+açılmaz, dosya olarak gösterilir.
+
+Boyut fikri vermesi için: tek alıcılı, 7 karakterlik bir mesaj imzasızken
+2.365, imzalıyken 9.897 karakter tutar (ölçüm, `tests/carrier.rs`). Farkı
+ML-DSA imzası ve anahtarı yaratır.
+
+### Dosya adı
+
+Taşıyıcıyla gönderilen bir `.klt` dosyasının adı `kilit-<8 onaltılık rakam>.klt`
+biçimindedir ve rastgele üretilir. Asıl dosya adı yalnızca şifreli manifestte
+durur.
 
 ## Test vektörleri
 

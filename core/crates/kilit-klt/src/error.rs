@@ -13,6 +13,10 @@ pub enum KltError {
     WrongKey,
     /// The packet is damaged or was changed after it was made.
     Corrupt,
+    /// Pasted text ends before the packet does: the chat app cut it off.
+    Truncated,
+    /// The packet opened, but it is a file, not a text message.
+    NotAMessage,
     /// The packet is well formed but breaks a rule of the format.
     Malformed(&'static str),
     /// The packet asks for more work or memory than Kilit allows.
@@ -33,6 +37,8 @@ impl fmt::Display for KltError {
             Self::NotKlt => f.write_str("not a .klt packet"),
             Self::WrongKey => f.write_str("no matching key or passphrase"),
             Self::Corrupt => f.write_str("the packet is damaged or was changed"),
+            Self::Truncated => f.write_str("the pasted packet was cut off"),
+            Self::NotAMessage => f.write_str("the packet holds a file, not a message"),
             Self::Malformed(why) => write!(f, "malformed packet: {why}"),
             Self::TooExpensive => f.write_str("the packet asks for too much work"),
             Self::SizeMismatch => f.write_str("the content length does not match"),

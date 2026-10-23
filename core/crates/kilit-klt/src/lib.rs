@@ -5,6 +5,7 @@
 //! the authoritative description; this crate follows it.
 
 mod armor;
+mod carrier;
 mod error;
 mod manifest;
 mod packet;
@@ -13,7 +14,11 @@ mod passphrase;
 mod sign;
 mod xwing;
 
-pub use armor::{from_text, to_text};
+pub use armor::{MAX_ARMORED, MAX_FOUND, TEXT_END, find_in_text, from_text, to_text};
+pub use carrier::{
+    Carried, MAX_MESSAGE_BYTES, MESSAGE_MIME, MESSAGE_NAME, carrier_file_name, carry, open_message,
+    seal_message,
+};
 pub use error::KltError;
 pub use manifest::{Manifest, SignerKeys};
 pub use packet::{Opened, Signature, open, seal};
