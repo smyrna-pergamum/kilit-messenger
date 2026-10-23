@@ -34,12 +34,18 @@ Kilit'in Flutter arayüzü: Android ve Windows.
 ## Diller ve tercihler
 
 - **Ana dil İngilizce.** Yeni kurulumlar İngilizce açılır. Desteklenmeyen
-  bir sistem dilinde de İngilizce kullanılır. Ayarlar'dan Türkçe ya da
-  "Sistem dili" seçilebilir.
-- **Çeviriler:** `lib/l10n/app_en.arb` şablon dosyasıdır, `app_tr.arb`
-  Türkçe çevirisidir. Yeni bir dil, bir `.arb` dosyası eklenip
-  `lib/state/prefs.dart` içindeki `supportedLanguages` listesine yazılarak
-  eklenir. Dart kodu `flutter gen-l10n` ile üretilir.
+  bir sistem dilinde de İngilizce kullanılır. Ayarlar'dan başka bir dil ya
+  da "Sistem dili" seçilebilir.
+- **15 dil:** İngilizce, Arapça, Almanca, İspanyolca, Farsça, Fransızca,
+  Endonezce, İtalyanca, Japonca, Portekizce, Rusça, Türkçe, Ukraynaca,
+  Vietnamca ve Çince (basitleştirilmiş). Arapça ve Farsça'da ekran sağdan
+  sola yerleşir. İngilizce ve Türkçe dışındaki çeviriler makine ile
+  yapıldı; anadili konuşan birinin gözden geçirmesi gerekir.
+- **Çeviriler:** `lib/l10n/app_en.arb` şablon dosyasıdır. Yeni bir dil, bir
+  `.arb` dosyası eklenip `lib/state/prefs.dart` içindeki
+  `supportedLanguages` listesine kendi adıyla yazılarak eklenir. Dart kodu
+  `flutter gen-l10n` ile üretilir. `test/app_test.dart`, kilit ekranını ve
+  Ayarlar'ı her dilde açıp taşma olmadığını denetler.
 - **Tercihler:** Tema, dil ve pano önerisi gizli değildir, ama kasa
   açılmadan önce gerekirler. Bu yüzden kasanın yanında `prefs.json`
   dosyasında tutulurlar.

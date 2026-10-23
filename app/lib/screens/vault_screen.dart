@@ -152,7 +152,8 @@ class _VaultScreenState extends State<VaultScreen> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (_) => _CarrierComposeSheet(core: widget.core),
+      builder: (_) =>
+          _CarrierComposeSheet(core: widget.core, files: widget.files),
     );
   }
 
@@ -394,9 +395,10 @@ class _NoteDialogState extends State<_NoteDialog> {
 
 /// Writes a message, seals it and shows the `KLT1:` text to paste elsewhere.
 class _CarrierComposeSheet extends StatefulWidget {
-  const _CarrierComposeSheet({required this.core});
+  const _CarrierComposeSheet({required this.core, required this.files});
 
   final KilitCore core;
+  final FileAccess files;
 
   @override
   State<_CarrierComposeSheet> createState() => _CarrierComposeSheetState();
@@ -497,17 +499,34 @@ class _CarrierComposeSheetState extends State<_CarrierComposeSheet> {
                 style: TextStyle(color: t.textMuted),
               ),
               const SizedBox(height: 16),
-              FilledButton.icon(
-                key: const ValueKey('carrier-copy'),
-                onPressed: () async {
-                  await Clipboard.setData(ClipboardData(text: sealed));
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text(l.copied)));
-                  }
-                },
-                icon: const Icon(Icons.copy_rounded),
-                label: Text(l.copy),
+              Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.icon(
+                      key: const ValueKey('carrier-copy'),
+                      onPressed: () async {
+                        await Clipboard.setData(ClipboardData(text: sealed));
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(SnackBar(content: Text(l.copied)));
+                        }
+                      },
+                      icon: const Icon(Icons.copy_rounded),
+                      label: Text(l.copy),
+                    ),
+                  ),
+                  if (widget.files.canShare) ...[
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: FilledButton.icon(
+                        key: const ValueKey('carrier-share'),
+                        onPressed: () => widget.files.shareText(sealed),
+                        icon: const Icon(Icons.share_rounded),
+                        label: Text(l.share),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ],
     );

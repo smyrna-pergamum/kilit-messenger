@@ -46,7 +46,25 @@ class MemoryPrefsStore implements PrefsStore {
 
 /// The languages Kilit ships, by code. English is the main language: the
 /// default for new installs and the fallback for any other system language.
-const supportedLanguages = {'en': 'English', 'tr': 'Türkçe'};
+/// Each language is named in itself, so it can be found by someone who
+/// does not read the language currently on screen.
+const supportedLanguages = {
+  'en': 'English',
+  'ar': 'العربية',
+  'de': 'Deutsch',
+  'es': 'Español',
+  'fa': 'فارسی',
+  'fr': 'Français',
+  'id': 'Bahasa Indonesia',
+  'it': 'Italiano',
+  'ja': '日本語',
+  'pt': 'Português',
+  'ru': 'Русский',
+  'tr': 'Türkçe',
+  'uk': 'Українська',
+  'vi': 'Tiếng Việt',
+  'zh': '中文（简体）',
+};
 
 const defaultLanguage = 'en';
 

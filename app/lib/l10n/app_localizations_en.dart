@@ -25,6 +25,9 @@ class LEn extends L {
   String get copied => 'Copied';
 
   @override
+  String get share => 'Share';
+
+  @override
   String get lockNow => 'Lock now';
 
   @override

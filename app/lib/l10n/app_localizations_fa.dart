@@ -1,0 +1,475 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Persian (`fa`).
+class LFa extends L {
+  LFa([String locale = 'fa']) : super(locale);
+
+  @override
+  String get appTitle => 'Kilit';
+
+  @override
+  String get cancel => 'لغو';
+
+  @override
+  String get close => 'بستن';
+
+  @override
+  String get copy => 'کپی';
+
+  @override
+  String get copied => 'کپی شد';
+
+  @override
+  String get share => 'اشتراک‌گذاری';
+
+  @override
+  String get lockNow => 'قفل کن';
+
+  @override
+  String get devBanner => 'هسته توسعه: رمزگذاری واقعی ندارد.';
+
+  @override
+  String get lockTitleUnlock => 'باز کردن قفل';
+
+  @override
+  String get lockTitleCreate => 'یک PIN انتخاب کنید';
+
+  @override
+  String get lockTitleConfirm => 'PIN را دوباره وارد کنید';
+
+  @override
+  String get lockHintUnlock => 'برای باز کردن گاوصندوق، PIN خود را وارد کنید.';
+
+  @override
+  String lockHintCreate(int min) {
+    return 'دست‌کم $min رقم. اگر آن را فراموش کنید گاوصندوق باز نمی‌شود: راه بازیابی وجود ندارد.';
+  }
+
+  @override
+  String get lockHintConfirm => 'همان PIN را یک بار دیگر وارد کنید.';
+
+  @override
+  String get lockMismatch => 'PINها یکسان نبودند. از نو شروع کنید.';
+
+  @override
+  String get lockWrongPin => 'PIN اشتباه است.';
+
+  @override
+  String lockWait(int seconds) {
+    return 'پیش از تلاش دوباره $seconds ثانیه صبر کنید.';
+  }
+
+  @override
+  String pinDigitsEntered(int count) {
+    return '$count رقم وارد شد';
+  }
+
+  @override
+  String get pinDelete => 'حذف';
+
+  @override
+  String get pinOk => 'تأیید';
+
+  @override
+  String get navChats => 'گفتگوها';
+
+  @override
+  String get navVault => 'گاوصندوق';
+
+  @override
+  String get navCamera => 'دوربین';
+
+  @override
+  String get navSettings => 'تنظیمات';
+
+  @override
+  String get chatsLater => 'پیام‌رسانی از طریق Tor در مرحله 2 می‌آید.';
+
+  @override
+  String get cameraLater =>
+      'دوربینی که هرگز داده رمزنشده روی دیسک نمی‌نویسد در مرحله 2 می‌آید.';
+
+  @override
+  String get vaultAddNote => 'افزودن یادداشت';
+
+  @override
+  String get vaultCompose => 'پیام حامل';
+
+  @override
+  String get vaultOpenClipboard => 'باز کردن از کلیپ‌بورد';
+
+  @override
+  String get vaultOpenPasted => 'باز کردن متن چسبانده‌شده';
+
+  @override
+  String get vaultSealFile => 'رمزگذاری فایل';
+
+  @override
+  String get vaultOpenKlt => 'باز کردن .klt';
+
+  @override
+  String get vaultEmpty =>
+      'گاوصندوق شما خالی است. یادداشتی اضافه کنید یا فایلی را رمزگذاری کنید؛ همه چیز به صورت بسته .klt نگهداری می‌شود.';
+
+  @override
+  String get vaultSigned => 'امضاشده';
+
+  @override
+  String get vaultFileTooLarge => 'فایل خیلی بزرگ است: حداکثر 64 MB.';
+
+  @override
+  String vaultFileSealed(String name) {
+    return '$name رمزگذاری شد و به گاوصندوق افزوده شد.';
+  }
+
+  @override
+  String get clipboardEmpty =>
+      'پیام Kilit در کلیپ‌بورد نیست. در WhatsApp، پیام را لمس طولانی کنید و کپی را بزنید.';
+
+  @override
+  String get clipboardBanner => 'یک پیام Kilit در کلیپ‌بورد هست.';
+
+  @override
+  String get clipboardBannerOpen => 'باز کردن';
+
+  @override
+  String get clipboardBannerDismiss => 'نادیده گرفتن';
+
+  @override
+  String get noteNew => 'یادداشت جدید';
+
+  @override
+  String get noteTitle => 'عنوان';
+
+  @override
+  String get noteText => 'یادداشت';
+
+  @override
+  String get sealAndSave => 'رمزگذاری و ذخیره';
+
+  @override
+  String get carrierTitle => 'پیام حامل';
+
+  @override
+  String get carrierIntro =>
+      'پیام رمزگذاری می‌شود و به متنی تبدیل می‌شود که می‌توانید در برنامه‌ای مثل WhatsApp بچسبانید.';
+
+  @override
+  String get carrierMessage => 'پیام';
+
+  @override
+  String get withPassphrase => 'با گذرواژه مشترک';
+
+  @override
+  String get carrierWithPassphraseHint =>
+      'طرف مقابل آن را با همان گذرواژه باز می‌کند. خاموش: فقط خودتان می‌توانید بازش کنید.';
+
+  @override
+  String get passphrase => 'گذرواژه مشترک';
+
+  @override
+  String get carrierPassphraseHelper =>
+      'دست‌کم 12 نویسه. آن را از همان کانالی که پیام را می‌فرستید نفرستید.';
+
+  @override
+  String get carrierSeal => 'رمزگذاری';
+
+  @override
+  String get carrierResultIntro =>
+      'این متن را کپی کنید و بفرستید. کانال فقط داده رمزگذاری‌شده می‌بیند.';
+
+  @override
+  String carrierChars(int count) {
+    return '$count نویسه';
+  }
+
+  @override
+  String get pasteTitle => 'باز کردن متن چسبانده‌شده';
+
+  @override
+  String get pasteInput => 'متنی که از یک گفتگو کپی کرده‌اید';
+
+  @override
+  String get pasteFromClipboard => 'چسباندن از کلیپ‌بورد';
+
+  @override
+  String get passphraseIfAny => 'گذرواژه مشترک (در صورت وجود)';
+
+  @override
+  String get pasteOpen => 'یافتن و باز کردن';
+
+  @override
+  String get pasteNone => 'هیچ بسته KLT1 در متن پیدا نشد.';
+
+  @override
+  String get pasteTruncated =>
+      'یک بسته ناقص است: شاید برنامه فرستنده پیام را کوتاه کرده باشد.';
+
+  @override
+  String get pasteMalformed => 'یک بسته آسیب دیده است.';
+
+  @override
+  String get openWrongKey => 'این بسته با این گذرواژه یا کلید باز نمی‌شود.';
+
+  @override
+  String get openDamaged => 'این بسته آسیب دیده یا تغییر کرده است.';
+
+  @override
+  String get openIsFile =>
+      'این بسته حاوی یک فایل است؛ آن را با «باز کردن .klt» به گاوصندوق اضافه کنید.';
+
+  @override
+  String get packetTitle => 'تحلیل بسته';
+
+  @override
+  String get packetFile => 'فایل';
+
+  @override
+  String get packetType => 'نوع';
+
+  @override
+  String get packetSize => 'اندازه';
+
+  @override
+  String packetSizeValue(String content, String packet) {
+    return '$content (بسته $packet)';
+  }
+
+  @override
+  String get packetFormat => 'قالب';
+
+  @override
+  String get packetFormatValue => 'KLT1 (بر پایه age v1)';
+
+  @override
+  String get packetRecipients => 'گیرندگان';
+
+  @override
+  String get packetContent => 'محتوا';
+
+  @override
+  String get packetContentValue => 'ChaCha20-Poly1305، تکه‌های 64 KiB';
+
+  @override
+  String get packetSignature => 'امضا';
+
+  @override
+  String get sigVerified => 'Ed25519 + ML-DSA-65، تأییدشده';
+
+  @override
+  String get sigUnsigned => 'بدون امضا';
+
+  @override
+  String get sigInvalid => 'نامعتبر';
+
+  @override
+  String get recipientXwing => 'klt-xwing (ML-KEM-768 + X25519)';
+
+  @override
+  String get recipientPassphrase => 'klt-argon2id (گذرواژه مشترک)';
+
+  @override
+  String get itemOpen => 'باز کردن';
+
+  @override
+  String get itemView => 'نمایش';
+
+  @override
+  String get itemExport => 'صدور به صورت .klt';
+
+  @override
+  String get itemSavePlain => 'ذخیره بدون رمزگذاری';
+
+  @override
+  String get savePlainTitle => 'بدون رمزگذاری ذخیره شود؟';
+
+  @override
+  String get savePlainBody =>
+      'فایل رمزگشایی‌شده ذخیره می‌شود. هر کسی که به محل ذخیره دسترسی داشته باشد می‌تواند آن را بخواند؛ Kilit دیگر نمی‌تواند از آن محافظت کند.';
+
+  @override
+  String get itemDelete => 'حذف از گاوصندوق';
+
+  @override
+  String get exportTitle => 'صدور به صورت .klt';
+
+  @override
+  String get exportIntro =>
+      'فایل دوباره رمزگذاری و با گاوصندوق شما امضا می‌شود. نام فایل تصادفی است؛ نام واقعی درون بسته رمزگذاری‌شده می‌ماند.';
+
+  @override
+  String get exportWithPassphraseHint =>
+      'هر کسی گذرواژه را داشته باشد می‌تواند بازش کند. خاموش: فقط گاوصندوق شما آن را باز می‌کند (برای پشتیبان‌گیری).';
+
+  @override
+  String get exportPassphraseHelper =>
+      'دست‌کم 12 نویسه. آن را از همان کانالی که فایل را می‌فرستید نفرستید.';
+
+  @override
+  String get passphraseTooShort => 'گذرواژه مشترک باید دست‌کم 12 نویسه باشد.';
+
+  @override
+  String get importTitle => 'باز کردن فایل .klt';
+
+  @override
+  String get importPassphraseHelper =>
+      'اگر برای گاوصندوق خودتان فرستاده شده، خالی بگذارید.';
+
+  @override
+  String get importGo => 'باز کردن و افزودن به گاوصندوق';
+
+  @override
+  String importAddedSigned(String name) {
+    return '$name به گاوصندوق افزوده شد (امضاشده).';
+  }
+
+  @override
+  String importAddedUnsigned(String name) {
+    return '$name به گاوصندوق افزوده شد (بدون امضا).';
+  }
+
+  @override
+  String get importWrongKey =>
+      'این فایل با این گذرواژه یا گاوصندوق شما باز نمی‌شود.';
+
+  @override
+  String get importNotKlt => 'این یک فایل .klt نیست.';
+
+  @override
+  String get importDamaged => 'فایل آسیب دیده یا تغییر کرده است.';
+
+  @override
+  String get settingsProtections => 'محافظت‌های شما';
+
+  @override
+  String get protPin => 'محافظت با PIN';
+
+  @override
+  String get protScreenshots => 'جلوگیری از اسکرین‌شات';
+
+  @override
+  String get protScreenshotsValue => 'روشن، در همه صفحه‌ها';
+
+  @override
+  String get protAutoLock => 'قفل خودکار';
+
+  @override
+  String get protAutoLockValue => 'هنگام خروج از برنامه';
+
+  @override
+  String get protNetwork => 'اتصال Tor';
+
+  @override
+  String get protNetworkValue =>
+      'متصل نیست: مرحله 1 هرگز آنلاین نمی‌شود. Tor در مرحله 2 می‌آید.';
+
+  @override
+  String get hwStrongbox => 'تراشه امنیتی StrongBox';
+
+  @override
+  String get hwTee => 'محیط اجرای مورد اعتماد (TEE)';
+
+  @override
+  String get hwTpm => 'TPM 2.0';
+
+  @override
+  String get hwOsSoftware => 'Android Keystore (بدون سخت‌افزار امن)';
+
+  @override
+  String get hwSoftwareFile => 'کلید نرم‌افزاری (کنار گاوصندوق)';
+
+  @override
+  String get hwNone => 'هیچ';
+
+  @override
+  String get hwDev => 'هیچ (هسته توسعه)';
+
+  @override
+  String get hwBoundHint =>
+      'PIN شما به کلید سخت‌افزاری این دستگاه گره خورده است. حتی نسخه‌ای از فایل گاوصندوق را نمی‌توان روی دستگاه دیگری امتحان کرد.';
+
+  @override
+  String get hwNotBoundHint =>
+      'کلید سخت‌افزاری وجود ندارد: اگر فایل گاوصندوق کپی شود، PIN را می‌توان روی دستگاه دیگری حدس زد.';
+
+  @override
+  String get settingsFingerprint => 'شماره امنیتی شما';
+
+  @override
+  String get settingsFingerprintHint =>
+      'هنگام تأیید یک مخاطب، باید در هر دو دستگاه یکسان باشد.';
+
+  @override
+  String get settingsAppearance => 'ظاهر';
+
+  @override
+  String get themeSystem => 'سیستم';
+
+  @override
+  String get themeLight => 'روشن';
+
+  @override
+  String get themeDark => 'تیره';
+
+  @override
+  String get settingsLanguage => 'زبان';
+
+  @override
+  String get languageSystem => 'زبان سیستم';
+
+  @override
+  String get settingsPrivacy => 'حریم خصوصی';
+
+  @override
+  String get clipboardCheck => 'پیشنهاد پیام Kilit موجود در کلیپ‌بورد';
+
+  @override
+  String get clipboardCheckHint =>
+      'هنگام باز شدن گاوصندوق، باز کردن پیام KLT1: موجود در کلیپ‌بورد را پیشنهاد می‌دهد. Android اعلانی نشان می‌دهد که کلیپ‌بورد خوانده شده است.';
+
+  @override
+  String get settingsPermissions => 'مجوزها';
+
+  @override
+  String get permIntro =>
+      'Kilit در حال حاضر از هیچ مجوز حساسی استفاده نمی‌کند.';
+
+  @override
+  String get permCamera => 'دوربین';
+
+  @override
+  String get permCameraValue => 'استفاده نمی‌شود (دوربین در مرحله 2 می‌آید)';
+
+  @override
+  String get permNotifications => 'اعلان‌ها';
+
+  @override
+  String get permNotificationsValue => 'استفاده نمی‌شود';
+
+  @override
+  String get permInternet => 'اینترنت';
+
+  @override
+  String get permInternetValue => 'هیچ: مرحله 1 آفلاین کار می‌کند';
+
+  @override
+  String get permOpenSystem => 'باز کردن تنظیمات مجوزهای سیستم';
+
+  @override
+  String get settingsAbout => 'درباره';
+
+  @override
+  String get aboutVersion => 'نسخه';
+
+  @override
+  String get aboutLicense => 'مجوز';
+
+  @override
+  String get aboutAlpha =>
+      'به طور مستقل ممیزی نشده است. نسخه آلفا: مناسب برای آزمایش، نه برای استفاده پرمخاطره.';
+}

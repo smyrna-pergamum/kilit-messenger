@@ -54,6 +54,15 @@ class FilesChannel(private val activity: Activity, private val channel: MethodCh
                     .putExtra(Intent.EXTRA_TITLE, call.argument<String>("name") ?: "kilit.klt")
                 activity.startActivityForResult(intent, SAVE)
             }
+            "shareText" -> {
+                // the system share sheet: WhatsApp, Telegram, Signal, mail...
+                // Only the KLT1: ciphertext ever comes here.
+                val send = Intent(Intent.ACTION_SEND)
+                    .setType("text/plain")
+                    .putExtra(Intent.EXTRA_TEXT, call.arguments as String)
+                activity.startActivity(Intent.createChooser(send, null))
+                result.success(null)
+            }
             "openAppSettings" -> {
                 // Kilit's page in Android settings, where the user grants or
                 // revokes its permissions

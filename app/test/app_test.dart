@@ -50,6 +50,14 @@ class FakeFiles implements FileAccess {
 
   @override
   Future<void> openAppSettings() async => settingsOpened++;
+
+  final shared = <String>[];
+
+  @override
+  bool get canShare => true;
+
+  @override
+  Future<void> shareText(String text) async => shared.add(text);
 }
 
 /// Answers Flutter's clipboard calls with [text].
@@ -160,8 +168,11 @@ void main() {
     expect(find.text('Ed25519 + ML-DSA-65, verified'), findsOneWidget);
   });
 
-  testWidgets('a carrier message round-trips through paste', (tester) async {
-    await startApp(tester);
+  testWidgets('a carrier message is shared and round-trips through paste', (
+    tester,
+  ) async {
+    final files = FakeFiles();
+    await startApp(tester, files: files);
     await setUpVault(tester);
     await tester.tap(find.byKey(const ValueKey('compose-carrier')));
     await tester.pumpAndSettle();
@@ -180,6 +191,8 @@ void main() {
         .data!;
     expect(sealed, startsWith('KLT1:'));
     expect(sealed, endsWith('.'));
+    await tester.tap(find.byKey(const ValueKey('carrier-share')));
+    expect(files.shared.single, sealed);
 
     Navigator.of(tester.element(find.byKey(const ValueKey('carrier-result'))))
         .pop();
@@ -276,15 +289,21 @@ void main() {
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
     expect(app.themeMode, ThemeMode.dark);
 
+    await tester.ensureVisible(find.byKey(const ValueKey('open-permissions')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('open-permissions')));
     expect(files.settingsOpened, 1);
 
+    await tester.ensureVisible(find.byKey(const ValueKey('language-tr')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('language-tr')));
     await tester.pumpAndSettle();
     expect(prefs.language, 'tr');
-    expect(find.text('Korumaların'), findsOneWidget);
+    // the list is scrolled down to the languages; the title bar shows it
     expect(find.text('Ayarlar'), findsWidgets);
 
+    await tester.ensureVisible(find.byKey(const ValueKey('clipboard-hint')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('clipboard-hint')));
     await tester.pumpAndSettle();
     expect(prefs.clipboardHint, isTrue);
@@ -388,5 +407,48 @@ void main() {
     final again = await Prefs.load(store);
     expect(again.language, isNull);
     expect(again.themeMode, ThemeMode.light);
+  });
+
+  for (final lang in supportedLanguages.keys) {
+    testWidgets('the lock screen and settings render in $lang', (tester) async {
+      await startApp(
+        tester,
+        size: const Size(360, 2600),
+        prefs: {'language': lang},
+      );
+      expect(tester.takeException(), isNull);
+      final dir = Directionality.of(
+        tester.element(find.byKey(const ValueKey('lock-title'))),
+      );
+      expect(
+        dir,
+        lang == 'ar' || lang == 'fa' ? TextDirection.rtl : TextDirection.ltr,
+      );
+      await setUpVault(tester);
+      await tester.tap(find.byIcon(Icons.settings_outlined));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('status-tor')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('switching the theme fades out and back in', (tester) async {
+    final (_, prefs) = await startApp(tester);
+    FadeTransition fade() => tester.widget<FadeTransition>(
+      find.byWidgetPredicate(
+        (w) => w is FadeTransition && w.child is MaterialApp,
+      ),
+    );
+    expect(fade().opacity.value, 1);
+    unawaited(prefs.setThemeMode(ThemeMode.dark));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(fade().opacity.value, lessThan(1));
+    await tester.pumpAndSettle();
+    expect(fade().opacity.value, 1);
+    expect(
+      tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+      ThemeMode.dark,
+    );
   });
 }

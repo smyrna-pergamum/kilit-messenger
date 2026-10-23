@@ -1,0 +1,462 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Japanese (`ja`).
+class LJa extends L {
+  LJa([String locale = 'ja']) : super(locale);
+
+  @override
+  String get appTitle => 'Kilit';
+
+  @override
+  String get cancel => 'キャンセル';
+
+  @override
+  String get close => '閉じる';
+
+  @override
+  String get copy => 'コピー';
+
+  @override
+  String get copied => 'コピーしました';
+
+  @override
+  String get share => '共有';
+
+  @override
+  String get lockNow => '今すぐロック';
+
+  @override
+  String get devBanner => '開発用コア：実際の暗号化は行われません。';
+
+  @override
+  String get lockTitleUnlock => 'ロック解除';
+
+  @override
+  String get lockTitleCreate => 'PINを設定';
+
+  @override
+  String get lockTitleConfirm => 'PINをもう一度入力';
+
+  @override
+  String get lockHintUnlock => '金庫を開くにはPINを入力してください。';
+
+  @override
+  String lockHintCreate(int min) {
+    return '$min桁以上。忘れると金庫は開けません。復旧手段はありません。';
+  }
+
+  @override
+  String get lockHintConfirm => '同じPINをもう一度入力してください。';
+
+  @override
+  String get lockMismatch => 'PINが一致しませんでした。最初からやり直してください。';
+
+  @override
+  String get lockWrongPin => 'PINが違います。';
+
+  @override
+  String lockWait(int seconds) {
+    return '$seconds秒待ってから再試行してください。';
+  }
+
+  @override
+  String pinDigitsEntered(int count) {
+    return '$count桁入力済み';
+  }
+
+  @override
+  String get pinDelete => '削除';
+
+  @override
+  String get pinOk => 'OK';
+
+  @override
+  String get navChats => 'チャット';
+
+  @override
+  String get navVault => '金庫';
+
+  @override
+  String get navCamera => 'カメラ';
+
+  @override
+  String get navSettings => '設定';
+
+  @override
+  String get chatsLater => 'Tor経由のメッセージ機能はステージ2で提供されます。';
+
+  @override
+  String get cameraLater => '平文をディスクに書き込まないカメラはステージ2で提供されます。';
+
+  @override
+  String get vaultAddNote => 'メモを追加';
+
+  @override
+  String get vaultCompose => 'キャリアメッセージ';
+
+  @override
+  String get vaultOpenClipboard => 'クリップボードから開く';
+
+  @override
+  String get vaultOpenPasted => '貼り付けたテキストを開く';
+
+  @override
+  String get vaultSealFile => 'ファイルを暗号化';
+
+  @override
+  String get vaultOpenKlt => '.kltを開く';
+
+  @override
+  String get vaultEmpty =>
+      '金庫は空です。メモを追加するかファイルを暗号化してください。すべて.kltパケットとして保管されます。';
+
+  @override
+  String get vaultSigned => '署名済み';
+
+  @override
+  String get vaultFileTooLarge => 'ファイルが大きすぎます。上限は64 MBです。';
+
+  @override
+  String vaultFileSealed(String name) {
+    return '$nameを暗号化して金庫に追加しました。';
+  }
+
+  @override
+  String get clipboardEmpty =>
+      'クリップボードにKilitメッセージがありません。WhatsAppでメッセージを長押しし、［コピー］をタップしてください。';
+
+  @override
+  String get clipboardBanner => 'クリップボードにKilitメッセージがあります。';
+
+  @override
+  String get clipboardBannerOpen => '開く';
+
+  @override
+  String get clipboardBannerDismiss => '無視';
+
+  @override
+  String get noteNew => '新しいメモ';
+
+  @override
+  String get noteTitle => 'タイトル';
+
+  @override
+  String get noteText => 'メモ';
+
+  @override
+  String get sealAndSave => '暗号化して保存';
+
+  @override
+  String get carrierTitle => 'キャリアメッセージ';
+
+  @override
+  String get carrierIntro => 'メッセージを暗号化し、WhatsAppなどのアプリに貼り付けられるテキストに変換します。';
+
+  @override
+  String get carrierMessage => 'メッセージ';
+
+  @override
+  String get withPassphrase => '共有パスフレーズを使う';
+
+  @override
+  String get carrierWithPassphraseHint => '相手は同じパスフレーズで開きます。オフの場合は自分だけが開けます。';
+
+  @override
+  String get passphrase => '共有パスフレーズ';
+
+  @override
+  String get carrierPassphraseHelper => '12文字以上。メッセージと同じ経路で送らないでください。';
+
+  @override
+  String get carrierSeal => '暗号化';
+
+  @override
+  String get carrierResultIntro =>
+      'このテキストをコピーして送信してください。経路上では暗号化されたデータしか見えません。';
+
+  @override
+  String carrierChars(int count) {
+    return '$count文字';
+  }
+
+  @override
+  String get pasteTitle => '貼り付けたテキストを開く';
+
+  @override
+  String get pasteInput => 'チャットからコピーしたテキスト';
+
+  @override
+  String get pasteFromClipboard => 'クリップボードから貼り付け';
+
+  @override
+  String get passphraseIfAny => '共有パスフレーズ（ある場合）';
+
+  @override
+  String get pasteOpen => '検出して開く';
+
+  @override
+  String get pasteNone => 'テキストにKLT1パケットが見つかりません。';
+
+  @override
+  String get pasteTruncated => 'パケットが途中で切れています。送信元のアプリがメッセージを短縮した可能性があります。';
+
+  @override
+  String get pasteMalformed => 'パケットが破損しています。';
+
+  @override
+  String get openWrongKey => 'このパスフレーズまたは鍵ではこのパケットを開けません。';
+
+  @override
+  String get openDamaged => 'このパケットは破損しているか、改変されています。';
+
+  @override
+  String get openIsFile => 'このパケットにはファイルが含まれています。［.kltを開く］で金庫に追加してください。';
+
+  @override
+  String get packetTitle => 'パケット解析';
+
+  @override
+  String get packetFile => 'ファイル';
+
+  @override
+  String get packetType => '種類';
+
+  @override
+  String get packetSize => 'サイズ';
+
+  @override
+  String packetSizeValue(String content, String packet) {
+    return '$content（パケット $packet）';
+  }
+
+  @override
+  String get packetFormat => '形式';
+
+  @override
+  String get packetFormatValue => 'KLT1（age v1ベース）';
+
+  @override
+  String get packetRecipients => '受信者';
+
+  @override
+  String get packetContent => '内容';
+
+  @override
+  String get packetContentValue => 'ChaCha20-Poly1305、64 KiBチャンク';
+
+  @override
+  String get packetSignature => '署名';
+
+  @override
+  String get sigVerified => 'Ed25519 + ML-DSA-65、検証済み';
+
+  @override
+  String get sigUnsigned => '署名なし';
+
+  @override
+  String get sigInvalid => '無効';
+
+  @override
+  String get recipientXwing => 'klt-xwing (ML-KEM-768 + X25519)';
+
+  @override
+  String get recipientPassphrase => 'klt-argon2id（共有パスフレーズ）';
+
+  @override
+  String get itemOpen => '開く';
+
+  @override
+  String get itemView => '表示';
+
+  @override
+  String get itemExport => '.kltとして書き出す';
+
+  @override
+  String get itemSavePlain => '暗号化せずに保存';
+
+  @override
+  String get savePlainTitle => '暗号化せずに保存しますか？';
+
+  @override
+  String get savePlainBody =>
+      'ファイルは復号された状態で保存されます。保存先にアクセスできる人は誰でも読むことができ、Kilitでは保護できなくなります。';
+
+  @override
+  String get itemDelete => '金庫から削除';
+
+  @override
+  String get exportTitle => '.kltとして書き出す';
+
+  @override
+  String get exportIntro =>
+      'ファイルは再度暗号化され、あなたの金庫で署名されます。ファイル名はランダムで、本来の名前は暗号化されたパケット内に保持されます。';
+
+  @override
+  String get exportWithPassphraseHint =>
+      'パスフレーズを知っている人なら誰でも開けます。オフの場合は自分の金庫だけが開けます（バックアップ用）。';
+
+  @override
+  String get exportPassphraseHelper => '12文字以上。ファイルと同じ経路で送らないでください。';
+
+  @override
+  String get passphraseTooShort => '共有パスフレーズは12文字以上にしてください。';
+
+  @override
+  String get importTitle => '.kltファイルを開く';
+
+  @override
+  String get importPassphraseHelper => '自分の金庫宛てに送られた場合は空欄のままにしてください。';
+
+  @override
+  String get importGo => '開いて金庫に追加';
+
+  @override
+  String importAddedSigned(String name) {
+    return '$nameを金庫に追加しました（署名済み）。';
+  }
+
+  @override
+  String importAddedUnsigned(String name) {
+    return '$nameを金庫に追加しました（署名なし）。';
+  }
+
+  @override
+  String get importWrongKey => 'このパスフレーズまたはあなたの金庫ではこのファイルを開けません。';
+
+  @override
+  String get importNotKlt => '.kltファイルではありません。';
+
+  @override
+  String get importDamaged => 'ファイルが破損しているか、改変されています。';
+
+  @override
+  String get settingsProtections => '保護機能';
+
+  @override
+  String get protPin => 'PIN保護';
+
+  @override
+  String get protScreenshots => 'スクリーンショットのブロック';
+
+  @override
+  String get protScreenshotsValue => 'オン（すべての画面）';
+
+  @override
+  String get protAutoLock => '自動ロック';
+
+  @override
+  String get protAutoLockValue => 'アプリを離れたとき';
+
+  @override
+  String get protNetwork => 'Tor接続';
+
+  @override
+  String get protNetworkValue => '未接続：ステージ1はオンラインになりません。Torはステージ2で提供されます。';
+
+  @override
+  String get hwStrongbox => 'StrongBoxセキュリティチップ';
+
+  @override
+  String get hwTee => '信頼できる実行環境（TEE）';
+
+  @override
+  String get hwTpm => 'TPM 2.0';
+
+  @override
+  String get hwOsSoftware => 'Android Keystore（セキュアハードウェアなし）';
+
+  @override
+  String get hwSoftwareFile => 'ソフトウェア鍵（金庫と同じ場所）';
+
+  @override
+  String get hwNone => 'なし';
+
+  @override
+  String get hwDev => 'なし（開発用コア）';
+
+  @override
+  String get hwBoundHint =>
+      'PINはこの端末のハードウェア鍵に結び付けられています。金庫ファイルをコピーされても、別の端末では試行できません。';
+
+  @override
+  String get hwNotBoundHint =>
+      'ハードウェア鍵がありません。金庫ファイルがコピーされると、別の端末でPINを推測される可能性があります。';
+
+  @override
+  String get settingsFingerprint => '安全番号';
+
+  @override
+  String get settingsFingerprintHint => '連絡先を確認する際は、両方の端末で同じである必要があります。';
+
+  @override
+  String get settingsAppearance => '外観';
+
+  @override
+  String get themeSystem => 'システム';
+
+  @override
+  String get themeLight => 'ライト';
+
+  @override
+  String get themeDark => 'ダーク';
+
+  @override
+  String get settingsLanguage => '言語';
+
+  @override
+  String get languageSystem => 'システムの言語';
+
+  @override
+  String get settingsPrivacy => 'プライバシー';
+
+  @override
+  String get clipboardCheck => 'クリップボードのKilitメッセージを提案';
+
+  @override
+  String get clipboardCheckHint =>
+      '金庫を開いたとき、クリップボードにあるKLT1:メッセージを開くよう提案します。Androidではクリップボードが読み取られたことが通知されます。';
+
+  @override
+  String get settingsPermissions => '権限';
+
+  @override
+  String get permIntro => 'Kilitは現在、機密性の高い権限を使用していません。';
+
+  @override
+  String get permCamera => 'カメラ';
+
+  @override
+  String get permCameraValue => '未使用（カメラはステージ2で提供）';
+
+  @override
+  String get permNotifications => '通知';
+
+  @override
+  String get permNotificationsValue => '未使用';
+
+  @override
+  String get permInternet => 'インターネット';
+
+  @override
+  String get permInternetValue => 'なし：ステージ1はオフラインで動作します';
+
+  @override
+  String get permOpenSystem => 'システムの権限設定を開く';
+
+  @override
+  String get settingsAbout => 'このアプリについて';
+
+  @override
+  String get aboutVersion => 'バージョン';
+
+  @override
+  String get aboutLicense => 'ライセンス';
+
+  @override
+  String get aboutAlpha => '独立した監査は受けていません。アルファ版：テスト用であり、重要な用途には適していません。';
+}

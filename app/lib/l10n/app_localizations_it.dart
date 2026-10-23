@@ -1,0 +1,480 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Italian (`it`).
+class LIt extends L {
+  LIt([String locale = 'it']) : super(locale);
+
+  @override
+  String get appTitle => 'Kilit';
+
+  @override
+  String get cancel => 'Annulla';
+
+  @override
+  String get close => 'Chiudi';
+
+  @override
+  String get copy => 'Copia';
+
+  @override
+  String get copied => 'Copiato';
+
+  @override
+  String get share => 'Condividi';
+
+  @override
+  String get lockNow => 'Blocca ora';
+
+  @override
+  String get devBanner => 'Nucleo di sviluppo: nessuna vera crittografia.';
+
+  @override
+  String get lockTitleUnlock => 'Sblocca';
+
+  @override
+  String get lockTitleCreate => 'Scegli un PIN';
+
+  @override
+  String get lockTitleConfirm => 'Inserisci di nuovo il PIN';
+
+  @override
+  String get lockHintUnlock =>
+      'Inserisci il tuo PIN per aprire la tua cassaforte.';
+
+  @override
+  String lockHintCreate(int min) {
+    return 'Almeno $min cifre. Se lo dimentichi, la tua cassaforte non potrà essere aperta: non c\'è recupero.';
+  }
+
+  @override
+  String get lockHintConfirm => 'Inserisci lo stesso PIN ancora una volta.';
+
+  @override
+  String get lockMismatch => 'I PIN non corrispondono. Ricomincia.';
+
+  @override
+  String get lockWrongPin => 'PIN errato.';
+
+  @override
+  String lockWait(int seconds) {
+    return 'Attendi $seconds s prima di riprovare.';
+  }
+
+  @override
+  String pinDigitsEntered(int count) {
+    return '$count cifre inserite';
+  }
+
+  @override
+  String get pinDelete => 'Cancella';
+
+  @override
+  String get pinOk => 'OK';
+
+  @override
+  String get navChats => 'Chat';
+
+  @override
+  String get navVault => 'Cassaforte';
+
+  @override
+  String get navCamera => 'Fotocamera';
+
+  @override
+  String get navSettings => 'Impostazioni';
+
+  @override
+  String get chatsLater => 'La messaggistica tramite Tor arriva nella fase 2.';
+
+  @override
+  String get cameraLater =>
+      'Una fotocamera che non scrive mai dati in chiaro sulla memoria arriva nella fase 2.';
+
+  @override
+  String get vaultAddNote => 'Aggiungi nota';
+
+  @override
+  String get vaultCompose => 'Messaggio vettore';
+
+  @override
+  String get vaultOpenClipboard => 'Apri dagli appunti';
+
+  @override
+  String get vaultOpenPasted => 'Apri testo incollato';
+
+  @override
+  String get vaultSealFile => 'Cifra un file';
+
+  @override
+  String get vaultOpenKlt => 'Apri .klt';
+
+  @override
+  String get vaultEmpty =>
+      'La tua cassaforte è vuota. Aggiungi una nota o cifra un file; tutto viene conservato come pacchetto .klt.';
+
+  @override
+  String get vaultSigned => 'Firmato';
+
+  @override
+  String get vaultFileTooLarge => 'Il file è troppo grande: massimo 64 MB.';
+
+  @override
+  String vaultFileSealed(String name) {
+    return '$name è stato cifrato e aggiunto alla cassaforte.';
+  }
+
+  @override
+  String get clipboardEmpty =>
+      'Nessun messaggio Kilit negli appunti. In WhatsApp, tieni premuto il messaggio e tocca Copia.';
+
+  @override
+  String get clipboardBanner => 'C\'è un messaggio Kilit negli appunti.';
+
+  @override
+  String get clipboardBannerOpen => 'Apri';
+
+  @override
+  String get clipboardBannerDismiss => 'Ignora';
+
+  @override
+  String get noteNew => 'Nuova nota';
+
+  @override
+  String get noteTitle => 'Titolo';
+
+  @override
+  String get noteText => 'Nota';
+
+  @override
+  String get sealAndSave => 'Cifra e salva';
+
+  @override
+  String get carrierTitle => 'Messaggio vettore';
+
+  @override
+  String get carrierIntro =>
+      'Il messaggio viene cifrato e trasformato in testo da incollare in un\'app come WhatsApp.';
+
+  @override
+  String get carrierMessage => 'Messaggio';
+
+  @override
+  String get withPassphrase => 'Con una passphrase condivisa';
+
+  @override
+  String get carrierWithPassphraseHint =>
+      'L\'altra persona lo apre con la stessa passphrase. Disattivato: solo tu puoi aprirlo.';
+
+  @override
+  String get passphrase => 'Passphrase condivisa';
+
+  @override
+  String get carrierPassphraseHelper =>
+      'Almeno 12 caratteri. Non inviarla tramite lo stesso canale del messaggio.';
+
+  @override
+  String get carrierSeal => 'Cifra';
+
+  @override
+  String get carrierResultIntro =>
+      'Copia e invia questo testo. Il canale vede solo dati cifrati.';
+
+  @override
+  String carrierChars(int count) {
+    return '$count caratteri';
+  }
+
+  @override
+  String get pasteTitle => 'Apri testo incollato';
+
+  @override
+  String get pasteInput => 'Testo copiato da una chat';
+
+  @override
+  String get pasteFromClipboard => 'Incolla dagli appunti';
+
+  @override
+  String get passphraseIfAny => 'Passphrase condivisa (se presente)';
+
+  @override
+  String get pasteOpen => 'Trova e apri';
+
+  @override
+  String get pasteNone => 'Nessun pacchetto KLT1 trovato nel testo.';
+
+  @override
+  String get pasteTruncated =>
+      'Un pacchetto è stato troncato: l\'app di invio potrebbe aver accorciato il messaggio.';
+
+  @override
+  String get pasteMalformed => 'Un pacchetto è danneggiato.';
+
+  @override
+  String get openWrongKey =>
+      'Questo pacchetto non si apre con questa passphrase o chiave.';
+
+  @override
+  String get openDamaged =>
+      'Questo pacchetto è danneggiato o è stato modificato.';
+
+  @override
+  String get openIsFile =>
+      'Questo pacchetto contiene un file; aggiungilo alla cassaforte con Apri .klt.';
+
+  @override
+  String get packetTitle => 'Analisi del pacchetto';
+
+  @override
+  String get packetFile => 'File';
+
+  @override
+  String get packetType => 'Tipo';
+
+  @override
+  String get packetSize => 'Dimensione';
+
+  @override
+  String packetSizeValue(String content, String packet) {
+    return '$content (pacchetto $packet)';
+  }
+
+  @override
+  String get packetFormat => 'Formato';
+
+  @override
+  String get packetFormatValue => 'KLT1 (basato su age v1)';
+
+  @override
+  String get packetRecipients => 'Destinatari';
+
+  @override
+  String get packetContent => 'Contenuto';
+
+  @override
+  String get packetContentValue => 'ChaCha20-Poly1305, blocchi da 64 KiB';
+
+  @override
+  String get packetSignature => 'Firma';
+
+  @override
+  String get sigVerified => 'Ed25519 + ML-DSA-65, verificata';
+
+  @override
+  String get sigUnsigned => 'Non firmato';
+
+  @override
+  String get sigInvalid => 'NON VALIDA';
+
+  @override
+  String get recipientXwing => 'klt-xwing (ML-KEM-768 + X25519)';
+
+  @override
+  String get recipientPassphrase => 'klt-argon2id (passphrase condivisa)';
+
+  @override
+  String get itemOpen => 'Apri';
+
+  @override
+  String get itemView => 'Visualizza';
+
+  @override
+  String get itemExport => 'Esporta come .klt';
+
+  @override
+  String get itemSavePlain => 'Salva senza cifratura';
+
+  @override
+  String get savePlainTitle => 'Salvare senza cifratura?';
+
+  @override
+  String get savePlainBody =>
+      'Il file viene salvato decifrato. Chiunque abbia accesso al punto in cui lo salvi può leggerlo; Kilit non può più proteggerlo.';
+
+  @override
+  String get itemDelete => 'Elimina dalla cassaforte';
+
+  @override
+  String get exportTitle => 'Esporta come .klt';
+
+  @override
+  String get exportIntro =>
+      'Il file viene cifrato di nuovo e firmato dalla tua cassaforte. Il nome del file è casuale; il nome reale resta nel pacchetto cifrato.';
+
+  @override
+  String get exportWithPassphraseHint =>
+      'Chiunque abbia la passphrase può aprirlo. Disattivato: solo la tua cassaforte lo apre (per i backup).';
+
+  @override
+  String get exportPassphraseHelper =>
+      'Almeno 12 caratteri. Non inviarla tramite lo stesso canale del file.';
+
+  @override
+  String get passphraseTooShort =>
+      'La passphrase condivisa deve avere almeno 12 caratteri.';
+
+  @override
+  String get importTitle => 'Apri un file .klt';
+
+  @override
+  String get importPassphraseHelper =>
+      'Lascia vuoto se è stato inviato alla tua cassaforte.';
+
+  @override
+  String get importGo => 'Apri e aggiungi alla cassaforte';
+
+  @override
+  String importAddedSigned(String name) {
+    return '$name è stato aggiunto alla cassaforte (firmato).';
+  }
+
+  @override
+  String importAddedUnsigned(String name) {
+    return '$name è stato aggiunto alla cassaforte (non firmato).';
+  }
+
+  @override
+  String get importWrongKey =>
+      'Questo file non si apre con questa passphrase o con la tua cassaforte.';
+
+  @override
+  String get importNotKlt => 'Questo non è un file .klt.';
+
+  @override
+  String get importDamaged => 'Il file è danneggiato o è stato modificato.';
+
+  @override
+  String get settingsProtections => 'Le tue protezioni';
+
+  @override
+  String get protPin => 'Protezione con PIN';
+
+  @override
+  String get protScreenshots => 'Blocco screenshot';
+
+  @override
+  String get protScreenshotsValue => 'Attivo, su ogni schermata';
+
+  @override
+  String get protAutoLock => 'Blocco automatico';
+
+  @override
+  String get protAutoLockValue => 'Quando esci dall\'app';
+
+  @override
+  String get protNetwork => 'Connessione Tor';
+
+  @override
+  String get protNetworkValue =>
+      'Non connesso: la fase 1 non va mai online. Tor arriva nella fase 2.';
+
+  @override
+  String get hwStrongbox => 'Chip di sicurezza StrongBox';
+
+  @override
+  String get hwTee => 'Ambiente di esecuzione attendibile (TEE)';
+
+  @override
+  String get hwTpm => 'TPM 2.0';
+
+  @override
+  String get hwOsSoftware => 'Android Keystore (nessun hardware sicuro)';
+
+  @override
+  String get hwSoftwareFile => 'Chiave software (accanto alla cassaforte)';
+
+  @override
+  String get hwNone => 'Nessuno';
+
+  @override
+  String get hwDev => 'Nessuno (nucleo di sviluppo)';
+
+  @override
+  String get hwBoundHint =>
+      'Il tuo PIN è legato alla chiave hardware di questo dispositivo. Nemmeno una copia del file della cassaforte può essere provata su un altro dispositivo.';
+
+  @override
+  String get hwNotBoundHint =>
+      'Nessuna chiave hardware: se il file della cassaforte viene copiato, il PIN può essere indovinato su un altro dispositivo.';
+
+  @override
+  String get settingsFingerprint => 'Il tuo numero di sicurezza';
+
+  @override
+  String get settingsFingerprintHint =>
+      'Quando verifichi un contatto, deve essere uguale su entrambi i dispositivi.';
+
+  @override
+  String get settingsAppearance => 'Aspetto';
+
+  @override
+  String get themeSystem => 'Sistema';
+
+  @override
+  String get themeLight => 'Chiaro';
+
+  @override
+  String get themeDark => 'Scuro';
+
+  @override
+  String get settingsLanguage => 'Lingua';
+
+  @override
+  String get languageSystem => 'Lingua di sistema';
+
+  @override
+  String get settingsPrivacy => 'Privacy';
+
+  @override
+  String get clipboardCheck => 'Proponi il messaggio Kilit negli appunti';
+
+  @override
+  String get clipboardCheckHint =>
+      'All\'apertura della cassaforte, propone di aprire un messaggio KLT1: presente negli appunti. Android mostra un avviso che gli appunti sono stati letti.';
+
+  @override
+  String get settingsPermissions => 'Autorizzazioni';
+
+  @override
+  String get permIntro =>
+      'Al momento Kilit non usa alcuna autorizzazione sensibile.';
+
+  @override
+  String get permCamera => 'Fotocamera';
+
+  @override
+  String get permCameraValue => 'Non usata (la fotocamera arriva nella fase 2)';
+
+  @override
+  String get permNotifications => 'Notifiche';
+
+  @override
+  String get permNotificationsValue => 'Non usate';
+
+  @override
+  String get permInternet => 'Internet';
+
+  @override
+  String get permInternetValue => 'Nessuno: la fase 1 funziona offline';
+
+  @override
+  String get permOpenSystem =>
+      'Apri le impostazioni delle autorizzazioni di sistema';
+
+  @override
+  String get settingsAbout => 'Informazioni';
+
+  @override
+  String get aboutVersion => 'Versione';
+
+  @override
+  String get aboutLicense => 'Licenza';
+
+  @override
+  String get aboutAlpha =>
+      'Non verificato in modo indipendente. Alfa: adatto ai test, non a usi critici.';
+}

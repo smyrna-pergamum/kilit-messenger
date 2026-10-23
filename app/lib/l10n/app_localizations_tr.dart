@@ -25,6 +25,9 @@ class LTr extends L {
   String get copied => 'Kopyalandı';
 
   @override
+  String get share => 'Paylaş';
+
+  @override
   String get lockNow => 'Şimdi kilitle';
 
   @override

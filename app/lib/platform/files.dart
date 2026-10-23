@@ -42,6 +42,12 @@ abstract interface class FileAccess {
 
   /// Opens the system page where Kilit's permissions are granted.
   Future<void> openAppSettings();
+
+  /// Whether [shareText] opens a share sheet on this platform.
+  bool get canShare;
+
+  /// Hands text to another app through the system share sheet.
+  Future<void> shareText(String text);
 }
 
 /// A media type from a file name, for platforms that give no type.
@@ -161,6 +167,14 @@ class PlatformFileAccess implements FileAccess {
 
   @override
   Stream<void> get incomingReady => _ready.stream;
+
+  // Android only for now: Windows' share window needs a packaged app
+  @override
+  bool get canShare => Platform.isAndroid;
+
+  @override
+  Future<void> shareText(String text) =>
+      _channel.invokeMethod<void>('shareText', text);
 
   @override
   Future<void> openAppSettings() async {
