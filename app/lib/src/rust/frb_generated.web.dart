@@ -52,6 +52,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool dco_decode_bool(dynamic raw);
 
   @protected
+  ItemInfo dco_decode_box_autoadd_item_info(dynamic raw);
+
+  @protected
+  ExportedKlt dco_decode_exported_klt(dynamic raw);
+
+  @protected
   FoundKind dco_decode_found_kind(dynamic raw);
 
   @protected
@@ -62,6 +68,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   PlatformInt64 dco_decode_i_64(dynamic raw);
+
+  @protected
+  ImportKind dco_decode_import_kind(dynamic raw);
+
+  @protected
+  ImportReply dco_decode_import_reply(dynamic raw);
 
   @protected
   ItemInfo dco_decode_item_info(dynamic raw);
@@ -95,6 +107,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   String? dco_decode_opt_String(dynamic raw);
+
+  @protected
+  ItemInfo? dco_decode_opt_box_autoadd_item_info(dynamic raw);
 
   @protected
   PacketReport dco_decode_packet_report(dynamic raw);
@@ -148,6 +163,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool sse_decode_bool(SseDeserializer deserializer);
 
   @protected
+  ItemInfo sse_decode_box_autoadd_item_info(SseDeserializer deserializer);
+
+  @protected
+  ExportedKlt sse_decode_exported_klt(SseDeserializer deserializer);
+
+  @protected
   FoundKind sse_decode_found_kind(SseDeserializer deserializer);
 
   @protected
@@ -158,6 +179,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   PlatformInt64 sse_decode_i_64(SseDeserializer deserializer);
+
+  @protected
+  ImportKind sse_decode_import_kind(SseDeserializer deserializer);
+
+  @protected
+  ImportReply sse_decode_import_reply(SseDeserializer deserializer);
 
   @protected
   ItemInfo sse_decode_item_info(SseDeserializer deserializer);
@@ -191,6 +218,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   String? sse_decode_opt_String(SseDeserializer deserializer);
+
+  @protected
+  ItemInfo? sse_decode_opt_box_autoadd_item_info(SseDeserializer deserializer);
 
   @protected
   PacketReport sse_decode_packet_report(SseDeserializer deserializer);
@@ -247,6 +277,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_bool(bool self, SseSerializer serializer);
 
   @protected
+  void sse_encode_box_autoadd_item_info(
+    ItemInfo self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_exported_klt(ExportedKlt self, SseSerializer serializer);
+
+  @protected
   void sse_encode_found_kind(FoundKind self, SseSerializer serializer);
 
   @protected
@@ -257,6 +296,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_i_64(PlatformInt64 self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_import_kind(ImportKind self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_import_reply(ImportReply self, SseSerializer serializer);
 
   @protected
   void sse_encode_item_info(ItemInfo self, SseSerializer serializer);
@@ -299,6 +344,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_opt_String(String? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_box_autoadd_item_info(
+    ItemInfo? self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_packet_report(PacketReport self, SseSerializer serializer);

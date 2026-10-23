@@ -240,6 +240,36 @@ pub fn find_packets(text: String) -> Vec<FoundPacket> {
         .collect()
 }
 
+/// A `.klt` file ready to save or share.
+pub struct ExportedKlt {
+    /// A random `kilit-xxxxxxxx.klt` name that says nothing of the content.
+    pub file_name: String,
+    /// The packet.
+    pub bytes: Vec<u8>,
+}
+
+/// How importing a `.klt` file went.
+pub enum ImportKind {
+    /// In the vault now; see `item`.
+    Imported,
+    /// No key or passphrase we hold opens it.
+    WrongKey,
+    /// Not a `.klt` file.
+    NotKlt,
+    /// Damaged or changed.
+    Damaged,
+}
+
+/// The result of importing a `.klt` file.
+pub struct ImportReply {
+    /// How it went.
+    pub kind: ImportKind,
+    /// The new vault item when `kind` is `Imported`.
+    pub item: Option<ItemInfo>,
+    /// Who signed the original.
+    pub signed_by: SignedBy,
+}
+
 /// One user's Kilit on this device. Dart holds only this handle.
 #[frb(opaque)]
 pub struct KilitHandle {
@@ -335,6 +365,51 @@ impl KilitHandle {
     pub fn read_text(&self, id: String) -> Result<String, KilitError> {
         let bytes = self.engine()?.read(&id)?;
         String::from_utf8(bytes).map_err(|_| EngineError::Damaged.into())
+    }
+
+    /// Seals a file into the vault. At most 64 MiB.
+    pub fn add_file(
+        &self,
+        name: String,
+        mime: String,
+        data: Vec<u8>,
+    ) -> Result<ItemInfo, KilitError> {
+        Ok(self.engine()?.add(&name, &mime, &data)?.into())
+    }
+
+    /// An item's content, decrypted into memory: to show an image, or to
+    /// save it unencrypted when the user asks for exactly that.
+    pub fn read_file(&self, id: String) -> Result<Vec<u8>, KilitError> {
+        Ok(self.engine()?.read(&id)?)
+    }
+
+    /// An item as a `.klt` file, to a shared passphrase or to this vault.
+    pub fn export_klt(
+        &self,
+        id: String,
+        passphrase: Option<String>,
+    ) -> Result<ExportedKlt, KilitError> {
+        let (file_name, bytes) = self.engine()?.export(&id, passphrase)?;
+        Ok(ExportedKlt { file_name, bytes })
+    }
+
+    /// Opens a `.klt` file from outside and seals its content into the vault.
+    pub fn import_klt(
+        &self,
+        bytes: Vec<u8>,
+        passphrase: Option<String>,
+    ) -> Result<ImportReply, KilitError> {
+        let (kind, item, signed_by) = match self.engine()?.import(&bytes, passphrase)? {
+            engine::Imported::Item(e, s) => (ImportKind::Imported, Some(e.into()), s.into()),
+            engine::Imported::WrongKey => (ImportKind::WrongKey, None, SignedBy::Nobody),
+            engine::Imported::NotKlt => (ImportKind::NotKlt, None, SignedBy::Nobody),
+            engine::Imported::Damaged => (ImportKind::Damaged, None, SignedBy::Nobody),
+        };
+        Ok(ImportReply {
+            kind,
+            item,
+            signed_by,
+        })
     }
 
     /// Removes an item.

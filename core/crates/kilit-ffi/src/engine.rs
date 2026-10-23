@@ -9,7 +9,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use kilit_klt::PacketSigner;
 use kilit_klt::{
     Carried, KdfParams, KltError, PassphraseIdentity, PassphraseRecipient, Signature, SignerKeys,
-    XWingIdentity, find_in_text, open, open_message, seal, seal_message,
+    XWingIdentity, carrier_file_name, find_in_text, open, open_message, seal, seal_message,
 };
 use kilit_store::Store;
 use kilit_vault::{PinMac, SoftwareKey, Vault, VaultError};
@@ -32,6 +32,10 @@ const INDEX_MIME: &str = "application/cbor";
 const FREE_MISSES: u32 = 5;
 /// The first wait; it doubles with every further miss, up to 2^10 times.
 const FIRST_WAIT_SECS: u64 = 30;
+
+/// The largest file the vault takes. Files cross the bridge and are sealed
+/// in memory, so this bounds memory use; streaming lifts it later.
+pub const MAX_FILE_BYTES: usize = 64 * 1024 * 1024;
 
 /// Why a call failed, in words the UI can map to a message.
 #[derive(Debug, PartialEq, Eq)]
@@ -151,6 +155,19 @@ pub enum Found {
     Truncated,
     /// Damaged.
     Malformed,
+}
+
+/// The result of importing a `.klt` file.
+#[derive(Debug, PartialEq, Eq)]
+pub enum Imported {
+    /// Now in the vault; the original was signed as shown.
+    Item(Entry, SignatureCheck),
+    /// No key or passphrase we hold opens it.
+    WrongKey,
+    /// Not a `.klt` file at all.
+    NotKlt,
+    /// Damaged or changed.
+    Damaged,
 }
 
 /// The result of opening a pasted message.
@@ -510,6 +527,9 @@ impl Engine {
 
     /// Seals any bytes into the vault.
     pub fn add(&mut self, name: &str, mime: &str, data: &[u8]) -> Result<Entry, EngineError> {
+        if data.len() > MAX_FILE_BYTES {
+            return Err(EngineError::TooLong);
+        }
         let packet = self.seal_to_me(name, mime, data)?;
         let id = random_hex::<8>()?;
         self.store.write(&item_blob(&id)?, &packet)?;
@@ -570,6 +590,78 @@ impl Engine {
             recipients: vec!["klt-xwing".to_owned()],
             signature: self.check(&opened.signature)?,
         })
+    }
+
+    /// An item as a `.klt` file to take out of the app: sealed to a shared
+    /// passphrase, or to this vault when there is none, and signed by this
+    /// vault either way. Returns a random file name and the packet.
+    pub fn export(
+        &self,
+        id: &str,
+        passphrase: Option<String>,
+    ) -> Result<(String, Vec<u8>), EngineError> {
+        let o = self.require_open()?;
+        let entry = o
+            .index
+            .iter()
+            .find(|e| e.id == id)
+            .ok_or(EngineError::NotFound)?;
+        let data = self.read(id)?;
+        let pass = match passphrase {
+            Some(p) if p.chars().count() < 12 => {
+                return Err(EngineError::Rejected("passphrase too short".into()));
+            }
+            Some(p) => Some(PassphraseRecipient::with_params(
+                SecretString::from(p),
+                self.params,
+            )?),
+            None => None,
+        };
+        let mine = o.me.recipient();
+        let recipient: &dyn age::Recipient = match &pass {
+            Some(p) => p,
+            None => &mine,
+        };
+        let packet = seal(
+            &entry.name,
+            &entry.mime,
+            data.len() as u64,
+            data.as_slice(),
+            &[recipient],
+            Some(&o.vault),
+            Vec::new(),
+        )?;
+        Ok((carrier_file_name()?, packet))
+    }
+
+    /// Opens a `.klt` file from outside with this vault's key or the given
+    /// passphrase, and seals its content into the vault. Returns the new
+    /// item and who signed the original.
+    pub fn import(
+        &mut self,
+        packet: &[u8],
+        passphrase: Option<String>,
+    ) -> Result<Imported, EngineError> {
+        if packet.len() > MAX_FILE_BYTES + 64 * 1024 {
+            return Err(EngineError::TooLong);
+        }
+        let o = self.require_open()?;
+        let pass = passphrase.map(|p| PassphraseIdentity::new(SecretString::from(p)));
+        let mut ids: Vec<&dyn age::Identity> = vec![&o.me];
+        if let Some(p) = pass.as_ref() {
+            ids.push(p);
+        }
+        let mut content = Vec::new();
+        let opened = match open(packet, &ids, &mut content) {
+            Ok(o) => o,
+            Err(KltError::WrongKey) => return Ok(Imported::WrongKey),
+            Err(KltError::NotKlt) => return Ok(Imported::NotKlt),
+            Err(KltError::Io(e)) => return Err(EngineError::Storage(e.kind().to_string())),
+            Err(_) => return Ok(Imported::Damaged),
+        };
+        let signer = self.check(&opened.signature)?;
+        let entry = self.add(&opened.manifest.name, &opened.manifest.mime, &content)?;
+        Ok(Imported::Item(entry, signer))
     }
 
     /// A message as `KLT1:` text. With a passphrase it is unsigned, like the
@@ -890,6 +982,75 @@ mod tests {
             e.unlock_with_mac(platform_mac("482916")).unwrap(),
             Unlock::Unlocked
         );
+    }
+
+    #[test]
+    fn a_file_exported_with_a_passphrase_imports_on_another_device() {
+        let (d1, d2) = (tempfile::tempdir().unwrap(), tempfile::tempdir().unwrap());
+        let mut ayse = ready(&d1);
+        let mut bob = ready(&d2);
+        let photo: Vec<u8> = (0..200_000u32).map(|i| (i % 251) as u8).collect();
+        let item = ayse.add("tatil.jpg", "image/jpeg", &photo).unwrap();
+
+        let (name, klt) = ayse
+            .export(&item.id, Some("uzun bir ortak parola".into()))
+            .unwrap();
+        assert!(name.starts_with("kilit-") && name.ends_with(".klt"));
+        assert!(!String::from_utf8_lossy(&klt).contains("tatil"));
+
+        assert_eq!(
+            bob.import(&klt, Some("yanlış ama uzun parola".into()))
+                .unwrap(),
+            Imported::WrongKey
+        );
+        let Imported::Item(entry, signer) = bob
+            .import(&klt, Some("uzun bir ortak parola".into()))
+            .unwrap()
+        else {
+            panic!("not imported")
+        };
+        assert_eq!(entry.name, "tatil.jpg");
+        assert_eq!(entry.mime, "image/jpeg");
+        assert_eq!(signer, SignatureCheck::Other);
+        assert_eq!(bob.read(&entry.id).unwrap(), photo);
+    }
+
+    #[test]
+    fn a_file_exported_to_myself_comes_back_signed_by_me() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut e = ready(&dir);
+        let item = e.add("rapor.pdf", "application/pdf", b"%PDF-1.7").unwrap();
+        let (_, klt) = e.export(&item.id, None).unwrap();
+        let Imported::Item(back, signer) = e.import(&klt, None).unwrap() else {
+            panic!("not imported")
+        };
+        assert_eq!(signer, SignatureCheck::Mine);
+        assert_eq!(e.read(&back.id).unwrap(), b"%PDF-1.7");
+        assert_eq!(e.items().unwrap().len(), 2);
+    }
+
+    #[test]
+    fn other_files_and_damaged_packets_are_not_imported() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut e = ready(&dir);
+        assert_eq!(
+            e.import(b"PK\x03\x04 a zip", None).unwrap(),
+            Imported::NotKlt
+        );
+        let item = e.add("a.txt", "text/plain", b"x").unwrap();
+        let (_, mut klt) = e.export(&item.id, None).unwrap();
+        let at = klt.len() / 2;
+        klt[at] ^= 1;
+        assert_eq!(e.import(&klt, None).unwrap(), Imported::Damaged);
+        assert_eq!(e.items().unwrap().len(), 1);
+    }
+
+    #[test]
+    fn files_over_the_limit_are_refused() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut e = ready(&dir);
+        let big = vec![0u8; MAX_FILE_BYTES + 1];
+        assert_eq!(e.add("big.bin", "", &big), Err(EngineError::TooLong));
     }
 
     #[test]

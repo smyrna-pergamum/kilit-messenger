@@ -115,6 +115,34 @@ class RustCore implements KilitCore {
   Future<String> readText(String id) => _h.readText(id: id);
 
   @override
+  Future<VaultItem> addFile(String name, String mime, Uint8List bytes) async =>
+      _item(await _h.addFile(name: name, mime: mime, data: bytes));
+
+  @override
+  Future<Uint8List> readFile(String id) => _h.readFile(id: id);
+
+  @override
+  Future<ExportedKlt> exportKlt(String id, {String? passphrase}) async {
+    final e = await _h.exportKlt(id: id, passphrase: passphrase);
+    return ExportedKlt(e.fileName, e.bytes);
+  }
+
+  @override
+  Future<ImportResult> importKlt(Uint8List bytes, {String? passphrase}) async {
+    final r = await _h.importKlt(bytes: bytes, passphrase: passphrase);
+    return switch (r.kind) {
+      rust.ImportKind.imported => ImportResult(
+        ImportOutcome.imported,
+        item: _item(r.item!),
+        signature: _sig(r.signedBy),
+      ),
+      rust.ImportKind.wrongKey => const ImportResult(ImportOutcome.wrongKey),
+      rust.ImportKind.notKlt => const ImportResult(ImportOutcome.notKlt),
+      rust.ImportKind.damaged => const ImportResult(ImportOutcome.damaged),
+    };
+  }
+
+  @override
   Future<void> deleteItem(String id) => _h.deleteItem(id: id);
 
   SignatureState _sig(rust.SignedBy s) => switch (s) {

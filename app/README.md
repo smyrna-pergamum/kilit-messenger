@@ -31,6 +31,26 @@ Kilit'in Flutter arayüzü: Android ve Windows.
 - **Windows:** pencere `WDA_EXCLUDEFROMCAPTURE` ile ekran yakalamadan
   gizlenir (Windows 10 2004 ve sonrası).
 
+## Dosyalar
+
+- **Android:** dosyalar Storage Access Framework ile akış olarak okunur ve
+  yazılır (`FilesChannel.kt`). Hazır seçici eklentilerinin aksine, seçilen
+  dosyanın şifresiz bir kopyası uygulama önbelleğine yazılmaz.
+- **Windows:** sistemin aç ve kaydet pencereleri (`files_channel.cpp`)
+  kullanılır. Dosyayı Dart okur ve yazar.
+- **Sınır:** 64 MB. Dosyalar köprüden geçerken ve şifrelenirken bellekte
+  tutulur; akış olarak şifreleme sonraki bir adımda gelecek.
+- **Dışarıdan gelen dosyalar:** Android'de bir dosya yöneticisinden açılan ya da
+  paylaşılan `.klt` dosyaları ve WhatsApp'tan paylaşılan `KLT1:` mesajları
+  Kilit'e gelir ve kasa açılınca gösterilir. Android'de `.klt` uzantısını
+  güvenilir biçimde eşlemenin bir yolu olmadığından Kilit, türü belirsiz ikili
+  dosyalar için de seçenek olarak görünür; içeriği yalnızca `KLT1` imzası
+  tutarsa açar.
+- **Windows'ta `.klt` ilişkilendirmesi:** Gezgin'den açılan dosya komut
+  satırı argümanı olarak gelir. Uzantının Kilit'e bağlanması ise kurulum
+  paketi (MSIX) aşamasında yapılacak.
+- **Şifresiz kaydet:** Yalnızca kullanıcı uyarıyı onaylarsa yapılır.
+
 Yazı tipi: kodlar ve parmak izleri için uygulamayla gelen JetBrains Mono
 (OFL). Diğer metinlerde platformun kendi yazı tipi kullanılır; ağdan yazı
 tipi indirilmez.

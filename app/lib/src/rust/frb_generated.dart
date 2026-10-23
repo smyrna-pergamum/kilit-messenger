@@ -69,7 +69,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => 1346737890;
+  int get rustContentHash => -48720525;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -81,6 +81,13 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
+  Future<ItemInfo> crateApiKilitHandleAddFile({
+    required KilitHandle that,
+    required String name,
+    required String mime,
+    required List<int> data,
+  });
+
   Future<ItemInfo> crateApiKilitHandleAddNote({
     required KilitHandle that,
     required String title,
@@ -102,9 +109,21 @@ abstract class RustLibApi extends BaseApi {
     required String id,
   });
 
+  Future<ExportedKlt> crateApiKilitHandleExportKlt({
+    required KilitHandle that,
+    required String id,
+    String? passphrase,
+  });
+
   Future<String> crateApiKilitHandleFingerprint({required KilitHandle that});
 
   Future<bool> crateApiKilitHandleHasVault({required KilitHandle that});
+
+  Future<ImportReply> crateApiKilitHandleImportKlt({
+    required KilitHandle that,
+    required List<int> bytes,
+    String? passphrase,
+  });
 
   Future<PacketReport> crateApiKilitHandleInspect({
     required KilitHandle that,
@@ -131,6 +150,11 @@ abstract class RustLibApi extends BaseApi {
     required KilitHandle that,
     required List<int> packet,
     String? passphrase,
+  });
+
+  Future<Uint8List> crateApiKilitHandleReadFile({
+    required KilitHandle that,
+    required String id,
   });
 
   Future<String> crateApiKilitHandleReadText({
@@ -178,6 +202,47 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
+  Future<ItemInfo> crateApiKilitHandleAddFile({
+    required KilitHandle that,
+    required String name,
+    required String mime,
+    required List<int> data,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(name, serializer);
+          sse_encode_String(mime, serializer);
+          sse_encode_list_prim_u_8_loose(data, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 1,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_item_info,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleAddFileConstMeta,
+        argValues: [that, name, mime, data],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleAddFileConstMeta => const TaskConstMeta(
+    debugName: "KilitHandle_add_file",
+    argNames: ["that", "name", "mime", "data"],
+  );
+
+  @override
   Future<ItemInfo> crateApiKilitHandleAddNote({
     required KilitHandle that,
     required String title,
@@ -196,7 +261,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 1,
+            funcId: 2,
             port: port_,
           );
         },
@@ -233,7 +298,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 2,
+            funcId: 3,
             port: port_,
           );
         },
@@ -271,7 +336,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 3,
+            funcId: 4,
             port: port_,
           );
         },
@@ -309,7 +374,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 4,
+            funcId: 5,
             port: port_,
           );
         },
@@ -331,6 +396,46 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<ExportedKlt> crateApiKilitHandleExportKlt({
+    required KilitHandle that,
+    required String id,
+    String? passphrase,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(id, serializer);
+          sse_encode_opt_String(passphrase, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 6,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_exported_klt,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleExportKltConstMeta,
+        argValues: [that, id, passphrase],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleExportKltConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_export_klt",
+        argNames: ["that", "id", "passphrase"],
+      );
+
+  @override
   Future<String> crateApiKilitHandleFingerprint({required KilitHandle that}) {
     return handler.executeNormal(
       NormalTask(
@@ -343,7 +448,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 5,
+            funcId: 7,
             port: port_,
           );
         },
@@ -377,7 +482,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 6,
+            funcId: 8,
             port: port_,
           );
         },
@@ -399,6 +504,46 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<ImportReply> crateApiKilitHandleImportKlt({
+    required KilitHandle that,
+    required List<int> bytes,
+    String? passphrase,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_list_prim_u_8_loose(bytes, serializer);
+          sse_encode_opt_String(passphrase, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 9,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_import_reply,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleImportKltConstMeta,
+        argValues: [that, bytes, passphrase],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleImportKltConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_import_klt",
+        argNames: ["that", "bytes", "passphrase"],
+      );
+
+  @override
   Future<PacketReport> crateApiKilitHandleInspect({
     required KilitHandle that,
     required String id,
@@ -415,7 +560,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 7,
+            funcId: 10,
             port: port_,
           );
         },
@@ -448,7 +593,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 8,
+            funcId: 11,
             port: port_,
           );
         },
@@ -476,7 +621,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 12)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_pin_key_kind,
@@ -504,7 +649,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 10)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 13)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -537,7 +682,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 11,
+            funcId: 14,
             port: port_,
           );
         },
@@ -572,7 +717,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 12,
+            funcId: 15,
             port: port_,
           );
         },
@@ -612,7 +757,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 13,
+            funcId: 16,
             port: port_,
           );
         },
@@ -634,6 +779,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<Uint8List> crateApiKilitHandleReadFile({
+    required KilitHandle that,
+    required String id,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(id, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 17,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_prim_u_8_strict,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleReadFileConstMeta,
+        argValues: [that, id],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleReadFileConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_read_file",
+        argNames: ["that", "id"],
+      );
+
+  @override
   Future<String> crateApiKilitHandleReadText({
     required KilitHandle that,
     required String id,
@@ -650,7 +833,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 14,
+            funcId: 18,
             port: port_,
           );
         },
@@ -690,7 +873,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 15,
+            funcId: 19,
             port: port_,
           );
         },
@@ -728,7 +911,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 16,
+            funcId: 20,
             port: port_,
           );
         },
@@ -765,7 +948,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 17,
+            funcId: 21,
             port: port_,
           );
         },
@@ -793,7 +976,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(text, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 18)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 22)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_found_packet,
@@ -818,7 +1001,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 19,
+            funcId: 23,
             port: port_,
           );
         },
@@ -843,7 +1026,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(pin, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 20)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 24)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -907,6 +1090,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ItemInfo dco_decode_box_autoadd_item_info(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_item_info(raw);
+  }
+
+  @protected
+  ExportedKlt dco_decode_exported_klt(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return ExportedKlt(
+      fileName: dco_decode_String(arr[0]),
+      bytes: dco_decode_list_prim_u_8_strict(arr[1]),
+    );
+  }
+
+  @protected
   FoundKind dco_decode_found_kind(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return FoundKind.values[raw as int];
@@ -934,6 +1135,25 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   PlatformInt64 dco_decode_i_64(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dcoDecodeI64(raw);
+  }
+
+  @protected
+  ImportKind dco_decode_import_kind(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return ImportKind.values[raw as int];
+  }
+
+  @protected
+  ImportReply dco_decode_import_reply(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 3)
+      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    return ImportReply(
+      kind: dco_decode_import_kind(arr[0]),
+      item: dco_decode_opt_box_autoadd_item_info(arr[1]),
+      signedBy: dco_decode_signed_by(arr[2]),
+    );
   }
 
   @protected
@@ -1023,6 +1243,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   String? dco_decode_opt_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_String(raw);
+  }
+
+  @protected
+  ItemInfo? dco_decode_opt_box_autoadd_item_info(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_item_info(raw);
   }
 
   @protected
@@ -1143,6 +1369,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ItemInfo sse_decode_box_autoadd_item_info(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_item_info(deserializer));
+  }
+
+  @protected
+  ExportedKlt sse_decode_exported_klt(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_fileName = sse_decode_String(deserializer);
+    var var_bytes = sse_decode_list_prim_u_8_strict(deserializer);
+    return ExportedKlt(fileName: var_fileName, bytes: var_bytes);
+  }
+
+  @protected
   FoundKind sse_decode_found_kind(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var inner = sse_decode_i_32(deserializer);
@@ -1167,6 +1407,22 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   PlatformInt64 sse_decode_i_64(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getPlatformInt64();
+  }
+
+  @protected
+  ImportKind sse_decode_import_kind(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_i_32(deserializer);
+    return ImportKind.values[inner];
+  }
+
+  @protected
+  ImportReply sse_decode_import_reply(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_kind = sse_decode_import_kind(deserializer);
+    var var_item = sse_decode_opt_box_autoadd_item_info(deserializer);
+    var var_signedBy = sse_decode_signed_by(deserializer);
+    return ImportReply(kind: var_kind, item: var_item, signedBy: var_signedBy);
   }
 
   @protected
@@ -1275,6 +1531,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
     if (sse_decode_bool(deserializer)) {
       return (sse_decode_String(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  ItemInfo? sse_decode_opt_box_autoadd_item_info(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_item_info(deserializer));
     } else {
       return null;
     }
@@ -1399,6 +1666,22 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_box_autoadd_item_info(
+    ItemInfo self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_item_info(self, serializer);
+  }
+
+  @protected
+  void sse_encode_exported_klt(ExportedKlt self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.fileName, serializer);
+    sse_encode_list_prim_u_8_strict(self.bytes, serializer);
+  }
+
+  @protected
   void sse_encode_found_kind(FoundKind self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.index, serializer);
@@ -1421,6 +1704,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_i_64(PlatformInt64 self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putPlatformInt64(self);
+  }
+
+  @protected
+  void sse_encode_import_kind(ImportKind self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
+  void sse_encode_import_reply(ImportReply self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_import_kind(self.kind, serializer);
+    sse_encode_opt_box_autoadd_item_info(self.item, serializer);
+    sse_encode_signed_by(self.signedBy, serializer);
   }
 
   @protected
@@ -1530,6 +1827,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_opt_box_autoadd_item_info(
+    ItemInfo? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_item_info(self, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_packet_report(PacketReport self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_item_info(self.item, serializer);
@@ -1606,6 +1916,18 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
         RustLib.instance.api.rust_arc_decrement_strong_count_KilitHandlePtr,
   );
 
+  /// Seals a file into the vault. At most 64 MiB.
+  Future<ItemInfo> addFile({
+    required String name,
+    required String mime,
+    required List<int> data,
+  }) => RustLib.instance.api.crateApiKilitHandleAddFile(
+    that: this,
+    name: name,
+    mime: mime,
+    data: data,
+  );
+
   /// Seals a note into the vault.
   Future<ItemInfo> addNote({required String title, required String text}) =>
       RustLib.instance.api.crateApiKilitHandleAddNote(
@@ -1630,6 +1952,14 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
   Future<void> deleteItem({required String id}) =>
       RustLib.instance.api.crateApiKilitHandleDeleteItem(that: this, id: id);
 
+  /// An item as a `.klt` file, to a shared passphrase or to this vault.
+  Future<ExportedKlt> exportKlt({required String id, String? passphrase}) =>
+      RustLib.instance.api.crateApiKilitHandleExportKlt(
+        that: this,
+        id: id,
+        passphrase: passphrase,
+      );
+
   /// The safety number.
   Future<String> fingerprint() =>
       RustLib.instance.api.crateApiKilitHandleFingerprint(that: this);
@@ -1637,6 +1967,16 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
   /// Whether a vault exists.
   Future<bool> hasVault() =>
       RustLib.instance.api.crateApiKilitHandleHasVault(that: this);
+
+  /// Opens a `.klt` file from outside and seals its content into the vault.
+  Future<ImportReply> importKlt({
+    required List<int> bytes,
+    String? passphrase,
+  }) => RustLib.instance.api.crateApiKilitHandleImportKlt(
+    that: this,
+    bytes: bytes,
+    passphrase: passphrase,
+  );
 
   /// Packet analysis for one item.
   Future<PacketReport> inspect({required String id}) =>
@@ -1666,6 +2006,11 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
     packet: packet,
     passphrase: passphrase,
   );
+
+  /// An item's content, decrypted into memory: to show an image, or to
+  /// save it unencrypted when the user asks for exactly that.
+  Future<Uint8List> readFile({required String id}) =>
+      RustLib.instance.api.crateApiKilitHandleReadFile(that: this, id: id);
 
   /// A text item's content, decrypted into memory to show it.
   Future<String> readText({required String id}) =>

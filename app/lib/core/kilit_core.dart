@@ -31,6 +31,19 @@ abstract interface class KilitCore {
 
   /// A text item, decrypted into memory to show it.
   Future<String> readText(String id);
+
+  /// Seals a file into the vault (at most 64 MiB).
+  Future<VaultItem> addFile(String name, String mime, Uint8List bytes);
+
+  /// An item's content in memory: to preview an image, or to save it
+  /// unencrypted when the user explicitly asks.
+  Future<Uint8List> readFile(String id);
+
+  /// An item as a `.klt` file, to a shared passphrase or to this vault.
+  Future<ExportedKlt> exportKlt(String id, {String? passphrase});
+
+  /// A `.klt` file from outside, opened and sealed into the vault.
+  Future<ImportResult> importKlt(Uint8List bytes, {String? passphrase});
   Future<void> deleteItem(String id);
   Future<PacketInfo> inspect(String id);
 
@@ -113,4 +126,27 @@ class OpenedMessage {
   final String? text;
   final SignatureState signature;
   final OpenFailure? failure;
+}
+
+class ExportedKlt {
+  const ExportedKlt(this.fileName, this.bytes);
+
+  /// A random `kilit-xxxxxxxx.klt` name that says nothing of the content.
+  final String fileName;
+  final Uint8List bytes;
+}
+
+enum ImportOutcome { imported, wrongKey, notKlt, damaged }
+
+class ImportResult {
+  const ImportResult(
+    this.outcome, {
+    this.item,
+    this.signature = SignatureState.unsigned,
+  });
+  final ImportOutcome outcome;
+  final VaultItem? item;
+
+  /// Who signed the original file.
+  final SignatureState signature;
 }

@@ -156,4 +156,40 @@ void main() {
     final note = (await later.items()).single;
     expect(await later.readText(note.id), 'taşınacak');
   }, skip: skip);
+
+  test('a file exported as .klt imports on another device', () async {
+    final a = await Directory.systemTemp.createTemp('kilit-fa-');
+    final b = await Directory.systemTemp.createTemp('kilit-fb-');
+    addTearDown(() => a.delete(recursive: true));
+    addTearDown(() => b.delete(recursive: true));
+    final ayse = await RustCore.open(a.path, desktop: false, key: NoKey());
+    final bob = await RustCore.open(b.path, desktop: false, key: NoKey());
+    await ayse.createVault('482916');
+    await bob.createVault('739204');
+
+    final photo = Uint8List.fromList(List.generate(100000, (i) => i % 251));
+    final item = await ayse.addFile('tatil.jpg', 'image/jpeg', photo);
+    final klt = await ayse.exportKlt(
+      item.id,
+      passphrase: 'uzun bir ortak parola',
+    );
+    expect(klt.fileName, matches(RegExp(r'^kilit-[0-9a-f]{8}\.klt$')));
+
+    final wrong = await bob.importKlt(
+      klt.bytes,
+      passphrase: 'yanlış ama uzun parola',
+    );
+    expect(wrong.outcome, ImportOutcome.wrongKey);
+    final ok = await bob.importKlt(
+      klt.bytes,
+      passphrase: 'uzun bir ortak parola',
+    );
+    expect(ok.outcome, ImportOutcome.imported);
+    expect(ok.item!.name, 'tatil.jpg');
+    expect(ok.signature, SignatureState.verified);
+    expect(await bob.readFile(ok.item!.id), photo);
+
+    final junk = await bob.importKlt(Uint8List.fromList([1, 2, 3, 4, 5]));
+    expect(junk.outcome, ImportOutcome.notKlt);
+  }, skip: skip);
 }

@@ -8,6 +8,7 @@
 #endif
 
 #include "flutter/generated_plugin_registrant.h"
+#include "files_channel.h"
 #include "hardware_key.h"
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
@@ -36,6 +37,7 @@ bool FlutterWindow::OnCreate() {
   }
   RegisterPlugins(flutter_controller_->engine());
   RegisterHardwareKeyChannel(flutter_controller_->engine()->messenger());
+  RegisterFilesChannel(flutter_controller_->engine()->messenger());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
   flutter_controller_->engine()->SetNextFrameCallback([&]() {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../platform/files.dart';
 import '../state/session.dart';
 import '../theme/tokens.dart';
 import 'settings_screen.dart';
@@ -9,9 +10,10 @@ import 'vault_screen.dart';
 const wideLayoutWidth = 720.0;
 
 class Shell extends StatefulWidget {
-  const Shell({super.key, required this.session});
+  const Shell({super.key, required this.session, required this.files});
 
   final Session session;
+  final FileAccess files;
 
   @override
   State<Shell> createState() => _ShellState();
@@ -40,7 +42,7 @@ class _ShellState extends State<Shell> {
       title: 'Sohbetler',
       text: 'Tor üzerinden mesajlaşma Aşama 2\'de geliyor.',
     ),
-    1 => VaultScreen(core: widget.session.core),
+    1 => VaultScreen(core: widget.session.core, files: widget.files),
     2 => const _ComingLater(
       title: 'Kamera',
       text: 'Diske şifresiz yazmayan kamera Aşama 2\'de geliyor.',

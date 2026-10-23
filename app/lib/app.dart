@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 
 import 'core/kilit_core.dart';
+import 'platform/files.dart';
 import 'screens/lock_screen.dart';
 import 'screens/shell.dart';
 import 'state/session.dart';
 import 'theme/theme.dart';
 
 class KilitApp extends StatefulWidget {
-  const KilitApp({super.key, required this.core});
+  const KilitApp({super.key, required this.core, required this.files});
 
   final KilitCore core;
+  final FileAccess files;
 
   @override
   State<KilitApp> createState() => _KilitAppState();
@@ -50,7 +52,10 @@ class _KilitAppState extends State<KilitApp> {
             key: ValueKey(_session.phase),
             session: _session,
           ),
-          SessionPhase.unlocked => Shell(session: _session),
+          SessionPhase.unlocked => Shell(
+            session: _session,
+            files: widget.files,
+          ),
         },
       ),
     );

@@ -20,6 +20,13 @@ List<FoundPacket> findPackets({required String text}) =>
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<KilitHandle>>
 abstract class KilitHandle implements RustOpaqueInterface {
+  /// Seals a file into the vault. At most 64 MiB.
+  Future<ItemInfo> addFile({
+    required String name,
+    required String mime,
+    required List<int> data,
+  });
+
   /// Seals a note into the vault.
   Future<ItemInfo> addNote({required String title, required String text});
 
@@ -34,11 +41,17 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// Removes an item.
   Future<void> deleteItem({required String id});
 
+  /// An item as a `.klt` file, to a shared passphrase or to this vault.
+  Future<ExportedKlt> exportKlt({required String id, String? passphrase});
+
   /// The safety number.
   Future<String> fingerprint();
 
   /// Whether a vault exists.
   Future<bool> hasVault();
+
+  /// Opens a `.klt` file from outside and seals its content into the vault.
+  Future<ImportReply> importKlt({required List<int> bytes, String? passphrase});
 
   /// Packet analysis for one item.
   Future<PacketReport> inspect({required String id});
@@ -68,6 +81,10 @@ abstract class KilitHandle implements RustOpaqueInterface {
     String? passphrase,
   });
 
+  /// An item's content, decrypted into memory: to show an image, or to
+  /// save it unencrypted when the user asks for exactly that.
+  Future<Uint8List> readFile({required String id});
+
   /// A text item's content, decrypted into memory to show it.
   Future<String> readText({required String id});
 
@@ -79,6 +96,28 @@ abstract class KilitHandle implements RustOpaqueInterface {
 
   /// Tries a hardware PIN MAC against a hardware-key vault.
   Future<UnlockReply> unlockWithMac({required List<int> mac});
+}
+
+/// A `.klt` file ready to save or share.
+class ExportedKlt {
+  /// A random `kilit-xxxxxxxx.klt` name that says nothing of the content.
+  final String fileName;
+
+  /// The packet.
+  final Uint8List bytes;
+
+  const ExportedKlt({required this.fileName, required this.bytes});
+
+  @override
+  int get hashCode => fileName.hashCode ^ bytes.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ExportedKlt &&
+          runtimeType == other.runtimeType &&
+          fileName == other.fileName &&
+          bytes == other.bytes;
 }
 
 /// What kind of thing was found in pasted text.
@@ -113,6 +152,47 @@ class FoundPacket {
           runtimeType == other.runtimeType &&
           kind == other.kind &&
           packet == other.packet;
+}
+
+/// How importing a `.klt` file went.
+enum ImportKind {
+  /// In the vault now; see `item`.
+  imported,
+
+  /// No key or passphrase we hold opens it.
+  wrongKey,
+
+  /// Not a `.klt` file.
+  notKlt,
+
+  /// Damaged or changed.
+  damaged,
+}
+
+/// The result of importing a `.klt` file.
+class ImportReply {
+  /// How it went.
+  final ImportKind kind;
+
+  /// The new vault item when `kind` is `Imported`.
+  final ItemInfo? item;
+
+  /// Who signed the original.
+  final SignedBy signedBy;
+
+  const ImportReply({required this.kind, this.item, required this.signedBy});
+
+  @override
+  int get hashCode => kind.hashCode ^ item.hashCode ^ signedBy.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ImportReply &&
+          runtimeType == other.runtimeType &&
+          kind == other.kind &&
+          item == other.item &&
+          signedBy == other.signedBy;
 }
 
 /// One vault item as the list shows it.

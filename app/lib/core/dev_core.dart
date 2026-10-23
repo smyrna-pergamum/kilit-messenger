@@ -105,6 +105,61 @@ class DevCore implements KilitCore {
   }
 
   @override
+  Future<VaultItem> addFile(String name, String mime, Uint8List bytes) async {
+    _requireOpen();
+    final item = VaultItem(
+      id: '${_nextId++}',
+      name: name,
+      mime: mime,
+      size: bytes.length,
+      added: _clock(),
+      signed: true,
+    );
+    _items.add(_Item(item, bytes));
+    return item;
+  }
+
+  @override
+  Future<Uint8List> readFile(String id) async {
+    _requireOpen();
+    return Uint8List.fromList(_items.firstWhere((i) => i.item.id == id).bytes);
+  }
+
+  @override
+  Future<ExportedKlt> exportKlt(String id, {String? passphrase}) async {
+    final i = _items.firstWhere((i) => i.item.id == id);
+    final body = utf8.encode('${i.item.name}\n${i.item.mime}\n') + i.bytes;
+    return ExportedKlt(
+      'kilit-00000000.klt',
+      Uint8List.fromList(utf8.encode('KLT1$_marker') + body),
+    );
+  }
+
+  @override
+  Future<ImportResult> importKlt(Uint8List bytes, {String? passphrase}) async {
+    _requireOpen();
+    final head = utf8.encode('KLT1$_marker');
+    if (bytes.length < head.length ||
+        utf8.decode(bytes.sublist(0, 4), allowMalformed: true) != 'KLT1') {
+      return const ImportResult(ImportOutcome.notKlt);
+    }
+    final rest = bytes.sublist(head.length);
+    final nl1 = rest.indexOf(10);
+    final nl2 = rest.indexOf(10, nl1 + 1);
+    if (nl1 < 0 || nl2 < 0) return const ImportResult(ImportOutcome.damaged);
+    final item = await addFile(
+      utf8.decode(rest.sublist(0, nl1)),
+      utf8.decode(rest.sublist(nl1 + 1, nl2)),
+      Uint8List.fromList(rest.sublist(nl2 + 1)),
+    );
+    return ImportResult(
+      ImportOutcome.imported,
+      item: item,
+      signature: SignatureState.verified,
+    );
+  }
+
+  @override
   Future<void> deleteItem(String id) async {
     _requireOpen();
     _items.removeWhere((i) => i.item.id == id);

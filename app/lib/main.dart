@@ -5,9 +5,10 @@ import 'package:path_provider/path_provider.dart';
 
 import 'app.dart';
 import 'core/rust_core.dart';
+import 'platform/files.dart';
 import 'src/rust/frb_generated.dart';
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   await RustLib.init();
   // app-private storage: excluded from Android backup and device transfer
@@ -17,5 +18,6 @@ Future<void> main() async {
     '${dir.path}${Platform.pathSeparator}kilit',
     desktop: Platform.isWindows || Platform.isLinux || Platform.isMacOS,
   );
-  runApp(KilitApp(core: core));
+  // on Windows a .klt opened from Explorer arrives as an argument
+  runApp(KilitApp(core: core, files: PlatformFileAccess(args)));
 }

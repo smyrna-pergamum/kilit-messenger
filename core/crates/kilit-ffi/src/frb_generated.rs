@@ -40,7 +40,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1346737890;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -48720525;
 
 // Section: executor
 
@@ -48,6 +48,63 @@ flutter_rust_bridge::frb_generated_default_handler!();
 
 // Section: wire_funcs
 
+fn wire__crate__api__KilitHandle_add_file_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "KilitHandle_add_file",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<KilitHandle>,
+            >>::sse_decode(&mut deserializer);
+            let api_name = <String>::sse_decode(&mut deserializer);
+            let api_mime = <String>::sse_decode(&mut deserializer);
+            let api_data = <Vec<u8>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, crate::api::KilitError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
+                        }
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::KilitHandle::add_file(
+                        &*api_that_guard,
+                        api_name,
+                        api_mime,
+                        api_data,
+                    )?;
+                    std::result::Result::Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
 fn wire__crate__api__KilitHandle_add_note_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -252,6 +309,61 @@ fn wire__crate__api__KilitHandle_delete_item_impl(
         },
     )
 }
+fn wire__crate__api__KilitHandle_export_klt_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "KilitHandle_export_klt",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<KilitHandle>,
+            >>::sse_decode(&mut deserializer);
+            let api_id = <String>::sse_decode(&mut deserializer);
+            let api_passphrase = <Option<String>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, crate::api::KilitError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
+                        }
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::KilitHandle::export_klt(
+                        &*api_that_guard,
+                        api_id,
+                        api_passphrase,
+                    )?;
+                    std::result::Result::Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
 fn wire__crate__api__KilitHandle_fingerprint_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -344,6 +456,61 @@ fn wire__crate__api__KilitHandle_has_vault_impl(
                     }
                     let api_that_guard = api_that_guard.unwrap();
                     let output_ok = crate::api::KilitHandle::has_vault(&*api_that_guard)?;
+                    std::result::Result::Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__api__KilitHandle_import_klt_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "KilitHandle_import_klt",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<KilitHandle>,
+            >>::sse_decode(&mut deserializer);
+            let api_bytes = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_passphrase = <Option<String>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, crate::api::KilitError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
+                        }
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::KilitHandle::import_klt(
+                        &*api_that_guard,
+                        api_bytes,
+                        api_passphrase,
+                    )?;
                     std::result::Result::Ok(output_ok)
                 })())
             }
@@ -677,6 +844,56 @@ fn wire__crate__api__KilitHandle_open_message_impl(
                         api_packet,
                         api_passphrase,
                     ))?;
+                    std::result::Result::Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__api__KilitHandle_read_file_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "KilitHandle_read_file",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<KilitHandle>,
+            >>::sse_decode(&mut deserializer);
+            let api_id = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, crate::api::KilitError>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
+                        }
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = crate::api::KilitHandle::read_file(&*api_that_guard, api_id)?;
                     std::result::Result::Ok(output_ok)
                 })())
             }
@@ -1027,6 +1244,18 @@ impl SseDecode for bool {
     }
 }
 
+impl SseDecode for crate::api::ExportedKlt {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_fileName = <String>::sse_decode(deserializer);
+        let mut var_bytes = <Vec<u8>>::sse_decode(deserializer);
+        return crate::api::ExportedKlt {
+            file_name: var_fileName,
+            bytes: var_bytes,
+        };
+    }
+}
+
 impl SseDecode for crate::api::FoundKind {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1063,6 +1292,34 @@ impl SseDecode for i64 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         deserializer.cursor.read_i64::<NativeEndian>().unwrap()
+    }
+}
+
+impl SseDecode for crate::api::ImportKind {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::ImportKind::Imported,
+            1 => crate::api::ImportKind::WrongKey,
+            2 => crate::api::ImportKind::NotKlt,
+            3 => crate::api::ImportKind::Damaged,
+            _ => unreachable!("Invalid variant for ImportKind: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::ImportReply {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_kind = <crate::api::ImportKind>::sse_decode(deserializer);
+        let mut var_item = <Option<crate::api::ItemInfo>>::sse_decode(deserializer);
+        let mut var_signedBy = <crate::api::SignedBy>::sse_decode(deserializer);
+        return crate::api::ImportReply {
+            kind: var_kind,
+            item: var_item,
+            signed_by: var_signedBy,
+        };
     }
 }
 
@@ -1203,6 +1460,17 @@ impl SseDecode for Option<String> {
     }
 }
 
+impl SseDecode for Option<crate::api::ItemInfo> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::api::ItemInfo>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for crate::api::PacketReport {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1305,31 +1573,35 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        1 => wire__crate__api__KilitHandle_add_note_impl(port, ptr, rust_vec_len, data_len),
-        2 => wire__crate__api__KilitHandle_create_vault_impl(port, ptr, rust_vec_len, data_len),
-        3 => wire__crate__api__KilitHandle_create_vault_with_mac_impl(
+        1 => wire__crate__api__KilitHandle_add_file_impl(port, ptr, rust_vec_len, data_len),
+        2 => wire__crate__api__KilitHandle_add_note_impl(port, ptr, rust_vec_len, data_len),
+        3 => wire__crate__api__KilitHandle_create_vault_impl(port, ptr, rust_vec_len, data_len),
+        4 => wire__crate__api__KilitHandle_create_vault_with_mac_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        4 => wire__crate__api__KilitHandle_delete_item_impl(port, ptr, rust_vec_len, data_len),
-        5 => wire__crate__api__KilitHandle_fingerprint_impl(port, ptr, rust_vec_len, data_len),
-        6 => wire__crate__api__KilitHandle_has_vault_impl(port, ptr, rust_vec_len, data_len),
-        7 => wire__crate__api__KilitHandle_inspect_impl(port, ptr, rust_vec_len, data_len),
-        8 => wire__crate__api__KilitHandle_items_impl(port, ptr, rust_vec_len, data_len),
-        11 => {
+        5 => wire__crate__api__KilitHandle_delete_item_impl(port, ptr, rust_vec_len, data_len),
+        6 => wire__crate__api__KilitHandle_export_klt_impl(port, ptr, rust_vec_len, data_len),
+        7 => wire__crate__api__KilitHandle_fingerprint_impl(port, ptr, rust_vec_len, data_len),
+        8 => wire__crate__api__KilitHandle_has_vault_impl(port, ptr, rust_vec_len, data_len),
+        9 => wire__crate__api__KilitHandle_import_klt_impl(port, ptr, rust_vec_len, data_len),
+        10 => wire__crate__api__KilitHandle_inspect_impl(port, ptr, rust_vec_len, data_len),
+        11 => wire__crate__api__KilitHandle_items_impl(port, ptr, rust_vec_len, data_len),
+        14 => {
             wire__crate__api__KilitHandle_move_to_hardware_impl(port, ptr, rust_vec_len, data_len)
         }
-        12 => wire__crate__api__KilitHandle_open_impl(port, ptr, rust_vec_len, data_len),
-        13 => wire__crate__api__KilitHandle_open_message_impl(port, ptr, rust_vec_len, data_len),
-        14 => wire__crate__api__KilitHandle_read_text_impl(port, ptr, rust_vec_len, data_len),
-        15 => {
+        15 => wire__crate__api__KilitHandle_open_impl(port, ptr, rust_vec_len, data_len),
+        16 => wire__crate__api__KilitHandle_open_message_impl(port, ptr, rust_vec_len, data_len),
+        17 => wire__crate__api__KilitHandle_read_file_impl(port, ptr, rust_vec_len, data_len),
+        18 => wire__crate__api__KilitHandle_read_text_impl(port, ptr, rust_vec_len, data_len),
+        19 => {
             wire__crate__api__KilitHandle_seal_for_carrier_impl(port, ptr, rust_vec_len, data_len)
         }
-        16 => wire__crate__api__KilitHandle_unlock_impl(port, ptr, rust_vec_len, data_len),
-        17 => wire__crate__api__KilitHandle_unlock_with_mac_impl(port, ptr, rust_vec_len, data_len),
-        19 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
+        20 => wire__crate__api__KilitHandle_unlock_impl(port, ptr, rust_vec_len, data_len),
+        21 => wire__crate__api__KilitHandle_unlock_with_mac_impl(port, ptr, rust_vec_len, data_len),
+        23 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -1342,10 +1614,10 @@ fn pde_ffi_dispatcher_sync_impl(
 ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        9 => wire__crate__api__KilitHandle_key_kind_impl(ptr, rust_vec_len, data_len),
-        10 => wire__crate__api__KilitHandle_lock_impl(ptr, rust_vec_len, data_len),
-        18 => wire__crate__api__find_packets_impl(ptr, rust_vec_len, data_len),
-        20 => wire__crate__api__pin_mac_input_impl(ptr, rust_vec_len, data_len),
+        12 => wire__crate__api__KilitHandle_key_kind_impl(ptr, rust_vec_len, data_len),
+        13 => wire__crate__api__KilitHandle_lock_impl(ptr, rust_vec_len, data_len),
+        22 => wire__crate__api__find_packets_impl(ptr, rust_vec_len, data_len),
+        24 => wire__crate__api__pin_mac_input_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -1367,6 +1639,22 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<KilitHandle>> for KilitHandle 
     }
 }
 
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::ExportedKlt {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.file_name.into_into_dart().into_dart(),
+            self.bytes.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::ExportedKlt {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::ExportedKlt> for crate::api::ExportedKlt {
+    fn into_into_dart(self) -> crate::api::ExportedKlt {
+        self
+    }
+}
 // Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::FoundKind {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
@@ -1397,6 +1685,41 @@ impl flutter_rust_bridge::IntoDart for crate::api::FoundPacket {
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::FoundPacket {}
 impl flutter_rust_bridge::IntoIntoDart<crate::api::FoundPacket> for crate::api::FoundPacket {
     fn into_into_dart(self) -> crate::api::FoundPacket {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::ImportKind {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Imported => 0.into_dart(),
+            Self::WrongKey => 1.into_dart(),
+            Self::NotKlt => 2.into_dart(),
+            Self::Damaged => 3.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::ImportKind {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::ImportKind> for crate::api::ImportKind {
+    fn into_into_dart(self) -> crate::api::ImportKind {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::ImportReply {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.kind.into_into_dart().into_dart(),
+            self.item.into_into_dart().into_dart(),
+            self.signed_by.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::ImportReply {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::ImportReply> for crate::api::ImportReply {
+    fn into_into_dart(self) -> crate::api::ImportReply {
         self
     }
 }
@@ -1611,6 +1934,14 @@ impl SseEncode for bool {
     }
 }
 
+impl SseEncode for crate::api::ExportedKlt {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.file_name, serializer);
+        <Vec<u8>>::sse_encode(self.bytes, serializer);
+    }
+}
+
 impl SseEncode for crate::api::FoundKind {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -1647,6 +1978,33 @@ impl SseEncode for i64 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         serializer.cursor.write_i64::<NativeEndian>(self).unwrap();
+    }
+}
+
+impl SseEncode for crate::api::ImportKind {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::ImportKind::Imported => 0,
+                crate::api::ImportKind::WrongKey => 1,
+                crate::api::ImportKind::NotKlt => 2,
+                crate::api::ImportKind::Damaged => 3,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::ImportReply {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <crate::api::ImportKind>::sse_encode(self.kind, serializer);
+        <Option<crate::api::ItemInfo>>::sse_encode(self.item, serializer);
+        <crate::api::SignedBy>::sse_encode(self.signed_by, serializer);
     }
 }
 
@@ -1765,6 +2123,16 @@ impl SseEncode for Option<String> {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
             <String>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::api::ItemInfo> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::ItemInfo>::sse_encode(value, serializer);
         }
     }
 }

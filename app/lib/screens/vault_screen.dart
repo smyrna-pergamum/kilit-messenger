@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../core/kilit_core.dart';
+import '../platform/files.dart';
 import '../theme/theme.dart';
 import '../theme/tokens.dart';
 
@@ -18,9 +21,10 @@ String formatDate(DateTime d) {
 
 /// Kasa: the vault's packets, and carrier mode in and out.
 class VaultScreen extends StatefulWidget {
-  const VaultScreen({super.key, required this.core});
+  const VaultScreen({super.key, required this.core, required this.files});
 
   final KilitCore core;
+  final FileAccess files;
 
   @override
   State<VaultScreen> createState() => _VaultScreenState();
@@ -28,11 +32,78 @@ class VaultScreen extends StatefulWidget {
 
 class _VaultScreenState extends State<VaultScreen> {
   late Future<List<VaultItem>> _items = widget.core.items();
+  StreamSubscription<void>? _incoming;
+
+  @override
+  void initState() {
+    super.initState();
+    // things shared or opened into Kilit wait until the vault is open
+    _incoming = widget.files.incomingReady.listen((_) => _takeIncoming());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _takeIncoming());
+  }
+
+  @override
+  void dispose() {
+    _incoming?.cancel();
+    super.dispose();
+  }
 
   void _reload() {
     setState(() {
       _items = widget.core.items();
     });
+  }
+
+  void _say(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _takeIncoming() async {
+    final got = await widget.files.takeIncoming();
+    if (got == null || !mounted) return;
+    final text = got.text;
+    final file = got.file;
+    if (text != null) {
+      await _openPasted(initial: text);
+    } else if (file != null) {
+      await _import(file);
+    }
+  }
+
+  Future<void> _sealFile() async {
+    final PickedFile? f;
+    try {
+      f = await widget.files.pick();
+    } on FileTooLarge {
+      _say('Dosya çok büyük: en fazla 64 MB.');
+      return;
+    }
+    if (f == null) return;
+    await widget.core.addFile(f.name, f.mime, f.bytes);
+    _reload();
+    _say('${f.name} şifrelendi ve kasaya eklendi.');
+  }
+
+  Future<void> _openKlt() async {
+    final PickedFile? f;
+    try {
+      f = await widget.files.pick();
+    } on FileTooLarge {
+      _say('Dosya çok büyük.');
+      return;
+    }
+    if (f != null) await _import(f);
+  }
+
+  Future<void> _import(PickedFile f) async {
+    final imported = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _ImportSheet(core: widget.core, file: f),
+    );
+    if (imported == true) _reload();
   }
 
   Future<void> _addNote() async {
@@ -51,11 +122,11 @@ class _VaultScreenState extends State<VaultScreen> {
     );
   }
 
-  Future<void> _openPasted() async {
+  Future<void> _openPasted({String? initial}) async {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (_) => _PasteSheet(core: widget.core),
+      builder: (_) => _PasteSheet(core: widget.core, initial: initial),
     );
   }
 
@@ -63,7 +134,8 @@ class _VaultScreenState extends State<VaultScreen> {
     final deleted = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      builder: (_) => _PacketSheet(core: widget.core, item: item),
+      builder: (_) =>
+          _PacketSheet(core: widget.core, files: widget.files, item: item),
     );
     if (deleted == true) _reload();
   }
@@ -98,13 +170,17 @@ class _VaultScreenState extends State<VaultScreen> {
                 icon: const Icon(Icons.content_paste_search_outlined),
                 label: const Text('Yapıştırılanı aç'),
               ),
-              Tooltip(
-                message: 'Dosya seçici bir sonraki adımda geliyor',
-                child: OutlinedButton.icon(
-                  onPressed: null,
-                  icon: const Icon(Icons.upload_file_outlined),
-                  label: const Text('Dosya şifrele'),
-                ),
+              OutlinedButton.icon(
+                key: const ValueKey('seal-file'),
+                onPressed: _sealFile,
+                icon: const Icon(Icons.upload_file_outlined),
+                label: const Text('Dosya şifrele'),
+              ),
+              OutlinedButton.icon(
+                key: const ValueKey('open-klt'),
+                onPressed: _openKlt,
+                icon: const Icon(Icons.file_open_outlined),
+                label: const Text('.klt aç'),
               ),
             ],
           ),
@@ -384,16 +460,19 @@ class _CarrierComposeSheetState extends State<_CarrierComposeSheet> {
 
 /// Finds `KLT1:` packets in pasted text and opens the messages among them.
 class _PasteSheet extends StatefulWidget {
-  const _PasteSheet({required this.core});
+  const _PasteSheet({required this.core, this.initial});
 
   final KilitCore core;
+
+  /// Text shared into Kilit from another app.
+  final String? initial;
 
   @override
   State<_PasteSheet> createState() => _PasteSheetState();
 }
 
 class _PasteSheetState extends State<_PasteSheet> {
-  final _pasted = TextEditingController();
+  late final _pasted = TextEditingController(text: widget.initial);
   final _passphrase = TextEditingController();
   List<String>? _results;
 
@@ -492,9 +571,14 @@ class _PasteSheetState extends State<_PasteSheet> {
 
 /// "Paket analizi": how an item is protected. Never shows key material.
 class _PacketSheet extends StatelessWidget {
-  const _PacketSheet({required this.core, required this.item});
+  const _PacketSheet({
+    required this.core,
+    required this.files,
+    required this.item,
+  });
 
   final KilitCore core;
+  final FileAccess files;
   final VaultItem item;
 
   @override
@@ -588,6 +672,70 @@ class _PacketSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                   ],
+                  if (info.mime.startsWith('image/')) ...[
+                    FilledButton.icon(
+                      key: const ValueKey('item-view-image'),
+                      onPressed: () async {
+                        final bytes = await core.readFile(item.id);
+                        if (!context.mounted) return;
+                        await showDialog<void>(
+                          context: context,
+                          builder: (_) => Dialog(
+                            child: InteractiveViewer(
+                              child: Image.memory(bytes, gaplessPlayback: true),
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.image_outlined),
+                      label: const Text('Görüntüle'),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  OutlinedButton.icon(
+                    key: const ValueKey('item-export'),
+                    onPressed: () => showModalBottomSheet<void>(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (_) =>
+                          _ExportSheet(core: core, files: files, item: item),
+                    ),
+                    icon: const Icon(Icons.ios_share_outlined),
+                    label: const Text('.klt olarak dışa aktar'),
+                  ),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    key: const ValueKey('item-save-plain'),
+                    onPressed: () async {
+                      final ok = await showDialog<bool>(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Text('Şifresiz kaydedilsin mi?'),
+                          content: const Text(
+                            'Dosya şifresi çözülmüş olarak kaydedilir. Kaydettiğin yerde '
+                            'kim erişebiliyorsa okuyabilir; Kilit onu artık koruyamaz.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Vazgeç'),
+                            ),
+                            TextButton(
+                              key: const ValueKey('confirm-save-plain'),
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Şifresiz kaydet'),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (ok != true) return;
+                      final bytes = await core.readFile(item.id);
+                      await files.save(info.name, info.mime, bytes);
+                    },
+                    icon: const Icon(Icons.lock_open_outlined),
+                    label: const Text('Şifresiz kaydet'),
+                  ),
+                  const SizedBox(height: 8),
                   OutlinedButton.icon(
                     key: const ValueKey('item-delete'),
                     style: OutlinedButton.styleFrom(foregroundColor: t.danger),
@@ -601,6 +749,181 @@ class _PacketSheet extends StatelessWidget {
                 ],
         );
       },
+    );
+  }
+}
+
+/// Seals an item again as a `.klt` file and saves it where the user picks.
+class _ExportSheet extends StatefulWidget {
+  const _ExportSheet({
+    required this.core,
+    required this.files,
+    required this.item,
+  });
+
+  final KilitCore core;
+  final FileAccess files;
+  final VaultItem item;
+
+  @override
+  State<_ExportSheet> createState() => _ExportSheetState();
+}
+
+class _ExportSheetState extends State<_ExportSheet> {
+  final _passphrase = TextEditingController();
+  bool _usePassphrase = true;
+  String? _error;
+
+  @override
+  void dispose() {
+    _passphrase.dispose();
+    super.dispose();
+  }
+
+  Future<void> _export() async {
+    if (_usePassphrase && _passphrase.text.length < 12) {
+      setState(() => _error = 'Ortak parola en az 12 karakter olmalı.');
+      return;
+    }
+    final klt = await widget.core.exportKlt(
+      widget.item.id,
+      passphrase: _usePassphrase ? _passphrase.text : null,
+    );
+    final saved = await widget.files.save(
+      klt.fileName,
+      'application/x-kilit',
+      klt.bytes,
+    );
+    if (mounted && saved) Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return _SheetFrame(
+      title: '.klt olarak dışa aktar',
+      children: [
+        Text(
+          'Dosya yeniden şifrelenir ve kasan tarafından imzalanır. Dosya adı '
+          'rastgele olur; asıl ad yalnızca şifreli paketin içinde durur.',
+          style: TextStyle(color: t.textMuted),
+        ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _usePassphrase,
+          onChanged: (v) => setState(() => _usePassphrase = v),
+          title: const Text('Ortak parola ile'),
+          subtitle: const Text(
+            'Parolayı bilen herkes açar. Kapalıysa yalnızca senin kasan açar (yedek için).',
+          ),
+        ),
+        if (_usePassphrase)
+          TextField(
+            key: const ValueKey('export-passphrase'),
+            controller: _passphrase,
+            obscureText: true,
+            enableIMEPersonalizedLearning: false,
+            decoration: InputDecoration(
+              labelText: 'Ortak parola',
+              helperText: 'En az 12 karakter. Dosyayla aynı kanaldan gönderme.',
+              errorText: _error,
+            ),
+          ),
+        const SizedBox(height: 16),
+        FilledButton(
+          key: const ValueKey('export-go'),
+          onPressed: _export,
+          child: const Text('Şifrele ve kaydet'),
+        ),
+      ],
+    );
+  }
+}
+
+/// Opens a `.klt` file and seals its content into the vault.
+class _ImportSheet extends StatefulWidget {
+  const _ImportSheet({required this.core, required this.file});
+
+  final KilitCore core;
+  final PickedFile file;
+
+  @override
+  State<_ImportSheet> createState() => _ImportSheetState();
+}
+
+class _ImportSheetState extends State<_ImportSheet> {
+  final _passphrase = TextEditingController();
+  String? _result;
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _passphrase.dispose();
+    super.dispose();
+  }
+
+  Future<void> _open() async {
+    setState(() => _busy = true);
+    final r = await widget.core.importKlt(
+      widget.file.bytes,
+      passphrase: _passphrase.text.isEmpty ? null : _passphrase.text,
+    );
+    if (!mounted) return;
+    if (r.outcome == ImportOutcome.imported) {
+      final who = r.signature == SignatureState.verified ? 'imzalı' : 'imzasız';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${r.item!.name} kasaya eklendi ($who).')),
+      );
+      Navigator.pop(context, true);
+      return;
+    }
+    setState(() {
+      _busy = false;
+      _result = switch (r.outcome) {
+        ImportOutcome.wrongKey =>
+          'Bu dosya bu parolayla ya da kasanla açılmıyor.',
+        ImportOutcome.notKlt => 'Bu bir .klt dosyası değil.',
+        _ => 'Dosya bozuk ya da değiştirilmiş.',
+      };
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return _SheetFrame(
+      title: '.klt dosyasını aç',
+      children: [
+        Text(
+          '${widget.file.name} · ${formatBytes(widget.file.bytes.length)}',
+          style: TextStyle(color: t.textMuted),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          key: const ValueKey('import-passphrase'),
+          controller: _passphrase,
+          obscureText: true,
+          enableIMEPersonalizedLearning: false,
+          decoration: const InputDecoration(
+            labelText: 'Ortak parola (varsa)',
+            helperText: 'Sana kendi kasanla gönderildiyse boş bırak.',
+          ),
+        ),
+        if (_result != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            _result!,
+            key: const ValueKey('import-result'),
+            style: TextStyle(color: t.danger),
+          ),
+        ],
+        const SizedBox(height: 16),
+        FilledButton(
+          key: const ValueKey('import-go'),
+          onPressed: _busy ? null : _open,
+          child: const Text('Aç ve kasaya ekle'),
+        ),
+      ],
     );
   }
 }
