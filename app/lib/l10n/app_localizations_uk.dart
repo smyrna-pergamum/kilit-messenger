@@ -883,4 +883,14 @@ class LUk extends L {
 
   @override
   String get torRouteLinesHint => 'Один рядок моста на рядок';
+
+  @override
+  String get resend => 'Надіслати знову';
+
+  @override
+  String get resendHint =>
+      'Повідомлення є на ретрансляторі, але телефон співрозмовника ще не підтвердив отримання. Kilit надсилає його повторно раз на день протягом тижня, доки воно не дійде.';
+
+  @override
+  String get resendDone => 'Надіслано знову.';
 }

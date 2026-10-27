@@ -265,6 +265,7 @@ class RustCore implements KilitCore {
       DateTime.fromMillisecondsSinceEpoch(unix * 1000);
 
   static ChatLine _line(rust.ChatLine l) => ChatLine(
+    id: l.id,
     outgoing: l.outgoing,
     text: l.text,
     at: _time(l.atUnix.toInt()),
@@ -365,6 +366,10 @@ class RustCore implements KilitCore {
   @override
   Future<void> setTimer(String id, Duration timer) =>
       _h.setTimer(id: id, secs: timer.inSeconds);
+
+  @override
+  Future<void> resendMessage(String id, String line) =>
+      _h.resendMessage(id: id, line: line);
 
   @override
   Future<MyKilit> renewKilitId() async {

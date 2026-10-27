@@ -610,6 +610,39 @@ void main() {
     expect(find.byKey(const ValueKey('paste-input')), findsOneWidget);
   });
 
+  testWidgets('a message not delivered yet can be sent again', (tester) async {
+    final tor = readyTor();
+    addTearDown(tor.dispose);
+    final (core, _) = await startApp(tester, tor: tor);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    await letTorUp(tester);
+    await addSomeone(tester, boraLink);
+    await tester.enterText(
+      find.byKey(const ValueKey('chat-input')),
+      'orada mısın',
+    );
+    await tester.tap(find.byKey(const ValueKey('chat-send')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('line-sent')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('once a day for a week'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('line-resend')));
+    await tester.pumpAndSettle();
+    final line = (await core.chat(DevCore.addressOf(boraWords))).single;
+    expect(core.resent, [line.id]);
+    expect(find.text('Sent again.'), findsOneWidget);
+
+    // delivered: nothing to send again
+    core.receiptFrom(DevCore.addressOf(boraWords));
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('line-delivered')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('line-resend')), findsNothing);
+    tor.stop();
+  });
+
   testWidgets('a stranger waits in Requests until accepted', (tester) async {
     final tor = readyTor();
     addTearDown(tor.dispose);

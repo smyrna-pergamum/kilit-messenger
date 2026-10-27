@@ -884,4 +884,14 @@ class LEs extends L {
 
   @override
   String get torRouteLinesHint => 'Una línea de puente por fila';
+
+  @override
+  String get resend => 'Enviar de nuevo';
+
+  @override
+  String get resendHint =>
+      'Un relay tiene el mensaje, pero su teléfono aún no ha confirmado que llegó. Kilit lo reenvía una vez al día durante una semana hasta que llegue.';
+
+  @override
+  String get resendDone => 'Enviado de nuevo.';
 }

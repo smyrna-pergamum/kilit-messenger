@@ -265,5 +265,8 @@
   "torRouteSnowflakeHint": "厳しい検閲向け。低速です。",
   "torRouteCustom": "自分のブリッジ",
   "torRouteCustomHint": "bridges.torproject.org または信頼できる人から得たブリッジ行。",
-  "torRouteLinesHint": "1 行に 1 つのブリッジ"
+  "torRouteLinesHint": "1 行に 1 つのブリッジ",
+  "resend": "もう一度送る",
+  "resendHint": "メッセージはリレーにありますが、相手の端末から到着の知らせがまだありません。届くまで、Kilit は 1 週間、1 日 1 回再送します。",
+  "resendDone": "再送しました。"
 }

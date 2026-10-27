@@ -878,4 +878,14 @@ class LVi extends L {
 
   @override
   String get torRouteLinesHint => 'Mỗi hàng một dòng cầu nối';
+
+  @override
+  String get resend => 'Gửi lại';
+
+  @override
+  String get resendHint =>
+      'Một relay đã giữ tin nhắn, nhưng điện thoại của họ chưa báo đã nhận. Kilit gửi lại mỗi ngày một lần trong một tuần cho đến khi tin đến nơi.';
+
+  @override
+  String get resendDone => 'Đã gửi lại.';
 }

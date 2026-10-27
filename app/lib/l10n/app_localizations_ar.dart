@@ -875,4 +875,14 @@ class LAr extends L {
 
   @override
   String get torRouteLinesHint => 'سطر جسر واحد في كل صف';
+
+  @override
+  String get resend => 'إرسال مرة أخرى';
+
+  @override
+  String get resendHint =>
+      'الرسالة لدى أحد المرحِّلات، لكن هاتفهم لم يؤكد وصولها بعد. يعيد Kilit إرسالها مرة يوميًا لمدة أسبوع حتى تصل.';
+
+  @override
+  String get resendDone => 'أُعيد الإرسال.';
 }

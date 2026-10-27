@@ -1718,6 +1718,24 @@ abstract class L {
   /// In en, this message translates to:
   /// **'One bridge line per row'**
   String get torRouteLinesHint;
+
+  /// No description provided for @resend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send again'**
+  String get resend;
+
+  /// No description provided for @resendHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A relay has this message, but their phone has not said it arrived. Kilit sends it again once a day for a week, until it does.'**
+  String get resendHint;
+
+  /// No description provided for @resendDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent again.'**
+  String get resendDone;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

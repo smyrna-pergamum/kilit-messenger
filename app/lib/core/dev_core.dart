@@ -327,6 +327,7 @@ class DevCore implements KilitCore {
       final l = lines[i];
       if (!l.outgoing) continue;
       lines[i] = ChatLine(
+        id: l.id,
         outgoing: true,
         text: l.text,
         at: l.at,
@@ -365,6 +366,7 @@ class DevCore implements KilitCore {
     final now = _clock();
     final c = _contacts[id];
     final line = ChatLine(
+      id: _lineId(),
       outgoing: true,
       text: text,
       at: now,
@@ -386,6 +388,17 @@ class DevCore implements KilitCore {
   @override
   Future<void> setTimer(String id, Duration timer) async {
     _contacts[id] = _contacts[id]!.withTimer(timer);
+  }
+
+  /// Message ids sent again, for tests.
+  final resent = <String>[];
+  int _nextLine = 0;
+  String _lineId() => (_nextLine++).toRadixString(16).padLeft(32, '0');
+
+  @override
+  Future<void> resendMessage(String id, String line) async {
+    _requireOpen();
+    resent.add(line);
   }
 
   @override
@@ -464,6 +477,7 @@ class DevCore implements KilitCore {
     final now = _clock();
     final c = _contacts[id];
     final line = ChatLine(
+      id: _lineId(),
       outgoing: true,
       text: text,
       at: now,

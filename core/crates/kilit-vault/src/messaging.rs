@@ -446,6 +446,9 @@ pub struct Content {
     pub timer: u32,
     /// A file, when there is one.
     pub file: Option<FileRef>,
+    /// Sending a message again: its id (16 bytes) and when it was written,
+    /// so the recipient knows it for the same one. None for a new message.
+    pub again: Option<(Vec<u8>, i64)>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -1071,14 +1074,22 @@ impl Messaging {
             _ => self.mailbox(contact, contact, unix_secs(now).div_euclid(DAY_SECS))?,
         };
         let mut id = [0u8; 16];
-        getrandom::fill(&mut id).map_err(|_| MessagingError::Crypto)?;
+        let mut sent = unix_secs(now);
+        match &content.again {
+            Some((old, at)) if old.len() == id.len() => {
+                id.copy_from_slice(old);
+                sent = *at;
+            }
+            Some(_) => return Err(MessagingError::Damaged),
+            None => getrandom::fill(&mut id).map_err(|_| MessagingError::Crypto)?,
+        }
         let mut body = Vec::new();
         ciborium::into_writer(
             &Body {
                 v: BODY_VERSION,
                 id: ByteBuf::from(id.to_vec()),
                 text: content.text.clone(),
-                sent: unix_secs(now),
+                sent,
                 id_salt: self.s.id_salt.clone(),
                 receipts: content
                     .receipts

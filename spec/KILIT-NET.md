@@ -85,6 +85,21 @@ kimliklerini taşıyan bir mesajla yanıtlanır. Gönderende satır "teslim edil
 olur. İstekler kabul edilene kadar yanıtlanmaz; böylece tanımayan biri,
 mesajının okunup okunmadığını öğrenemez. Kabul edilince bildirim gider.
 
+## Yeniden gönderme
+
+Alıcı yalnızca dünün, bugünün ve yarının posta kutusunu izler. İki günden
+uzun çevrimdışı kalan biri, relay'de duran eski mesajı göremez. Bu yüzden bir
+relay'in sakladığı ama alındı bildirimi gelmeyen mesaj, son denemeden 20 saat
+sonra yeniden mühürlenir: aynı 16 baytlık kimlik ve aynı yazılma zamanıyla,
+o günün posta kutusuna. Bu en fazla 7 kez, yaklaşık bir hafta sürer.
+Kullanıcı tek tike dokunup "Tekrar gönder" ile hemen de gönderebilir; o zaman
+dosyanın parçaları da gönderenin kasadaki kopyasından yeniden üretilir (aynı
+anahtar, etiket ve içerik aynı parçaları verir).
+
+Alan taraf aynı kimlikli ikinci mesaja yeni bir satır açmaz. Kabul edilmiş
+kişiye alındı bildirimini yeniden gönderir; parçaları eksik bir dosyanın
+etiketini yeniden izlemeye alır.
+
 ## Süreli mesajlar
 
 Sohbetin süresi her mesajla birlikte gider; alan taraf aynı süreyi sohbete
@@ -115,6 +130,5 @@ bilgileriyle açılır, böylece ayrı bir Tor devresi kullanır.
 
 ## Henüz yok
 
-- Teslim edilmeyen mesajın 48 saat sonra yeniden yayını.
 - Doğrudan onion bağlantısı.
 - Video.

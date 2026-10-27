@@ -265,5 +265,8 @@
   "torRouteSnowflakeHint": "Für starke Zensur. Langsamer.",
   "torRouteCustom": "Eigene Brücken",
   "torRouteCustomHint": "Brückenzeilen von bridges.torproject.org oder von jemandem, dem du vertraust.",
-  "torRouteLinesHint": "Eine Brückenzeile pro Zeile"
+  "torRouteLinesHint": "Eine Brückenzeile pro Zeile",
+  "resend": "Erneut senden",
+  "resendHint": "Ein Relay hat die Nachricht, aber das andere Telefon hat den Empfang noch nicht bestätigt. Kilit sendet sie eine Woche lang einmal täglich erneut, bis sie ankommt.",
+  "resendDone": "Erneut gesendet."
 }

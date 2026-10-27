@@ -265,5 +265,8 @@
   "torRouteSnowflakeHint": "برای سانسور شدید. کندتر.",
   "torRouteCustom": "پل‌های خودم",
   "torRouteCustomHint": "خطوط پل از bridges.torproject.org یا از کسی که به او اعتماد دارید.",
-  "torRouteLinesHint": "در هر سطر یک پل"
+  "torRouteLinesHint": "در هر سطر یک پل",
+  "resend": "ارسال دوباره",
+  "resendHint": "پیام روی یک رله است، اما گوشی طرف مقابل هنوز رسیدنش را تأیید نکرده. Kilit تا یک هفته روزی یک بار آن را دوباره می‌فرستد تا برسد.",
+  "resendDone": "دوباره فرستاده شد."
 }

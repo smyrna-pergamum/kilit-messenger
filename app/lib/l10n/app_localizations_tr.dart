@@ -876,4 +876,14 @@ class LTr extends L {
 
   @override
   String get torRouteLinesHint => 'Her satıra bir köprü';
+
+  @override
+  String get resend => 'Tekrar gönder';
+
+  @override
+  String get resendHint =>
+      'Mesaj bir relay\'de, ama karşı telefon ulaştığını henüz bildirmedi. Kilit, ulaşana kadar bir hafta boyunca günde bir kez yeniden gönderir.';
+
+  @override
+  String get resendDone => 'Tekrar gönderildi.';
 }

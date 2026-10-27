@@ -265,5 +265,8 @@
   "torRouteSnowflakeHint": "Ağır sansür için. Daha yavaş.",
   "torRouteCustom": "Kendi köprülerim",
   "torRouteCustomHint": "bridges.torproject.org'dan ya da güvendiğiniz birinden köprü satırları.",
-  "torRouteLinesHint": "Her satıra bir köprü"
+  "torRouteLinesHint": "Her satıra bir köprü",
+  "resend": "Tekrar gönder",
+  "resendHint": "Mesaj bir relay'de, ama karşı telefon ulaştığını henüz bildirmedi. Kilit, ulaşana kadar bir hafta boyunca günde bir kez yeniden gönderir.",
+  "resendDone": "Tekrar gönderildi."
 }

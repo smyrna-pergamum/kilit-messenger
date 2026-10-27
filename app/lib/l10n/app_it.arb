@@ -265,5 +265,8 @@
   "torRouteSnowflakeHint": "Per una censura pesante. Più lento.",
   "torRouteCustom": "I miei bridge",
   "torRouteCustomHint": "Righe bridge da bridges.torproject.org o da qualcuno di cui ti fidi.",
-  "torRouteLinesHint": "Una riga bridge per riga"
+  "torRouteLinesHint": "Una riga bridge per riga",
+  "resend": "Invia di nuovo",
+  "resendHint": "Un relay ha il messaggio, ma il loro telefono non ne ha ancora confermato l'arrivo. Kilit lo reinvia una volta al giorno per una settimana, finché non arriva.",
+  "resendDone": "Inviato di nuovo."
 }

@@ -265,5 +265,8 @@
   "torRouteSnowflakeHint": "Cho kiểm duyệt nặng. Chậm hơn.",
   "torRouteCustom": "Cầu nối của tôi",
   "torRouteCustomHint": "Dòng cầu nối từ bridges.torproject.org hoặc người bạn tin tưởng.",
-  "torRouteLinesHint": "Mỗi hàng một dòng cầu nối"
+  "torRouteLinesHint": "Mỗi hàng một dòng cầu nối",
+  "resend": "Gửi lại",
+  "resendHint": "Một relay đã giữ tin nhắn, nhưng điện thoại của họ chưa báo đã nhận. Kilit gửi lại mỗi ngày một lần trong một tuần cho đến khi tin đến nơi.",
+  "resendDone": "Đã gửi lại."
 }

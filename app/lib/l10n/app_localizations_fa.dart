@@ -881,4 +881,14 @@ class LFa extends L {
 
   @override
   String get torRouteLinesHint => 'در هر سطر یک پل';
+
+  @override
+  String get resend => 'ارسال دوباره';
+
+  @override
+  String get resendHint =>
+      'پیام روی یک رله است، اما گوشی طرف مقابل هنوز رسیدنش را تأیید نکرده. Kilit تا یک هفته روزی یک بار آن را دوباره می‌فرستد تا برسد.';
+
+  @override
+  String get resendDone => 'دوباره فرستاده شد.';
 }

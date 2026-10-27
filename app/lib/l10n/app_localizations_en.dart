@@ -880,4 +880,14 @@ class LEn extends L {
 
   @override
   String get torRouteLinesHint => 'One bridge line per row';
+
+  @override
+  String get resend => 'Send again';
+
+  @override
+  String get resendHint =>
+      'A relay has this message, but their phone has not said it arrived. Kilit sends it again once a day for a week, until it does.';
+
+  @override
+  String get resendDone => 'Sent again.';
 }

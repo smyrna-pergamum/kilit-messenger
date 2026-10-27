@@ -200,6 +200,10 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// ID and link stop working.
   Future<MyKilitInfo> renewKilitId();
 
+  /// Sends a message that has not been delivered again now, with its
+  /// file's pieces. `line` is [`ChatLine::id`].
+  Future<void> resendMessage({required String id, required String line});
+
   /// The safety number to compare with a contact.
   Future<String> safetyNumber({required String id});
 
@@ -274,6 +278,9 @@ class ChatFile {
 
 /// One line of a conversation.
 class ChatLine {
+  /// The message's id, hex; names it to [`KilitHandle::resend_message`].
+  final String id;
+
   /// Written on this device (true) or received.
   final bool outgoing;
 
@@ -299,6 +306,7 @@ class ChatLine {
   final ChatFile? file;
 
   const ChatLine({
+    required this.id,
     required this.outgoing,
     required this.text,
     required this.atUnix,
@@ -311,6 +319,7 @@ class ChatLine {
 
   @override
   int get hashCode =>
+      id.hashCode ^
       outgoing.hashCode ^
       text.hashCode ^
       atUnix.hashCode ^
@@ -325,6 +334,7 @@ class ChatLine {
       identical(this, other) ||
       other is ChatLine &&
           runtimeType == other.runtimeType &&
+          id == other.id &&
           outgoing == other.outgoing &&
           text == other.text &&
           atUnix == other.atUnix &&

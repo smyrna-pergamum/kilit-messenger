@@ -1056,6 +1056,38 @@ class _ChatScreenState extends State<ChatScreen> {
     _lines = widget.core.chat(_contact.id);
   });
 
+  /// A message not delivered yet: says what Kilit does about it, and sends
+  /// it again now if asked.
+  Future<void> _resend(ChatLine line) async {
+    final l = L.of(context);
+    final go = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+              child: Text(line.onRelay ? l.resendHint : l.chatQueued),
+            ),
+            ListTile(
+              key: const ValueKey('line-resend'),
+              leading: const Icon(Icons.refresh_rounded),
+              title: Text(l.resend),
+              onTap: () => Navigator.pop(context, true),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (go != true || !mounted) return;
+    await widget.core.resendMessage(_contact.id, line.id);
+    widget.chats.touched();
+    _reload();
+    if (mounted) _say(context, l.resendDone);
+  }
+
   Future<void> _send() async {
     final text = _input.text.trim();
     if (text.isEmpty) return;
@@ -1359,11 +1391,17 @@ class _ChatScreenState extends State<ChatScreen> {
                     reverse: true,
                     padding: const EdgeInsets.all(12),
                     itemCount: lines.length,
-                    itemBuilder: (context, i) => _Bubble(
-                      line: lines[lines.length - 1 - i],
-                      core: widget.core,
-                      files: widget.files,
-                    ),
+                    itemBuilder: (context, i) {
+                      final line = lines[lines.length - 1 - i];
+                      return _Bubble(
+                        line: line,
+                        core: widget.core,
+                        files: widget.files,
+                        onResend: line.outgoing && !line.delivered
+                            ? () => _resend(line)
+                            : null,
+                      );
+                    },
                   );
                 },
               ),
@@ -1406,11 +1444,19 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class _Bubble extends StatelessWidget {
-  const _Bubble({required this.line, required this.core, required this.files});
+  const _Bubble({
+    required this.line,
+    required this.core,
+    required this.files,
+    this.onResend,
+  });
 
   final ChatLine line;
   final KilitCore core;
   final FileAccess files;
+
+  /// For an outgoing message not delivered yet.
+  final VoidCallback? onResend;
 
   @override
   Widget build(BuildContext context) {
@@ -1466,11 +1512,15 @@ class _Bubble extends StatelessWidget {
                   const SizedBox(width: 4),
                   Tooltip(
                     message: tip,
-                    child: Icon(
-                      icon,
-                      key: ValueKey(key),
-                      size: 14,
-                      color: color,
+                    child: InkWell(
+                      onTap: onResend,
+                      customBorder: const CircleBorder(),
+                      child: Icon(
+                        icon,
+                        key: ValueKey(key),
+                        size: 14,
+                        color: color,
+                      ),
                     ),
                   ),
                 ],

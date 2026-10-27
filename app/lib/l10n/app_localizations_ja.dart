@@ -854,4 +854,14 @@ class LJa extends L {
 
   @override
   String get torRouteLinesHint => '1 行に 1 つのブリッジ';
+
+  @override
+  String get resend => 'もう一度送る';
+
+  @override
+  String get resendHint =>
+      'メッセージはリレーにありますが、相手の端末から到着の知らせがまだありません。届くまで、Kilit は 1 週間、1 日 1 回再送します。';
+
+  @override
+  String get resendDone => '再送しました。';
 }

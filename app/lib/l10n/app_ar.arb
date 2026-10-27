@@ -265,5 +265,8 @@
   "torRouteSnowflakeHint": "للرقابة الشديدة. أبطأ.",
   "torRouteCustom": "جسوري الخاصة",
   "torRouteCustomHint": "أسطر جسور من bridges.torproject.org أو من شخص تثق به.",
-  "torRouteLinesHint": "سطر جسر واحد في كل صف"
+  "torRouteLinesHint": "سطر جسر واحد في كل صف",
+  "resend": "إرسال مرة أخرى",
+  "resendHint": "الرسالة لدى أحد المرحِّلات، لكن هاتفهم لم يؤكد وصولها بعد. يعيد Kilit إرسالها مرة يوميًا لمدة أسبوع حتى تصل.",
+  "resendDone": "أُعيد الإرسال."
 }

@@ -882,4 +882,14 @@ class LRu extends L {
 
   @override
   String get torRouteLinesHint => 'Одна строка моста на строку';
+
+  @override
+  String get resend => 'Отправить снова';
+
+  @override
+  String get resendHint =>
+      'Сообщение есть на ретрансляторе, но телефон собеседника ещё не подтвердил получение. Kilit отправляет его повторно раз в день в течение недели, пока оно не дойдёт.';
+
+  @override
+  String get resendDone => 'Отправлено снова.';
 }

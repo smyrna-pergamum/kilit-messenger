@@ -65,6 +65,12 @@ const CHUNK: usize = 24 * 1024;
 pub const MAX_FILE: usize = 5 * 1024 * 1024;
 /// Files being fetched at once at most.
 const MAX_PENDING_FILES: usize = 50;
+/// A message that a relay kept but whose receipt has not come is sealed
+/// again this long after the last try, under the day's mailbox: the
+/// recipient watches only yesterday's, today's and tomorrow's.
+const RESEND_EVERY: i64 = 20 * 3600;
+/// And at most this many times, about a week.
+const MAX_RESENDS: u32 = 7;
 
 fn chat_blob(contact: &str) -> Result<String, EngineError> {
     if contact.len() == 32
@@ -171,6 +177,15 @@ pub struct Line {
     /// A file with it.
     #[serde(default)]
     pub file: Option<LineFile>,
+    /// Outgoing lines with a file: what opens it, to send it again.
+    #[serde(default)]
+    pub file_ref: Option<FileRef>,
+    /// Outgoing: how many times it was sent again, and when last (Unix
+    /// seconds; 0 never).
+    #[serde(default)]
+    pub tries: u32,
+    #[serde(default)]
+    pub tried: i64,
 }
 
 /// A contact with the newest line of the conversation, for the list.
@@ -620,23 +635,7 @@ impl Engine {
         }
         let key = random::<32>()?;
         let tag = hex(&random::<32>()?);
-        let cipher = XChaCha20Poly1305::new_from_slice(&key).map_err(|_| EngineError::Damaged)?;
-        let mut pieces = Vec::new();
-        for (i, chunk) in cleaned.chunks(CHUNK).enumerate() {
-            let i = i as u32;
-            let sealed = cipher
-                .encrypt(
-                    &chunk_nonce(i),
-                    Payload {
-                        msg: chunk,
-                        aad: tag.as_bytes(),
-                    },
-                )
-                .map_err(|_| EngineError::Damaged)?;
-            let mut content = i.to_le_bytes().to_vec();
-            content.extend_from_slice(&sealed);
-            pieces.push(self.message_event(tag.clone(), &content)?);
-        }
+        let pieces = self.pieces(&key, &tag, &cleaned)?;
         let file = FileRef {
             key: ByteBuf::from(key.to_vec()),
             tag,
@@ -659,6 +658,29 @@ impl Engine {
         self.send(id, text, Some(file), pieces, Some(shown))
     }
 
+    /// A file's pieces, each its own event under the file's tag. The same
+    /// key, tag and bytes give the same pieces again.
+    fn pieces(&self, key: &[u8], tag: &str, data: &[u8]) -> Result<Vec<Event>, EngineError> {
+        let cipher = XChaCha20Poly1305::new_from_slice(key).map_err(|_| EngineError::Damaged)?;
+        let mut pieces = Vec::new();
+        for (i, chunk) in data.chunks(CHUNK).enumerate() {
+            let i = i as u32;
+            let sealed = cipher
+                .encrypt(
+                    &chunk_nonce(i),
+                    Payload {
+                        msg: chunk,
+                        aad: tag.as_bytes(),
+                    },
+                )
+                .map_err(|_| EngineError::Damaged)?;
+            let mut content = i.to_le_bytes().to_vec();
+            content.extend_from_slice(&sealed);
+            pieces.push(self.message_event(tag.to_owned(), &content)?);
+        }
+        Ok(pieces)
+    }
+
     fn send(
         &mut self,
         id: &str,
@@ -676,7 +698,7 @@ impl Engine {
                 &Content {
                     text: text.to_owned(),
                     timer,
-                    file,
+                    file: file.clone(),
                     ..Content::default()
                 },
                 self.system_now(),
@@ -699,11 +721,94 @@ impl Engine {
             id: ByteBuf::from(out.id),
             expires: self.expires(timer),
             file: shown,
+            file_ref: file,
+            tries: 0,
+            tried: 0,
         };
         let mut lines = self.load_chat(id)?;
         lines.push(line.clone());
         self.save_chat(id, lines)?;
         Ok((line, pieces))
+    }
+
+    /// Seals an outgoing line again, as the same message under today's
+    /// mailbox, and queues it; with `pieces`, its file's pieces too, from
+    /// the copy kept here. A line already delivered is left alone.
+    pub fn resend(&mut self, contact: &str, id: &[u8], pieces: bool) -> Result<(), EngineError> {
+        let mut lines = self.load_chat(contact)?;
+        let i = lines
+            .iter()
+            .position(|l| l.outgoing && *l.id == *id)
+            .ok_or(EngineError::NotFound)?;
+        let line = lines[i].clone();
+        if line.state == LineState::Delivered {
+            return Ok(());
+        }
+        let mut m = self.messaging()?;
+        let timer = m.timer(contact).map_err(messaging_err)?;
+        let out = m
+            .seal(
+                contact,
+                &Content {
+                    text: line.text.clone(),
+                    timer,
+                    file: line.file_ref.clone(),
+                    again: Some((line.id.to_vec(), line.sent)),
+                    ..Content::default()
+                },
+                self.system_now(),
+            )
+            .map_err(messaging_err)?;
+        let event = self.message_event(out.tag, &out.payload)?;
+        self.save_messaging(&m)?;
+        let mut events = Vec::new();
+        if pieces
+            && let (Some(f), Some(shown)) = (&line.file_ref, &line.file)
+            && !shown.blob.is_empty()
+        {
+            let data = self.read_attachment(&shown.blob)?;
+            events = self.pieces(&f.key, &f.tag, &data)?;
+        }
+        events.push(event.clone());
+        self.queue(events)?;
+        let l = &mut lines[i];
+        l.event = event.id;
+        l.state = LineState::Queued;
+        l.tries += 1;
+        l.tried = (self.now)();
+        self.save_chat(contact, lines)
+    }
+
+    /// Sends again every message a relay kept but whose receipt has not
+    /// come, once a day for about a week. Returns how many went.
+    pub fn resend_due(&mut self) -> Result<usize, EngineError> {
+        if self.store.len(SIGNAL)?.is_none() {
+            return Ok(0);
+        }
+        let now = (self.now)();
+        let mut sent = 0;
+        for c in self.messaging()?.contacts() {
+            if c.state == ContactState::Blocked {
+                continue;
+            }
+            let due: Vec<ByteBuf> = self
+                .load_chat(&c.id)?
+                .into_iter()
+                .filter(|l| {
+                    l.outgoing
+                        && l.state == LineState::Sent
+                        && l.tries < MAX_RESENDS
+                        && (l.expires == 0 || l.expires > now)
+                        && now - l.tried.max(l.at) >= RESEND_EVERY
+                })
+                .map(|l| l.id)
+                .collect();
+            for id in due {
+                self.resend(&c.id, &id, false)?;
+                sent += 1;
+            }
+        }
+        Ok(sent)
     }
 
     /// Events waiting for a relay.
@@ -780,6 +885,34 @@ impl Engine {
             if r.text.is_empty() && r.file.is_none() {
                 continue;
             }
+            let accepted = m
+                .contacts()
+                .iter()
+                .any(|c| c.id == r.contact && c.state == ContactState::Accepted);
+            let mut lines = self.load_chat(&r.contact)?;
+            if let Some(old) = lines.iter().find(|l| !l.outgoing && *l.id == *r.id) {
+                // sent again: our receipt did not reach them, so it goes
+                // again; a file still missing pieces is looked for again
+                if accepted {
+                    confirm.entry(r.contact.clone()).or_default().push(r.id);
+                }
+                if let (Some(f), Some(shown)) = (&r.file, &old.file)
+                    && shown.blob.is_empty()
+                    && !files.pending.contains_key(&f.tag)
+                    && files.pending.len() < MAX_PENDING_FILES
+                {
+                    files.pending.insert(
+                        f.tag.clone(),
+                        Pending {
+                            contact: r.contact.clone(),
+                            line: old.id.clone(),
+                            file: f.clone(),
+                            got: BTreeMap::new(),
+                        },
+                    );
+                }
+                continue;
+            }
             let file = match &r.file {
                 Some(f) if f.chunks > 0 && f.chunks as usize <= MAX_FILE.div_ceil(CHUNK) + 1 => {
                     if files.pending.len() < MAX_PENDING_FILES {
@@ -802,7 +935,6 @@ impl Engine {
                 }
                 _ => None,
             };
-            let mut lines = self.load_chat(&r.contact)?;
             lines.push(Line {
                 outgoing: false,
                 text: r.text.clone(),
@@ -813,12 +945,11 @@ impl Engine {
                 id: ByteBuf::from(r.id.clone()),
                 expires: self.expires(r.timer),
                 file,
+                file_ref: None,
+                tries: 0,
+                tried: 0,
             });
             self.save_chat(&r.contact, lines)?;
-            let accepted = m
-                .contacts()
-                .iter()
-                .any(|c| c.id == r.contact && c.state == ContactState::Accepted);
             if accepted {
                 confirm.entry(r.contact.clone()).or_default().push(r.id);
             }
@@ -1020,6 +1151,118 @@ mod tests {
             ayse.safety_number(&c.id).unwrap(),
             bora.safety_number(&ayse_id).unwrap()
         );
+    }
+
+    use std::sync::atomic::{AtomicI64, Ordering};
+
+    static AYSE_NOW: AtomicI64 = AtomicI64::new(0);
+    static BORA_NOW: AtomicI64 = AtomicI64::new(0);
+
+    #[test]
+    fn an_unanswered_message_goes_again_under_the_new_day() {
+        let (da, db) = (tempfile::tempdir().unwrap(), tempfile::tempdir().unwrap());
+        let mut ayse = ready(&da, "482916");
+        let mut bora = ready(&db, "739204");
+        let start = (ayse.now)();
+        AYSE_NOW.store(start, Ordering::SeqCst);
+        BORA_NOW.store(start, Ordering::SeqCst);
+        ayse.now = || AYSE_NOW.load(Ordering::SeqCst);
+        bora.now = || BORA_NOW.load(Ordering::SeqCst);
+        let mut relays = Relays::default();
+        let (ayse_id, bora_id) = meet(&mut ayse, &mut bora, &mut relays);
+
+        let (line, _) = ayse.send_message(&bora_id, "neredesin").unwrap();
+        relays.take_outbox(&mut ayse);
+        // nothing is due before a day has passed
+        assert_eq!(ayse.resend_due().unwrap(), 0);
+
+        // Bora was away three days: today's mailbox is no longer watched
+        let later = start + 3 * 86_400;
+        BORA_NOW.store(later, Ordering::SeqCst);
+        assert!(relays.deliver(&mut bora).is_empty());
+
+        AYSE_NOW.store(later, Ordering::SeqCst);
+        assert_eq!(ayse.resend_due().unwrap(), 1);
+        assert_eq!(
+            ayse.chat(&bora_id).unwrap().last().unwrap().state,
+            LineState::Queued
+        );
+        relays.take_outbox(&mut ayse);
+        let got = relays.deliver(&mut bora);
+        assert_eq!(got.len(), 1);
+        assert_eq!(got[0].text, "neredesin");
+        let theirs = bora.chat(&ayse_id).unwrap().last().unwrap().clone();
+        assert_eq!(theirs.sent, line.sent, "the time it was written stays");
+
+        // sent again by hand before the receipt came: still one line, and
+        // the receipt answers both
+        ayse.resend(&bora_id, &line.id, true).unwrap();
+        relays.take_outbox(&mut ayse);
+        assert!(relays.deliver(&mut bora).is_empty());
+        assert_eq!(bora.chat(&ayse_id).unwrap().len(), 2);
+        relays.take_outbox(&mut bora);
+        relays.deliver(&mut ayse);
+        let mine = ayse.chat(&bora_id).unwrap().last().unwrap().clone();
+        assert_eq!((mine.state, mine.tries), (LineState::Delivered, 2));
+        // delivered: never again
+        AYSE_NOW.store(later + 2 * 86_400, Ordering::SeqCst);
+        assert_eq!(ayse.resend_due().unwrap(), 0);
+    }
+
+    #[test]
+    fn resending_stops_after_a_week() {
+        let (da, db) = (tempfile::tempdir().unwrap(), tempfile::tempdir().unwrap());
+        let mut ayse = ready(&da, "482916");
+        let mut bora = ready(&db, "739204");
+        let mut relays = Relays::default();
+        let (_, bora_id) = meet(&mut ayse, &mut bora, &mut relays);
+        ayse.send_message(&bora_id, "orada mısın").unwrap();
+        relays.take_outbox(&mut ayse);
+        let mut lines = ayse.load_chat(&bora_id).unwrap();
+        let l = lines.last_mut().unwrap();
+        l.tries = MAX_RESENDS;
+        l.at -= 30 * 86_400;
+        ayse.save_chat(&bora_id, lines).unwrap();
+        assert_eq!(ayse.resend_due().unwrap(), 0);
+    }
+
+    #[test]
+    fn a_file_sent_again_brings_its_pieces() {
+        let (da, db) = (tempfile::tempdir().unwrap(), tempfile::tempdir().unwrap());
+        let mut ayse = ready(&da, "482916");
+        let mut bora = ready(&db, "739204");
+        let mut relays = Relays::default();
+        let (ayse_id, bora_id) = meet(&mut ayse, &mut bora, &mut relays);
+        let data: Vec<u8> = (0..30_000u32).map(|i| (i * 13 % 251) as u8).collect();
+        let (line, _) = ayse
+            .send_file(&bora_id, "a.bin", "application/octet-stream", &data, "")
+            .unwrap();
+        // the relays lost the pieces; only the message got through
+        let all = ayse.outbox().unwrap();
+        let ids: Vec<String> = all.iter().map(|e| e.id.clone()).collect();
+        relays.0.push(all.last().unwrap().clone());
+        ayse.mark_stored(&ids).unwrap();
+        relays.deliver(&mut bora);
+        let l = bora.chat(&ayse_id).unwrap().last().unwrap().clone();
+        assert_eq!(l.file.unwrap().blob, "");
+
+        ayse.resend(&bora_id, &line.id, true).unwrap();
+        assert_eq!(
+            ayse.outbox().unwrap().len(),
+            3,
+            "two pieces and the message"
+        );
+        relays.take_outbox(&mut ayse);
+        relays.deliver(&mut bora);
+        relays.deliver(&mut bora);
+        let lines = bora.chat(&ayse_id).unwrap();
+        assert_eq!(
+            lines.iter().filter(|l| !l.outgoing).count(),
+            2,
+            "selam and the file"
+        );
+        let f = lines.last().unwrap().file.clone().unwrap();
+        assert_eq!(bora.read_attachment(&f.blob).unwrap(), data);
     }
 
     #[test]

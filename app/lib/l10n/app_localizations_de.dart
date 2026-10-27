@@ -885,4 +885,14 @@ class LDe extends L {
 
   @override
   String get torRouteLinesHint => 'Eine Brückenzeile pro Zeile';
+
+  @override
+  String get resend => 'Erneut senden';
+
+  @override
+  String get resendHint =>
+      'Ein Relay hat die Nachricht, aber das andere Telefon hat den Empfang noch nicht bestätigt. Kilit sendet sie eine Woche lang einmal täglich erneut, bis sie ankommt.';
+
+  @override
+  String get resendDone => 'Erneut gesendet.';
 }

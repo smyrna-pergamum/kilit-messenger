@@ -885,4 +885,14 @@ class LFr extends L {
 
   @override
   String get torRouteLinesHint => 'Une ligne de pont par rangée';
+
+  @override
+  String get resend => 'Renvoyer';
+
+  @override
+  String get resendHint =>
+      'Un relais a ce message, mais son téléphone n\'a pas encore confirmé sa réception. Kilit le renvoie une fois par jour pendant une semaine, jusqu\'à ce qu\'il arrive.';
+
+  @override
+  String get resendDone => 'Renvoyé.';
 }

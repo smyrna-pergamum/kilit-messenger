@@ -394,6 +394,8 @@ pub struct ImportReply {
 
 /// One line of a conversation.
 pub struct ChatLine {
+    /// The message's id, hex; names it to [`KilitHandle::resend_message`].
+    pub id: String,
     /// Written on this device (true) or received.
     pub outgoing: bool,
     /// The text.
@@ -427,6 +429,7 @@ pub struct ChatFile {
 impl From<engine::Line> for ChatLine {
     fn from(l: engine::Line) -> Self {
         Self {
+            id: l.id.iter().map(|b| format!("{b:02x}")).collect(),
             outgoing: l.outgoing,
             text: l.text,
             at_unix: l.at,
@@ -528,12 +531,15 @@ struct Network {
     /// When each queued event was last handed to the relays.
     published: HashMap<String, Instant>,
     card_published: Option<Instant>,
+    resend_checked: Option<Instant>,
 }
 
 /// Queued events are handed to the relays again this often until one keeps
 /// them; the card is published again this often.
 const REPUBLISH: Duration = Duration::from_secs(60);
 const CARD_REPUBLISH: Duration = Duration::from_secs(6 * 3600);
+/// How often unanswered messages are looked over to send again.
+const RESEND_CHECK: Duration = Duration::from_secs(600);
 /// How long a card lookup waits for the relays.
 const LOOKUP_WAIT: Duration = Duration::from_secs(25);
 
@@ -693,6 +699,7 @@ impl KilitHandle {
             watching: None,
             published: HashMap::new(),
             card_published: None,
+            resend_checked: None,
         });
         drop(slot);
         self.net_tick().map(|_| ())
@@ -743,6 +750,11 @@ impl KilitHandle {
         {
             n.net.publish(e.card_event()?);
             n.card_published = Some(Instant::now());
+        }
+
+        if n.resend_checked.is_none_or(|t| t.elapsed() > RESEND_CHECK) {
+            e.resend_due()?;
+            n.resend_checked = Some(Instant::now());
         }
 
         let outbox = e.outbox()?;
@@ -895,6 +907,28 @@ impl KilitHandle {
     /// A sent or received file's bytes, to show or save.
     pub fn read_attachment(&self, blob: String) -> Result<Vec<u8>, KilitError> {
         Ok(self.engine()?.read_attachment(&blob)?)
+    }
+
+    /// Sends a message that has not been delivered again now, with its
+    /// file's pieces. `line` is [`ChatLine::id`].
+    pub fn resend_message(&self, id: String, line: String) -> Result<(), KilitError> {
+        let bytes = (0..line.len())
+            .step_by(2)
+            .map(|i| {
+                line.get(i..i + 2)
+                    .and_then(|h| u8::from_str_radix(h, 16).ok())
+            })
+            .collect::<Option<Vec<u8>>>()
+            .filter(|b| b.len() == 16)
+            .ok_or(EngineError::NotFound)?;
+        let events = {
+            let mut e = self.engine()?;
+            let before = e.outbox()?.len();
+            e.resend(&id, &bytes, true)?;
+            let all = e.outbox()?;
+            all[before.min(all.len())..].to_vec()
+        };
+        self.publish_now(events)
     }
 
     /// Sets a conversation's disappearing-message time (seconds, 0 = off).

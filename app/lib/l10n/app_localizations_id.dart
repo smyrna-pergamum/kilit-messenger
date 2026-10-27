@@ -879,4 +879,14 @@ class LId extends L {
 
   @override
   String get torRouteLinesHint => 'Satu baris jembatan per baris';
+
+  @override
+  String get resend => 'Kirim lagi';
+
+  @override
+  String get resendHint =>
+      'Pesan ini ada di relay, tetapi ponsel mereka belum mengonfirmasi penerimaannya. Kilit mengirim ulang sekali sehari selama seminggu sampai pesan diterima.';
+
+  @override
+  String get resendDone => 'Terkirim lagi.';
 }

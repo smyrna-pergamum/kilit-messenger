@@ -886,4 +886,14 @@ class LIt extends L {
 
   @override
   String get torRouteLinesHint => 'Una riga bridge per riga';
+
+  @override
+  String get resend => 'Invia di nuovo';
+
+  @override
+  String get resendHint =>
+      'Un relay ha il messaggio, ma il loro telefono non ne ha ancora confermato l\'arrivo. Kilit lo reinvia una volta al giorno per una settimana, finché non arriva.';
+
+  @override
+  String get resendDone => 'Inviato di nuovo.';
 }

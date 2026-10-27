@@ -265,5 +265,8 @@
   "torRouteSnowflakeHint": "适用于严格审查。较慢。",
   "torRouteCustom": "我自己的网桥",
   "torRouteCustomHint": "来自 bridges.torproject.org 或你信任之人的网桥行。",
-  "torRouteLinesHint": "每行一个网桥"
+  "torRouteLinesHint": "每行一个网桥",
+  "resend": "重新发送",
+  "resendHint": "中继已收到这条消息，但对方手机尚未确认送达。在送达之前，Kilit 会在一周内每天重发一次。",
+  "resendDone": "已重新发送。"
 }

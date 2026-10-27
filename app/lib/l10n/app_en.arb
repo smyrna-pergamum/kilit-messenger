@@ -389,5 +389,8 @@
   "torRouteSnowflakeHint": "For heavy censorship. Slower.",
   "torRouteCustom": "My own bridges",
   "torRouteCustomHint": "Bridge lines from bridges.torproject.org or someone you trust.",
-  "torRouteLinesHint": "One bridge line per row"
+  "torRouteLinesHint": "One bridge line per row",
+  "resend": "Send again",
+  "resendHint": "A relay has this message, but their phone has not said it arrived. Kilit sends it again once a day for a week, until it does.",
+  "resendDone": "Sent again."
 }

@@ -265,5 +265,8 @@
   "torRouteSnowflakeHint": "Untuk sensor berat. Lebih lambat.",
   "torRouteCustom": "Jembatan sendiri",
   "torRouteCustomHint": "Baris jembatan dari bridges.torproject.org atau orang yang Anda percayai.",
-  "torRouteLinesHint": "Satu baris jembatan per baris"
+  "torRouteLinesHint": "Satu baris jembatan per baris",
+  "resend": "Kirim lagi",
+  "resendHint": "Pesan ini ada di relay, tetapi ponsel mereka belum mengonfirmasi penerimaannya. Kilit mengirim ulang sekali sehari selama seminggu sampai pesan diterima.",
+  "resendDone": "Terkirim lagi."
 }

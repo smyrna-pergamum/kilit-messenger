@@ -841,4 +841,13 @@ class LZh extends L {
 
   @override
   String get torRouteLinesHint => '每行一个网桥';
+
+  @override
+  String get resend => '重新发送';
+
+  @override
+  String get resendHint => '中继已收到这条消息，但对方手机尚未确认送达。在送达之前，Kilit 会在一周内每天重发一次。';
+
+  @override
+  String get resendDone => '已重新发送。';
 }

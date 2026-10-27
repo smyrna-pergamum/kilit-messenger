@@ -134,6 +134,10 @@ abstract interface class KilitCore {
   /// messages. The next message tells them.
   Future<void> setTimer(String id, Duration timer);
 
+  /// Sends message [line] to contact [id] again now, file and all. Kilit
+  /// also does this by itself once a day for a week until it is delivered.
+  Future<void> resendMessage(String id, String line);
+
   /// A new Kilit ID: new words, link and QR code. Contacts stay; the old ID
   /// and link stop working.
   Future<MyKilit> renewKilitId();
@@ -201,6 +205,7 @@ class MyKilit {
 
 class ChatLine {
   const ChatLine({
+    this.id = '',
     required this.outgoing,
     required this.text,
     required this.at,
@@ -210,6 +215,9 @@ class ChatLine {
     this.expires,
     this.file,
   });
+
+  /// The message's id; names it to [KilitCore.resendMessage].
+  final String id;
 
   /// Written on this device.
   final bool outgoing;

@@ -884,4 +884,14 @@ class LPt extends L {
 
   @override
   String get torRouteLinesHint => 'Uma linha de ponte por linha';
+
+  @override
+  String get resend => 'Enviar de novo';
+
+  @override
+  String get resendHint =>
+      'Um relay tem a mensagem, mas o telefone da pessoa ainda não confirmou que chegou. O Kilit a reenvia uma vez por dia durante uma semana, até chegar.';
+
+  @override
+  String get resendDone => 'Enviada de novo.';
 }
