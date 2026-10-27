@@ -254,5 +254,16 @@
   "settingsAbout": "Informazioni",
   "aboutVersion": "Versione",
   "aboutLicense": "Licenza",
-  "aboutAlpha": "Non verificato in modo indipendente. Alfa: adatto ai test, non a usi critici."
+  "aboutAlpha": "Non verificato in modo indipendente. Alfa: adatto ai test, non a usi critici.",
+  "settingsBridges": "Connessione a Tor",
+  "torRouteAuto": "Automatica",
+  "torRouteAutoHint": "Diretta a Tor; tramite bridge se è bloccata.",
+  "torRouteDirect": "Diretta a Tor",
+  "torRouteObfs4": "Bridge obfs4",
+  "torRouteObfs4Hint": "Per le reti che bloccano Tor.",
+  "torRouteSnowflake": "Snowflake",
+  "torRouteSnowflakeHint": "Per una censura pesante. Più lento.",
+  "torRouteCustom": "I miei bridge",
+  "torRouteCustomHint": "Righe bridge da bridges.torproject.org o da qualcuno di cui ti fidi.",
+  "torRouteLinesHint": "Una riga bridge per riga"
 }

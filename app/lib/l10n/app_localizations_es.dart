@@ -849,4 +849,39 @@ class LEs extends L {
   @override
   String get aboutAlpha =>
       'Sin auditoría independiente. Alfa: útil para pruebas, no para usos críticos.';
+
+  @override
+  String get settingsBridges => 'Conexión a Tor';
+
+  @override
+  String get torRouteAuto => 'Automática';
+
+  @override
+  String get torRouteAutoHint =>
+      'Directo a Tor; mediante puentes si está bloqueado.';
+
+  @override
+  String get torRouteDirect => 'Directo a Tor';
+
+  @override
+  String get torRouteObfs4 => 'Puentes obfs4';
+
+  @override
+  String get torRouteObfs4Hint => 'Para redes que bloquean Tor.';
+
+  @override
+  String get torRouteSnowflake => 'Snowflake';
+
+  @override
+  String get torRouteSnowflakeHint => 'Para censura fuerte. Más lento.';
+
+  @override
+  String get torRouteCustom => 'Mis propios puentes';
+
+  @override
+  String get torRouteCustomHint =>
+      'Líneas de puente de bridges.torproject.org o de alguien de confianza.';
+
+  @override
+  String get torRouteLinesHint => 'Una línea de puente por fila';
 }

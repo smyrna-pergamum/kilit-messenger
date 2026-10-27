@@ -1652,6 +1652,72 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Not independently audited. Alpha: good for testing, not for high-stakes use.'**
   String get aboutAlpha;
+
+  /// No description provided for @settingsBridges.
+  ///
+  /// In en, this message translates to:
+  /// **'Tor connection'**
+  String get settingsBridges;
+
+  /// No description provided for @torRouteAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get torRouteAuto;
+
+  /// No description provided for @torRouteAutoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Straight to Tor; through bridges when that is blocked.'**
+  String get torRouteAutoHint;
+
+  /// No description provided for @torRouteDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Straight to Tor'**
+  String get torRouteDirect;
+
+  /// No description provided for @torRouteObfs4.
+  ///
+  /// In en, this message translates to:
+  /// **'obfs4 bridges'**
+  String get torRouteObfs4;
+
+  /// No description provided for @torRouteObfs4Hint.
+  ///
+  /// In en, this message translates to:
+  /// **'For networks that block Tor.'**
+  String get torRouteObfs4Hint;
+
+  /// No description provided for @torRouteSnowflake.
+  ///
+  /// In en, this message translates to:
+  /// **'Snowflake'**
+  String get torRouteSnowflake;
+
+  /// No description provided for @torRouteSnowflakeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For heavy censorship. Slower.'**
+  String get torRouteSnowflakeHint;
+
+  /// No description provided for @torRouteCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'My own bridges'**
+  String get torRouteCustom;
+
+  /// No description provided for @torRouteCustomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Bridge lines from bridges.torproject.org or someone you trust.'**
+  String get torRouteCustomHint;
+
+  /// No description provided for @torRouteLinesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'One bridge line per row'**
+  String get torRouteLinesHint;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

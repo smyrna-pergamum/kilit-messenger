@@ -846,4 +846,39 @@ class LFa extends L {
   @override
   String get aboutAlpha =>
       'به طور مستقل ممیزی نشده است. نسخه آلفا: مناسب برای آزمایش، نه برای استفاده پرمخاطره.';
+
+  @override
+  String get settingsBridges => 'اتصال Tor';
+
+  @override
+  String get torRouteAuto => 'خودکار';
+
+  @override
+  String get torRouteAutoHint =>
+      'مستقیم به Tor؛ اگر مسدود باشد، از طریق پل‌ها.';
+
+  @override
+  String get torRouteDirect => 'مستقیم به Tor';
+
+  @override
+  String get torRouteObfs4 => 'پل‌های obfs4';
+
+  @override
+  String get torRouteObfs4Hint => 'برای شبکه‌هایی که Tor را مسدود می‌کنند.';
+
+  @override
+  String get torRouteSnowflake => 'Snowflake';
+
+  @override
+  String get torRouteSnowflakeHint => 'برای سانسور شدید. کندتر.';
+
+  @override
+  String get torRouteCustom => 'پل‌های خودم';
+
+  @override
+  String get torRouteCustomHint =>
+      'خطوط پل از bridges.torproject.org یا از کسی که به او اعتماد دارید.';
+
+  @override
+  String get torRouteLinesHint => 'در هر سطر یک پل';
 }

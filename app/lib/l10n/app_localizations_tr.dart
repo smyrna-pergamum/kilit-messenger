@@ -842,4 +842,38 @@ class LTr extends L {
   @override
   String get aboutAlpha =>
       'Bağımsız bir denetimden geçmedi. Alfa sürüm: denemek için uygun, yüksek riskli kullanım için değil.';
+
+  @override
+  String get settingsBridges => 'Tor bağlantısı';
+
+  @override
+  String get torRouteAuto => 'Otomatik';
+
+  @override
+  String get torRouteAutoHint => 'Önce doğrudan Tor; engellenirse köprülerle.';
+
+  @override
+  String get torRouteDirect => 'Doğrudan Tor';
+
+  @override
+  String get torRouteObfs4 => 'obfs4 köprüleri';
+
+  @override
+  String get torRouteObfs4Hint => 'Tor\'u engelleyen ağlar için.';
+
+  @override
+  String get torRouteSnowflake => 'Snowflake';
+
+  @override
+  String get torRouteSnowflakeHint => 'Ağır sansür için. Daha yavaş.';
+
+  @override
+  String get torRouteCustom => 'Kendi köprülerim';
+
+  @override
+  String get torRouteCustomHint =>
+      'bridges.torproject.org\'dan ya da güvendiğiniz birinden köprü satırları.';
+
+  @override
+  String get torRouteLinesHint => 'Her satıra bir köprü';
 }

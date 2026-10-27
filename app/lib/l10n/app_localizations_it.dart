@@ -852,4 +852,38 @@ class LIt extends L {
   @override
   String get aboutAlpha =>
       'Non verificato in modo indipendente. Alfa: adatto ai test, non a usi critici.';
+
+  @override
+  String get settingsBridges => 'Connessione a Tor';
+
+  @override
+  String get torRouteAuto => 'Automatica';
+
+  @override
+  String get torRouteAutoHint => 'Diretta a Tor; tramite bridge se è bloccata.';
+
+  @override
+  String get torRouteDirect => 'Diretta a Tor';
+
+  @override
+  String get torRouteObfs4 => 'Bridge obfs4';
+
+  @override
+  String get torRouteObfs4Hint => 'Per le reti che bloccano Tor.';
+
+  @override
+  String get torRouteSnowflake => 'Snowflake';
+
+  @override
+  String get torRouteSnowflakeHint => 'Per una censura pesante. Più lento.';
+
+  @override
+  String get torRouteCustom => 'I miei bridge';
+
+  @override
+  String get torRouteCustomHint =>
+      'Righe bridge da bridges.torproject.org o da qualcuno di cui ti fidi.';
+
+  @override
+  String get torRouteLinesHint => 'Una riga bridge per riga';
 }

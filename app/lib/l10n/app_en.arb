@@ -378,5 +378,16 @@
   "settingsAbout": "About",
   "aboutVersion": "Version",
   "aboutLicense": "License",
-  "aboutAlpha": "Not independently audited. Alpha: good for testing, not for high-stakes use."
+  "aboutAlpha": "Not independently audited. Alpha: good for testing, not for high-stakes use.",
+  "settingsBridges": "Tor connection",
+  "torRouteAuto": "Automatic",
+  "torRouteAutoHint": "Straight to Tor; through bridges when that is blocked.",
+  "torRouteDirect": "Straight to Tor",
+  "torRouteObfs4": "obfs4 bridges",
+  "torRouteObfs4Hint": "For networks that block Tor.",
+  "torRouteSnowflake": "Snowflake",
+  "torRouteSnowflakeHint": "For heavy censorship. Slower.",
+  "torRouteCustom": "My own bridges",
+  "torRouteCustomHint": "Bridge lines from bridges.torproject.org or someone you trust.",
+  "torRouteLinesHint": "One bridge line per row"
 }

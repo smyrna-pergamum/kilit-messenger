@@ -254,5 +254,16 @@
   "settingsAbout": "Про застосунок",
   "aboutVersion": "Версія",
   "aboutLicense": "Ліцензія",
-  "aboutAlpha": "Незалежного аудиту не проводилося. Альфа-версія: підходить для тестів, але не для випадків із високими ставками."
+  "aboutAlpha": "Незалежного аудиту не проводилося. Альфа-версія: підходить для тестів, але не для випадків із високими ставками.",
+  "settingsBridges": "Підключення до Tor",
+  "torRouteAuto": "Автоматично",
+  "torRouteAutoHint": "Напряму до Tor; через мости, якщо його заблоковано.",
+  "torRouteDirect": "Напряму до Tor",
+  "torRouteObfs4": "Мости obfs4",
+  "torRouteObfs4Hint": "Для мереж, де Tor заблоковано.",
+  "torRouteSnowflake": "Snowflake",
+  "torRouteSnowflakeHint": "За жорсткої цензури. Повільніше.",
+  "torRouteCustom": "Власні мости",
+  "torRouteCustomHint": "Рядки мостів з bridges.torproject.org або від того, кому ви довіряєте.",
+  "torRouteLinesHint": "Один рядок моста на рядок"
 }

@@ -1,11 +1,13 @@
 # Kilit
 
 Hesapsız, telefon numarasız, uçtan uca ve post-kuantum şifreli bir mesajlaşma
-uygulaması ve dosya kasası. Mesajlar Tor onion servisleri üzerinden doğrudan
-gider. Karşı taraf çevrimdışıysa açık Nostr relay'lerinde çift şifreli olarak
-bekler. Belge, resim ve videolar `.klt` paketlerine şifrelenir.
+uygulaması ve dosya kasası. Mesajlar Signal protokolüyle (PQXDH, Kyber1024)
+şifrelenir ve yalnızca Tor üzerinden açık Nostr relay'lerine bırakılır; sunucu
+yoktur. Tor engelliyse yerleşik obfs4 ya da snowflake köprüleri, veya
+kullanıcının kendi köprüleri kullanılır. Belge, resim ve videolar `.klt`
+paketlerine şifrelenir.
 
-> **Durum:** Aşama 0, iskelet. Çalışan bir uygulama yok. Güvenlik denetiminden geçmedi.
+> **Durum:** Alfa. Android'de iki telefon arasında denendi. Güvenlik denetiminden geçmedi.
 
 ## Yapı
 

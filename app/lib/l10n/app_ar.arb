@@ -254,5 +254,16 @@
   "settingsAbout": "حول",
   "aboutVersion": "الإصدار",
   "aboutLicense": "الترخيص",
-  "aboutAlpha": "لم يخضع لتدقيق مستقل. إصدار ألفا: مناسب للتجربة، لا للاستخدام عالي المخاطر."
+  "aboutAlpha": "لم يخضع لتدقيق مستقل. إصدار ألفا: مناسب للتجربة، لا للاستخدام عالي المخاطر.",
+  "settingsBridges": "اتصال Tor",
+  "torRouteAuto": "تلقائي",
+  "torRouteAutoHint": "مباشرة إلى Tor؛ وعبر الجسور إذا كان محجوبًا.",
+  "torRouteDirect": "مباشرة إلى Tor",
+  "torRouteObfs4": "جسور obfs4",
+  "torRouteObfs4Hint": "للشبكات التي تحجب Tor.",
+  "torRouteSnowflake": "Snowflake",
+  "torRouteSnowflakeHint": "للرقابة الشديدة. أبطأ.",
+  "torRouteCustom": "جسوري الخاصة",
+  "torRouteCustomHint": "أسطر جسور من bridges.torproject.org أو من شخص تثق به.",
+  "torRouteLinesHint": "سطر جسر واحد في كل صف"
 }

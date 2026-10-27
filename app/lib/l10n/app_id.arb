@@ -254,5 +254,16 @@
   "settingsAbout": "Tentang",
   "aboutVersion": "Versi",
   "aboutLicense": "Lisensi",
-  "aboutAlpha": "Belum diaudit secara independen. Alfa: cocok untuk pengujian, bukan untuk penggunaan berisiko tinggi."
+  "aboutAlpha": "Belum diaudit secara independen. Alfa: cocok untuk pengujian, bukan untuk penggunaan berisiko tinggi.",
+  "settingsBridges": "Koneksi Tor",
+  "torRouteAuto": "Otomatis",
+  "torRouteAutoHint": "Langsung ke Tor; lewat jembatan bila diblokir.",
+  "torRouteDirect": "Langsung ke Tor",
+  "torRouteObfs4": "Jembatan obfs4",
+  "torRouteObfs4Hint": "Untuk jaringan yang memblokir Tor.",
+  "torRouteSnowflake": "Snowflake",
+  "torRouteSnowflakeHint": "Untuk sensor berat. Lebih lambat.",
+  "torRouteCustom": "Jembatan sendiri",
+  "torRouteCustomHint": "Baris jembatan dari bridges.torproject.org atau orang yang Anda percayai.",
+  "torRouteLinesHint": "Satu baris jembatan per baris"
 }

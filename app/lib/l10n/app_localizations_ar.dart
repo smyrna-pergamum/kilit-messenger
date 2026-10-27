@@ -841,4 +841,38 @@ class LAr extends L {
   @override
   String get aboutAlpha =>
       'لم يخضع لتدقيق مستقل. إصدار ألفا: مناسب للتجربة، لا للاستخدام عالي المخاطر.';
+
+  @override
+  String get settingsBridges => 'اتصال Tor';
+
+  @override
+  String get torRouteAuto => 'تلقائي';
+
+  @override
+  String get torRouteAutoHint => 'مباشرة إلى Tor؛ وعبر الجسور إذا كان محجوبًا.';
+
+  @override
+  String get torRouteDirect => 'مباشرة إلى Tor';
+
+  @override
+  String get torRouteObfs4 => 'جسور obfs4';
+
+  @override
+  String get torRouteObfs4Hint => 'للشبكات التي تحجب Tor.';
+
+  @override
+  String get torRouteSnowflake => 'Snowflake';
+
+  @override
+  String get torRouteSnowflakeHint => 'للرقابة الشديدة. أبطأ.';
+
+  @override
+  String get torRouteCustom => 'جسوري الخاصة';
+
+  @override
+  String get torRouteCustomHint =>
+      'أسطر جسور من bridges.torproject.org أو من شخص تثق به.';
+
+  @override
+  String get torRouteLinesHint => 'سطر جسر واحد في كل صف';
 }

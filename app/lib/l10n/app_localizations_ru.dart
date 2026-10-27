@@ -847,4 +847,39 @@ class LRu extends L {
   @override
   String get aboutAlpha =>
       'Независимый аудит не проводился. Альфа-версия: подходит для тестов, но не для случаев с высокими ставками.';
+
+  @override
+  String get settingsBridges => 'Подключение к Tor';
+
+  @override
+  String get torRouteAuto => 'Автоматически';
+
+  @override
+  String get torRouteAutoHint =>
+      'Напрямую к Tor; через мосты, если он заблокирован.';
+
+  @override
+  String get torRouteDirect => 'Напрямую к Tor';
+
+  @override
+  String get torRouteObfs4 => 'Мосты obfs4';
+
+  @override
+  String get torRouteObfs4Hint => 'Для сетей, где Tor заблокирован.';
+
+  @override
+  String get torRouteSnowflake => 'Snowflake';
+
+  @override
+  String get torRouteSnowflakeHint => 'При жёсткой цензуре. Медленнее.';
+
+  @override
+  String get torRouteCustom => 'Свои мосты';
+
+  @override
+  String get torRouteCustomHint =>
+      'Строки мостов с bridges.torproject.org или от того, кому вы доверяете.';
+
+  @override
+  String get torRouteLinesHint => 'Одна строка моста на строку';
 }

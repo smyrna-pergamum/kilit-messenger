@@ -254,5 +254,16 @@
   "settingsAbout": "Hakkında",
   "aboutVersion": "Sürüm",
   "aboutLicense": "Lisans",
-  "aboutAlpha": "Bağımsız bir denetimden geçmedi. Alfa sürüm: denemek için uygun, yüksek riskli kullanım için değil."
+  "aboutAlpha": "Bağımsız bir denetimden geçmedi. Alfa sürüm: denemek için uygun, yüksek riskli kullanım için değil.",
+  "settingsBridges": "Tor bağlantısı",
+  "torRouteAuto": "Otomatik",
+  "torRouteAutoHint": "Önce doğrudan Tor; engellenirse köprülerle.",
+  "torRouteDirect": "Doğrudan Tor",
+  "torRouteObfs4": "obfs4 köprüleri",
+  "torRouteObfs4Hint": "Tor'u engelleyen ağlar için.",
+  "torRouteSnowflake": "Snowflake",
+  "torRouteSnowflakeHint": "Ağır sansür için. Daha yavaş.",
+  "torRouteCustom": "Kendi köprülerim",
+  "torRouteCustomHint": "bridges.torproject.org'dan ya da güvendiğiniz birinden köprü satırları.",
+  "torRouteLinesHint": "Her satıra bir köprü"
 }

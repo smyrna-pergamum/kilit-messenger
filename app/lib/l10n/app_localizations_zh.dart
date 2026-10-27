@@ -808,4 +808,37 @@ class LZh extends L {
 
   @override
   String get aboutAlpha => '未经独立审计。Alpha 版：适合测试，不适合高风险用途。';
+
+  @override
+  String get settingsBridges => 'Tor 连接';
+
+  @override
+  String get torRouteAuto => '自动';
+
+  @override
+  String get torRouteAutoHint => '先直连 Tor；被封锁时改用网桥。';
+
+  @override
+  String get torRouteDirect => '直连 Tor';
+
+  @override
+  String get torRouteObfs4 => 'obfs4 网桥';
+
+  @override
+  String get torRouteObfs4Hint => '适用于封锁 Tor 的网络。';
+
+  @override
+  String get torRouteSnowflake => 'Snowflake';
+
+  @override
+  String get torRouteSnowflakeHint => '适用于严格审查。较慢。';
+
+  @override
+  String get torRouteCustom => '我自己的网桥';
+
+  @override
+  String get torRouteCustomHint => '来自 bridges.torproject.org 或你信任之人的网桥行。';
+
+  @override
+  String get torRouteLinesHint => '每行一个网桥';
 }

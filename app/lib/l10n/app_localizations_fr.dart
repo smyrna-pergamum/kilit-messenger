@@ -850,4 +850,39 @@ class LFr extends L {
   @override
   String get aboutAlpha =>
       'Pas d\'audit indépendant. Alpha : idéal pour tester, pas pour un usage critique.';
+
+  @override
+  String get settingsBridges => 'Connexion à Tor';
+
+  @override
+  String get torRouteAuto => 'Automatique';
+
+  @override
+  String get torRouteAutoHint =>
+      'Directement vers Tor ; par des ponts si c\'est bloqué.';
+
+  @override
+  String get torRouteDirect => 'Directement vers Tor';
+
+  @override
+  String get torRouteObfs4 => 'Ponts obfs4';
+
+  @override
+  String get torRouteObfs4Hint => 'Pour les réseaux qui bloquent Tor.';
+
+  @override
+  String get torRouteSnowflake => 'Snowflake';
+
+  @override
+  String get torRouteSnowflakeHint => 'Pour une forte censure. Plus lent.';
+
+  @override
+  String get torRouteCustom => 'Mes propres ponts';
+
+  @override
+  String get torRouteCustomHint =>
+      'Lignes de pont de bridges.torproject.org ou d\'une personne de confiance.';
+
+  @override
+  String get torRouteLinesHint => 'Une ligne de pont par rangée';
 }

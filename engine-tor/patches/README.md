@@ -17,3 +17,19 @@ go-libtor's own `ARCH_*32` defines.
 `build.sh` copies the module from Go's module cache (checked against
 `go.sum`), applies the patch to the copy and builds against it through a
 temporary `go.work`; nothing patched is kept in the repository.
+
+## anet
+
+`anet.patch`, also from Kryfo (`engine/vendor-patches/anet.patch`).
+snowflake lists network interfaces on Android through wlynxg/anet, whose
+`interface_android.go` reaches into two private caches of `net` and
+`x/net` with `go:linkname`. Go 1.23 and later refuse that at link time.
+The patch keeps both caches inside anet.
+
+## snowflake
+
+`third_party/snowflake` is Kryfo's client-only copy of snowflake v2.14.1
+(BSD-3-Clause, its LICENSE kept): no SQS rendezvous and so no AWS SDK, an
+error instead of `log.Fatal` (which would end the app), and no logging of
+broker addresses. go.mod points at it with a `replace`.
+

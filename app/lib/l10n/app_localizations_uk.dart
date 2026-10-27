@@ -848,4 +848,39 @@ class LUk extends L {
   @override
   String get aboutAlpha =>
       'Незалежного аудиту не проводилося. Альфа-версія: підходить для тестів, але не для випадків із високими ставками.';
+
+  @override
+  String get settingsBridges => 'Підключення до Tor';
+
+  @override
+  String get torRouteAuto => 'Автоматично';
+
+  @override
+  String get torRouteAutoHint =>
+      'Напряму до Tor; через мости, якщо його заблоковано.';
+
+  @override
+  String get torRouteDirect => 'Напряму до Tor';
+
+  @override
+  String get torRouteObfs4 => 'Мости obfs4';
+
+  @override
+  String get torRouteObfs4Hint => 'Для мереж, де Tor заблоковано.';
+
+  @override
+  String get torRouteSnowflake => 'Snowflake';
+
+  @override
+  String get torRouteSnowflakeHint => 'За жорсткої цензури. Повільніше.';
+
+  @override
+  String get torRouteCustom => 'Власні мости';
+
+  @override
+  String get torRouteCustomHint =>
+      'Рядки мостів з bridges.torproject.org або від того, кому ви довіряєте.';
+
+  @override
+  String get torRouteLinesHint => 'Один рядок моста на рядок';
 }

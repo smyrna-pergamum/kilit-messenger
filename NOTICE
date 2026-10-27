@@ -40,6 +40,18 @@ JetBrains Mono  OFL-1.1             app/assets/fonts/OFL-JetBrainsMono.txt
 Tor             BSD-3-Clause    https://www.torproject.org/
 go-libtor       BSD-3-Clause    https://github.com/alexballas/go-libtor
 bine            MIT             https://github.com/cretz/bine
+lyrebird (obfs4, webtunnel)  BSD-2-Clause, parts GPL-3.0
+                https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird
+snowflake       BSD-3-Clause    engine-tor/third_party/snowflake (Kryfo's
+                client-only copy of v2.14.1; LICENSE kept there)
+goptlib         CC0-1.0         https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib
+ptutil          BSD-3-Clause    https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/ptutil
+pion (WebRTC)   MIT             https://github.com/pion
+uTLS            BSD-3-Clause    https://github.com/refraction-networking/utls
+kcp-go, smux    MIT             https://github.com/xtaci
+klauspost/compress, reedsolomon   BSD-3-Clause / MIT
+anet            BSD-3-Clause    https://github.com/wlynxg/anet (patched at build)
+Built-in bridges   engine-tor/builtin.json, Tor Browser's list as Kryfo carries it
 BIP-39 words    MIT             core/crates/kilit-vault/src/bip39-english.txt
 k256            Apache-2.0 OR MIT   https://github.com/RustCrypto/elliptic-curves
 tokio, tungstenite, rustls, webpki-roots   MIT / Apache-2.0 / ISC / MPL-2.0

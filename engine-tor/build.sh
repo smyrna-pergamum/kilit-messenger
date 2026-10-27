@@ -7,7 +7,8 @@
 #     kilit-android sh build.sh
 #
 # Modules come from the Go proxy and are checked against go.sum. go-libtor
-# is built from a patched copy (patches/README.md).
+# and anet are built from patched copies (patches/README.md); snowflake is a
+# client-only copy in third_party/snowflake.
 set -eu
 cd "$(dirname "$0")"
 HERE=$(pwd)
@@ -23,12 +24,20 @@ trap 'rm -rf "$WORK"' EXIT
 cp -r "$SRC" "$WORK/go-libtor"
 chmod -R u+w "$WORK/go-libtor"
 patch -s -p1 -d "$WORK/go-libtor" < patches/go-libtor.patch
+# anet (snowflake lists network interfaces through it on Android): its
+# go:linkname into net is refused by the linker since Go 1.23
+go mod download github.com/wlynxg/anet
+ANET=$(go list -m -f '{{.Dir}}' github.com/wlynxg/anet)
+cp -r "$ANET" "$WORK/anet"
+chmod -R u+w "$WORK/anet"
+patch -s -p1 -d "$WORK/anet" < patches/anet.patch
 cat > "$WORK/go.work" <<EOF
 go 1.26.9
 
 use $HERE
 
 replace github.com/alexballas/go-libtor => $WORK/go-libtor
+replace github.com/wlynxg/anet => $WORK/anet
 EOF
 export GOWORK="$WORK/go.work"
 

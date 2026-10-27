@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import '../platform/tor.dart';
+
 /// Where preferences are kept. They are not secret (a theme, a language,
 /// one switch) and are needed before the vault opens, so they live in a
 /// small JSON file beside the vault rather than inside it.
@@ -75,6 +77,8 @@ class Prefs extends ChangeNotifier {
     this._language,
     this._clipboardHint,
     this._tor,
+    this._torRoute,
+    this._bridges,
   );
 
   static Future<Prefs> load(PrefsStore store) async {
@@ -91,6 +95,12 @@ class Prefs extends ChangeNotifier {
       v['clipboardHint'] == true,
       // absent: on, the way Kilit is meant to run
       v['tor'] != false,
+      TorRoute.values.where((r) => r.name == v['torRoute']).firstOrNull ??
+          TorRoute.auto,
+      [
+        for (final b in v['bridges'] is List ? v['bridges'] as List : const [])
+          if (b is String) b,
+      ],
     );
   }
 
@@ -99,6 +109,8 @@ class Prefs extends ChangeNotifier {
   String? _language;
   bool _clipboardHint;
   bool _tor;
+  TorRoute _torRoute;
+  List<String> _bridges;
 
   ThemeMode get themeMode => _theme;
 
@@ -110,6 +122,12 @@ class Prefs extends ChangeNotifier {
 
   /// Whether Kilit connects to Tor. Off, it never goes online.
   bool get tor => _tor;
+
+  /// How Tor reaches the network.
+  TorRoute get torRoute => _torRoute;
+
+  /// The user's own bridge lines, for [TorRoute.custom].
+  List<String> get bridges => _bridges;
 
   Locale? get locale => _language == null ? null : Locale(_language!);
 
@@ -124,6 +142,8 @@ class Prefs extends ChangeNotifier {
       'language': _language,
       'clipboardHint': _clipboardHint,
       'tor': _tor,
+      'torRoute': _torRoute.name,
+      'bridges': _bridges,
     });
   }
 
@@ -147,12 +167,20 @@ class Prefs extends ChangeNotifier {
     return _save();
   }
 
+  Future<void> setTorRoute(TorRoute r, [List<String>? bridges]) {
+    _torRoute = r;
+    if (bridges != null) _bridges = bridges;
+    return _save();
+  }
+
   /// After the panic code: everything back to a new install's settings,
   /// except the language, so the person can still read the screen.
   Future<void> resetAfterPanic() {
     _theme = ThemeMode.system;
     _clipboardHint = false;
     _tor = true;
+    _torRoute = TorRoute.auto;
+    _bridges = const [];
     openSections
       ..clear()
       ..add('protections');

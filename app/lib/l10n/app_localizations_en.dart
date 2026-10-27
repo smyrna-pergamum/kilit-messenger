@@ -845,4 +845,39 @@ class LEn extends L {
   @override
   String get aboutAlpha =>
       'Not independently audited. Alpha: good for testing, not for high-stakes use.';
+
+  @override
+  String get settingsBridges => 'Tor connection';
+
+  @override
+  String get torRouteAuto => 'Automatic';
+
+  @override
+  String get torRouteAutoHint =>
+      'Straight to Tor; through bridges when that is blocked.';
+
+  @override
+  String get torRouteDirect => 'Straight to Tor';
+
+  @override
+  String get torRouteObfs4 => 'obfs4 bridges';
+
+  @override
+  String get torRouteObfs4Hint => 'For networks that block Tor.';
+
+  @override
+  String get torRouteSnowflake => 'Snowflake';
+
+  @override
+  String get torRouteSnowflakeHint => 'For heavy censorship. Slower.';
+
+  @override
+  String get torRouteCustom => 'My own bridges';
+
+  @override
+  String get torRouteCustomHint =>
+      'Bridge lines from bridges.torproject.org or someone you trust.';
+
+  @override
+  String get torRouteLinesHint => 'One bridge line per row';
 }

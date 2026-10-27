@@ -254,5 +254,16 @@
   "settingsAbout": "关于",
   "aboutVersion": "版本",
   "aboutLicense": "许可证",
-  "aboutAlpha": "未经独立审计。Alpha 版：适合测试，不适合高风险用途。"
+  "aboutAlpha": "未经独立审计。Alpha 版：适合测试，不适合高风险用途。",
+  "settingsBridges": "Tor 连接",
+  "torRouteAuto": "自动",
+  "torRouteAutoHint": "先直连 Tor；被封锁时改用网桥。",
+  "torRouteDirect": "直连 Tor",
+  "torRouteObfs4": "obfs4 网桥",
+  "torRouteObfs4Hint": "适用于封锁 Tor 的网络。",
+  "torRouteSnowflake": "Snowflake",
+  "torRouteSnowflakeHint": "适用于严格审查。较慢。",
+  "torRouteCustom": "我自己的网桥",
+  "torRouteCustomHint": "来自 bridges.torproject.org 或你信任之人的网桥行。",
+  "torRouteLinesHint": "每行一个网桥"
 }

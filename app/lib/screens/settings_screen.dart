@@ -110,7 +110,10 @@ class SettingsScreen extends StatelessWidget {
                     value: switch (s.phase) {
                       TorPhase.off => l.torOff,
                       TorPhase.starting => l.torStarting(s.progress),
-                      TorPhase.ready => l.torReady,
+                      TorPhase.ready =>
+                        s.mode.isEmpty || s.mode == 'direct'
+                            ? l.torReady
+                            : '${l.torReady} (${s.mode})',
                       TorPhase.failed => l.torFailed,
                       TorPhase.unavailable => l.torUnavailable,
                     },
@@ -130,6 +133,14 @@ class SettingsScreen extends StatelessWidget {
                 ),
             ],
           ),
+          if (tor.available)
+            _Section(
+              open: prefs.openSections,
+              id: 'bridges',
+              icon: Icons.alt_route_rounded,
+              title: l.settingsBridges,
+              children: [_TorRoutes(prefs: prefs, tor: tor)],
+            ),
           _Section(
             open: prefs.openSections,
             id: 'panic',
@@ -311,6 +322,112 @@ class SettingsScreen extends StatelessWidget {
 }
 
 /// The panic code: what it does, whether it is set, and setting it.
+/// How Tor reaches the network: straight, through built-in bridges, or
+/// through the user's own lines.
+class _TorRoutes extends StatefulWidget {
+  const _TorRoutes({required this.prefs, required this.tor});
+
+  final Prefs prefs;
+  final TorController tor;
+
+  @override
+  State<_TorRoutes> createState() => _TorRoutesState();
+}
+
+class _TorRoutesState extends State<_TorRoutes> {
+  late final TextEditingController _lines = TextEditingController(
+    text: widget.prefs.bridges.join('\n'),
+  );
+  late TorRoute _shown = widget.prefs.torRoute;
+
+  @override
+  void dispose() {
+    _lines.dispose();
+    super.dispose();
+  }
+
+  List<String> get _typed => [
+    for (final line in _lines.text.split('\n'))
+      if (line.trim().isNotEmpty) line.trim(),
+  ];
+
+  Future<void> _use(TorRoute r) async {
+    setState(() => _shown = r);
+    // own bridges take effect once some are saved
+    if (r == TorRoute.custom && _typed.isEmpty) return;
+    await widget.prefs.setTorRoute(r, r == TorRoute.custom ? _typed : null);
+    widget.tor.setRoute(r, widget.prefs.bridges);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    String? hint(TorRoute r) => switch (r) {
+      TorRoute.auto => l.torRouteAutoHint,
+      TorRoute.direct => null,
+      TorRoute.obfs4 => l.torRouteObfs4Hint,
+      TorRoute.snowflake => l.torRouteSnowflakeHint,
+      TorRoute.custom => l.torRouteCustomHint,
+    };
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        RadioGroup<TorRoute>(
+          groupValue: _shown,
+          onChanged: (r) {
+            if (r != null) _use(r);
+          },
+          child: Column(
+            children: [
+              for (final r in TorRoute.values)
+                RadioListTile<TorRoute>(
+                  key: ValueKey('route-${r.name}'),
+                  value: r,
+                  title: Text(switch (r) {
+                    TorRoute.auto => l.torRouteAuto,
+                    TorRoute.direct => l.torRouteDirect,
+                    TorRoute.obfs4 => l.torRouteObfs4,
+                    TorRoute.snowflake => l.torRouteSnowflake,
+                    TorRoute.custom => l.torRouteCustom,
+                  }),
+                  subtitle: hint(r) == null ? null : Text(hint(r)!),
+                ),
+            ],
+          ),
+        ),
+        if (_shown == TorRoute.custom)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                TextField(
+                  key: const ValueKey('bridge-lines'),
+                  controller: _lines,
+                  minLines: 3,
+                  maxLines: 8,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    hintText: l.torRouteLinesHint,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                FilledButton(
+                  key: const ValueKey('bridge-save'),
+                  onPressed: () => _use(TorRoute.custom),
+                  child: Text(l.save),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 class _PanicSettings extends StatefulWidget {
   const _PanicSettings({required this.core});
 

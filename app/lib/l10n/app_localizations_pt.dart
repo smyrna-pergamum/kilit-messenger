@@ -849,4 +849,39 @@ class LPt extends L {
   @override
   String get aboutAlpha =>
       'Sem auditoria independente. Alfa: bom para testes, não para uso de alto risco.';
+
+  @override
+  String get settingsBridges => 'Conexão ao Tor';
+
+  @override
+  String get torRouteAuto => 'Automática';
+
+  @override
+  String get torRouteAutoHint =>
+      'Direto ao Tor; por pontes se estiver bloqueado.';
+
+  @override
+  String get torRouteDirect => 'Direto ao Tor';
+
+  @override
+  String get torRouteObfs4 => 'Pontes obfs4';
+
+  @override
+  String get torRouteObfs4Hint => 'Para redes que bloqueiam o Tor.';
+
+  @override
+  String get torRouteSnowflake => 'Snowflake';
+
+  @override
+  String get torRouteSnowflakeHint => 'Para censura forte. Mais lento.';
+
+  @override
+  String get torRouteCustom => 'Minhas pontes';
+
+  @override
+  String get torRouteCustomHint =>
+      'Linhas de ponte de bridges.torproject.org ou de alguém de confiança.';
+
+  @override
+  String get torRouteLinesHint => 'Uma linha de ponte por linha';
 }

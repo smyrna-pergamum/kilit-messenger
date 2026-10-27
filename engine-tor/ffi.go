@@ -14,11 +14,17 @@ import (
 	"unsafe"
 )
 
-// KilitTorStart starts tor in dataDir/tor. Returns "" or an error.
+// KilitTorStart starts tor in dataDir/tor, or changes how a running one
+// goes out. config is JSON (see Config): {"mode":"obfs4"}. Returns "" or an
+// error.
 //
 //export KilitTorStart
-func KilitTorStart(dataDir *C.char) *C.char {
-	if err := Start(C.GoString(dataDir)); err != nil {
+func KilitTorStart(dataDir *C.char, config *C.char) *C.char {
+	var cfg Config
+	if err := json.Unmarshal([]byte(C.GoString(config)), &cfg); err != nil {
+		return C.CString("config: " + err.Error())
+	}
+	if err := Start(C.GoString(dataDir), cfg); err != nil {
 		return C.CString(err.Error())
 	}
 	return C.CString("")

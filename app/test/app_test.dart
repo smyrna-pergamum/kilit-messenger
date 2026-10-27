@@ -69,14 +69,20 @@ class FakeFiles implements FileAccess {
 
 /// A Tor that bootstraps one step per state read.
 class FakeTor implements TorBackend {
+  FakeTor({this.stuck = false});
+
+  /// Never gets past the first step, like a Tor the network blocks.
+  final bool stuck;
   int progress = -1;
   int stops = 0;
+  final List<String> configs = [];
 
   @override
   bool get available => true;
 
   @override
-  String? start(String dir) {
+  String? start(String dir, String config) {
+    configs.add(config);
     progress = 0;
     return null;
   }
@@ -84,6 +90,7 @@ class FakeTor implements TorBackend {
   @override
   TorState state() {
     if (progress < 0) return const TorState(TorPhase.off);
+    if (stuck) return const TorState(TorPhase.starting, progress: 5);
     progress = (progress + 50).clamp(0, 100);
     return progress == 100
         ? const TorState(TorPhase.ready, progress: 100, socks: 9050)
@@ -720,6 +727,70 @@ void main() {
     tor.stop();
   });
 
+  testWidgets('automatic tries bridges when Tor does not come up', (
+    tester,
+  ) async {
+    final backend = FakeTor(stuck: true);
+    final tor = TorController(backend, '/data');
+    addTearDown(tor.dispose);
+    tor.start();
+    expect(backend.configs, ['{"mode":"direct"}']);
+    await tester.pump(const Duration(seconds: 46));
+    expect(backend.configs.last, '{"mode":"obfs4"}');
+    await tester.pump(const Duration(seconds: 91));
+    expect(backend.configs.last, '{"mode":"snowflake"}');
+    await tester.pump(const Duration(seconds: 121));
+    expect(backend.configs.last, '{"mode":"direct"}');
+    tor.stop();
+  });
+
+  testWidgets('a Tor that comes up stays on its way out', (tester) async {
+    final backend = FakeTor();
+    final tor = TorController(backend, '/data');
+    addTearDown(tor.dispose);
+    tor.start();
+    await tester.pump(const Duration(minutes: 5));
+    expect(backend.configs, ['{"mode":"direct"}']);
+    expect(tor.state.phase, TorPhase.ready);
+    tor.stop();
+  });
+
+  testWidgets('settings choose a bridge and keep own lines', (tester) async {
+    final backend = FakeTor();
+    final tor = TorController(backend, '/data');
+    addTearDown(tor.dispose);
+    final (_, prefs) = await startApp(tester, tor: tor);
+    await setUpVault(tester);
+    await openSettingsSection(tester, 'bridges');
+
+    await tester.ensureVisible(find.byKey(const ValueKey('route-obfs4')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('route-obfs4')));
+    await tester.pump();
+    expect(prefs.torRoute, TorRoute.obfs4);
+    expect(backend.configs.last, '{"mode":"obfs4"}');
+
+    // own bridges: nothing changes until lines are saved
+    await tester.ensureVisible(find.byKey(const ValueKey('route-custom')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('route-custom')));
+    await tester.pump();
+    expect(prefs.torRoute, TorRoute.obfs4);
+    const line = 'obfs4 192.0.2.1:443 cert=abc iat-mode=0';
+    await tester.enterText(
+      find.byKey(const ValueKey('bridge-lines')),
+      '  $line \n\n',
+    );
+    await tester.ensureVisible(find.byKey(const ValueKey('bridge-save')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('bridge-save')));
+    await tester.pump();
+    expect(prefs.torRoute, TorRoute.custom);
+    expect(prefs.bridges, [line]);
+    expect(backend.configs.last, '{"mode":"custom","bridges":["$line"]}');
+    tor.stop();
+  });
+
   testWidgets('a tap on the lock button only locks', (tester) async {
     await startApp(tester);
     await setUpVault(tester);
@@ -984,9 +1055,15 @@ void main() {
     expect(p.language, 'en');
     await p.setLanguage(null);
     await p.setThemeMode(ThemeMode.light);
+    await p.setTorRoute(TorRoute.custom, ['obfs4 192.0.2.1:443 cert=x']);
     final again = await Prefs.load(store);
     expect(again.language, isNull);
     expect(again.themeMode, ThemeMode.light);
+    expect(again.torRoute, TorRoute.custom);
+    expect(again.bridges, ['obfs4 192.0.2.1:443 cert=x']);
+    await again.resetAfterPanic();
+    expect(again.torRoute, TorRoute.auto);
+    expect(again.bridges, isEmpty);
   });
 
   for (final lang in supportedLanguages.keys) {

@@ -850,4 +850,39 @@ class LDe extends L {
   @override
   String get aboutAlpha =>
       'Nicht unabhängig geprüft. Alpha: gut zum Testen, nicht für kritische Einsätze.';
+
+  @override
+  String get settingsBridges => 'Tor-Verbindung';
+
+  @override
+  String get torRouteAuto => 'Automatisch';
+
+  @override
+  String get torRouteAutoHint =>
+      'Direkt zu Tor; über Brücken, wenn das blockiert ist.';
+
+  @override
+  String get torRouteDirect => 'Direkt zu Tor';
+
+  @override
+  String get torRouteObfs4 => 'obfs4-Brücken';
+
+  @override
+  String get torRouteObfs4Hint => 'Für Netze, die Tor blockieren.';
+
+  @override
+  String get torRouteSnowflake => 'Snowflake';
+
+  @override
+  String get torRouteSnowflakeHint => 'Für starke Zensur. Langsamer.';
+
+  @override
+  String get torRouteCustom => 'Eigene Brücken';
+
+  @override
+  String get torRouteCustomHint =>
+      'Brückenzeilen von bridges.torproject.org oder von jemandem, dem du vertraust.';
+
+  @override
+  String get torRouteLinesHint => 'Eine Brückenzeile pro Zeile';
 }

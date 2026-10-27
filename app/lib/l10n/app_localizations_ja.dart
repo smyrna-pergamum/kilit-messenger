@@ -821,4 +821,37 @@ class LJa extends L {
 
   @override
   String get aboutAlpha => '独立した監査は受けていません。アルファ版：テスト用であり、重要な用途には適していません。';
+
+  @override
+  String get settingsBridges => 'Tor 接続';
+
+  @override
+  String get torRouteAuto => '自動';
+
+  @override
+  String get torRouteAutoHint => 'まず Tor に直接接続し、遮断されていればブリッジを使います。';
+
+  @override
+  String get torRouteDirect => 'Tor に直接';
+
+  @override
+  String get torRouteObfs4 => 'obfs4 ブリッジ';
+
+  @override
+  String get torRouteObfs4Hint => 'Tor を遮断するネットワーク向け。';
+
+  @override
+  String get torRouteSnowflake => 'Snowflake';
+
+  @override
+  String get torRouteSnowflakeHint => '厳しい検閲向け。低速です。';
+
+  @override
+  String get torRouteCustom => '自分のブリッジ';
+
+  @override
+  String get torRouteCustomHint => 'bridges.torproject.org または信頼できる人から得たブリッジ行。';
+
+  @override
+  String get torRouteLinesHint => '1 行に 1 つのブリッジ';
 }

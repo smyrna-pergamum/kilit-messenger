@@ -24,6 +24,7 @@ import (
 	"time"
 
 	libtor "github.com/alexballas/go-libtor"
+	"github.com/cretz/bine/control"
 	"github.com/cretz/bine/process"
 	"github.com/cretz/bine/tor"
 )
@@ -57,6 +58,8 @@ type State struct {
 	Socks int `json:"socks"`
 	// Error is set when Phase is Failed. Never holds anything secret.
 	Error string `json:"error,omitempty"`
+	// Mode is the way out: direct, obfs4, snowflake or custom.
+	Mode string `json:"mode,omitempty"`
 }
 
 var (
@@ -65,9 +68,17 @@ var (
 	startMu sync.Mutex
 	mu      sync.Mutex
 	node    *tor.Tor
-	cancel  context.CancelFunc
 	current = State{Phase: Off}
+	// whether tor should be on the network, and since when the way out
+	// was last set: right after a change, an old 100% means nothing yet
+	enabled bool
+	fresh   time.Time
+	// tor's bootstrap was seen below 100% since the way out was set
+	dipped bool
 )
+
+// how long an unchanged 100% is doubted after the way out changed
+const freshDoubt = 15 * time.Second
 
 func set(f func(*State)) {
 	mu.Lock()
@@ -106,37 +117,94 @@ func cleanRunFiles(dir string) {
 	}
 }
 
-// Start brings tor up in dataDir/tor and returns once it is starting; the
-// bootstrap is watched in the background. Starting a running tor is a no-op.
-func Start(dataDir string) error {
+// Start brings tor up in dataDir/tor the first time, going out the way
+// cfg says, and returns once it is starting; the bootstrap is watched in
+// the background. Later calls change the way out on the running tor.
+//
+// Tor runs at most once per process (it cannot be started again inside
+// the same one), so it is never closed: Stop takes it off the network.
+func Start(dataDir string, cfg Config) error {
 	startMu.Lock()
 	defer startMu.Unlock()
-	if node != nil {
-		return nil
-	}
-	if dataDir == "" {
-		return errors.New("empty data dir")
-	}
-	dir := filepath.Join(dataDir, "tor")
-	if err := os.MkdirAll(dir, 0o700); err != nil {
-		return fmt.Errorf("data dir: %w", err)
-	}
-	cleanRunFiles(dir)
-	set(func(s *State) { *s = State{Phase: Starting, Summary: "starting"} })
-
-	t, err := tor.Start(context.Background(), &tor.StartConf{
-		ProcessCreator: libtorCreator{},
-		DataDir:        dir,
-		ExtraArgs:      args(),
-		EnableNetwork:  true,
-	})
+	lines, err := Lines(cfg)
 	if err != nil {
-		fail(fmt.Errorf("tor start: %w", err))
+		fail(err)
 		return err
 	}
-	ctx, stop := context.WithCancel(context.Background())
-	node, cancel = t, stop
-	go watch(ctx, t)
+	if node == nil {
+		if dataDir == "" {
+			return errors.New("empty data dir")
+		}
+		dir := filepath.Join(dataDir, "tor")
+		if err := os.MkdirAll(dir, 0o700); err != nil {
+			return fmt.Errorf("data dir: %w", err)
+		}
+		cleanRunFiles(dir)
+		set(func(s *State) { *s = State{Phase: Starting, Summary: "starting"} })
+		// off the network until the way out is set
+		t, err := tor.Start(context.Background(), &tor.StartConf{
+			ProcessCreator: libtorCreator{},
+			DataDir:        dir,
+			ExtraArgs:      args(),
+		})
+		if err != nil {
+			fail(fmt.Errorf("tor start: %w", err))
+			return err
+		}
+		node = t
+		go watch(context.Background(), t)
+	}
+	mu.Lock()
+	enabled, fresh, dipped = true, time.Now(), false
+	current = State{Phase: Starting, Summary: "starting", Mode: modeName(cfg)}
+	mu.Unlock()
+	if err := apply(node, lines); err != nil {
+		fail(err)
+		return err
+	}
+	return nil
+}
+
+func modeName(c Config) string {
+	if c.Mode == "" {
+		return "direct"
+	}
+	return c.Mode
+}
+
+// apply sets the bridges (or none) and puts tor on the network again, so it
+// builds its circuits the new way.
+func apply(t *tor.Tor, lines []string) error {
+	c := t.Control
+	if err := c.SetConf(control.NewKeyVal("DisableNetwork", "1")); err != nil {
+		return fmt.Errorf("network off: %w", err)
+	}
+	if len(lines) == 0 {
+		if err := c.SetConf(control.NewKeyVal("UseBridges", "0")); err != nil {
+			return fmt.Errorf("direct: %w", err)
+		}
+		if err := c.ResetConf(control.NewKeyVal("Bridge", "")); err != nil {
+			return fmt.Errorf("direct: %w", err)
+		}
+	} else {
+		if err := startTransports(); err != nil {
+			return err
+		}
+		var kv []*control.KeyVal
+		for _, p := range transportPlugins() {
+			kv = append(kv, control.NewKeyVal("ClientTransportPlugin", p))
+		}
+		for _, l := range lines {
+			kv = append(kv, control.NewKeyVal("Bridge", withToken(l)))
+		}
+		kv = append(kv, control.NewKeyVal("UseBridges", "1"))
+		if err := c.SetConf(kv...); err != nil {
+			return fmt.Errorf("bridges: %w", err)
+		}
+	}
+	if err := c.SetConf(control.NewKeyVal("DisableNetwork", "0")); err != nil {
+		return fmt.Errorf("network on: %w", err)
+	}
 	return nil
 }
 
@@ -209,6 +277,15 @@ func watch(ctx context.Context, t *tor.Tor) {
 			continue
 		}
 		set(func(s *State) {
+			if !enabled {
+				return
+			}
+			if p < 100 {
+				dipped = true
+			}
+			if p == 100 && !dipped && time.Since(fresh) < freshDoubt {
+				p = 99
+			}
 			s.Progress, s.Summary, s.Socks = p, summary, socks
 			s.Error = ""
 			if p == 100 && socks > 0 {
@@ -220,15 +297,16 @@ func watch(ctx context.Context, t *tor.Tor) {
 	}
 }
 
-// Stop shuts tor down. Stopping a stopped tor is a no-op.
+// Stop takes tor off the network; it stays in the process, ready to come
+// back with Start. Stopping a stopped tor is a no-op.
 func Stop() {
 	startMu.Lock()
 	defer startMu.Unlock()
-	if node == nil {
-		return
+	mu.Lock()
+	enabled = false
+	mu.Unlock()
+	if node != nil {
+		_ = node.Control.SetConf(control.NewKeyVal("DisableNetwork", "1"))
 	}
-	cancel()
-	_ = node.Close()
-	node, cancel = nil, nil
 	set(func(s *State) { *s = State{Phase: Off} })
 }

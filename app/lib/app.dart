@@ -54,7 +54,9 @@ class _KilitAppState extends State<KilitApp> {
   @override
   void initState() {
     super.initState();
-    if (widget.prefs.tor) _tor.start();
+    if (widget.prefs.tor) {
+      _tor.start(route: widget.prefs.torRoute, bridges: widget.prefs.bridges);
+    }
   }
 
   @override

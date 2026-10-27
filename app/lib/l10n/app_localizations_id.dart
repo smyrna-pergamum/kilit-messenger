@@ -844,4 +844,39 @@ class LId extends L {
   @override
   String get aboutAlpha =>
       'Belum diaudit secara independen. Alfa: cocok untuk pengujian, bukan untuk penggunaan berisiko tinggi.';
+
+  @override
+  String get settingsBridges => 'Koneksi Tor';
+
+  @override
+  String get torRouteAuto => 'Otomatis';
+
+  @override
+  String get torRouteAutoHint =>
+      'Langsung ke Tor; lewat jembatan bila diblokir.';
+
+  @override
+  String get torRouteDirect => 'Langsung ke Tor';
+
+  @override
+  String get torRouteObfs4 => 'Jembatan obfs4';
+
+  @override
+  String get torRouteObfs4Hint => 'Untuk jaringan yang memblokir Tor.';
+
+  @override
+  String get torRouteSnowflake => 'Snowflake';
+
+  @override
+  String get torRouteSnowflakeHint => 'Untuk sensor berat. Lebih lambat.';
+
+  @override
+  String get torRouteCustom => 'Jembatan sendiri';
+
+  @override
+  String get torRouteCustomHint =>
+      'Baris jembatan dari bridges.torproject.org atau orang yang Anda percayai.';
+
+  @override
+  String get torRouteLinesHint => 'Satu baris jembatan per baris';
 }

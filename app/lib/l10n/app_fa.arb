@@ -254,5 +254,16 @@
   "settingsAbout": "درباره",
   "aboutVersion": "نسخه",
   "aboutLicense": "مجوز",
-  "aboutAlpha": "به طور مستقل ممیزی نشده است. نسخه آلفا: مناسب برای آزمایش، نه برای استفاده پرمخاطره."
+  "aboutAlpha": "به طور مستقل ممیزی نشده است. نسخه آلفا: مناسب برای آزمایش، نه برای استفاده پرمخاطره.",
+  "settingsBridges": "اتصال Tor",
+  "torRouteAuto": "خودکار",
+  "torRouteAutoHint": "مستقیم به Tor؛ اگر مسدود باشد، از طریق پل‌ها.",
+  "torRouteDirect": "مستقیم به Tor",
+  "torRouteObfs4": "پل‌های obfs4",
+  "torRouteObfs4Hint": "برای شبکه‌هایی که Tor را مسدود می‌کنند.",
+  "torRouteSnowflake": "Snowflake",
+  "torRouteSnowflakeHint": "برای سانسور شدید. کندتر.",
+  "torRouteCustom": "پل‌های خودم",
+  "torRouteCustomHint": "خطوط پل از bridges.torproject.org یا از کسی که به او اعتماد دارید.",
+  "torRouteLinesHint": "در هر سطر یک پل"
 }

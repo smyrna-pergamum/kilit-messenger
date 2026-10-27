@@ -844,4 +844,38 @@ class LVi extends L {
   @override
   String get aboutAlpha =>
       'Chưa được kiểm toán độc lập. Bản alpha: phù hợp để thử nghiệm, không dùng cho mục đích quan trọng.';
+
+  @override
+  String get settingsBridges => 'Kết nối Tor';
+
+  @override
+  String get torRouteAuto => 'Tự động';
+
+  @override
+  String get torRouteAutoHint => 'Thẳng tới Tor; qua cầu nối nếu bị chặn.';
+
+  @override
+  String get torRouteDirect => 'Thẳng tới Tor';
+
+  @override
+  String get torRouteObfs4 => 'Cầu nối obfs4';
+
+  @override
+  String get torRouteObfs4Hint => 'Cho mạng chặn Tor.';
+
+  @override
+  String get torRouteSnowflake => 'Snowflake';
+
+  @override
+  String get torRouteSnowflakeHint => 'Cho kiểm duyệt nặng. Chậm hơn.';
+
+  @override
+  String get torRouteCustom => 'Cầu nối của tôi';
+
+  @override
+  String get torRouteCustomHint =>
+      'Dòng cầu nối từ bridges.torproject.org hoặc người bạn tin tưởng.';
+
+  @override
+  String get torRouteLinesHint => 'Mỗi hàng một dòng cầu nối';
 }

@@ -254,5 +254,16 @@
   "settingsAbout": "Giới thiệu",
   "aboutVersion": "Phiên bản",
   "aboutLicense": "Giấy phép",
-  "aboutAlpha": "Chưa được kiểm toán độc lập. Bản alpha: phù hợp để thử nghiệm, không dùng cho mục đích quan trọng."
+  "aboutAlpha": "Chưa được kiểm toán độc lập. Bản alpha: phù hợp để thử nghiệm, không dùng cho mục đích quan trọng.",
+  "settingsBridges": "Kết nối Tor",
+  "torRouteAuto": "Tự động",
+  "torRouteAutoHint": "Thẳng tới Tor; qua cầu nối nếu bị chặn.",
+  "torRouteDirect": "Thẳng tới Tor",
+  "torRouteObfs4": "Cầu nối obfs4",
+  "torRouteObfs4Hint": "Cho mạng chặn Tor.",
+  "torRouteSnowflake": "Snowflake",
+  "torRouteSnowflakeHint": "Cho kiểm duyệt nặng. Chậm hơn.",
+  "torRouteCustom": "Cầu nối của tôi",
+  "torRouteCustomHint": "Dòng cầu nối từ bridges.torproject.org hoặc người bạn tin tưởng.",
+  "torRouteLinesHint": "Mỗi hàng một dòng cầu nối"
 }
