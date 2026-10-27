@@ -24,7 +24,10 @@ relay'lerin gördüğü biçimi anlatır. Kod: `core/crates/kilit-vault/src/mess
   ilk temas etiketi yolda olan mesajlar için bir hafta daha izlenir.
 - **Davet bağlantısı:** `kilit://add?id=<dört kelime>&a=<adres>`. QR kod bu
   bağlantıyı taşır. Elle yazılan `@dört-kelime` adresi taşımaz; o zaman kart
-  yalnızca kelimelere göre doğrulanır.
+  yalnızca kelimelere göre doğrulanır. Android'de bu bağlantıya (ya da onu
+  içeren paylaşılmış bir metne) dokunmak Kilit'i açar; kilit açıldıktan sonra
+  "Kişi ekle" sayfası bağlantıyla dolu gelir. Kişi, kullanıcı "Ekle"ye
+  dokunmadan eklenmez; bir web sayfası kimseyi habersiz ekleyemez.
 
 ## Kart
 

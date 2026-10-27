@@ -41,12 +41,16 @@ class ChatsScreen extends StatefulWidget {
     required this.files,
     required this.chats,
     required this.tor,
+    this.link,
   });
 
   final Session session;
   final FileAccess files;
   final ChatService chats;
   final TorController tor;
+
+  /// A kilit:// link opened from another app, waiting to be added.
+  final ValueNotifier<String?>? link;
 
   @override
   State<ChatsScreen> createState() => _ChatsScreenState();
@@ -63,12 +67,24 @@ class _ChatsScreenState extends State<ChatsScreen> {
   void initState() {
     super.initState();
     widget.chats.addListener(_changed);
+    widget.link?.addListener(_takeLink);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _takeLink());
   }
 
   @override
   void dispose() {
     widget.chats.removeListener(_changed);
+    widget.link?.removeListener(_takeLink);
     super.dispose();
+  }
+
+  /// A link only fills in the sheet: adding still takes a tap, so a web
+  /// page cannot add contacts behind the user's back.
+  void _takeLink() {
+    final link = widget.link?.value;
+    if (link == null || !mounted) return;
+    widget.link!.value = null;
+    _add(initial: link);
   }
 
   void _changed() {
@@ -94,12 +110,16 @@ class _ChatsScreenState extends State<ChatsScreen> {
     _reload();
   }
 
-  Future<void> _add() async {
+  Future<void> _add({String? initial}) async {
     final c = await showModalBottomSheet<Contact>(
       context: context,
       isScrollControlled: true,
-      builder: (_) =>
-          AddSheet(core: core, files: widget.files, chats: widget.chats),
+      builder: (_) => AddSheet(
+        core: core,
+        files: widget.files,
+        chats: widget.chats,
+        initial: initial,
+      ),
     );
     _reload();
     if (c != null && mounted) await _open(c);
@@ -472,18 +492,22 @@ class AddSheet extends StatefulWidget {
     required this.core,
     required this.files,
     required this.chats,
+    this.initial,
   });
 
   final KilitCore core;
   final FileAccess files;
   final ChatService chats;
 
+  /// Filled in from a kilit:// link.
+  final String? initial;
+
   @override
   State<AddSheet> createState() => _AddSheetState();
 }
 
 class _AddSheetState extends State<AddSheet> {
-  final _text = TextEditingController();
+  late final _text = TextEditingController(text: widget.initial);
   String? Function(L)? _error;
   bool _busy = false;
 

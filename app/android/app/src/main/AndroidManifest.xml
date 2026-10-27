@@ -43,6 +43,14 @@
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:scheme="content" android:mimeType="application/x-kilit"/>
             </intent-filter>
+            <!-- kilit://add?id=... links: someone's Kilit ID, from a chat or a
+                 web page. They only fill in the add-contact sheet. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="kilit" android:host="add"/>
+            </intent-filter>
             <!-- "Share" to Kilit: a .klt file, or a KLT1: message from WhatsApp -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>

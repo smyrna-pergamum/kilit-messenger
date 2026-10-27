@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../core/kilit_core.dart';
 import '../l10n/app_localizations.dart';
 import '../platform/files.dart';
 import '../platform/tor.dart';
@@ -12,6 +15,17 @@ import 'camera_screen.dart';
 import 'chats_screen.dart';
 import 'settings_screen.dart';
 import 'vault_screen.dart';
+
+/// The Kilit invite in [text]: the whole text, or a kilit:// link inside it
+/// ("Add me on Kilit: kilit://add?id=..."). Null when there is none.
+String? inviteIn(KilitCore core, String? text) {
+  if (text == null) return null;
+  if (core.isInvite(text)) return text.trim();
+  for (final m in RegExp(r'kilit://add\?[^\s]+').allMatches(text)) {
+    if (core.isInvite(m[0]!)) return m[0];
+  }
+  return null;
+}
 
 /// Phones get a bottom bar; wide windows (Windows, tablets) a side rail.
 const wideLayoutWidth = 720.0;
@@ -58,10 +72,39 @@ class _ShellState extends State<Shell> {
 
   late final ChatService _chats = ChatService(widget.session.core, widget.tor);
 
+  // what other apps hand Kilit: a kilit:// link goes to the chats, anything
+  // else to the vault. Both wait here until the page takes them.
+  final _link = ValueNotifier<String?>(null);
+  final _forVault = ValueNotifier<Incoming?>(null);
+  StreamSubscription<void>? _incoming;
+
+  @override
+  void initState() {
+    super.initState();
+    // things shared or opened into Kilit wait until the vault is open
+    _incoming = widget.files.incomingReady.listen((_) => _take());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _take());
+  }
+
   @override
   void dispose() {
+    _incoming?.cancel();
+    _link.dispose();
+    _forVault.dispose();
     _chats.dispose();
     super.dispose();
+  }
+
+  Future<void> _take() async {
+    final got = await widget.files.takeIncoming();
+    if (got == null || !mounted) return;
+    final link = inviteIn(widget.session.core, got.text);
+    setState(() => _index = link != null ? 0 : 1);
+    if (link != null) {
+      _link.value = link;
+    } else {
+      _forVault.value = got;
+    }
   }
 
   Widget _page(L l) => switch (_index) {
@@ -70,11 +113,13 @@ class _ShellState extends State<Shell> {
       files: widget.files,
       chats: _chats,
       tor: widget.tor,
+      link: _link,
     ),
     1 => VaultScreen(
       core: widget.session.core,
       files: widget.files,
       prefs: widget.prefs,
+      incoming: _forVault,
     ),
     2 => CameraTab(
       core: widget.session.core,

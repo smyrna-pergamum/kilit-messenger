@@ -28,6 +28,8 @@ class FilesChannel(private val activity: Activity, private val channel: MethodCh
 
         /** The vault's file limit (kilit-ffi MAX_FILE_BYTES) plus room for a header. */
         const val MAX_BYTES = 64L * 1024 * 1024 + 64 * 1024
+        // a kilit://add link is about 100 characters
+        const val MAX_LINK = 512
     }
 
     private val main = Handler(Looper.getMainLooper())
@@ -157,6 +159,15 @@ class FilesChannel(private val activity: Activity, private val channel: MethodCh
     /** Takes a VIEW or SEND intent from another app, then tells Dart. */
     fun onIntent(intent: Intent?) {
         intent ?: return
+        // a kilit:// link is handed over as text; Dart checks it
+        val data = intent.data
+        if (intent.action == Intent.ACTION_VIEW && data?.scheme == "kilit") {
+            val link = data.toString()
+            if (link.length > MAX_LINK) return
+            incoming = mapOf("text" to link)
+            channel.invokeMethod("incomingReady", null)
+            return
+        }
         val uri: Uri? = when (intent.action) {
             Intent.ACTION_VIEW -> intent.data
             Intent.ACTION_SEND -> {

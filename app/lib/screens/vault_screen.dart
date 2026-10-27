@@ -28,11 +28,15 @@ class VaultScreen extends StatefulWidget {
     required this.core,
     required this.files,
     required this.prefs,
+    this.incoming,
   });
 
   final KilitCore core;
   final FileAccess files;
   final Prefs prefs;
+
+  /// A file or message another app handed Kilit, for the vault to open.
+  final ValueNotifier<Incoming?>? incoming;
 
   @override
   State<VaultScreen> createState() => _VaultScreenState();
@@ -40,14 +44,12 @@ class VaultScreen extends StatefulWidget {
 
 class _VaultScreenState extends State<VaultScreen> {
   late Future<List<VaultItem>> _items = widget.core.items();
-  StreamSubscription<void>? _incoming;
   String? _clipboardPacket;
 
   @override
   void initState() {
     super.initState();
-    // things shared or opened into Kilit wait until the vault is open
-    _incoming = widget.files.incomingReady.listen((_) => _takeIncoming());
+    widget.incoming?.addListener(_takeIncoming);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _takeIncoming();
       if (widget.prefs.clipboardHint) _checkClipboard();
@@ -56,7 +58,7 @@ class _VaultScreenState extends State<VaultScreen> {
 
   @override
   void dispose() {
-    _incoming?.cancel();
+    widget.incoming?.removeListener(_takeIncoming);
     super.dispose();
   }
 
@@ -98,8 +100,9 @@ class _VaultScreenState extends State<VaultScreen> {
   }
 
   Future<void> _takeIncoming() async {
-    final got = await widget.files.takeIncoming();
+    final got = widget.incoming?.value;
     if (got == null || !mounted) return;
+    widget.incoming!.value = null;
     final text = got.text;
     final file = got.file;
     if (text != null) {

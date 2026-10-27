@@ -55,6 +55,12 @@ class FakeFiles implements FileAccess {
   @override
   Stream<void> get incomingReady => _ready.stream;
 
+  /// Another app hands Kilit [i] while it runs.
+  void deliver(Incoming i) {
+    incoming = i;
+    _ready.add(null);
+  }
+
   @override
   Future<void> openAppSettings() async => settingsOpened++;
 
@@ -555,6 +561,55 @@ void main() {
     tor.stop();
   });
 
+  testWidgets('a kilit:// link opened at start fills in the add sheet', (
+    tester,
+  ) async {
+    final tor = readyTor();
+    addTearDown(tor.dispose);
+    final files = FakeFiles()..incoming = const Incoming.text(boraLink);
+    final (core, _) = await startApp(tester, files: files, tor: tor);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    await letTorUp(tester);
+    final field = tester.widget<TextField>(
+      find.byKey(const ValueKey('add-input')),
+    );
+    expect(field.controller!.text, boraLink);
+    // nothing is added until the user says so
+    expect(await core.contacts(), isEmpty);
+    await tester.tap(find.byKey(const ValueKey('add-go')));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<Text>(find.byKey(const ValueKey('chat-title'))).data,
+      '@$boraWords',
+    );
+    tor.stop();
+  });
+
+  testWidgets('a link inside shared text opens the chats, from any tab', (
+    tester,
+  ) async {
+    final files = FakeFiles();
+    await startApp(tester, files: files);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pumpAndSettle();
+    files.deliver(const Incoming.text('Add me on Kilit: $boraLink see you'));
+    await tester.pumpAndSettle();
+    final field = tester.widget<TextField>(
+      find.byKey(const ValueKey('add-input')),
+    );
+    expect(field.controller!.text, boraLink);
+
+    // a carrier message still goes to the vault
+    await tester.tapAt(const Offset(20, 20));
+    await tester.pumpAndSettle();
+    files.deliver(const Incoming.text('KLT1:abc.'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('paste-input')), findsOneWidget);
+  });
+
   testWidgets('a stranger waits in Requests until accepted', (tester) async {
     final tor = readyTor();
     addTearDown(tor.dispose);
@@ -1030,7 +1085,9 @@ void main() {
     final files = FakeFiles()
       ..incoming = const Incoming.text('Ayşe: KLT1:abc. see you');
     await startApp(tester, files: files);
-    await setUpVault(tester);
+    // the shell takes it to the vault on its own
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
     await tester.pumpAndSettle();
     final field = tester.widget<TextField>(
       find.byKey(const ValueKey('paste-input')),
