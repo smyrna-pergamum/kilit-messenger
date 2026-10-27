@@ -170,62 +170,6 @@ class LTr extends L {
   String get navSettings => 'Ayarlar';
 
   @override
-  String get chatsLater => 'Tor üzerinden mesajlaşma Aşama 2\'de geliyor.';
-
-  @override
-  String get chatsIntro =>
-      'Mesajlar Signal protokolüyle (PQXDH ve SPQR, kuantum sonrası) uçtan uca şifrelenir. Kilit\'in kendi ağı gelene kadar, herhangi bir sohbet uygulamasına kopyaladığınız metin olarak gider.';
-
-  @override
-  String get chatsEmpty =>
-      'Henüz kişi yok. Kartınızı birine verin ya da onunkini ekleyin.';
-
-  @override
-  String get chatsShareCard => 'Kartım';
-
-  @override
-  String get chatsAddContact => 'Kişi ekle';
-
-  @override
-  String get chatsOpenClipboard => 'Panodan aç';
-
-  @override
-  String get chatsNothingOnClipboard =>
-      'Panoda Kilit mesajı ya da kişi kartı yok.';
-
-  @override
-  String get cardTitle => 'Kişi kartınız';
-
-  @override
-  String get cardName => 'Gösterilecek ad (isteğe bağlı)';
-
-  @override
-  String get cardShow => 'Kart oluştur';
-
-  @override
-  String get cardHint =>
-      'Bu metni konuşmak istediğiniz kişiye gönderin. Gizli bir şey içermez. Bağlandıktan sonra güvenlik numaralarını karşılaştırın.';
-
-  @override
-  String get addContactTitle => 'Kişi ekle';
-
-  @override
-  String get addContactCard => 'Kişinin kartı (KLC1:…)';
-
-  @override
-  String get addContactName => 'Ad (isteğe bağlı)';
-
-  @override
-  String get addContactGo => 'Ekle';
-
-  @override
-  String get addContactRefused =>
-      'Bu bir kişi kartı değil ya da sizin kendi kartınız.';
-
-  @override
-  String get contactUnnamed => 'Adsız kişi';
-
-  @override
   String get chatEmpty =>
       'Henüz mesaj yok. Yazdığınız ilk mesaj şifreli oturumu başlatır.';
 
@@ -233,35 +177,11 @@ class LTr extends L {
   String get chatInput => 'Mesaj';
 
   @override
-  String get chatSend => 'Şifrele';
-
-  @override
-  String get chatPaste => 'Yanıtı panodan aç';
-
-  @override
-  String get chatSealedTitle => 'Şifreli mesaj';
-
-  @override
-  String chatSealedHint(String name) {
-    return 'Bunu sohbet uygulamanıza kopyalayıp $name kişisine gönderin. Yalnızca o açabilir.';
-  }
+  String get chatSend => 'Gönder';
 
   @override
   String get chatNewContact =>
-      'Kartınıza sahip biri size yazdı. Ona bir ad verin ve güvenmeden önce güvenlik numaralarını karşılaştırın.';
-
-  @override
-  String get chatOtherContact =>
-      'Başka bir kişiden gelen mesaj da açıldı; onunla olan sohbette.';
-
-  @override
-  String get chatDuplicate => 'Bu mesaj daha önce açıldı.';
-
-  @override
-  String get chatUnknown => 'Bu mesaj, oturumunuz olan kimseden gelmiyor.';
-
-  @override
-  String get chatDamaged => 'Mesaj bozuk.';
+      'Seni eklemeden yazdı. Yanıtlamak için kabul et ya da engelle. Güvenmeden önce güvenlik numaralarını karşılaştırın.';
 
   @override
   String get safetyTitle => 'Güvenlik numarası';
@@ -270,6 +190,201 @@ class LTr extends L {
   String safetyHint(String name) {
     return 'Bu 60 haneyi $name ile yüz yüze ya da telefonda karşılaştırın. İki telefonda da aynıysa arada kimse yoktur.';
   }
+
+  @override
+  String get attachCamera => 'Kamera';
+
+  @override
+  String get attachFile => 'Fotoğraf ya da dosya';
+
+  @override
+  String get chatFileTooLarge => 'Gönderilemeyecek kadar büyük: en fazla 5 MB.';
+
+  @override
+  String get chatDelivered => 'Teslim edildi';
+
+  @override
+  String get fileComing => 'Alınıyor…';
+
+  @override
+  String get fileToVault => 'Kasaya ekle';
+
+  @override
+  String get fileSavedVault => 'Kasaya eklendi.';
+
+  @override
+  String get timerTitle => 'Süreli mesajlar';
+
+  @override
+  String get timerHint =>
+      'Bu sohbetteki yeni mesajlar bu süreden sonra iki telefondan da silinir.';
+
+  @override
+  String get timerOff => 'Kapalı';
+
+  @override
+  String get timer5m => '5 dakika';
+
+  @override
+  String get timer1h => '1 saat';
+
+  @override
+  String get timer1d => '1 gün';
+
+  @override
+  String get timer1w => '1 hafta';
+
+  @override
+  String get renewTitle => 'Kilit kimliğimi yenile';
+
+  @override
+  String get renewBody =>
+      'Yeni kelimeler, yeni bir bağlantı ve yeni bir QR kod alırsın. Kişilerin seninle eskisi gibi yazışmaya devam eder; eski kimlik ve bağlantı yeni kimse için çalışmaz.';
+
+  @override
+  String get renewGo => 'Yenile';
+
+  @override
+  String renewDone(String id) {
+    return 'Yeni kimliğin: @$id';
+  }
+
+  @override
+  String get cameraNoCamera =>
+      'Kamera açılamadı. Telefonun ayarlarından kamera iznini kontrol et.';
+
+  @override
+  String get cameraShutter => 'Fotoğraf çek';
+
+  @override
+  String get cameraRetake => 'Yeniden çek';
+
+  @override
+  String get cameraUse => 'Kullan';
+
+  @override
+  String get cameraIntro =>
+      'Fotoğraflar yalnızca bellekte çekilir: telefona hiçbir şey yazılmaz ve içlerinde konum ya da kamera bilgisi olmaz.';
+
+  @override
+  String get cameraSendTo => 'Gönder…';
+
+  @override
+  String get cameraToVault => 'Kasada sakla';
+
+  @override
+  String get cameraSavedVault => 'Fotoğraf kasada saklandı.';
+
+  @override
+  String get cameraNoContacts => 'Henüz gönderilecek kişi yok.';
+
+  @override
+  String cameraSent(String name) {
+    return '$name kişisine gönderildi.';
+  }
+
+  @override
+  String get chatsYourKilit => 'Senin Kilit\'in';
+
+  @override
+  String get chatsSearch => 'Ara';
+
+  @override
+  String get chatsEmptyNew =>
+      'Henüz kimse yok. Birini ekle ya da ona kodunu göster.';
+
+  @override
+  String get torChipReady => 'Tor hazır';
+
+  @override
+  String torChipStarting(int progress) {
+    return 'Tor %$progress';
+  }
+
+  @override
+  String get torChipOff => 'Tor kapalı';
+
+  @override
+  String get addTitle => 'Birini ekle';
+
+  @override
+  String get addHint =>
+      'Onun kodunu tara ya da sana verdiğini yapıştır: bir bağlantı ya da bir @kimlik.';
+
+  @override
+  String get addScan => 'Onun kodunu tara';
+
+  @override
+  String get addField => 'Bir Kilit bağlantısı ya da @kimlik';
+
+  @override
+  String get addGo => 'Ekle';
+
+  @override
+  String get addSearching => 'Tor üzerinden aranıyor…';
+
+  @override
+  String get addNotFound =>
+      'Bu kimlikle kimse bulunamadı. Kontrol et ya da birazdan yeniden dene.';
+
+  @override
+  String get addOffline =>
+      'Henüz Tor\'a bağlı değil. \'Tor hazır\' yazana kadar bekle.';
+
+  @override
+  String get addNotInvite => 'Bu bir Kilit bağlantısı ya da @kimlik değil.';
+
+  @override
+  String get addShowMine => 'Kodumu göster';
+
+  @override
+  String get addShowMineHint => 'QR kodun, bağlantın, @kimliğin';
+
+  @override
+  String get myTitle => 'Kodum';
+
+  @override
+  String get myHint =>
+      'Bu kodu, bağlantını ya da @kimliğini bilen herkes sana yazabilir. İlk mesajı, sen kabul edene kadar İstekler\'de bekler.';
+
+  @override
+  String get myCopyLink => 'Bağlantıyı kopyala';
+
+  @override
+  String myShareText(String id, String link) {
+    return 'Kilit\'te beni ekle: @$id\n$link';
+  }
+
+  @override
+  String get scanTitle => 'Kilit kodu tara';
+
+  @override
+  String get scanHint => 'Kamerayı QR koda tut.';
+
+  @override
+  String get requestsTitle => 'İstekler';
+
+  @override
+  String get requestsEmpty => 'İstek yok.';
+
+  @override
+  String get requestHint =>
+      'Sana, seni eklemeden yazdılar. Kabul edip yanıt verene kadar onlara hiçbir şey gitmez.';
+
+  @override
+  String get requestAccept => 'Kabul et';
+
+  @override
+  String get requestDecline => 'Reddet';
+
+  @override
+  String get requestBlock => 'Engelle';
+
+  @override
+  String get chatOnRelay => 'Relay\'lerde';
+
+  @override
+  String get chatQueued => 'Ağ bekleniyor';
 
   @override
   String get contactRename => 'Yeniden adlandır';
@@ -282,17 +397,13 @@ class LTr extends L {
 
   @override
   String get contactRemoveBody =>
-      'Oturum ve tüm sohbet silinir. Yeniden yazışmak için birbirinizin kartı gerekir.';
+      'Oturum ve tüm sohbet silinir. Yeniden yazışmak için birbirinizi yeniden ekleyin.';
 
   @override
   String get contactRemoveGo => 'Sil';
 
   @override
   String get save => 'Kaydet';
-
-  @override
-  String get cameraLater =>
-      'Diske şifresiz yazmayan kamera Aşama 2\'de geliyor.';
 
   @override
   String get vaultAddNote => 'Not ekle';
@@ -603,6 +714,30 @@ class LTr extends L {
   @override
   String get protNetworkValue =>
       'Bağlı değil: Aşama 1 ağa hiç çıkmaz. Tor Aşama 2\'de gelecek.';
+
+  @override
+  String get torOff => 'Kapalı: Kilit internete çıkmıyor.';
+
+  @override
+  String torStarting(int progress) {
+    return 'Bağlanıyor… %$progress';
+  }
+
+  @override
+  String get torReady => 'Tor üzerinden bağlı.';
+
+  @override
+  String get torFailed => 'Tor\'a bağlanılamadı.';
+
+  @override
+  String get torUnavailable => 'Bu cihazda henüz yok.';
+
+  @override
+  String get torSwitch => 'Tor üzerinden bağlan';
+
+  @override
+  String get torSwitchHint =>
+      'Kilit ağa yalnızca Tor üzerinden çıkar. Kapalıyken çevrimdışı kalır.';
 
   @override
   String get hwStrongbox => 'StrongBox güvenlik çipi';

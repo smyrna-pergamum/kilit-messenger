@@ -168,62 +168,6 @@ class LVi extends L {
   String get navSettings => 'Cài đặt';
 
   @override
-  String get chatsLater => 'Nhắn tin qua Tor sẽ có ở giai đoạn 2.';
-
-  @override
-  String get chatsIntro =>
-      'Tin nhắn được mã hóa đầu cuối bằng giao thức Signal (PQXDH và SPQR, hậu lượng tử). Cho đến khi mạng riêng của Kilit ra mắt, chúng được gửi dưới dạng văn bản bạn sao chép vào bất kỳ ứng dụng trò chuyện nào.';
-
-  @override
-  String get chatsEmpty =>
-      'Chưa có liên hệ. Hãy đưa thẻ của bạn cho ai đó, hoặc thêm thẻ của họ.';
-
-  @override
-  String get chatsShareCard => 'Thẻ của tôi';
-
-  @override
-  String get chatsAddContact => 'Thêm liên hệ';
-
-  @override
-  String get chatsOpenClipboard => 'Mở từ bảng nhớ tạm';
-
-  @override
-  String get chatsNothingOnClipboard =>
-      'Không có tin nhắn Kilit hay thẻ liên hệ trong bảng nhớ tạm.';
-
-  @override
-  String get cardTitle => 'Thẻ liên hệ của bạn';
-
-  @override
-  String get cardName => 'Tên hiển thị (không bắt buộc)';
-
-  @override
-  String get cardShow => 'Tạo thẻ';
-
-  @override
-  String get cardHint =>
-      'Gửi văn bản này cho người bạn muốn trò chuyện. Nó không chứa bí mật nào. Sau khi kết nối, hãy so sánh số an toàn.';
-
-  @override
-  String get addContactTitle => 'Thêm liên hệ';
-
-  @override
-  String get addContactCard => 'Thẻ liên hệ của họ (KLC1:…)';
-
-  @override
-  String get addContactName => 'Tên (không bắt buộc)';
-
-  @override
-  String get addContactGo => 'Thêm';
-
-  @override
-  String get addContactRefused =>
-      'Đây không phải thẻ liên hệ, hoặc là thẻ của chính bạn.';
-
-  @override
-  String get contactUnnamed => 'Liên hệ chưa đặt tên';
-
-  @override
   String get chatEmpty =>
       'Chưa có tin nhắn. Tin đầu tiên bạn viết sẽ bắt đầu phiên mã hóa.';
 
@@ -231,35 +175,11 @@ class LVi extends L {
   String get chatInput => 'Tin nhắn';
 
   @override
-  String get chatSend => 'Mã hóa';
-
-  @override
-  String get chatPaste => 'Mở câu trả lời từ bảng nhớ tạm';
-
-  @override
-  String get chatSealedTitle => 'Tin nhắn đã mã hóa';
-
-  @override
-  String chatSealedHint(String name) {
-    return 'Sao chép nội dung này vào ứng dụng trò chuyện và gửi cho $name. Chỉ người đó mở được.';
-  }
+  String get chatSend => 'Gửi';
 
   @override
   String get chatNewContact =>
-      'Một người có thẻ của bạn đã nhắn cho bạn. Hãy đặt tên cho họ và so sánh số an toàn trước khi tin tưởng.';
-
-  @override
-  String get chatOtherContact =>
-      'Một tin nhắn từ liên hệ khác cũng đã được mở; nó nằm trong cuộc trò chuyện với người đó.';
-
-  @override
-  String get chatDuplicate => 'Tin nhắn này đã được mở trước đó.';
-
-  @override
-  String get chatUnknown => 'Tin nhắn này không đến từ ai có phiên với bạn.';
-
-  @override
-  String get chatDamaged => 'Tin nhắn bị hỏng.';
+      'Đã nhắn cho bạn mà chưa được thêm. Chấp nhận để trả lời, hoặc chặn. Hãy so sánh số an toàn trước khi tin tưởng.';
 
   @override
   String get safetyTitle => 'Số an toàn';
@@ -268,6 +188,201 @@ class LVi extends L {
   String safetyHint(String name) {
     return 'So sánh 60 chữ số này với $name, trực tiếp hoặc qua cuộc gọi. Nếu giống nhau trên cả hai điện thoại thì không có ai ở giữa.';
   }
+
+  @override
+  String get attachCamera => 'Máy ảnh';
+
+  @override
+  String get attachFile => 'Ảnh hoặc tệp';
+
+  @override
+  String get chatFileTooLarge => 'Quá lớn để gửi: tối đa 5 MB.';
+
+  @override
+  String get chatDelivered => 'Đã nhận';
+
+  @override
+  String get fileComing => 'Đang nhận…';
+
+  @override
+  String get fileToVault => 'Thêm vào kho';
+
+  @override
+  String get fileSavedVault => 'Đã thêm vào kho.';
+
+  @override
+  String get timerTitle => 'Tin nhắn tự hủy';
+
+  @override
+  String get timerHint =>
+      'Tin nhắn mới trong cuộc trò chuyện này biến mất sau thời gian này, trên cả hai điện thoại.';
+
+  @override
+  String get timerOff => 'Tắt';
+
+  @override
+  String get timer5m => '5 phút';
+
+  @override
+  String get timer1h => '1 giờ';
+
+  @override
+  String get timer1d => '1 ngày';
+
+  @override
+  String get timer1w => '1 tuần';
+
+  @override
+  String get renewTitle => 'Làm mới ID Kilit của tôi';
+
+  @override
+  String get renewBody =>
+      'Bạn nhận được từ mới, liên kết mới và mã QR mới. Danh bạ vẫn trò chuyện với bạn như trước; ID và liên kết cũ không còn dùng được cho người mới.';
+
+  @override
+  String get renewGo => 'Làm mới';
+
+  @override
+  String renewDone(String id) {
+    return 'ID mới của bạn: @$id';
+  }
+
+  @override
+  String get cameraNoCamera =>
+      'Không mở được máy ảnh. Hãy kiểm tra quyền máy ảnh trong cài đặt điện thoại.';
+
+  @override
+  String get cameraShutter => 'Chụp ảnh';
+
+  @override
+  String get cameraRetake => 'Chụp lại';
+
+  @override
+  String get cameraUse => 'Dùng';
+
+  @override
+  String get cameraIntro =>
+      'Ảnh chỉ được chụp trong bộ nhớ: không có gì được ghi vào điện thoại và ảnh không chứa vị trí hay dữ liệu máy ảnh.';
+
+  @override
+  String get cameraSendTo => 'Gửi cho…';
+
+  @override
+  String get cameraToVault => 'Giữ trong kho';
+
+  @override
+  String get cameraSavedVault => 'Đã giữ ảnh trong kho.';
+
+  @override
+  String get cameraNoContacts => 'Chưa có liên hệ nào để gửi.';
+
+  @override
+  String cameraSent(String name) {
+    return 'Đã gửi cho $name.';
+  }
+
+  @override
+  String get chatsYourKilit => 'Kilit của bạn';
+
+  @override
+  String get chatsSearch => 'Tìm';
+
+  @override
+  String get chatsEmptyNew =>
+      'Chưa có ai. Hãy thêm ai đó, hoặc cho họ xem mã của bạn.';
+
+  @override
+  String get torChipReady => 'Tor sẵn sàng';
+
+  @override
+  String torChipStarting(int progress) {
+    return 'Tor $progress%';
+  }
+
+  @override
+  String get torChipOff => 'Tor tắt';
+
+  @override
+  String get addTitle => 'Thêm người';
+
+  @override
+  String get addHint =>
+      'Quét mã của họ, hoặc dán thứ họ đưa cho bạn: một liên kết hoặc một @ID.';
+
+  @override
+  String get addScan => 'Quét mã của họ';
+
+  @override
+  String get addField => 'Liên kết Kilit hoặc @ID';
+
+  @override
+  String get addGo => 'Thêm';
+
+  @override
+  String get addSearching => 'Đang tìm qua Tor…';
+
+  @override
+  String get addNotFound =>
+      'Không tìm thấy ai với ID này. Hãy kiểm tra lại hoặc thử lại sau ít phút.';
+
+  @override
+  String get addOffline =>
+      'Chưa kết nối Tor. Hãy đợi đến khi hiện Tor sẵn sàng.';
+
+  @override
+  String get addNotInvite => 'Đó không phải liên kết Kilit hay @ID.';
+
+  @override
+  String get addShowMine => 'Hiện mã của tôi';
+
+  @override
+  String get addShowMineHint => 'Mã QR, liên kết và @ID của bạn';
+
+  @override
+  String get myTitle => 'Mã của tôi';
+
+  @override
+  String get myHint =>
+      'Ai có mã này, liên kết hoặc @ID của bạn đều có thể nhắn cho bạn. Tin đầu tiên chờ trong Yêu cầu cho đến khi bạn chấp nhận.';
+
+  @override
+  String get myCopyLink => 'Sao chép liên kết';
+
+  @override
+  String myShareText(String id, String link) {
+    return 'Thêm tôi trên Kilit: @$id\n$link';
+  }
+
+  @override
+  String get scanTitle => 'Quét mã Kilit';
+
+  @override
+  String get scanHint => 'Hướng camera vào mã QR.';
+
+  @override
+  String get requestsTitle => 'Yêu cầu';
+
+  @override
+  String get requestsEmpty => 'Không có yêu cầu.';
+
+  @override
+  String get requestHint =>
+      'Họ nhắn cho bạn mà chưa được thêm. Không gì đến được với họ cho đến khi bạn chấp nhận và trả lời.';
+
+  @override
+  String get requestAccept => 'Chấp nhận';
+
+  @override
+  String get requestDecline => 'Từ chối';
+
+  @override
+  String get requestBlock => 'Chặn';
+
+  @override
+  String get chatOnRelay => 'Trên relay';
+
+  @override
+  String get chatQueued => 'Đang chờ mạng';
 
   @override
   String get contactRename => 'Đổi tên';
@@ -280,17 +395,13 @@ class LVi extends L {
 
   @override
   String get contactRemoveBody =>
-      'Phiên và toàn bộ cuộc trò chuyện sẽ bị xóa. Để nhắn lại, hai bạn cần thẻ của nhau.';
+      'Phiên và toàn bộ cuộc trò chuyện sẽ bị xóa. Để nhắn lại, hãy thêm nhau lần nữa.';
 
   @override
   String get contactRemoveGo => 'Xóa';
 
   @override
   String get save => 'Lưu';
-
-  @override
-  String get cameraLater =>
-      'Máy ảnh không bao giờ ghi dữ liệu chưa mã hóa ra bộ nhớ sẽ có ở giai đoạn 2.';
 
   @override
   String get vaultAddNote => 'Thêm ghi chú';
@@ -605,6 +716,30 @@ class LVi extends L {
   @override
   String get protNetworkValue =>
       'Chưa kết nối: giai đoạn 1 không bao giờ lên mạng. Tor sẽ có ở giai đoạn 2.';
+
+  @override
+  String get torOff => 'Tắt: Kilit không lên mạng.';
+
+  @override
+  String torStarting(int progress) {
+    return 'Đang kết nối… $progress%';
+  }
+
+  @override
+  String get torReady => 'Đã kết nối qua Tor.';
+
+  @override
+  String get torFailed => 'Không thể kết nối Tor.';
+
+  @override
+  String get torUnavailable => 'Chưa có trên thiết bị này.';
+
+  @override
+  String get torSwitch => 'Kết nối qua Tor';
+
+  @override
+  String get torSwitchHint =>
+      'Kilit chỉ ra mạng qua Tor. Khi tắt, ứng dụng ở chế độ ngoại tuyến.';
 
   @override
   String get hwStrongbox => 'Chip bảo mật StrongBox';

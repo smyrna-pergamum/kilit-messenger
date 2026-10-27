@@ -15,3 +15,5 @@ key.properties
 # local
 .env
 out/
+# engine-tor output, built by engine-tor/build.sh
+app/android/app/src/main/jniLibs/*/libkilittor.so

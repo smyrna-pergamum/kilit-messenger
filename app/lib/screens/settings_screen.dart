@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/kilit_core.dart';
 import '../l10n/app_localizations.dart';
 import '../platform/files.dart';
+import '../platform/tor.dart';
 import '../state/prefs.dart';
 import '../state/session.dart';
 import '../theme/theme.dart';
@@ -29,11 +30,13 @@ class SettingsScreen extends StatelessWidget {
     required this.session,
     required this.prefs,
     required this.files,
+    required this.tor,
   });
 
   final Session session;
   final Prefs prefs;
   final FileAccess files;
+  final TorController tor;
 
   @override
   Widget build(BuildContext context) {
@@ -92,12 +95,39 @@ class SettingsScreen extends StatelessWidget {
                 title: l.protAutoLock,
                 value: l.protAutoLockValue,
               ),
-              _Status(
-                key: const ValueKey('status-tor'),
-                ok: null,
-                title: l.protNetwork,
-                value: l.protNetworkValue,
+              ListenableBuilder(
+                listenable: tor,
+                builder: (context, _) {
+                  final s = tor.state;
+                  return _Status(
+                    key: const ValueKey('status-tor'),
+                    ok: switch (s.phase) {
+                      TorPhase.ready => true,
+                      TorPhase.failed => false,
+                      _ => null,
+                    },
+                    title: l.protNetwork,
+                    value: switch (s.phase) {
+                      TorPhase.off => l.torOff,
+                      TorPhase.starting => l.torStarting(s.progress),
+                      TorPhase.ready => l.torReady,
+                      TorPhase.failed => l.torFailed,
+                      TorPhase.unavailable => l.torUnavailable,
+                    },
+                  );
+                },
               ),
+              if (tor.available)
+                SwitchListTile(
+                  key: const ValueKey('tor-switch'),
+                  value: prefs.tor,
+                  onChanged: (on) async {
+                    await prefs.setTor(on);
+                    on ? tor.start() : tor.stop();
+                  },
+                  title: Text(l.torSwitch),
+                  subtitle: Text(l.torSwitchHint),
+                ),
             ],
           ),
           _Section(

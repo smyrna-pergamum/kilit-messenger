@@ -7,6 +7,7 @@ import 'package:kilit/app.dart';
 import 'package:kilit/core/dev_core.dart';
 import 'package:kilit/core/kilit_core.dart';
 import 'package:kilit/platform/files.dart';
+import 'package:kilit/platform/tor.dart';
 import 'package:kilit/state/prefs.dart';
 import 'package:kilit/widgets/pin_pad.dart';
 
@@ -64,6 +65,36 @@ class FakeFiles implements FileAccess {
 
   @override
   Future<void> shareText(String text) async => shared.add(text);
+}
+
+/// A Tor that bootstraps one step per state read.
+class FakeTor implements TorBackend {
+  int progress = -1;
+  int stops = 0;
+
+  @override
+  bool get available => true;
+
+  @override
+  String? start(String dir) {
+    progress = 0;
+    return null;
+  }
+
+  @override
+  TorState state() {
+    if (progress < 0) return const TorState(TorPhase.off);
+    progress = (progress + 50).clamp(0, 100);
+    return progress == 100
+        ? const TorState(TorPhase.ready, progress: 100, socks: 9050)
+        : TorState(TorPhase.starting, progress: progress);
+  }
+
+  @override
+  void stop() {
+    progress = -1;
+    stops++;
+  }
 }
 
 /// A core that finds every picture damaged.
@@ -163,6 +194,7 @@ Future<(DevCore, Prefs)> startApp(
   FileAccess? files,
   Map<String, Object?>? prefs,
   DevCore? core,
+  TorController? tor,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -170,7 +202,7 @@ Future<(DevCore, Prefs)> startApp(
   core ??= DevCore();
   final p = await Prefs.load(MemoryPrefsStore(prefs));
   await tester.pumpWidget(
-    KilitApp(core: core, files: files ?? FakeFiles(), prefs: p),
+    KilitApp(core: core, files: files ?? FakeFiles(), prefs: p, tor: tor),
   );
   await tester.pumpAndSettle();
   return (core, p);
@@ -179,10 +211,28 @@ Future<(DevCore, Prefs)> startApp(
 Future<void> setUpVault(WidgetTester tester) async {
   await enterPin(tester, '482916');
   await enterPin(tester, '482916');
+  await toVault(tester);
+}
+
+/// Chats open first; most tests work in the vault.
+Future<void> toVault(WidgetTester tester) async {
+  await tester.tap(find.byIcon(Icons.lock_outline).last);
+  await tester.pumpAndSettle();
+}
+
+/// A Tor that is ready at once, for chats that need the network.
+TorController readyTor() => TorController(FakeTor(), '/data');
+
+/// Lets Tor come up and the chats connect.
+Future<void> letTorUp(WidgetTester tester) async {
+  for (var i = 0; i < 4; i++) {
+    await tester.pump(const Duration(seconds: 1));
+  }
+  await tester.pumpAndSettle();
 }
 
 void main() {
-  testWidgets('first run asks for a PIN twice, then opens the vault', (
+  testWidgets('first run asks for a PIN twice, then opens the chats', (
     tester,
   ) async {
     await startApp(tester);
@@ -191,6 +241,8 @@ void main() {
     await enterPin(tester, '482916');
     expect(titleText(tester), 'Enter the PIN again');
     await enterPin(tester, '482916');
+    expect(find.byKey(const ValueKey('chats-empty')), findsOneWidget);
+    await toVault(tester);
     expect(find.byKey(const ValueKey('vault-empty')), findsOneWidget);
   });
 
@@ -227,7 +279,7 @@ void main() {
     await enterPin(tester, '000000');
     expect(find.text('Wrong PIN.'), findsOneWidget);
     await enterPin(tester, '482916');
-    expect(find.byKey(const ValueKey('vault-empty')), findsOneWidget);
+    expect(find.byKey(const ValueKey('chats-empty')), findsOneWidget);
   });
 
   testWidgets('a note appears in the vault and opens in packet analysis', (
@@ -428,88 +480,60 @@ void main() {
     expect(titleTextOrNull(tester), isNull);
   });
 
-  const boraId = 'b0ba0000000000000000000000000001';
+  const boraWords = 'zoo-zone-zero-youth';
+  const boraLink =
+      'kilit://add?id=$boraWords&a=abababababababababababababababab';
 
-  Future<void> openChats(WidgetTester tester) async {
-    await tester.tap(find.byIcon(Icons.chat_bubble_outline));
+  Future<void> addSomeone(WidgetTester tester, String text) async {
+    await tester.tap(find.byKey(const ValueKey('add-contact')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('add-input')), text);
+    await tester.tap(find.byKey(const ValueKey('add-go')));
     await tester.pumpAndSettle();
   }
 
-  testWidgets('a contact is added from a card and gets a message', (
+  testWidgets('chats open first, with my @ID and Tor off', (tester) async {
+    await startApp(tester);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    expect(find.byKey(const ValueKey('chats-empty')), findsOneWidget);
+    expect(find.text('@${DevCore.myId}'), findsOneWidget);
+    expect(find.text('Tor off'), findsOneWidget);
+    // adding someone needs Tor
+    await addSomeone(tester, '@$boraWords');
+    expect(
+      find.text('Not connected to Tor yet. Wait until it says Tor ready.'),
+      findsOneWidget,
+    );
+    await tester.enterText(find.byKey(const ValueKey('add-input')), 'merhaba');
+    await tester.tap(find.byKey(const ValueKey('add-go')));
+    await tester.pumpAndSettle();
+    expect(find.text('That is not a Kilit link or @ID.'), findsOneWidget);
+  });
+
+  testWidgets('someone is added by link and gets a message over Tor', (
     tester,
   ) async {
-    final files = FakeFiles();
-    await startApp(tester, files: files);
-    await setUpVault(tester);
-    await openChats(tester);
-    expect(find.byKey(const ValueKey('chats-empty')), findsOneWidget);
+    final tor = readyTor();
+    addTearDown(tor.dispose);
+    await startApp(tester, tor: tor);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    await letTorUp(tester);
+    expect(find.text('Tor ready · 6/6'), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('add-contact')));
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byKey(const ValueKey('contact-card')),
-      'here is my card: ${DevCore.cardFor(boraId, 'Bora')}',
-    );
-    await tester.tap(find.byKey(const ValueKey('contact-add')));
-    await tester.pumpAndSettle();
-    // the new contact's conversation opens
+    await addSomeone(tester, boraLink);
     expect(
       tester.widget<Text>(find.byKey(const ValueKey('chat-title'))).data,
-      'Bora',
+      '@$boraWords',
     );
-    expect(find.byKey(const ValueKey('chat-empty')), findsOneWidget);
-
     await tester.enterText(find.byKey(const ValueKey('chat-input')), 'selam');
     await tester.tap(find.byKey(const ValueKey('chat-send')));
     await tester.pumpAndSettle();
-    final sealed = tester
-        .widget<SelectableText>(find.byKey(const ValueKey('sealed-text')))
-        .data!;
-    expect(sealed, startsWith('KLM1:'));
-    await tester.tap(find.byKey(const ValueKey('sealed-share')));
-    expect(files.shared.single, sealed);
-    Navigator.of(tester.element(find.byKey(const ValueKey('sealed-text'))))
-        .pop();
-    await tester.pumpAndSettle();
     expect(find.text('selam'), findsOneWidget);
+    expect(find.byKey(const ValueKey('line-sent')), findsOneWidget);
 
-    await tester.pageBack();
-    await tester.pumpAndSettle();
-    expect(find.text('→ selam'), findsOneWidget);
-  });
-
-  testWidgets('a card that is not one is refused', (tester) async {
-    await startApp(tester);
-    await setUpVault(tester);
-    await openChats(tester);
-    await tester.tap(find.byKey(const ValueKey('add-contact')));
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byKey(const ValueKey('contact-card')), 'hi');
-    await tester.tap(find.byKey(const ValueKey('contact-add')));
-    await tester.pumpAndSettle();
-    expect(
-      find.text('This is not a contact card, or it is your own.'),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('a first message from the clipboard makes a new contact', (
-    tester,
-  ) async {
-    await startApp(tester);
-    await setUpVault(tester);
-    await openChats(tester);
-    final clipboard = workingClipboard(
-      tester,
-      'Bora: ${DevCore.messageFrom(boraId, 'merhaba, kartını aldım')}',
-    );
-    await tester.tap(find.byKey(const ValueKey('chat-open-clipboard')));
-    await tester.pumpAndSettle();
-    expect(find.text('merhaba, kartını aldım'), findsOneWidget);
-    expect(find.byKey(const ValueKey('new-contact-banner')), findsOneWidget);
-    expect(clipboard(), isEmpty);
-
-    // name them, and look at the safety number
+    // named, it shows by name in the list
     await tester.tap(find.byKey(const ValueKey('chat-menu')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('menu-rename')));
@@ -517,52 +541,183 @@ void main() {
     await tester.enterText(find.byKey(const ValueKey('rename-input')), 'Bora');
     await tester.tap(find.byKey(const ValueKey('rename-save')));
     await tester.pumpAndSettle();
-    expect(
-      tester.widget<Text>(find.byKey(const ValueKey('chat-title'))).data,
-      'Bora',
-    );
-    expect(find.byKey(const ValueKey('new-contact-banner')), findsNothing);
-    await tester.tap(find.byKey(const ValueKey('chat-safety')));
+    await tester.pageBack();
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('safety-number')), findsOneWidget);
-    await tester.tap(find.text('Close'));
-    await tester.pumpAndSettle();
-
-    // the same message again is not read twice
-    workingClipboard(
-      tester,
-      DevCore.messageFrom(boraId, 'merhaba, kartını aldım'),
-    );
-    await tester.tap(find.byKey(const ValueKey('chat-paste')));
-    await tester.pumpAndSettle();
-    expect(find.text('This message was opened before.'), findsOneWidget);
-
-    // and the contact can go, with the conversation
-    await tester.tap(find.byKey(const ValueKey('chat-menu')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('menu-remove')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('remove-contact-go')));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('chats-empty')), findsOneWidget);
+    expect(find.text('Bora'), findsOneWidget);
+    expect(find.text('→ selam'), findsOneWidget);
+    tor.stop();
   });
 
-  testWidgets('my card is made with the name to show', (tester) async {
+  testWidgets('a stranger waits in Requests until accepted', (tester) async {
+    final tor = readyTor();
+    addTearDown(tor.dispose);
+    final (core, _) = await startApp(tester, tor: tor);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    await letTorUp(tester);
+    core.deliver('acid-acoustic-acquire-across', 'merhaba, ben Cem');
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('requests')), findsOneWidget);
+    expect(find.byKey(const ValueKey('chats-empty')), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('requests')));
+    await tester.pumpAndSettle();
+    expect(find.text('merhaba, ben Cem'), findsOneWidget);
+    final id = DevCore.addressOf('acid-acoustic-acquire-across');
+    await tester.tap(find.byKey(ValueKey('accept-$id')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('requests-empty')), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('requests')), findsNothing);
+    expect(find.text('@acid-acoustic-acquire-across'), findsOneWidget);
+    tor.stop();
+  });
+
+  /// A ready Tor, the vault set up, Bora added by link, his chat open.
+  Future<(DevCore, FakeFiles, TorController)> chatWithBora(
+    WidgetTester tester,
+  ) async {
+    final tor = readyTor();
+    final files = FakeFiles();
+    final (core, _) = await startApp(tester, tor: tor, files: files);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    await letTorUp(tester);
+    await addSomeone(tester, boraLink);
+    return (core, files, tor);
+  }
+
+  testWidgets('a message gets two ticks when their phone confirms it', (
+    tester,
+  ) async {
+    final (core, _, tor) = await chatWithBora(tester);
+    addTearDown(tor.dispose);
+    await tester.enterText(find.byKey(const ValueKey('chat-input')), 'selam');
+    await tester.tap(find.byKey(const ValueKey('chat-send')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('line-sent')), findsOneWidget);
+    core.receiptFrom(DevCore.addressOf(boraWords));
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('line-delivered')), findsOneWidget);
+    tor.stop();
+  });
+
+  testWidgets('a disappearing-message time marks new messages', (tester) async {
+    final (_, _, tor) = await chatWithBora(tester);
+    addTearDown(tor.dispose);
+    await tester.tap(find.byKey(const ValueKey('chat-timer')));
+    await tester.pumpAndSettle();
+    expect(find.text('Disappearing messages'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('timer-60')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('chat-input')), 'gizli');
+    await tester.tap(find.byKey(const ValueKey('chat-send')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('line-timed')), findsOneWidget);
+    tor.stop();
+  });
+
+  testWidgets('a file is sent from the attach button', (tester) async {
+    final (_, files, tor) = await chatWithBora(tester);
+    addTearDown(tor.dispose);
+    files.next = PickedFile(
+      'notlar.pdf',
+      'application/pdf',
+      Uint8List.fromList(List.filled(2048, 7)),
+    );
+    await tester.tap(find.byKey(const ValueKey('chat-attach')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('attach-file')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('file-tile')), findsOneWidget);
+    expect(find.text('notlar.pdf · 2 KB'), findsOneWidget);
+    tor.stop();
+  });
+
+  testWidgets('a file over 5 MB is not sent', (tester) async {
+    final (_, files, tor) = await chatWithBora(tester);
+    addTearDown(tor.dispose);
+    files.next = PickedFile(
+      'big.bin',
+      'application/octet-stream',
+      Uint8List(maxChatFileBytes + 1),
+    );
+    await tester.tap(find.byKey(const ValueKey('chat-attach')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('attach-file')));
+    await tester.pumpAndSettle();
+    expect(find.text('Too large to send: 5 MB at most.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('file-tile')), findsNothing);
+    tor.stop();
+  });
+
+  testWidgets('the Kilit ID can be renewed', (tester) async {
+    await startApp(tester);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    await tester.tap(find.byKey(const ValueKey('my-id')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const ValueKey('my-renew')));
+    await tester.tap(find.byKey(const ValueKey('my-renew')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('renew-go')));
+    await tester.pumpAndSettle();
+    expect(find.text('@zoo-zoo-zoo-zoo'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('@zoo-zoo-zoo-zoo'), findsOneWidget);
+    expect(find.text('@${DevCore.myId}'), findsNothing);
+  });
+
+  testWidgets('the camera tab offers a photo to a chat or the vault', (
+    tester,
+  ) async {
+    await startApp(tester);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    await tester.tap(find.byIcon(Icons.photo_camera_outlined).last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('camera-to-chat')), findsOneWidget);
+    expect(find.byKey(const ValueKey('camera-to-vault')), findsOneWidget);
+  });
+
+  testWidgets('my code shows the QR, the link and the @ID', (tester) async {
     final files = FakeFiles();
     await startApp(tester, files: files);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    await tester.tap(find.byKey(const ValueKey('my-id')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('my-qr')), findsOneWidget);
+    expect(find.text('@${DevCore.myId}'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('my-share')));
+    expect(files.shared.single, contains('kilit://add?id=${DevCore.myId}'));
+  });
+
+  testWidgets('settings show Tor coming up, and turn it off', (tester) async {
+    final backend = FakeTor();
+    final tor = TorController(backend, '/data');
+    addTearDown(tor.dispose);
+    final (_, prefs) = await startApp(tester, tor: tor);
     await setUpVault(tester);
-    await openChats(tester);
-    await tester.tap(find.byKey(const ValueKey('share-card')));
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byKey(const ValueKey('card-name')), 'Ayşe');
-    await tester.tap(find.byKey(const ValueKey('card-make')));
-    await tester.pumpAndSettle();
-    final card = tester
-        .widget<SelectableText>(find.byKey(const ValueKey('card-text')))
-        .data!;
-    expect(card, startsWith('KLC1:'));
-    await tester.tap(find.byKey(const ValueKey('card-share')));
-    expect(files.shared.single, card);
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.textContaining('Connected through Tor.'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('tor-switch')));
+    await tester.pump();
+    expect(backend.stops, 1);
+    expect(prefs.tor, isFalse);
+    expect(
+      find.textContaining('Off: Kilit does not go online.'),
+      findsOneWidget,
+    );
+    tor.stop();
   });
 
   testWidgets('a tap on the lock button only locks', (tester) async {

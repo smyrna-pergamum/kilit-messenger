@@ -71,41 +71,10 @@
   "navVault": "Vault",
   "navCamera": "Camera",
   "navSettings": "Settings",
-  "chatsLater": "Messaging over Tor arrives in stage 2.",
-  "chatsIntro": "Messages are end-to-end encrypted with Signal's protocol (PQXDH and SPQR, post-quantum). Until Kilit's own network arrives, they travel as text you copy into any chat app.",
-  "chatsEmpty": "No contacts yet. Give your card to someone, or add theirs.",
-  "chatsShareCard": "My card",
-  "chatsAddContact": "Add contact",
-  "chatsOpenClipboard": "Open from clipboard",
-  "chatsNothingOnClipboard": "No Kilit message or contact card on the clipboard.",
-  "cardTitle": "Your contact card",
-  "cardName": "Name to show (optional)",
-  "cardShow": "Make card",
-  "cardHint": "Send this text to the person you want to talk to. It holds no secret. Once you are connected, compare safety numbers.",
-  "addContactTitle": "Add a contact",
-  "addContactCard": "Their contact card (KLC1:…)",
-  "addContactName": "Name (optional)",
-  "addContactGo": "Add",
-  "addContactRefused": "This is not a contact card, or it is your own.",
-  "contactUnnamed": "Unnamed contact",
   "chatEmpty": "No messages yet. The first one you write starts the encrypted session.",
   "chatInput": "Message",
-  "chatSend": "Encrypt",
-  "chatPaste": "Open a reply from the clipboard",
-  "chatSealedTitle": "Encrypted message",
-  "chatSealedHint": "Copy this into your chat app and send it to {name}. Only they can open it.",
-  "@chatSealedHint": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "chatNewContact": "Someone who has your card wrote to you. Give them a name, and compare safety numbers before you trust them.",
-  "chatOtherContact": "A message from another contact was opened too; it is in their conversation.",
-  "chatDuplicate": "This message was opened before.",
-  "chatUnknown": "This message is from no one you have a session with.",
-  "chatDamaged": "The message is damaged.",
+  "chatSend": "Send",
+  "chatNewContact": "Wrote to you without being added. Accept to reply, or block them. Compare safety numbers before you trust them.",
   "safetyTitle": "Safety number",
   "safetyHint": "Compare these 60 digits with {name}, in person or on a call. If they are the same on both phones, no one is in between.",
   "@safetyHint": {
@@ -115,13 +84,102 @@
       }
     }
   },
+  "attachCamera": "Camera",
+  "attachFile": "Photo or file",
+  "chatFileTooLarge": "Too large to send: 5 MB at most.",
+  "chatDelivered": "Delivered",
+  "fileComing": "Receiving…",
+  "fileToVault": "Add to vault",
+  "fileSavedVault": "Added to the vault.",
+  "timerTitle": "Disappearing messages",
+  "timerHint": "New messages in this chat disappear after this time, on both phones.",
+  "timerOff": "Off",
+  "timer5m": "5 minutes",
+  "timer1h": "1 hour",
+  "timer1d": "1 day",
+  "timer1w": "1 week",
+  "renewTitle": "Renew my Kilit ID",
+  "renewBody": "You get new words, a new link and a new QR code. Your contacts keep talking to you as before; the old ID and link stop working for anyone new.",
+  "renewGo": "Renew",
+  "renewDone": "Your new ID: @{id}",
+  "@renewDone": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "cameraNoCamera": "The camera could not be opened. Check the camera permission in the phone's settings.",
+  "cameraShutter": "Take a photo",
+  "cameraRetake": "Retake",
+  "cameraUse": "Use",
+  "cameraIntro": "Photos are taken in memory only: nothing is written to the phone, and they carry no location or camera data.",
+  "cameraSendTo": "Send to…",
+  "cameraToVault": "Keep in the vault",
+  "cameraSavedVault": "Photo kept in the vault.",
+  "cameraNoContacts": "No contacts to send to yet.",
+  "cameraSent": "Sent to {name}.",
+  "@cameraSent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chatsYourKilit": "Your Kilit",
+  "chatsSearch": "Search",
+  "chatsEmptyNew": "No one here yet. Add someone, or show them your code.",
+  "torChipReady": "Tor ready",
+  "torChipStarting": "Tor {progress}%",
+  "@torChipStarting": {
+    "placeholders": {
+      "progress": {
+        "type": "int"
+      }
+    }
+  },
+  "torChipOff": "Tor off",
+  "addTitle": "Add someone",
+  "addHint": "Scan their code, or paste what they gave you: a link or an @ID.",
+  "addScan": "Scan their code",
+  "addField": "A Kilit link or @ID",
+  "addGo": "Add",
+  "addSearching": "Looking them up over Tor…",
+  "addNotFound": "No one found for this ID. Check it, or try again in a moment.",
+  "addOffline": "Not connected to Tor yet. Wait until it says Tor ready.",
+  "addNotInvite": "That is not a Kilit link or @ID.",
+  "addShowMine": "Show my code",
+  "addShowMineHint": "Your QR code, your link, your @ID",
+  "myTitle": "My code",
+  "myHint": "Anyone with this code, your link or your @ID can write to you. Their first message waits in Requests until you accept.",
+  "myCopyLink": "Copy link",
+  "myShareText": "Add me on Kilit: @{id}\n{link}",
+  "@myShareText": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "scanTitle": "Scan a Kilit code",
+  "scanHint": "Point the camera at the QR code.",
+  "requestsTitle": "Requests",
+  "requestsEmpty": "No requests.",
+  "requestHint": "They wrote to you without being added. Nothing reaches them until you accept and write back.",
+  "requestAccept": "Accept",
+  "requestDecline": "Decline",
+  "requestBlock": "Block",
+  "chatOnRelay": "On the relays",
+  "chatQueued": "Waiting for the network",
   "contactRename": "Rename",
   "contactRemove": "Delete contact",
   "contactRemoveTitle": "Delete this contact?",
-  "contactRemoveBody": "The session and the whole conversation are deleted. To write again you need each other's cards.",
+  "contactRemoveBody": "The session and the whole conversation are deleted. To write again, add each other again.",
   "contactRemoveGo": "Delete",
   "save": "Save",
-  "cameraLater": "A camera that never writes plaintext to disk arrives in stage 2.",
   "vaultAddNote": "Add note",
   "vaultCompose": "Carrier message",
   "vaultOpenClipboard": "Open from clipboard",
@@ -274,6 +332,20 @@
   "protAutoLockValue": "When you leave the app",
   "protNetwork": "Tor connection",
   "protNetworkValue": "Not connected: stage 1 never goes online. Tor arrives in stage 2.",
+  "torOff": "Off: Kilit does not go online.",
+  "torStarting": "Connecting… {progress}%",
+  "@torStarting": {
+    "placeholders": {
+      "progress": {
+        "type": "int"
+      }
+    }
+  },
+  "torReady": "Connected through Tor.",
+  "torFailed": "Could not connect to Tor.",
+  "torUnavailable": "Not available on this device yet.",
+  "torSwitch": "Connect over Tor",
+  "torSwitchHint": "Kilit reaches the network only through Tor. Off, it stays offline.",
   "hwStrongbox": "StrongBox security chip",
   "hwTee": "Trusted execution environment (TEE)",
   "hwTpm": "TPM 2.0",

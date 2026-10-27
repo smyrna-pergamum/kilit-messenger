@@ -15,6 +15,11 @@ crate-type = ["cdylib", "staticlib", "rlib"]
 kilit-ipc.workspace = true
 kilit-klt.workspace = true
 kilit-parse.workspace = true
+kilit-net = { path = "../kilit-net" }
+base64 = "0.22"
+chacha20poly1305 = { version = "0.11.0", default-features = false, features = ["alloc"] }
+serde_bytes = "0.11.19"
+sha2 = "0.11.1"
 age = { version = "=0.12.1", default-features = false }
 kilit-vault = { path = "../kilit-vault" }
 kilit-store = { path = "../kilit-store" }
@@ -23,7 +28,6 @@ ciborium = "0.2.2"
 serde = { version = "1.0.229", features = ["derive"] }
 secrecy = "0.10.3"
 getrandom = "0.4.3"
-sha2 = "0.11.1"
 
 [dev-dependencies]
 tempfile = "3.27.0"

@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../platform/files.dart';
+import '../platform/tor.dart';
 import '../state/prefs.dart';
 import '../state/session.dart';
 import '../theme/tokens.dart';
-import '../widgets/panic_code.dart';
+import '../state/chat_service.dart';
+import '../widgets/lock_button.dart';
+import 'camera_screen.dart';
 import 'chats_screen.dart';
 import 'settings_screen.dart';
 import 'vault_screen.dart';
@@ -19,11 +22,13 @@ class Shell extends StatefulWidget {
     required this.session,
     required this.files,
     required this.prefs,
+    required this.tor,
   });
 
   final Session session;
   final FileAccess files;
   final Prefs prefs;
+  final TorController tor;
 
   @override
   State<Shell> createState() => _ShellState();
@@ -48,40 +53,39 @@ final _destinations = [
 ];
 
 class _ShellState extends State<Shell> {
-  // the vault is what Aşama 1 can do, so it opens first
-  int _index = 1;
+  // conversations first, as in any messenger
+  int _index = 0;
 
-  /// A new message replaces the one on screen instead of queueing.
-  void _say(String message) => ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(message)));
+  late final ChatService _chats = ChatService(widget.session.core, widget.tor);
 
-  /// Held down: the panic code erases everything.
-  Future<void> _panic() async {
-    final l = L.of(context);
-    final session = widget.session;
-    if (!await session.core.hasPanicCode()) {
-      if (mounted) _say(l.panicNoCode);
-      return;
-    }
-    if (!mounted) return;
-    final code = await askPanicCode(context, confirm: false);
-    if (code == null) return;
-    if (!await session.panicWipe(code) && mounted) _say(l.panicWrong);
+  @override
+  void dispose() {
+    _chats.dispose();
+    super.dispose();
   }
 
   Widget _page(L l) => switch (_index) {
-    0 => ChatsScreen(core: widget.session.core, files: widget.files),
+    0 => ChatsScreen(
+      session: widget.session,
+      files: widget.files,
+      chats: _chats,
+      tor: widget.tor,
+    ),
     1 => VaultScreen(
       core: widget.session.core,
       files: widget.files,
       prefs: widget.prefs,
     ),
-    2 => _ComingLater(text: l.cameraLater),
+    2 => CameraTab(
+      core: widget.session.core,
+      onSend: (context, jpeg) =>
+          sendPhotoToSomeone(context, widget.session.core, _chats, jpeg),
+    ),
     _ => SettingsScreen(
       session: widget.session,
       prefs: widget.prefs,
       files: widget.files,
+      tor: widget.tor,
     ),
   };
 
@@ -90,30 +94,16 @@ class _ShellState extends State<Shell> {
     final t = context.tokens;
     final l = L.of(context);
     final wide = MediaQuery.sizeOf(context).width >= wideLayoutWidth;
-    final appBar = AppBar(
-      title: Text(_destinations[_index].label(l)),
-      actions: [
-        // tap: lock; hold: the panic code
-        Tooltip(
-          message: l.panicTooltip,
-          child: InkResponse(
-            key: const ValueKey('lock-now'),
-            radius: 24,
-            onTap: widget.session.lock,
-            onLongPress: _panic,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Icon(
-                Icons.gpp_maybe_outlined,
-                color: t.danger,
-                semanticLabel: l.panicTooltip,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 4),
-      ],
-    );
+    // the chats page draws its own header, with the lock button in it
+    final appBar = _index == 0
+        ? null
+        : AppBar(
+            title: Text(_destinations[_index].label(l)),
+            actions: [
+              LockButton(session: widget.session),
+              const SizedBox(width: 4),
+            ],
+          );
     if (!wide) {
       return Scaffold(
         appBar: appBar,
@@ -157,34 +147,6 @@ class _ShellState extends State<Shell> {
             child: Scaffold(appBar: appBar, body: _page(l)),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ComingLater extends StatelessWidget {
-  const _ComingLater({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = context.tokens;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.hourglass_empty_rounded, size: 40, color: t.textMuted),
-            const SizedBox(height: 12),
-            Text(
-              text,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: t.textMuted),
-            ),
-          ],
-        ),
       ),
     );
   }

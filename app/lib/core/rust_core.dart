@@ -269,24 +269,50 @@ class RustCore implements KilitCore {
     text: l.text,
     at: _time(l.atUnix.toInt()),
     sent: _time(l.sentUnix.toInt()),
+    onRelay: l.onRelay,
+    delivered: l.delivered,
+    expires: l.expiresUnix == 0 ? null : _time(l.expiresUnix.toInt()),
+    file: l.file == null
+        ? null
+        : ChatFile(
+            name: l.file!.name,
+            mime: l.file!.mime,
+            size: l.file!.size.toInt(),
+            blob: l.file!.blob,
+          ),
   );
 
   static Contact _contact(rust.ContactItem c) => Contact(
     id: c.id,
+    kilitId: c.kilitId,
     name: c.name,
     added: _time(c.addedUnix.toInt()),
+    standing: switch (c.standing) {
+      rust.ContactStanding.accepted => Standing.accepted,
+      rust.ContactStanding.request => Standing.request,
+      rust.ContactStanding.blocked => Standing.blocked,
+    },
+    timer: Duration(seconds: c.timer),
     last: c.last == null ? null : _line(c.last!),
   );
 
   @override
-  Future<String> myCard(String name) => _h.myCard(name: name);
+  Future<MyKilit> myKilit() async {
+    final m = await _h.myKilit();
+    return MyKilit(m.kilitId, m.link);
+  }
+
+  @override
+  bool isInvite(String text) => rust.KilitHandle.isInvite(text: text);
 
   @override
   Future<Contact> addContact(String text, {String? name}) async {
     try {
       return _contact(await _h.addContact(text: text, name: name));
     } on rust.KilitError catch (e) {
-      if (e.kind == rust.KilitErrorKind.rejected) throw const ContactRefused();
+      if (e.kind == rust.KilitErrorKind.rejected) {
+        throw e.detail == 'offline' ? const Offline() : const ContactRefused();
+      }
       rethrow;
     }
   }
@@ -301,6 +327,12 @@ class RustCore implements KilitCore {
       _h.renameContact(id: id, name: name);
 
   @override
+  Future<void> acceptContact(String id) => _h.acceptContact(id: id);
+
+  @override
+  Future<void> blockContact(String id) => _h.blockContact(id: id);
+
+  @override
   Future<void> removeContact(String id) => _h.removeContact(id: id);
 
   @override
@@ -312,25 +344,66 @@ class RustCore implements KilitCore {
   ];
 
   @override
-  Future<String> sendMessage(String id, String text) =>
-      _h.sendMessage(id: id, text: text);
+  Future<ChatLine> sendMessage(String id, String text) async =>
+      _line(await _h.sendMessage(id: id, text: text));
 
   @override
-  Future<List<IncomingMessage>> receive(String text) async => [
-    for (final m in await _h.receive(text: text))
-      IncomingMessage(
-        switch (m.kind) {
-          rust.IncomingKind.opened => IncomingKind.opened,
-          rust.IncomingKind.duplicate => IncomingKind.duplicate,
-          rust.IncomingKind.unknown => IncomingKind.unknown,
-          rust.IncomingKind.damaged => IncomingKind.damaged,
-          rust.IncomingKind.truncated => IncomingKind.truncated,
-        },
-        contact: m.contact,
-        newContact: m.newContact,
-        text: m.text,
-      ),
-  ];
+  Future<ChatLine> sendFile(
+    String id,
+    String name,
+    String mime,
+    Uint8List bytes, {
+    String text = '',
+  }) async => _line(
+    await _h.sendFile(id: id, name: name, mime: mime, data: bytes, text: text),
+  );
+
+  @override
+  Future<Uint8List> readAttachment(String blob) =>
+      _h.readAttachment(blob: blob);
+
+  @override
+  Future<void> setTimer(String id, Duration timer) =>
+      _h.setTimer(id: id, secs: timer.inSeconds);
+
+  @override
+  Future<MyKilit> renewKilitId() async {
+    final m = await _h.renewKilitId();
+    return MyKilit(m.kilitId, m.link);
+  }
+
+  @override
+  Future<Uint8List> cameraJpeg(CameraFrame f) => rust.cameraJpeg(
+    width: f.width,
+    height: f.height,
+    y: f.y,
+    u: f.u,
+    v: f.v,
+    yRow: f.yRow,
+    uvRow: f.uvRow,
+    uvPixel: f.uvPixel,
+    rotation: f.rotation,
+  );
+
+  @override
+  Future<void> netStart(int socks) => _h.netStart(socks: socks);
+
+  @override
+  void netStop() => _h.netStop();
+
+  @override
+  Future<NetTick> netTick() async {
+    final t = await _h.netTick();
+    return NetTick(
+      arrived: [
+        for (final i in t.incoming)
+          Arrived(i.contact, i.text, request: i.newContact),
+      ],
+      relaysUp: t.relaysUp,
+      relays: t.relays,
+      queued: t.queued,
+    );
+  }
 
   @override
   List<FoundPacket> findPackets(String pasted) => [

@@ -169,62 +169,6 @@ class LId extends L {
   String get navSettings => 'Pengaturan';
 
   @override
-  String get chatsLater => 'Perpesanan lewat Tor hadir di tahap 2.';
-
-  @override
-  String get chatsIntro =>
-      'Pesan dienkripsi ujung ke ujung dengan protokol Signal (PQXDH dan SPQR, pascakuantum). Sampai jaringan Kilit sendiri hadir, pesan dikirim sebagai teks yang Anda salin ke aplikasi obrolan apa pun.';
-
-  @override
-  String get chatsEmpty =>
-      'Belum ada kontak. Berikan kartu Anda kepada seseorang, atau tambahkan kartunya.';
-
-  @override
-  String get chatsShareCard => 'Kartu saya';
-
-  @override
-  String get chatsAddContact => 'Tambah kontak';
-
-  @override
-  String get chatsOpenClipboard => 'Buka dari papan klip';
-
-  @override
-  String get chatsNothingOnClipboard =>
-      'Tidak ada pesan Kilit atau kartu kontak di papan klip.';
-
-  @override
-  String get cardTitle => 'Kartu kontak Anda';
-
-  @override
-  String get cardName => 'Nama yang ditampilkan (opsional)';
-
-  @override
-  String get cardShow => 'Buat kartu';
-
-  @override
-  String get cardHint =>
-      'Kirim teks ini kepada orang yang ingin Anda ajak bicara. Teks ini tidak berisi rahasia. Setelah terhubung, bandingkan nomor keamanan.';
-
-  @override
-  String get addContactTitle => 'Tambah kontak';
-
-  @override
-  String get addContactCard => 'Kartu kontaknya (KLC1:…)';
-
-  @override
-  String get addContactName => 'Nama (opsional)';
-
-  @override
-  String get addContactGo => 'Tambah';
-
-  @override
-  String get addContactRefused =>
-      'Ini bukan kartu kontak, atau ini kartu Anda sendiri.';
-
-  @override
-  String get contactUnnamed => 'Kontak tanpa nama';
-
-  @override
   String get chatEmpty =>
       'Belum ada pesan. Pesan pertama yang Anda tulis memulai sesi terenkripsi.';
 
@@ -232,36 +176,11 @@ class LId extends L {
   String get chatInput => 'Pesan';
 
   @override
-  String get chatSend => 'Enkripsi';
-
-  @override
-  String get chatPaste => 'Buka balasan dari papan klip';
-
-  @override
-  String get chatSealedTitle => 'Pesan terenkripsi';
-
-  @override
-  String chatSealedHint(String name) {
-    return 'Salin ini ke aplikasi obrolan Anda dan kirim ke $name. Hanya dia yang dapat membukanya.';
-  }
+  String get chatSend => 'Kirim';
 
   @override
   String get chatNewContact =>
-      'Seseorang yang punya kartu Anda menulis kepada Anda. Beri dia nama, dan bandingkan nomor keamanan sebelum mempercayainya.';
-
-  @override
-  String get chatOtherContact =>
-      'Pesan dari kontak lain juga terbuka; pesan itu ada di percakapannya.';
-
-  @override
-  String get chatDuplicate => 'Pesan ini sudah pernah dibuka.';
-
-  @override
-  String get chatUnknown =>
-      'Pesan ini bukan dari siapa pun yang memiliki sesi dengan Anda.';
-
-  @override
-  String get chatDamaged => 'Pesan rusak.';
+      'Menulis kepadamu tanpa ditambahkan. Terima untuk membalas, atau blokir. Bandingkan nomor keamanan sebelum mempercayainya.';
 
   @override
   String get safetyTitle => 'Nomor keamanan';
@@ -270,6 +189,201 @@ class LId extends L {
   String safetyHint(String name) {
     return 'Bandingkan 60 digit ini dengan $name, secara langsung atau lewat telepon. Jika sama di kedua ponsel, tidak ada siapa pun di antara kalian.';
   }
+
+  @override
+  String get attachCamera => 'Kamera';
+
+  @override
+  String get attachFile => 'Foto atau file';
+
+  @override
+  String get chatFileTooLarge => 'Terlalu besar untuk dikirim: maksimal 5 MB.';
+
+  @override
+  String get chatDelivered => 'Terkirim';
+
+  @override
+  String get fileComing => 'Menerima…';
+
+  @override
+  String get fileToVault => 'Tambahkan ke brankas';
+
+  @override
+  String get fileSavedVault => 'Ditambahkan ke brankas.';
+
+  @override
+  String get timerTitle => 'Pesan sementara';
+
+  @override
+  String get timerHint =>
+      'Pesan baru di obrolan ini hilang setelah waktu ini, di kedua ponsel.';
+
+  @override
+  String get timerOff => 'Mati';
+
+  @override
+  String get timer5m => '5 menit';
+
+  @override
+  String get timer1h => '1 jam';
+
+  @override
+  String get timer1d => '1 hari';
+
+  @override
+  String get timer1w => '1 minggu';
+
+  @override
+  String get renewTitle => 'Perbarui ID Kilit saya';
+
+  @override
+  String get renewBody =>
+      'Kamu mendapat kata baru, tautan baru, dan kode QR baru. Kontakmu tetap bisa mengobrol seperti biasa; ID dan tautan lama tidak lagi berfungsi untuk orang baru.';
+
+  @override
+  String get renewGo => 'Perbarui';
+
+  @override
+  String renewDone(String id) {
+    return 'ID barumu: @$id';
+  }
+
+  @override
+  String get cameraNoCamera =>
+      'Kamera tidak bisa dibuka. Periksa izin kamera di setelan ponsel.';
+
+  @override
+  String get cameraShutter => 'Ambil foto';
+
+  @override
+  String get cameraRetake => 'Ambil ulang';
+
+  @override
+  String get cameraUse => 'Pakai';
+
+  @override
+  String get cameraIntro =>
+      'Foto diambil hanya di memori: tidak ada yang ditulis ke ponsel, dan tidak berisi lokasi atau data kamera.';
+
+  @override
+  String get cameraSendTo => 'Kirim ke…';
+
+  @override
+  String get cameraToVault => 'Simpan di brankas';
+
+  @override
+  String get cameraSavedVault => 'Foto disimpan di brankas.';
+
+  @override
+  String get cameraNoContacts => 'Belum ada kontak untuk dikirimi.';
+
+  @override
+  String cameraSent(String name) {
+    return 'Terkirim ke $name.';
+  }
+
+  @override
+  String get chatsYourKilit => 'Kilit kamu';
+
+  @override
+  String get chatsSearch => 'Cari';
+
+  @override
+  String get chatsEmptyNew =>
+      'Belum ada siapa pun. Tambahkan seseorang, atau tunjukkan kodemu.';
+
+  @override
+  String get torChipReady => 'Tor siap';
+
+  @override
+  String torChipStarting(int progress) {
+    return 'Tor $progress%';
+  }
+
+  @override
+  String get torChipOff => 'Tor mati';
+
+  @override
+  String get addTitle => 'Tambah seseorang';
+
+  @override
+  String get addHint =>
+      'Pindai kodenya, atau tempel yang ia berikan: tautan atau @ID.';
+
+  @override
+  String get addScan => 'Pindai kodenya';
+
+  @override
+  String get addField => 'Tautan Kilit atau @ID';
+
+  @override
+  String get addGo => 'Tambah';
+
+  @override
+  String get addSearching => 'Mencari lewat Tor…';
+
+  @override
+  String get addNotFound =>
+      'Tidak ada yang ditemukan dengan ID ini. Periksa, atau coba lagi sebentar.';
+
+  @override
+  String get addOffline =>
+      'Belum tersambung ke Tor. Tunggu sampai tertulis Tor siap.';
+
+  @override
+  String get addNotInvite => 'Itu bukan tautan Kilit atau @ID.';
+
+  @override
+  String get addShowMine => 'Tunjukkan kodeku';
+
+  @override
+  String get addShowMineHint => 'Kode QR, tautan, dan @ID kamu';
+
+  @override
+  String get myTitle => 'Kodeku';
+
+  @override
+  String get myHint =>
+      'Siapa pun yang punya kode ini, tautanmu, atau @ID-mu bisa menulis kepadamu. Pesan pertamanya menunggu di Permintaan sampai kamu menerima.';
+
+  @override
+  String get myCopyLink => 'Salin tautan';
+
+  @override
+  String myShareText(String id, String link) {
+    return 'Tambahkan aku di Kilit: @$id\n$link';
+  }
+
+  @override
+  String get scanTitle => 'Pindai kode Kilit';
+
+  @override
+  String get scanHint => 'Arahkan kamera ke kode QR.';
+
+  @override
+  String get requestsTitle => 'Permintaan';
+
+  @override
+  String get requestsEmpty => 'Tidak ada permintaan.';
+
+  @override
+  String get requestHint =>
+      'Mereka menulis kepadamu tanpa ditambahkan. Tidak ada yang sampai ke mereka sampai kamu menerima dan membalas.';
+
+  @override
+  String get requestAccept => 'Terima';
+
+  @override
+  String get requestDecline => 'Tolak';
+
+  @override
+  String get requestBlock => 'Blokir';
+
+  @override
+  String get chatOnRelay => 'Di relay';
+
+  @override
+  String get chatQueued => 'Menunggu jaringan';
 
   @override
   String get contactRename => 'Ganti nama';
@@ -282,17 +396,13 @@ class LId extends L {
 
   @override
   String get contactRemoveBody =>
-      'Sesi dan seluruh percakapan dihapus. Untuk menulis lagi, kalian memerlukan kartu masing-masing.';
+      'Sesi dan seluruh percakapan dihapus. Untuk menulis lagi, saling tambahkan kembali.';
 
   @override
   String get contactRemoveGo => 'Hapus';
 
   @override
   String get save => 'Simpan';
-
-  @override
-  String get cameraLater =>
-      'Kamera yang tidak pernah menulis data tak terenkripsi ke disk hadir di tahap 2.';
 
   @override
   String get vaultAddNote => 'Tambah catatan';
@@ -606,6 +716,30 @@ class LId extends L {
   @override
   String get protNetworkValue =>
       'Tidak terhubung: tahap 1 tidak pernah online. Tor hadir di tahap 2.';
+
+  @override
+  String get torOff => 'Mati: Kilit tidak tersambung ke internet.';
+
+  @override
+  String torStarting(int progress) {
+    return 'Menyambung… $progress%';
+  }
+
+  @override
+  String get torReady => 'Tersambung lewat Tor.';
+
+  @override
+  String get torFailed => 'Tidak dapat tersambung ke Tor.';
+
+  @override
+  String get torUnavailable => 'Belum tersedia di perangkat ini.';
+
+  @override
+  String get torSwitch => 'Sambungkan lewat Tor';
+
+  @override
+  String get torSwitchHint =>
+      'Kilit menjangkau jaringan hanya lewat Tor. Jika mati, Kilit tetap luring.';
 
   @override
   String get hwStrongbox => 'Chip keamanan StrongBox';

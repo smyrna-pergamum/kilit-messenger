@@ -423,108 +423,6 @@ abstract class L {
   /// **'Settings'**
   String get navSettings;
 
-  /// No description provided for @chatsLater.
-  ///
-  /// In en, this message translates to:
-  /// **'Messaging over Tor arrives in stage 2.'**
-  String get chatsLater;
-
-  /// No description provided for @chatsIntro.
-  ///
-  /// In en, this message translates to:
-  /// **'Messages are end-to-end encrypted with Signal\'s protocol (PQXDH and SPQR, post-quantum). Until Kilit\'s own network arrives, they travel as text you copy into any chat app.'**
-  String get chatsIntro;
-
-  /// No description provided for @chatsEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'No contacts yet. Give your card to someone, or add theirs.'**
-  String get chatsEmpty;
-
-  /// No description provided for @chatsShareCard.
-  ///
-  /// In en, this message translates to:
-  /// **'My card'**
-  String get chatsShareCard;
-
-  /// No description provided for @chatsAddContact.
-  ///
-  /// In en, this message translates to:
-  /// **'Add contact'**
-  String get chatsAddContact;
-
-  /// No description provided for @chatsOpenClipboard.
-  ///
-  /// In en, this message translates to:
-  /// **'Open from clipboard'**
-  String get chatsOpenClipboard;
-
-  /// No description provided for @chatsNothingOnClipboard.
-  ///
-  /// In en, this message translates to:
-  /// **'No Kilit message or contact card on the clipboard.'**
-  String get chatsNothingOnClipboard;
-
-  /// No description provided for @cardTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Your contact card'**
-  String get cardTitle;
-
-  /// No description provided for @cardName.
-  ///
-  /// In en, this message translates to:
-  /// **'Name to show (optional)'**
-  String get cardName;
-
-  /// No description provided for @cardShow.
-  ///
-  /// In en, this message translates to:
-  /// **'Make card'**
-  String get cardShow;
-
-  /// No description provided for @cardHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Send this text to the person you want to talk to. It holds no secret. Once you are connected, compare safety numbers.'**
-  String get cardHint;
-
-  /// No description provided for @addContactTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Add a contact'**
-  String get addContactTitle;
-
-  /// No description provided for @addContactCard.
-  ///
-  /// In en, this message translates to:
-  /// **'Their contact card (KLC1:…)'**
-  String get addContactCard;
-
-  /// No description provided for @addContactName.
-  ///
-  /// In en, this message translates to:
-  /// **'Name (optional)'**
-  String get addContactName;
-
-  /// No description provided for @addContactGo.
-  ///
-  /// In en, this message translates to:
-  /// **'Add'**
-  String get addContactGo;
-
-  /// No description provided for @addContactRefused.
-  ///
-  /// In en, this message translates to:
-  /// **'This is not a contact card, or it is your own.'**
-  String get addContactRefused;
-
-  /// No description provided for @contactUnnamed.
-  ///
-  /// In en, this message translates to:
-  /// **'Unnamed contact'**
-  String get contactUnnamed;
-
   /// No description provided for @chatEmpty.
   ///
   /// In en, this message translates to:
@@ -540,56 +438,14 @@ abstract class L {
   /// No description provided for @chatSend.
   ///
   /// In en, this message translates to:
-  /// **'Encrypt'**
+  /// **'Send'**
   String get chatSend;
-
-  /// No description provided for @chatPaste.
-  ///
-  /// In en, this message translates to:
-  /// **'Open a reply from the clipboard'**
-  String get chatPaste;
-
-  /// No description provided for @chatSealedTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Encrypted message'**
-  String get chatSealedTitle;
-
-  /// No description provided for @chatSealedHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy this into your chat app and send it to {name}. Only they can open it.'**
-  String chatSealedHint(String name);
 
   /// No description provided for @chatNewContact.
   ///
   /// In en, this message translates to:
-  /// **'Someone who has your card wrote to you. Give them a name, and compare safety numbers before you trust them.'**
+  /// **'Wrote to you without being added. Accept to reply, or block them. Compare safety numbers before you trust them.'**
   String get chatNewContact;
-
-  /// No description provided for @chatOtherContact.
-  ///
-  /// In en, this message translates to:
-  /// **'A message from another contact was opened too; it is in their conversation.'**
-  String get chatOtherContact;
-
-  /// No description provided for @chatDuplicate.
-  ///
-  /// In en, this message translates to:
-  /// **'This message was opened before.'**
-  String get chatDuplicate;
-
-  /// No description provided for @chatUnknown.
-  ///
-  /// In en, this message translates to:
-  /// **'This message is from no one you have a session with.'**
-  String get chatUnknown;
-
-  /// No description provided for @chatDamaged.
-  ///
-  /// In en, this message translates to:
-  /// **'The message is damaged.'**
-  String get chatDamaged;
 
   /// No description provided for @safetyTitle.
   ///
@@ -602,6 +458,360 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Compare these 60 digits with {name}, in person or on a call. If they are the same on both phones, no one is in between.'**
   String safetyHint(String name);
+
+  /// No description provided for @attachCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get attachCamera;
+
+  /// No description provided for @attachFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo or file'**
+  String get attachFile;
+
+  /// No description provided for @chatFileTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Too large to send: 5 MB at most.'**
+  String get chatFileTooLarge;
+
+  /// No description provided for @chatDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get chatDelivered;
+
+  /// No description provided for @fileComing.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving…'**
+  String get fileComing;
+
+  /// No description provided for @fileToVault.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to vault'**
+  String get fileToVault;
+
+  /// No description provided for @fileSavedVault.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to the vault.'**
+  String get fileSavedVault;
+
+  /// No description provided for @timerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disappearing messages'**
+  String get timerTitle;
+
+  /// No description provided for @timerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'New messages in this chat disappear after this time, on both phones.'**
+  String get timerHint;
+
+  /// No description provided for @timerOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get timerOff;
+
+  /// No description provided for @timer5m.
+  ///
+  /// In en, this message translates to:
+  /// **'5 minutes'**
+  String get timer5m;
+
+  /// No description provided for @timer1h.
+  ///
+  /// In en, this message translates to:
+  /// **'1 hour'**
+  String get timer1h;
+
+  /// No description provided for @timer1d.
+  ///
+  /// In en, this message translates to:
+  /// **'1 day'**
+  String get timer1d;
+
+  /// No description provided for @timer1w.
+  ///
+  /// In en, this message translates to:
+  /// **'1 week'**
+  String get timer1w;
+
+  /// No description provided for @renewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Renew my Kilit ID'**
+  String get renewTitle;
+
+  /// No description provided for @renewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You get new words, a new link and a new QR code. Your contacts keep talking to you as before; the old ID and link stop working for anyone new.'**
+  String get renewBody;
+
+  /// No description provided for @renewGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Renew'**
+  String get renewGo;
+
+  /// No description provided for @renewDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Your new ID: @{id}'**
+  String renewDone(String id);
+
+  /// No description provided for @cameraNoCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'The camera could not be opened. Check the camera permission in the phone\'s settings.'**
+  String get cameraNoCamera;
+
+  /// No description provided for @cameraShutter.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get cameraShutter;
+
+  /// No description provided for @cameraRetake.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake'**
+  String get cameraRetake;
+
+  /// No description provided for @cameraUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Use'**
+  String get cameraUse;
+
+  /// No description provided for @cameraIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos are taken in memory only: nothing is written to the phone, and they carry no location or camera data.'**
+  String get cameraIntro;
+
+  /// No description provided for @cameraSendTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to…'**
+  String get cameraSendTo;
+
+  /// No description provided for @cameraToVault.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep in the vault'**
+  String get cameraToVault;
+
+  /// No description provided for @cameraSavedVault.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo kept in the vault.'**
+  String get cameraSavedVault;
+
+  /// No description provided for @cameraNoContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'No contacts to send to yet.'**
+  String get cameraNoContacts;
+
+  /// No description provided for @cameraSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent to {name}.'**
+  String cameraSent(String name);
+
+  /// No description provided for @chatsYourKilit.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Kilit'**
+  String get chatsYourKilit;
+
+  /// No description provided for @chatsSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get chatsSearch;
+
+  /// No description provided for @chatsEmptyNew.
+  ///
+  /// In en, this message translates to:
+  /// **'No one here yet. Add someone, or show them your code.'**
+  String get chatsEmptyNew;
+
+  /// No description provided for @torChipReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Tor ready'**
+  String get torChipReady;
+
+  /// No description provided for @torChipStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Tor {progress}%'**
+  String torChipStarting(int progress);
+
+  /// No description provided for @torChipOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Tor off'**
+  String get torChipOff;
+
+  /// No description provided for @addTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add someone'**
+  String get addTitle;
+
+  /// No description provided for @addHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan their code, or paste what they gave you: a link or an @ID.'**
+  String get addHint;
+
+  /// No description provided for @addScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan their code'**
+  String get addScan;
+
+  /// No description provided for @addField.
+  ///
+  /// In en, this message translates to:
+  /// **'A Kilit link or @ID'**
+  String get addField;
+
+  /// No description provided for @addGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addGo;
+
+  /// No description provided for @addSearching.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking them up over Tor…'**
+  String get addSearching;
+
+  /// No description provided for @addNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No one found for this ID. Check it, or try again in a moment.'**
+  String get addNotFound;
+
+  /// No description provided for @addOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected to Tor yet. Wait until it says Tor ready.'**
+  String get addOffline;
+
+  /// No description provided for @addNotInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not a Kilit link or @ID.'**
+  String get addNotInvite;
+
+  /// No description provided for @addShowMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Show my code'**
+  String get addShowMine;
+
+  /// No description provided for @addShowMineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your QR code, your link, your @ID'**
+  String get addShowMineHint;
+
+  /// No description provided for @myTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My code'**
+  String get myTitle;
+
+  /// No description provided for @myHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone with this code, your link or your @ID can write to you. Their first message waits in Requests until you accept.'**
+  String get myHint;
+
+  /// No description provided for @myCopyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get myCopyLink;
+
+  /// No description provided for @myShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'Add me on Kilit: @{id}\n{link}'**
+  String myShareText(String id, String link);
+
+  /// No description provided for @scanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a Kilit code'**
+  String get scanTitle;
+
+  /// No description provided for @scanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Point the camera at the QR code.'**
+  String get scanHint;
+
+  /// No description provided for @requestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get requestsTitle;
+
+  /// No description provided for @requestsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No requests.'**
+  String get requestsEmpty;
+
+  /// No description provided for @requestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'They wrote to you without being added. Nothing reaches them until you accept and write back.'**
+  String get requestHint;
+
+  /// No description provided for @requestAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get requestAccept;
+
+  /// No description provided for @requestDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get requestDecline;
+
+  /// No description provided for @requestBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Block'**
+  String get requestBlock;
+
+  /// No description provided for @chatOnRelay.
+  ///
+  /// In en, this message translates to:
+  /// **'On the relays'**
+  String get chatOnRelay;
+
+  /// No description provided for @chatQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the network'**
+  String get chatQueued;
 
   /// No description provided for @contactRename.
   ///
@@ -624,7 +834,7 @@ abstract class L {
   /// No description provided for @contactRemoveBody.
   ///
   /// In en, this message translates to:
-  /// **'The session and the whole conversation are deleted. To write again you need each other\'s cards.'**
+  /// **'The session and the whole conversation are deleted. To write again, add each other again.'**
   String get contactRemoveBody;
 
   /// No description provided for @contactRemoveGo.
@@ -638,12 +848,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Save'**
   String get save;
-
-  /// No description provided for @cameraLater.
-  ///
-  /// In en, this message translates to:
-  /// **'A camera that never writes plaintext to disk arrives in stage 2.'**
-  String get cameraLater;
 
   /// No description provided for @vaultAddNote.
   ///
@@ -1208,6 +1412,48 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Not connected: stage 1 never goes online. Tor arrives in stage 2.'**
   String get protNetworkValue;
+
+  /// No description provided for @torOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off: Kilit does not go online.'**
+  String get torOff;
+
+  /// No description provided for @torStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting… {progress}%'**
+  String torStarting(int progress);
+
+  /// No description provided for @torReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected through Tor.'**
+  String get torReady;
+
+  /// No description provided for @torFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not connect to Tor.'**
+  String get torFailed;
+
+  /// No description provided for @torUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available on this device yet.'**
+  String get torUnavailable;
+
+  /// No description provided for @torSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect over Tor'**
+  String get torSwitch;
+
+  /// No description provided for @torSwitchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Kilit reaches the network only through Tor. Off, it stays offline.'**
+  String get torSwitchHint;
 
   /// No description provided for @hwStrongbox.
   ///

@@ -8,7 +8,7 @@ mod chats;
 
 use std::time::{SystemTime, UNIX_EPOCH};
 
-pub use chats::{Contact, Incoming, Line};
+pub use chats::{Contact, Line, LineState};
 
 use kilit_klt::PacketSigner;
 use kilit_klt::{

@@ -167,93 +167,17 @@ class LJa extends L {
   String get navSettings => '設定';
 
   @override
-  String get chatsLater => 'Tor経由のメッセージ機能はステージ2で提供されます。';
-
-  @override
-  String get chatsIntro =>
-      'メッセージは Signal プロトコル（PQXDH と SPQR、耐量子）でエンドツーエンド暗号化されます。Kilit 独自のネットワークができるまでは、任意のチャットアプリにコピーするテキストとして届けます。';
-
-  @override
-  String get chatsEmpty => 'まだ連絡先がありません。自分のカードを渡すか、相手のカードを追加してください。';
-
-  @override
-  String get chatsShareCard => '自分のカード';
-
-  @override
-  String get chatsAddContact => '連絡先を追加';
-
-  @override
-  String get chatsOpenClipboard => 'クリップボードから開く';
-
-  @override
-  String get chatsNothingOnClipboard => 'クリップボードに Kilit のメッセージも連絡先カードもありません。';
-
-  @override
-  String get cardTitle => 'あなたの連絡先カード';
-
-  @override
-  String get cardName => '表示名（任意）';
-
-  @override
-  String get cardShow => 'カードを作成';
-
-  @override
-  String get cardHint =>
-      'このテキストを話したい相手に送ってください。秘密は含まれていません。つながったら安全番号を照合してください。';
-
-  @override
-  String get addContactTitle => '連絡先を追加';
-
-  @override
-  String get addContactCard => '相手の連絡先カード（KLC1:…）';
-
-  @override
-  String get addContactName => '名前（任意）';
-
-  @override
-  String get addContactGo => '追加';
-
-  @override
-  String get addContactRefused => 'これは連絡先カードではないか、あなた自身のカードです。';
-
-  @override
-  String get contactUnnamed => '名前のない連絡先';
-
-  @override
   String get chatEmpty => 'まだメッセージはありません。最初に書いたメッセージで暗号化セッションが始まります。';
 
   @override
   String get chatInput => 'メッセージ';
 
   @override
-  String get chatSend => '暗号化';
-
-  @override
-  String get chatPaste => '返信をクリップボードから開く';
-
-  @override
-  String get chatSealedTitle => '暗号化されたメッセージ';
-
-  @override
-  String chatSealedHint(String name) {
-    return 'これをチャットアプリにコピーして $name に送ってください。開けるのはその人だけです。';
-  }
+  String get chatSend => '送信';
 
   @override
   String get chatNewContact =>
-      'あなたのカードを持つ人からメッセージが届きました。名前を付け、信頼する前に安全番号を照合してください。';
-
-  @override
-  String get chatOtherContact => '別の連絡先からのメッセージも開きました。その人との会話にあります。';
-
-  @override
-  String get chatDuplicate => 'このメッセージはすでに開かれています。';
-
-  @override
-  String get chatUnknown => 'このメッセージはセッションのある相手からのものではありません。';
-
-  @override
-  String get chatDamaged => 'メッセージが壊れています。';
+      '追加されていない相手からのメッセージです。返信するには承認、または相手をブロックしてください。信頼する前に安全番号を照合してください。';
 
   @override
   String get safetyTitle => '安全番号';
@@ -262,6 +186,193 @@ class LJa extends L {
   String safetyHint(String name) {
     return 'この60桁を $name と、会って、または通話で照合してください。両方の電話で同じなら、間に誰もいません。';
   }
+
+  @override
+  String get attachCamera => 'カメラ';
+
+  @override
+  String get attachFile => '写真またはファイル';
+
+  @override
+  String get chatFileTooLarge => '大きすぎて送れません：最大 5 MB。';
+
+  @override
+  String get chatDelivered => '配信済み';
+
+  @override
+  String get fileComing => '受信中…';
+
+  @override
+  String get fileToVault => '金庫に追加';
+
+  @override
+  String get fileSavedVault => '金庫に追加しました。';
+
+  @override
+  String get timerTitle => '消えるメッセージ';
+
+  @override
+  String get timerHint => 'このチャットの新しいメッセージは、この時間が過ぎると両方の電話から消えます。';
+
+  @override
+  String get timerOff => 'オフ';
+
+  @override
+  String get timer5m => '5 分';
+
+  @override
+  String get timer1h => '1 時間';
+
+  @override
+  String get timer1d => '1 日';
+
+  @override
+  String get timer1w => '1 週間';
+
+  @override
+  String get renewTitle => 'Kilit ID を更新';
+
+  @override
+  String get renewBody =>
+      '新しい単語、新しいリンク、新しい QR コードになります。連絡先とはこれまでどおりやり取りできます。古い ID とリンクは新しい相手には使えなくなります。';
+
+  @override
+  String get renewGo => '更新';
+
+  @override
+  String renewDone(String id) {
+    return '新しい ID：@$id';
+  }
+
+  @override
+  String get cameraNoCamera => 'カメラを開けませんでした。電話の設定でカメラの権限を確認してください。';
+
+  @override
+  String get cameraShutter => '写真を撮る';
+
+  @override
+  String get cameraRetake => '撮り直す';
+
+  @override
+  String get cameraUse => '使う';
+
+  @override
+  String get cameraIntro => '写真はメモリ上でのみ撮影されます。電話には何も書き込まれず、位置情報やカメラの情報も含まれません。';
+
+  @override
+  String get cameraSendTo => '送信先…';
+
+  @override
+  String get cameraToVault => '金庫に保管';
+
+  @override
+  String get cameraSavedVault => '写真を金庫に保管しました。';
+
+  @override
+  String get cameraNoContacts => 'まだ送信できる連絡先がいません。';
+
+  @override
+  String cameraSent(String name) {
+    return '$name に送信しました。';
+  }
+
+  @override
+  String get chatsYourKilit => 'あなたの Kilit';
+
+  @override
+  String get chatsSearch => '検索';
+
+  @override
+  String get chatsEmptyNew => 'まだ誰もいません。誰かを追加するか、自分のコードを見せてください。';
+
+  @override
+  String get torChipReady => 'Tor 準備完了';
+
+  @override
+  String torChipStarting(int progress) {
+    return 'Tor $progress%';
+  }
+
+  @override
+  String get torChipOff => 'Tor オフ';
+
+  @override
+  String get addTitle => '連絡先を追加';
+
+  @override
+  String get addHint => '相手のコードを読み取るか、もらったリンクや @ID を貼り付けてください。';
+
+  @override
+  String get addScan => '相手のコードを読み取る';
+
+  @override
+  String get addField => 'Kilit のリンクまたは @ID';
+
+  @override
+  String get addGo => '追加';
+
+  @override
+  String get addSearching => 'Tor 経由で検索中…';
+
+  @override
+  String get addNotFound => 'この ID の人は見つかりませんでした。確認するか、少ししてからもう一度試してください。';
+
+  @override
+  String get addOffline => 'まだ Tor に接続していません。「Tor 準備完了」になるまでお待ちください。';
+
+  @override
+  String get addNotInvite => 'Kilit のリンクでも @ID でもありません。';
+
+  @override
+  String get addShowMine => '自分のコードを表示';
+
+  @override
+  String get addShowMineHint => 'QR コード、リンク、@ID';
+
+  @override
+  String get myTitle => '自分のコード';
+
+  @override
+  String get myHint =>
+      'このコード、リンク、@ID を知っている人なら誰でもあなたに書けます。最初のメッセージは、承認するまで「リクエスト」で待ちます。';
+
+  @override
+  String get myCopyLink => 'リンクをコピー';
+
+  @override
+  String myShareText(String id, String link) {
+    return 'Kilit で追加してください：@$id\n$link';
+  }
+
+  @override
+  String get scanTitle => 'Kilit コードを読み取る';
+
+  @override
+  String get scanHint => 'カメラを QR コードに向けてください。';
+
+  @override
+  String get requestsTitle => 'リクエスト';
+
+  @override
+  String get requestsEmpty => 'リクエストはありません。';
+
+  @override
+  String get requestHint => '追加されていない相手からのメッセージです。承認して返信するまで、相手には何も届きません。';
+
+  @override
+  String get requestAccept => '承認';
+
+  @override
+  String get requestDecline => '拒否';
+
+  @override
+  String get requestBlock => 'ブロック';
+
+  @override
+  String get chatOnRelay => 'リレーに保存済み';
+
+  @override
+  String get chatQueued => 'ネットワーク待ち';
 
   @override
   String get contactRename => '名前を変更';
@@ -273,16 +384,14 @@ class LJa extends L {
   String get contactRemoveTitle => 'この連絡先を削除しますか？';
 
   @override
-  String get contactRemoveBody => 'セッションと会話全体が削除されます。再びやり取りするにはお互いのカードが必要です。';
+  String get contactRemoveBody =>
+      'セッションと会話全体が削除されます。再びやり取りするには、もう一度追加し合ってください。';
 
   @override
   String get contactRemoveGo => '削除';
 
   @override
   String get save => '保存';
-
-  @override
-  String get cameraLater => '平文をディスクに書き込まないカメラはステージ2で提供されます。';
 
   @override
   String get vaultAddNote => 'メモを追加';
@@ -586,6 +695,30 @@ class LJa extends L {
 
   @override
   String get protNetworkValue => '未接続：ステージ1はオンラインになりません。Torはステージ2で提供されます。';
+
+  @override
+  String get torOff => 'オフ：Kilit はオンラインになりません。';
+
+  @override
+  String torStarting(int progress) {
+    return '接続中… $progress%';
+  }
+
+  @override
+  String get torReady => 'Tor 経由で接続しました。';
+
+  @override
+  String get torFailed => 'Tor に接続できませんでした。';
+
+  @override
+  String get torUnavailable => 'このデバイスではまだ使えません。';
+
+  @override
+  String get torSwitch => 'Tor 経由で接続';
+
+  @override
+  String get torSwitchHint =>
+      'Kilit は Tor を通してのみネットワークに接続します。オフのときはオフラインのままです。';
 
   @override
   String get hwStrongbox => 'StrongBoxセキュリティチップ';

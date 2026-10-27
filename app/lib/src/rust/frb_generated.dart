@@ -69,7 +69,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => 1630889326;
+  int get rustContentHash => 1072243746;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -81,6 +81,11 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
+  Future<void> crateApiKilitHandleAcceptContact({
+    required KilitHandle that,
+    required String id,
+  });
+
   Future<ContactItem> crateApiKilitHandleAddContact({
     required KilitHandle that,
     required String text,
@@ -98,6 +103,11 @@ abstract class RustLibApi extends BaseApi {
     required KilitHandle that,
     required String title,
     required String text,
+  });
+
+  Future<void> crateApiKilitHandleBlockContact({
+    required KilitHandle that,
+    required String id,
   });
 
   Future<UnlockReply> crateApiKilitHandleChangePin({
@@ -159,6 +169,8 @@ abstract class RustLibApi extends BaseApi {
     required String id,
   });
 
+  bool crateApiKilitHandleIsInvite({required String text});
+
   Future<List<ItemInfo>> crateApiKilitHandleItems({required KilitHandle that});
 
   Future<KeptReply> crateApiKilitHandleKeepMessage({
@@ -177,10 +189,16 @@ abstract class RustLibApi extends BaseApi {
     required List<int> mac,
   });
 
-  Future<String> crateApiKilitHandleMyCard({
+  Future<MyKilitInfo> crateApiKilitHandleMyKilit({required KilitHandle that});
+
+  Future<void> crateApiKilitHandleNetStart({
     required KilitHandle that,
-    required String name,
+    required int socks,
   });
+
+  void crateApiKilitHandleNetStop({required KilitHandle that});
+
+  Future<NetTick> crateApiKilitHandleNetTick({required KilitHandle that});
 
   Future<KilitHandle> crateApiKilitHandleOpen({
     required String dir,
@@ -205,6 +223,11 @@ abstract class RustLibApi extends BaseApi {
     required List<int> mac,
   });
 
+  Future<Uint8List> crateApiKilitHandleReadAttachment({
+    required KilitHandle that,
+    required String blob,
+  });
+
   Future<Uint8List> crateApiKilitHandleReadFile({
     required KilitHandle that,
     required String id,
@@ -213,11 +236,6 @@ abstract class RustLibApi extends BaseApi {
   Future<String> crateApiKilitHandleReadText({
     required KilitHandle that,
     required String id,
-  });
-
-  Future<List<IncomingReply>> crateApiKilitHandleReceive({
-    required KilitHandle that,
-    required String text,
   });
 
   Future<void> crateApiKilitHandleRemoveContact({
@@ -231,6 +249,10 @@ abstract class RustLibApi extends BaseApi {
     required String name,
   });
 
+  Future<MyKilitInfo> crateApiKilitHandleRenewKilitId({
+    required KilitHandle that,
+  });
+
   Future<String> crateApiKilitHandleSafetyNumber({
     required KilitHandle that,
     required String id,
@@ -242,7 +264,16 @@ abstract class RustLibApi extends BaseApi {
     String? passphrase,
   });
 
-  Future<String> crateApiKilitHandleSendMessage({
+  Future<ChatLine> crateApiKilitHandleSendFile({
+    required KilitHandle that,
+    required String id,
+    required String name,
+    required String mime,
+    required List<int> data,
+    required String text,
+  });
+
+  Future<ChatLine> crateApiKilitHandleSendMessage({
     required KilitHandle that,
     required String id,
     required String text,
@@ -258,6 +289,12 @@ abstract class RustLibApi extends BaseApi {
     required List<int> mac,
   });
 
+  Future<void> crateApiKilitHandleSetTimer({
+    required KilitHandle that,
+    required String id,
+    required int secs,
+  });
+
   Future<UnlockReply> crateApiKilitHandleUnlock({
     required KilitHandle that,
     required String pin,
@@ -266,6 +303,18 @@ abstract class RustLibApi extends BaseApi {
   Future<UnlockReply> crateApiKilitHandleUnlockWithMac({
     required KilitHandle that,
     required List<int> mac,
+  });
+
+  Future<Uint8List> crateApiCameraJpeg({
+    required int width,
+    required int height,
+    required List<int> y,
+    required List<int> u,
+    required List<int> v,
+    required int yRow,
+    required int uvRow,
+    required int uvPixel,
+    required int rotation,
   });
 
   Future<CleanReply> crateApiCleanMetadata({required List<int> data});
@@ -294,6 +343,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
+  Future<void> crateApiKilitHandleAcceptContact({
+    required KilitHandle that,
+    required String id,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(id, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 1,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleAcceptContactConstMeta,
+        argValues: [that, id],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleAcceptContactConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_accept_contact",
+        argNames: ["that", "id"],
+      );
+
+  @override
   Future<ContactItem> crateApiKilitHandleAddContact({
     required KilitHandle that,
     required String text,
@@ -312,7 +399,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 1,
+            funcId: 2,
             port: port_,
           );
         },
@@ -354,7 +441,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 2,
+            funcId: 3,
             port: port_,
           );
         },
@@ -393,7 +480,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 3,
+            funcId: 4,
             port: port_,
           );
         },
@@ -414,6 +501,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
+  Future<void> crateApiKilitHandleBlockContact({
+    required KilitHandle that,
+    required String id,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(id, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 5,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleBlockContactConstMeta,
+        argValues: [that, id],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleBlockContactConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_block_contact",
+        argNames: ["that", "id"],
+      );
+
+  @override
   Future<UnlockReply> crateApiKilitHandleChangePin({
     required KilitHandle that,
     required String current,
@@ -432,7 +557,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 4,
+            funcId: 6,
             port: port_,
           );
         },
@@ -472,7 +597,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 5,
+            funcId: 7,
             port: port_,
           );
         },
@@ -510,7 +635,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 6,
+            funcId: 8,
             port: port_,
           );
         },
@@ -543,7 +668,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 7,
+            funcId: 9,
             port: port_,
           );
         },
@@ -579,7 +704,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 8,
+            funcId: 10,
             port: port_,
           );
         },
@@ -617,7 +742,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 9,
+            funcId: 11,
             port: port_,
           );
         },
@@ -655,7 +780,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 10,
+            funcId: 12,
             port: port_,
           );
         },
@@ -693,7 +818,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 11,
+            funcId: 13,
             port: port_,
           );
         },
@@ -733,7 +858,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 12,
+            funcId: 14,
             port: port_,
           );
         },
@@ -767,7 +892,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 13,
+            funcId: 15,
             port: port_,
           );
         },
@@ -801,7 +926,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 14,
+            funcId: 16,
             port: port_,
           );
         },
@@ -841,7 +966,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 15,
+            funcId: 17,
             port: port_,
           );
         },
@@ -879,7 +1004,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 16,
+            funcId: 18,
             port: port_,
           );
         },
@@ -900,6 +1025,32 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
+  bool crateApiKilitHandleIsInvite({required String text}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(text, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 19)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_bool,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiKilitHandleIsInviteConstMeta,
+        argValues: [text],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleIsInviteConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_is_invite",
+        argNames: ["text"],
+      );
+
+  @override
   Future<List<ItemInfo>> crateApiKilitHandleItems({required KilitHandle that}) {
     return handler.executeNormal(
       NormalTask(
@@ -912,7 +1063,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 17,
+            funcId: 20,
             port: port_,
           );
         },
@@ -951,7 +1102,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 18,
+            funcId: 21,
             port: port_,
           );
         },
@@ -982,7 +1133,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 19)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 22)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_pin_key_kind,
@@ -1010,7 +1161,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 20)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 23)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -1043,7 +1194,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 21,
+            funcId: 24,
             port: port_,
           );
         },
@@ -1065,9 +1216,42 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<String> crateApiKilitHandleMyCard({
+  Future<MyKilitInfo> crateApiKilitHandleMyKilit({required KilitHandle that}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 25,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_my_kilit_info,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleMyKilitConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleMyKilitConstMeta => const TaskConstMeta(
+    debugName: "KilitHandle_my_kilit",
+    argNames: ["that"],
+  );
+
+  @override
+  Future<void> crateApiKilitHandleNetStart({
     required KilitHandle that,
-    required String name,
+    required int socks,
   }) {
     return handler.executeNormal(
       NormalTask(
@@ -1077,28 +1261,90 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          sse_encode_String(name, serializer);
+          sse_encode_u_16(socks, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 22,
+            funcId: 26,
             port: port_,
           );
         },
         codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
+          decodeSuccessData: sse_decode_unit,
           decodeErrorData: sse_decode_kilit_error,
         ),
-        constMeta: kCrateApiKilitHandleMyCardConstMeta,
-        argValues: [that, name],
+        constMeta: kCrateApiKilitHandleNetStartConstMeta,
+        argValues: [that, socks],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiKilitHandleMyCardConstMeta => const TaskConstMeta(
-    debugName: "KilitHandle_my_card",
-    argNames: ["that", "name"],
+  TaskConstMeta get kCrateApiKilitHandleNetStartConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_net_start",
+        argNames: ["that", "socks"],
+      );
+
+  @override
+  void crateApiKilitHandleNetStop({required KilitHandle that}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 27)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiKilitHandleNetStopConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleNetStopConstMeta => const TaskConstMeta(
+    debugName: "KilitHandle_net_stop",
+    argNames: ["that"],
+  );
+
+  @override
+  Future<NetTick> crateApiKilitHandleNetTick({required KilitHandle that}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 28,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_net_tick,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleNetTickConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleNetTickConstMeta => const TaskConstMeta(
+    debugName: "KilitHandle_net_tick",
+    argNames: ["that"],
   );
 
   @override
@@ -1115,7 +1361,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 23,
+            funcId: 29,
             port: port_,
           );
         },
@@ -1155,7 +1401,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 24,
+            funcId: 30,
             port: port_,
           );
         },
@@ -1189,7 +1435,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 25,
+            funcId: 31,
             port: port_,
           );
         },
@@ -1227,7 +1473,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 26,
+            funcId: 32,
             port: port_,
           );
         },
@@ -1265,7 +1511,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 27,
+            funcId: 33,
             port: port_,
           );
         },
@@ -1287,6 +1533,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<Uint8List> crateApiKilitHandleReadAttachment({
+    required KilitHandle that,
+    required String blob,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(blob, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 34,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_prim_u_8_strict,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleReadAttachmentConstMeta,
+        argValues: [that, blob],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleReadAttachmentConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_read_attachment",
+        argNames: ["that", "blob"],
+      );
+
+  @override
   Future<Uint8List> crateApiKilitHandleReadFile({
     required KilitHandle that,
     required String id,
@@ -1303,7 +1587,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 28,
+            funcId: 35,
             port: port_,
           );
         },
@@ -1341,7 +1625,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 29,
+            funcId: 36,
             port: port_,
           );
         },
@@ -1363,43 +1647,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<List<IncomingReply>> crateApiKilitHandleReceive({
-    required KilitHandle that,
-    required String text,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
-            that,
-            serializer,
-          );
-          sse_encode_String(text, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 30,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_list_incoming_reply,
-          decodeErrorData: sse_decode_kilit_error,
-        ),
-        constMeta: kCrateApiKilitHandleReceiveConstMeta,
-        argValues: [that, text],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiKilitHandleReceiveConstMeta => const TaskConstMeta(
-    debugName: "KilitHandle_receive",
-    argNames: ["that", "text"],
-  );
-
-  @override
   Future<void> crateApiKilitHandleRemoveContact({
     required KilitHandle that,
     required String id,
@@ -1416,7 +1663,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 31,
+            funcId: 37,
             port: port_,
           );
         },
@@ -1456,7 +1703,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 32,
+            funcId: 38,
             port: port_,
           );
         },
@@ -1478,6 +1725,42 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<MyKilitInfo> crateApiKilitHandleRenewKilitId({
+    required KilitHandle that,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 39,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_my_kilit_info,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleRenewKilitIdConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleRenewKilitIdConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_renew_kilit_id",
+        argNames: ["that"],
+      );
+
+  @override
   Future<String> crateApiKilitHandleSafetyNumber({
     required KilitHandle that,
     required String id,
@@ -1494,7 +1777,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 33,
+            funcId: 40,
             port: port_,
           );
         },
@@ -1534,7 +1817,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 34,
+            funcId: 41,
             port: port_,
           );
         },
@@ -1556,7 +1839,53 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<String> crateApiKilitHandleSendMessage({
+  Future<ChatLine> crateApiKilitHandleSendFile({
+    required KilitHandle that,
+    required String id,
+    required String name,
+    required String mime,
+    required List<int> data,
+    required String text,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(id, serializer);
+          sse_encode_String(name, serializer);
+          sse_encode_String(mime, serializer);
+          sse_encode_list_prim_u_8_loose(data, serializer);
+          sse_encode_String(text, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 42,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_chat_line,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleSendFileConstMeta,
+        argValues: [that, id, name, mime, data, text],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleSendFileConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_send_file",
+        argNames: ["that", "id", "name", "mime", "data", "text"],
+      );
+
+  @override
+  Future<ChatLine> crateApiKilitHandleSendMessage({
     required KilitHandle that,
     required String id,
     required String text,
@@ -1574,12 +1903,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 35,
+            funcId: 43,
             port: port_,
           );
         },
         codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
+          decodeSuccessData: sse_decode_chat_line,
           decodeErrorData: sse_decode_kilit_error,
         ),
         constMeta: kCrateApiKilitHandleSendMessageConstMeta,
@@ -1612,7 +1941,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 36,
+            funcId: 44,
             port: port_,
           );
         },
@@ -1650,7 +1979,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 37,
+            funcId: 45,
             port: port_,
           );
         },
@@ -1672,6 +2001,46 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<void> crateApiKilitHandleSetTimer({
+    required KilitHandle that,
+    required String id,
+    required int secs,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(id, serializer);
+          sse_encode_u_32(secs, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 46,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleSetTimerConstMeta,
+        argValues: [that, id, secs],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleSetTimerConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_set_timer",
+        argNames: ["that", "id", "secs"],
+      );
+
+  @override
   Future<UnlockReply> crateApiKilitHandleUnlock({
     required KilitHandle that,
     required String pin,
@@ -1688,7 +2057,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 38,
+            funcId: 47,
             port: port_,
           );
         },
@@ -1725,7 +2094,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 39,
+            funcId: 48,
             port: port_,
           );
         },
@@ -1747,6 +2116,64 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<Uint8List> crateApiCameraJpeg({
+    required int width,
+    required int height,
+    required List<int> y,
+    required List<int> u,
+    required List<int> v,
+    required int yRow,
+    required int uvRow,
+    required int uvPixel,
+    required int rotation,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_u_32(width, serializer);
+          sse_encode_u_32(height, serializer);
+          sse_encode_list_prim_u_8_loose(y, serializer);
+          sse_encode_list_prim_u_8_loose(u, serializer);
+          sse_encode_list_prim_u_8_loose(v, serializer);
+          sse_encode_u_32(yRow, serializer);
+          sse_encode_u_32(uvRow, serializer);
+          sse_encode_u_32(uvPixel, serializer);
+          sse_encode_u_16(rotation, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 49,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_prim_u_8_strict,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiCameraJpegConstMeta,
+        argValues: [width, height, y, u, v, yRow, uvRow, uvPixel, rotation],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiCameraJpegConstMeta => const TaskConstMeta(
+    debugName: "camera_jpeg",
+    argNames: [
+      "width",
+      "height",
+      "y",
+      "u",
+      "v",
+      "yRow",
+      "uvRow",
+      "uvPixel",
+      "rotation",
+    ],
+  );
+
+  @override
   Future<CleanReply> crateApiCleanMetadata({required List<int> data}) {
     return handler.executeNormal(
       NormalTask(
@@ -1756,7 +2183,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 40,
+            funcId: 50,
             port: port_,
           );
         },
@@ -1781,7 +2208,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(text, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 41)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 51)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_found_packet,
@@ -1806,7 +2233,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 42,
+            funcId: 52,
             port: port_,
           );
         },
@@ -1831,7 +2258,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(pin, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 43)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 53)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -1895,6 +2322,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ChatFile dco_decode_box_autoadd_chat_file(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_chat_file(raw);
+  }
+
+  @protected
   ChatLine dco_decode_box_autoadd_chat_line(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_chat_line(raw);
@@ -1907,16 +2340,34 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  ChatLine dco_decode_chat_line(dynamic raw) {
+  ChatFile dco_decode_chat_file(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
     if (arr.length != 4)
       throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return ChatFile(
+      name: dco_decode_String(arr[0]),
+      mime: dco_decode_String(arr[1]),
+      size: dco_decode_u_64(arr[2]),
+      blob: dco_decode_String(arr[3]),
+    );
+  }
+
+  @protected
+  ChatLine dco_decode_chat_line(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 8)
+      throw Exception('unexpected arr length: expect 8 but see ${arr.length}');
     return ChatLine(
       outgoing: dco_decode_bool(arr[0]),
       text: dco_decode_String(arr[1]),
       atUnix: dco_decode_i_64(arr[2]),
       sentUnix: dco_decode_i_64(arr[3]),
+      onRelay: dco_decode_bool(arr[4]),
+      delivered: dco_decode_bool(arr[5]),
+      expiresUnix: dco_decode_i_64(arr[6]),
+      file: dco_decode_opt_box_autoadd_chat_file(arr[7]),
     );
   }
 
@@ -1943,14 +2394,23 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ContactItem dco_decode_contact_item(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 4)
-      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    if (arr.length != 7)
+      throw Exception('unexpected arr length: expect 7 but see ${arr.length}');
     return ContactItem(
       id: dco_decode_String(arr[0]),
-      name: dco_decode_String(arr[1]),
-      addedUnix: dco_decode_i_64(arr[2]),
-      last: dco_decode_opt_box_autoadd_chat_line(arr[3]),
+      kilitId: dco_decode_String(arr[1]),
+      name: dco_decode_String(arr[2]),
+      addedUnix: dco_decode_i_64(arr[3]),
+      standing: dco_decode_contact_standing(arr[4]),
+      timer: dco_decode_u_32(arr[5]),
+      last: dco_decode_opt_box_autoadd_chat_line(arr[6]),
     );
+  }
+
+  @protected
+  ContactStanding dco_decode_contact_standing(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return ContactStanding.values[raw as int];
   }
 
   @protected
@@ -2015,22 +2475,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  IncomingKind dco_decode_incoming_kind(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return IncomingKind.values[raw as int];
-  }
-
-  @protected
-  IncomingReply dco_decode_incoming_reply(dynamic raw) {
+  IncomingItem dco_decode_incoming_item(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 4)
-      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
-    return IncomingReply(
-      kind: dco_decode_incoming_kind(arr[0]),
-      contact: dco_decode_String(arr[1]),
-      newContact: dco_decode_bool(arr[2]),
-      text: dco_decode_String(arr[3]),
+    if (arr.length != 3)
+      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    return IncomingItem(
+      contact: dco_decode_String(arr[0]),
+      newContact: dco_decode_bool(arr[1]),
+      text: dco_decode_String(arr[2]),
     );
   }
 
@@ -2105,9 +2558,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  List<IncomingReply> dco_decode_list_incoming_reply(dynamic raw) {
+  List<IncomingItem> dco_decode_list_incoming_item(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
-    return (raw as List<dynamic>).map(dco_decode_incoming_reply).toList();
+    return (raw as List<dynamic>).map(dco_decode_incoming_item).toList();
   }
 
   @protected
@@ -2154,9 +2607,41 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  MyKilitInfo dco_decode_my_kilit_info(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return MyKilitInfo(
+      kilitId: dco_decode_String(arr[0]),
+      link: dco_decode_String(arr[1]),
+    );
+  }
+
+  @protected
+  NetTick dco_decode_net_tick(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return NetTick(
+      incoming: dco_decode_list_incoming_item(arr[0]),
+      relaysUp: dco_decode_u_32(arr[1]),
+      relays: dco_decode_u_32(arr[2]),
+      queued: dco_decode_u_32(arr[3]),
+    );
+  }
+
+  @protected
   String? dco_decode_opt_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_String(raw);
+  }
+
+  @protected
+  ChatFile? dco_decode_opt_box_autoadd_chat_file(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_chat_file(raw);
   }
 
   @protected
@@ -2201,6 +2686,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   SignedBy dco_decode_signed_by(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return SignedBy.values[raw as int];
+  }
+
+  @protected
+  int dco_decode_u_16(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
+  }
+
+  @protected
+  int dco_decode_u_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
   }
 
   @protected
@@ -2295,6 +2792,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ChatFile sse_decode_box_autoadd_chat_file(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_chat_file(deserializer));
+  }
+
+  @protected
   ChatLine sse_decode_box_autoadd_chat_line(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_chat_line(deserializer));
@@ -2307,17 +2810,40 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ChatFile sse_decode_chat_file(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_name = sse_decode_String(deserializer);
+    var var_mime = sse_decode_String(deserializer);
+    var var_size = sse_decode_u_64(deserializer);
+    var var_blob = sse_decode_String(deserializer);
+    return ChatFile(
+      name: var_name,
+      mime: var_mime,
+      size: var_size,
+      blob: var_blob,
+    );
+  }
+
+  @protected
   ChatLine sse_decode_chat_line(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_outgoing = sse_decode_bool(deserializer);
     var var_text = sse_decode_String(deserializer);
     var var_atUnix = sse_decode_i_64(deserializer);
     var var_sentUnix = sse_decode_i_64(deserializer);
+    var var_onRelay = sse_decode_bool(deserializer);
+    var var_delivered = sse_decode_bool(deserializer);
+    var var_expiresUnix = sse_decode_i_64(deserializer);
+    var var_file = sse_decode_opt_box_autoadd_chat_file(deserializer);
     return ChatLine(
       outgoing: var_outgoing,
       text: var_text,
       atUnix: var_atUnix,
       sentUnix: var_sentUnix,
+      onRelay: var_onRelay,
+      delivered: var_delivered,
+      expiresUnix: var_expiresUnix,
+      file: var_file,
     );
   }
 
@@ -2345,15 +2871,28 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ContactItem sse_decode_contact_item(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_id = sse_decode_String(deserializer);
+    var var_kilitId = sse_decode_String(deserializer);
     var var_name = sse_decode_String(deserializer);
     var var_addedUnix = sse_decode_i_64(deserializer);
+    var var_standing = sse_decode_contact_standing(deserializer);
+    var var_timer = sse_decode_u_32(deserializer);
     var var_last = sse_decode_opt_box_autoadd_chat_line(deserializer);
     return ContactItem(
       id: var_id,
+      kilitId: var_kilitId,
       name: var_name,
       addedUnix: var_addedUnix,
+      standing: var_standing,
+      timer: var_timer,
       last: var_last,
     );
+  }
+
+  @protected
+  ContactStanding sse_decode_contact_standing(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_i_32(deserializer);
+    return ContactStanding.values[inner];
   }
 
   @protected
@@ -2408,21 +2947,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  IncomingKind sse_decode_incoming_kind(SseDeserializer deserializer) {
+  IncomingItem sse_decode_incoming_item(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    var inner = sse_decode_i_32(deserializer);
-    return IncomingKind.values[inner];
-  }
-
-  @protected
-  IncomingReply sse_decode_incoming_reply(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_kind = sse_decode_incoming_kind(deserializer);
     var var_contact = sse_decode_String(deserializer);
     var var_newContact = sse_decode_bool(deserializer);
     var var_text = sse_decode_String(deserializer);
-    return IncomingReply(
-      kind: var_kind,
+    return IncomingItem(
       contact: var_contact,
       newContact: var_newContact,
       text: var_text,
@@ -2520,15 +3050,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  List<IncomingReply> sse_decode_list_incoming_reply(
+  List<IncomingItem> sse_decode_list_incoming_item(
     SseDeserializer deserializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     var len_ = sse_decode_i_32(deserializer);
-    var ans_ = <IncomingReply>[];
+    var ans_ = <IncomingItem>[];
     for (var idx_ = 0; idx_ < len_; ++idx_) {
-      ans_.add(sse_decode_incoming_reply(deserializer));
+      ans_.add(sse_decode_incoming_item(deserializer));
     }
     return ans_;
   }
@@ -2588,11 +3118,45 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  MyKilitInfo sse_decode_my_kilit_info(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_kilitId = sse_decode_String(deserializer);
+    var var_link = sse_decode_String(deserializer);
+    return MyKilitInfo(kilitId: var_kilitId, link: var_link);
+  }
+
+  @protected
+  NetTick sse_decode_net_tick(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_incoming = sse_decode_list_incoming_item(deserializer);
+    var var_relaysUp = sse_decode_u_32(deserializer);
+    var var_relays = sse_decode_u_32(deserializer);
+    var var_queued = sse_decode_u_32(deserializer);
+    return NetTick(
+      incoming: var_incoming,
+      relaysUp: var_relaysUp,
+      relays: var_relays,
+      queued: var_queued,
+    );
+  }
+
+  @protected
   String? sse_decode_opt_String(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     if (sse_decode_bool(deserializer)) {
       return (sse_decode_String(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  ChatFile? sse_decode_opt_box_autoadd_chat_file(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_chat_file(deserializer));
     } else {
       return null;
     }
@@ -2654,6 +3218,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var inner = sse_decode_i_32(deserializer);
     return SignedBy.values[inner];
+  }
+
+  @protected
+  int sse_decode_u_16(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint16();
+  }
+
+  @protected
+  int sse_decode_u_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint32();
   }
 
   @protected
@@ -2746,6 +3322,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_box_autoadd_chat_file(
+    ChatFile self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_chat_file(self, serializer);
+  }
+
+  @protected
   void sse_encode_box_autoadd_chat_line(
     ChatLine self,
     SseSerializer serializer,
@@ -2764,12 +3349,25 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_chat_file(ChatFile self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.name, serializer);
+    sse_encode_String(self.mime, serializer);
+    sse_encode_u_64(self.size, serializer);
+    sse_encode_String(self.blob, serializer);
+  }
+
+  @protected
   void sse_encode_chat_line(ChatLine self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_bool(self.outgoing, serializer);
     sse_encode_String(self.text, serializer);
     sse_encode_i_64(self.atUnix, serializer);
     sse_encode_i_64(self.sentUnix, serializer);
+    sse_encode_bool(self.onRelay, serializer);
+    sse_encode_bool(self.delivered, serializer);
+    sse_encode_i_64(self.expiresUnix, serializer);
+    sse_encode_opt_box_autoadd_chat_file(self.file, serializer);
   }
 
   @protected
@@ -2790,9 +3388,21 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_contact_item(ContactItem self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.id, serializer);
+    sse_encode_String(self.kilitId, serializer);
     sse_encode_String(self.name, serializer);
     sse_encode_i_64(self.addedUnix, serializer);
+    sse_encode_contact_standing(self.standing, serializer);
+    sse_encode_u_32(self.timer, serializer);
     sse_encode_opt_box_autoadd_chat_line(self.last, serializer);
+  }
+
+  @protected
+  void sse_encode_contact_standing(
+    ContactStanding self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
   }
 
   @protected
@@ -2842,15 +3452,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_incoming_kind(IncomingKind self, SseSerializer serializer) {
+  void sse_encode_incoming_item(IncomingItem self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_i_32(self.index, serializer);
-  }
-
-  @protected
-  void sse_encode_incoming_reply(IncomingReply self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_incoming_kind(self.kind, serializer);
     sse_encode_String(self.contact, serializer);
     sse_encode_bool(self.newContact, serializer);
     sse_encode_String(self.text, serializer);
@@ -2936,14 +3539,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_list_incoming_reply(
-    List<IncomingReply> self,
+  void sse_encode_list_incoming_item(
+    List<IncomingItem> self,
     SseSerializer serializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     for (final item in self) {
-      sse_encode_incoming_reply(item, serializer);
+      sse_encode_incoming_item(item, serializer);
     }
   }
 
@@ -3008,12 +3611,41 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_my_kilit_info(MyKilitInfo self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.kilitId, serializer);
+    sse_encode_String(self.link, serializer);
+  }
+
+  @protected
+  void sse_encode_net_tick(NetTick self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_list_incoming_item(self.incoming, serializer);
+    sse_encode_u_32(self.relaysUp, serializer);
+    sse_encode_u_32(self.relays, serializer);
+    sse_encode_u_32(self.queued, serializer);
+  }
+
+  @protected
   void sse_encode_opt_String(String? self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     sse_encode_bool(self != null, serializer);
     if (self != null) {
       sse_encode_String(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_chat_file(
+    ChatFile? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_chat_file(self, serializer);
     }
   }
 
@@ -3068,6 +3700,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_signed_by(SignedBy self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
+  void sse_encode_u_16(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint16(self);
+  }
+
+  @protected
+  void sse_encode_u_32(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint32(self);
   }
 
   @protected
@@ -3126,7 +3770,12 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
         RustLib.instance.api.rust_arc_decrement_strong_count_KilitHandlePtr,
   );
 
-  /// Adds the contact whose card is in `text`; `name` overrides the card's.
+  /// Lets a request in.
+  Future<void> acceptContact({required String id}) =>
+      RustLib.instance.api.crateApiKilitHandleAcceptContact(that: this, id: id);
+
+  /// Looks the card the link, QR code or `@ID` in `text` names up on the
+  /// relays, checks it and adds the contact. Needs the network.
   Future<ContactItem> addContact({required String text, String? name}) =>
       RustLib.instance.api.crateApiKilitHandleAddContact(
         that: this,
@@ -3153,6 +3802,10 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
         title: title,
         text: text,
       );
+
+  /// Hears nothing more from a contact.
+  Future<void> blockContact({required String id}) =>
+      RustLib.instance.api.crateApiKilitHandleBlockContact(that: this, id: id);
 
   /// Changes the open software-key vault's PIN. `Unlocked` means changed.
   Future<UnlockReply> changePin({
@@ -3182,7 +3835,7 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
   Future<void> clearPanic() =>
       RustLib.instance.api.crateApiKilitHandleClearPanic(that: this);
 
-  /// The contacts, newest conversation first.
+  /// The contacts, requests and blocked ones included, newest first.
   Future<List<ContactItem>> contacts() =>
       RustLib.instance.api.crateApiKilitHandleContacts(that: this);
 
@@ -3259,9 +3912,23 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
   Future<void> moveToHardware({required List<int> mac}) => RustLib.instance.api
       .crateApiKilitHandleMoveToHardware(that: this, mac: mac);
 
-  /// This vault's contact card (`KLC1:` text) with the name to show.
-  Future<String> myCard({required String name}) =>
-      RustLib.instance.api.crateApiKilitHandleMyCard(that: this, name: name);
+  /// This vault's Kilit ID and invite link.
+  Future<MyKilitInfo> myKilit() =>
+      RustLib.instance.api.crateApiKilitHandleMyKilit(that: this);
+
+  /// Connects to the relays through Tor's SOCKS port: publishes this
+  /// vault's card, watches its inbox, sends what waits in the outbox.
+  Future<void> netStart({required int socks}) => RustLib.instance.api
+      .crateApiKilitHandleNetStart(that: this, socks: socks);
+
+  /// Closes every relay connection.
+  void netStop() => RustLib.instance.api.crateApiKilitHandleNetStop(that: this);
+
+  /// One round of network work, called every few seconds while open:
+  /// opens what arrived, keeps the inbox watch and the card current,
+  /// hands queued messages to the relays and notes which they kept.
+  Future<NetTick> netTick() =>
+      RustLib.instance.api.crateApiKilitHandleNetTick(that: this);
 
   /// Opens a pasted message.
   Future<MessageReply> openMessage({
@@ -3289,6 +3956,12 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
       .api
       .crateApiKilitHandlePanicWipeWithMac(that: this, mac: mac);
 
+  /// A sent or received file's bytes, to show or save.
+  Future<Uint8List> readAttachment({required String blob}) => RustLib
+      .instance
+      .api
+      .crateApiKilitHandleReadAttachment(that: this, blob: blob);
+
   /// An item's content, decrypted into memory: to show an image, or to
   /// save it unencrypted when the user asks for exactly that.
   Future<Uint8List> readFile({required String id}) =>
@@ -3297,10 +3970,6 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
   /// A text item's content, decrypted into memory to show it.
   Future<String> readText({required String id}) =>
       RustLib.instance.api.crateApiKilitHandleReadText(that: this, id: id);
-
-  /// Opens every `KLM1:` message in pasted text.
-  Future<List<IncomingReply>> receive({required String text}) =>
-      RustLib.instance.api.crateApiKilitHandleReceive(that: this, text: text);
 
   /// Forgets a contact and the conversation.
   Future<void> removeContact({required String id}) =>
@@ -3313,6 +3982,11 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
         id: id,
         name: name,
       );
+
+  /// A new Kilit ID: new words, link and QR code. Contacts stay; the old
+  /// ID and link stop working.
+  Future<MyKilitInfo> renewKilitId() =>
+      RustLib.instance.api.crateApiKilitHandleRenewKilitId(that: this);
 
   /// The safety number to compare with a contact.
   Future<String> safetyNumber({required String id}) =>
@@ -3328,8 +4002,26 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
     passphrase: passphrase,
   );
 
-  /// Seals a message for a contact; returns the `KLM1:` text to send.
-  Future<String> sendMessage({required String id, required String text}) =>
+  /// Sends a file (at most 5 MiB) with `text` beside it. Pictures lose
+  /// their metadata first.
+  Future<ChatLine> sendFile({
+    required String id,
+    required String name,
+    required String mime,
+    required List<int> data,
+    required String text,
+  }) => RustLib.instance.api.crateApiKilitHandleSendFile(
+    that: this,
+    id: id,
+    name: name,
+    mime: mime,
+    data: data,
+    text: text,
+  );
+
+  /// Seals a message for a contact and sends it; without the network it
+  /// waits in the outbox.
+  Future<ChatLine> sendMessage({required String id, required String text}) =>
       RustLib.instance.api.crateApiKilitHandleSendMessage(
         that: this,
         id: id,
@@ -3343,6 +4035,12 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
   /// Sets the panic code of a hardware-key vault from the code's MAC.
   Future<void> setPanicWithMac({required List<int> mac}) => RustLib.instance.api
       .crateApiKilitHandleSetPanicWithMac(that: this, mac: mac);
+
+  /// Sets a conversation's disappearing-message time (seconds, 0 = off).
+  Future<void> setTimer({required String id, required int secs}) => RustLib
+      .instance
+      .api
+      .crateApiKilitHandleSetTimer(that: this, id: id, secs: secs);
 
   /// Tries `pin` against a software-key vault.
   Future<UnlockReply> unlock({required String pin}) =>

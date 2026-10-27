@@ -3,15 +3,26 @@
 //! SPQR, the sparse post-quantum ratchet, for every message after. libsignal
 //! insists on both; a session without them cannot be made.
 //!
-//! There is no key server. A contact's prekeys come from their **contact
-//! card**, a `KLC1:` text shared however the two people like (in person, a
-//! chat app). Messages travel as `KLM1:` text the same way until the network
-//! arrives; libsignal does not care how they get there.
+//! **Who is who.** A person's Kilit ID is four words, `@word-word-word-word`,
+//! taken from the hash of their Signal identity key; their address is the
+//! first 128 bits of the same hash. Neither is chosen or registered: there is
+//! no account and no server.
+//!
+//! **Finding someone.** Each vault publishes its contact card (the prekeys a
+//! session starts from) to the relays under its ID. Whoever has the ID, the
+//! invite link or its QR code fetches the card and checks that its identity
+//! key hashes to that ID and address, so a forged card is refused.
+//!
+//! **Mailboxes.** A message goes to a tag only the two people can compute:
+//! HMAC over their X25519 shared secret, the recipient's address and the day,
+//! so it changes daily and links nothing across days. Someone not yet known
+//! writes to the recipient's first-contact tag (on the card) and must attach a
+//! proof of work; their first message lands in Requests.
 //!
 //! What is kept: one signed prekey and one last-resort Kyber prekey (both on
-//! the card), and each contact's identity key, session and name. The Signal
-//! identity itself is derived from the vault's master secret. [`Messaging`]
-//! serialises to bytes the caller seals to the vault.
+//! the card), and each contact's identity key, session, name and state. The
+//! Signal identity itself is derived from the vault's master secret.
+//! [`Messaging`] serialises to bytes the caller seals to the vault.
 
 use std::collections::BTreeMap;
 use std::future::Future;
@@ -20,8 +31,7 @@ use std::task::{Context, Poll, Waker};
 use std::time::SystemTime;
 
 use async_trait::async_trait;
-use base64::Engine;
-use base64::engine::general_purpose::URL_SAFE_NO_PAD;
+use hmac::{Hmac, KeyInit, Mac};
 use libsignal_protocol::{
     DeviceId, Direction, Fingerprint, GenericSignedPreKey, IdentityChange, IdentityKey,
     IdentityKeyPair, IdentityKeyStore, KeyPair, KyberPreKeyId, KyberPreKeyRecord, KyberPreKeyStore,
@@ -35,58 +45,83 @@ use serde::{Deserialize, Serialize};
 use serde_bytes::ByteBuf;
 use sha2::{Digest, Sha256};
 
+use argon2::{Algorithm, Argon2, Params, Version};
+
 use crate::Vault;
 use crate::identity::seed;
 
-/// Text prefix of a contact card.
-pub const CARD_PREFIX: &str = "KLC1:";
-/// Text prefix of a message.
-pub const MESSAGE_PREFIX: &str = "KLM1:";
-/// Ends both kinds of text; not in the base64url alphabet.
-const TEXT_END: char = '.';
+/// The start of an invite link.
+pub const LINK_PREFIX: &str = "kilit://add?";
 
 const IDENTITY_INFO: &[u8] = b"kilit/v1/signal-identity";
+const FIRST_CONTACT_INFO: &[u8] = b"kilit/v1/first-contact";
+const CARD_KEY_INFO: &[u8] = b"kilit/v1/nostr-card";
+const FIRST_CONTACT_LABEL: &[u8] = b"kilit/v1/fc\0";
+const MAILBOX_LABEL: &[u8] = b"kilit/v1/mailbox\0";
+const POW_LABEL: &[u8] = b"kilit/v1/pow\0";
 const STATE_VERSION: u8 = 1;
 const CARD_VERSION: u8 = 1;
 const BODY_VERSION: u8 = 1;
+const ENVELOPE_VERSION: u8 = 1;
+const FLAG_POW: u8 = 1;
 /// libsignal's message type bytes.
 const PREKEY_MESSAGE: u8 = 3;
 const SIGNAL_MESSAGE: u8 = 2;
-/// Plaintext is padded to a multiple of this, as Signal's clients do, so a
+/// Leading zero bits a stranger's first message must show: about a million
+/// hashes, a second or two on a phone, and a real cost for a spammer.
+pub const POW_BITS: u32 = 20;
+/// Plaintext is padded to a multiple of this, as Signal's clients do (they
+/// use 160; a Kilit body also carries the ID salt and the timer), so a
 /// message's length says little about its text.
-const PAD_BLOCK: usize = 160;
+const PAD_BLOCK: usize = 256;
 /// The longest message text, in bytes.
 pub const MAX_TEXT: usize = 32 * 1024;
 /// How many base keys of the last-resort Kyber prekey are remembered, to
 /// refuse a replayed first message.
 const BASE_KEYS_KEPT: usize = 4096;
-/// Contacts this vault holds at most.
+/// Contacts this vault holds at most, requests included.
 pub const MAX_CONTACTS: usize = 1000;
-/// Packets [`find`] looks for in one paste.
-const MAX_FOUND: usize = 16;
+/// Requests waiting at most; more strangers are not let in until some are
+/// answered.
+pub const MAX_REQUESTS: usize = 50;
 const NAME_CHARS: usize = 64;
 const FINGERPRINT_ITERATIONS: u32 = 5200;
 const FINGERPRINT_VERSION: u32 = 2;
+const DAY_SECS: i64 = 86_400;
+/// Argon2id for the four words: 8 MiB, two passes. Some tens of
+/// milliseconds on a phone, and for someone hunting a matching key, every
+/// try costs the same.
+const ID_KDF_KIB: u32 = 8 * 1024;
+const ID_KDF_T: u32 = 2;
+/// After a new ID, the old first-contact tag is still watched this long, so
+/// a message already on its way is not lost.
+const RETIRED_FC_SECS: i64 = 7 * DAY_SECS;
+/// The disappearing-message times on offer stay below this.
+pub const MAX_TIMER: u32 = 4 * 7 * 86_400;
+
+const WORDS: &str = include_str!("bip39-english.txt");
 
 /// Why a messaging call failed. Says no more than the user may see.
 #[derive(Debug, PartialEq, Eq)]
 pub enum MessagingError {
-    /// Not a contact card, or a forged one.
+    /// Not a contact card, or one that does not match the ID it came under.
     NotACard,
     /// The card is this vault's own.
     OwnCard,
-    /// Not a message, or damaged.
+    /// Not a message, damaged, or a stranger's message without the proof of
+    /// work.
     NotAMessage,
-    /// A message from someone with no session here. Their first message
-    /// starts one; later ones need it.
+    /// A message from someone with no session here.
     UnknownSender,
+    /// From a blocked contact; dropped.
+    Blocked,
     /// Already read: the same message was opened before.
     Duplicate,
     /// The contact's identity key is not the one kept for them.
     IdentityChanged,
     /// No such contact.
     NoContact,
-    /// Too many contacts, or a text too long.
+    /// Too many contacts or requests, or a text too long.
     TooLarge,
     /// Stored state is damaged.
     Damaged,
@@ -135,13 +170,53 @@ fn address(name: &str) -> Result<ProtocolAddress, MessagingError> {
     Ok(ProtocolAddress::new(name.to_owned(), device))
 }
 
+fn hex(b: &[u8]) -> String {
+    b.iter().map(|x| format!("{x:02x}")).collect()
+}
+
+fn identity_hash(identity: &IdentityKey) -> [u8; 32] {
+    Sha256::digest(identity.serialize()).into()
+}
+
 /// A contact's address: the first half of the SHA-256 of their identity key,
-/// in hex. Nothing else names them: there is no number or account.
+/// in hex.
 fn address_name(identity: &IdentityKey) -> String {
-    Sha256::digest(identity.serialize())[..16]
-        .iter()
-        .map(|b| format!("{b:02x}"))
-        .collect()
+    hex(&identity_hash(identity)[..16])
+}
+
+/// Four BIP-39 words from the first 44 bits of Argon2id(identity key,
+/// salt). The salt is the vault's own and is on its card: a new salt is a
+/// new ID for the same identity. Argon2id makes making a key whose ID
+/// matches someone else's slow and costly; an empty answer means a salt too
+/// short to use.
+fn id_words(identity: &IdentityKey, salt: &[u8]) -> String {
+    let mut h = [0u8; 32];
+    let hashed = salt.len() >= 16
+        && Params::new(ID_KDF_KIB, ID_KDF_T, 1, Some(32))
+            .ok()
+            .is_some_and(|p| {
+                Argon2::new(Algorithm::Argon2id, Version::V0x13, p)
+                    .hash_password_into(&identity.serialize(), salt, &mut h)
+                    .is_ok()
+            });
+    if !hashed {
+        return String::new();
+    }
+    let bits = u64::from_be_bytes([h[0], h[1], h[2], h[3], h[4], h[5], 0, 0]) >> 20;
+    let words: Vec<&str> = WORDS.lines().collect();
+    (0..4)
+        .map(|i| {
+            let n = ((bits >> (33 - 11 * i)) & 0x7ff) as usize;
+            words.get(n).copied().unwrap_or("?")
+        })
+        .collect::<Vec<_>>()
+        .join("-")
+}
+
+fn random_bytes<const N: usize>() -> Result<[u8; N], MessagingError> {
+    let mut b = [0u8; N];
+    getrandom::fill(&mut b).map_err(|_| MessagingError::Crypto)?;
+    Ok(b)
 }
 
 fn unix_secs(t: SystemTime) -> i64 {
@@ -154,11 +229,144 @@ fn short(name: &str) -> String {
     name.trim().chars().take(NAME_CHARS).collect()
 }
 
+fn hmac(key: &[u8], parts: &[&[u8]]) -> Result<[u8; 32], MessagingError> {
+    let mut m =
+        <Hmac<Sha256> as KeyInit>::new_from_slice(key).map_err(|_| MessagingError::Crypto)?;
+    for p in parts {
+        m.update(p);
+    }
+    Ok(m.finalize().into_bytes().into())
+}
+
+fn leading_zero_bits(h: &[u8]) -> u32 {
+    let mut n = 0;
+    for &b in h {
+        if b == 0 {
+            n += 8;
+        } else {
+            return n + b.leading_zeros();
+        }
+    }
+    n
+}
+
+fn pow_ok(msg: &[u8], nonce: u64, bits: u32) -> bool {
+    let h = Sha256::new()
+        .chain_update(POW_LABEL)
+        .chain_update(msg)
+        .chain_update(nonce.to_le_bytes())
+        .finalize();
+    leading_zero_bits(&h) >= bits
+}
+
+fn pow_solve(msg: &[u8], bits: u32) -> Result<u64, MessagingError> {
+    (0..1u64 << 32)
+        .find(|&n| pow_ok(msg, n, bits))
+        .ok_or(MessagingError::Crypto)
+}
+
+/// What a link, a QR code or a typed `@ID` names.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Invite {
+    /// The four words, without `@`.
+    pub id: String,
+    /// The 32-hex address, when the invite carried it (links and QR codes
+    /// do; a typed ID does not).
+    pub address: Option<String>,
+}
+
+fn is_words(s: &str) -> bool {
+    let parts: Vec<&str> = s.split('-').collect();
+    parts.len() == 4
+        && parts
+            .iter()
+            .all(|p| !p.is_empty() && WORDS.lines().any(|w| w == *p))
+}
+
+/// Reads `kilit://add?id=…&a=…`, `@word-word-word-word` or the same with
+/// spaces around it. Anything else is not an invite.
+pub fn parse_invite(text: &str) -> Option<Invite> {
+    let t = text.trim();
+    if let Some(q) = t.strip_prefix(LINK_PREFIX) {
+        let mut id = None;
+        let mut addr = None;
+        for kv in q.split('&') {
+            let (k, v) = kv.split_once('=')?;
+            let slot = match k {
+                "id" => &mut id,
+                "a" => &mut addr,
+                _ => continue,
+            };
+            // a repeated parameter is a trick, not an invite
+            if slot.replace(v.to_owned()).is_some() {
+                return None;
+            }
+        }
+        let id = id.filter(|i| is_words(i))?;
+        let address = match addr {
+            Some(a)
+                if a.len() == 32
+                    && a.bytes()
+                        .all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase()) =>
+            {
+                Some(a)
+            }
+            Some(_) => return None,
+            None => None,
+        };
+        return Some(Invite { id, address });
+    }
+    let id = t.strip_prefix('@')?.to_lowercase();
+    is_words(&id).then_some(Invite { id, address: None })
+}
+
+/// A message ready for the network.
+#[derive(Debug, PartialEq, Eq)]
+pub struct Outgoing {
+    /// The mailbox tag to post it under.
+    pub tag: String,
+    /// The envelope: what the relay carries.
+    pub payload: Vec<u8>,
+    /// The message's own id, for delivery receipts later.
+    pub id: Vec<u8>,
+}
+
+/// Where a contact stands.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ContactState {
+    /// Added by this vault, or a request that was accepted.
+    #[default]
+    Accepted,
+    /// Wrote first without being added; waits in Requests.
+    Request,
+    /// Messages are dropped and no mailbox is watched for them.
+    Blocked,
+}
+
 #[derive(Clone, Default, Serialize, Deserialize)]
 struct Meta {
     name: String,
     /// When the contact was added, Unix seconds.
     added: i64,
+    #[serde(default)]
+    state: ContactState,
+    /// Their first-contact tag, from their card; used until they know us.
+    #[serde(default)]
+    first_contact: Option<String>,
+    /// True once a message from them arrived: they have our session, so
+    /// we write to the shared daily mailbox.
+    #[serde(default)]
+    knows_us: bool,
+    /// Their ID salt, from their card or their messages, and the four
+    /// words it gives; kept so the list need not run Argon2id each time.
+    #[serde(default)]
+    id_salt: ByteBuf,
+    #[serde(default)]
+    kilit_id: String,
+    /// Seconds after which messages in this conversation disappear; 0 keeps
+    /// them.
+    #[serde(default)]
+    timer: u32,
 }
 
 /// Kept apart, so each of libsignal's stores borrows its own part.
@@ -173,6 +381,18 @@ struct State {
     identities: BTreeMap<String, ByteBuf>,
     sessions: BTreeMap<String, ByteBuf>,
     contacts: BTreeMap<String, Meta>,
+    /// What the vault's four words come from; a new one is a new ID.
+    #[serde(default)]
+    id_salt: ByteBuf,
+    /// Which first-contact tag is current; it moves with the ID.
+    #[serde(default)]
+    fc_counter: u32,
+    /// Earlier first-contact tags and until when they are still watched.
+    #[serde(default)]
+    retired_fc: Vec<(String, i64)>,
+    /// Earlier IDs whose cards are to be blanked on the relays.
+    #[serde(default)]
+    retired_words: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -187,14 +407,65 @@ struct Card {
     kyber_prekey: ByteBuf,
     kyber_prekey_signature: ByteBuf,
     identity: ByteBuf,
+    /// Where someone not yet known writes first.
+    #[serde(default)]
+    first_contact: String,
+    /// What the four words come from.
+    #[serde(default)]
+    id_salt: ByteBuf,
+}
+
+/// A file sent with a message. The file travels encrypted in pieces of its
+/// own on the relays, under `tag`; this says how to fetch and open it.
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FileRef {
+    /// The XChaCha20-Poly1305 key the pieces are sealed with.
+    pub key: ByteBuf,
+    /// The tag the pieces are posted under.
+    pub tag: String,
+    /// How many pieces.
+    pub chunks: u32,
+    /// The whole file's length.
+    pub size: u64,
+    /// SHA-256 of the whole file.
+    pub sha256: ByteBuf,
+    /// The name to show; never a path.
+    pub name: String,
+    /// The media type.
+    pub mime: String,
+}
+
+/// What one message carries.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct Content {
+    /// The text; may be empty with a file or receipts.
+    pub text: String,
+    /// Ids of messages from the recipient that arrived here.
+    pub receipts: Vec<Vec<u8>>,
+    /// Seconds until it disappears; 0 keeps it.
+    pub timer: u32,
+    /// A file, when there is one.
+    pub file: Option<FileRef>,
 }
 
 #[derive(Serialize, Deserialize)]
 struct Body {
     v: u8,
+    /// Random, so the same text twice is two messages.
+    #[serde(default)]
+    id: ByteBuf,
     text: String,
     /// When it was written, Unix seconds, by the sender's clock.
     sent: i64,
+    /// The sender's ID salt, so the recipient shows their current ID.
+    #[serde(default)]
+    id_salt: ByteBuf,
+    #[serde(default)]
+    receipts: Vec<ByteBuf>,
+    #[serde(default)]
+    timer: u32,
+    #[serde(default)]
+    file: Option<FileRef>,
 }
 
 /// A contact as the list shows it.
@@ -202,10 +473,16 @@ struct Body {
 pub struct ContactInfo {
     /// The contact's address (32 hex digits).
     pub id: String,
+    /// Their Kilit ID: four words.
+    pub kilit_id: String,
     /// The name given to them; empty until one is given.
     pub name: String,
     /// When they were added, Unix seconds.
     pub added: i64,
+    /// Accepted, a request, or blocked.
+    pub state: ContactState,
+    /// Disappearing-message time in seconds; 0 keeps messages.
+    pub timer: u32,
 }
 
 /// An opened message.
@@ -213,68 +490,20 @@ pub struct ContactInfo {
 pub struct Received {
     /// Who sent it.
     pub contact: String,
-    /// True when this message made them a contact.
+    /// True when this message made them a contact: a new request.
     pub new_contact: bool,
+    /// The message's own id.
+    pub id: Vec<u8>,
     /// The text.
     pub text: String,
     /// When it was written, by the sender's clock, Unix seconds.
     pub sent: i64,
-}
-
-/// What [`find`] found in pasted text.
-#[derive(Debug, PartialEq, Eq)]
-pub enum Found {
-    /// A card's or a message's bytes.
-    Packet(Vec<u8>),
-    /// The chat app cut it off before the end marker.
-    Truncated,
-    /// Not valid base64url.
-    Malformed,
-}
-
-/// `<prefix><base64url>.`
-fn armor(prefix: &str, bytes: &[u8]) -> String {
-    format!("{prefix}{}{TEXT_END}", URL_SAFE_NO_PAD.encode(bytes))
-}
-
-/// Finds texts that start with `prefix` ([`CARD_PREFIX`] or
-/// [`MESSAGE_PREFIX`]) in pasted text. Line breaks a chat app put inside
-/// one are skipped.
-pub fn find(prefix: &str, text: &str) -> Vec<Found> {
-    let mut found = Vec::new();
-    let mut rest = text;
-    while let Some(at) = rest.find(prefix) {
-        if found.len() == MAX_FOUND {
-            break;
-        }
-        rest = &rest[at + prefix.len()..];
-        let mut body = String::new();
-        let mut ended = false;
-        let mut used = rest.len();
-        for (i, c) in rest.char_indices() {
-            if c == TEXT_END {
-                ended = true;
-                used = i + 1;
-                break;
-            }
-            if c.is_ascii_alphanumeric() || c == '-' || c == '_' {
-                body.push(c);
-            } else if !c.is_whitespace() {
-                used = i;
-                break;
-            }
-        }
-        rest = &rest[used..];
-        found.push(if !ended {
-            Found::Truncated
-        } else {
-            match URL_SAFE_NO_PAD.decode(body.as_bytes()) {
-                Ok(b) if !b.is_empty() => Found::Packet(b),
-                _ => Found::Malformed,
-            }
-        });
-    }
-    found
+    /// Ids of our messages that reached them.
+    pub receipts: Vec<Vec<u8>>,
+    /// The sender's disappearing-message time, now this conversation's.
+    pub timer: u32,
+    /// A file, when there is one.
+    pub file: Option<FileRef>,
 }
 
 fn pad(mut b: Vec<u8>) -> Vec<u8> {
@@ -293,6 +522,32 @@ fn unpad(b: &[u8]) -> Result<&[u8], MessagingError> {
         return Err(MessagingError::NotAMessage);
     }
     Ok(&b[..end])
+}
+
+/// `version | flags | [nonce] | signal type | signal message`
+fn envelope(kind: u8, msg: &[u8], pow: bool) -> Result<Vec<u8>, MessagingError> {
+    let mut inner = vec![kind];
+    inner.extend_from_slice(msg);
+    let mut out = vec![ENVELOPE_VERSION, if pow { FLAG_POW } else { 0 }];
+    if pow {
+        out.extend_from_slice(&pow_solve(&inner, POW_BITS)?.to_le_bytes());
+    }
+    out.extend_from_slice(&inner);
+    Ok(out)
+}
+
+/// The Signal part of an envelope, and whether its proof of work holds.
+fn open_envelope(e: &[u8]) -> Result<(&[u8], bool), MessagingError> {
+    match e {
+        [ENVELOPE_VERSION, 0, inner @ ..] => Ok((inner, false)),
+        [ENVELOPE_VERSION, FLAG_POW, rest @ ..] if rest.len() > 8 => {
+            let (nonce, inner) = rest.split_at(8);
+            let nonce =
+                u64::from_le_bytes(nonce.try_into().map_err(|_| MessagingError::NotAMessage)?);
+            Ok((inner, pow_ok(inner, nonce, POW_BITS)))
+        }
+        _ => Err(MessagingError::NotAMessage),
+    }
 }
 
 struct Identities<'a> {
@@ -474,6 +729,14 @@ impl KyberPreKeyStore for Kyber<'_> {
 pub struct Messaging {
     me: IdentityKeyPair,
     my_address: String,
+    my_words: String,
+    /// This vault's first-contact tag.
+    first_contact: String,
+    /// What first-contact tags are made from.
+    fc_key: zeroize::Zeroizing<[u8; 32]>,
+    /// The secp256k1 secret the published card is signed with, so a newer
+    /// card replaces the older one on the relays.
+    card_key: zeroize::Zeroizing<[u8; 32]>,
     s: State,
 }
 
@@ -484,13 +747,57 @@ impl Messaging {
         IdentityKeyPair::try_from(private).map_err(|_| MessagingError::Crypto)
     }
 
-    fn with_state(vault: &Vault, s: State) -> Result<Self, MessagingError> {
+    fn with_state(vault: &Vault, mut s: State) -> Result<Self, MessagingError> {
         let me = Self::identity(vault)?;
-        Ok(Self {
+        if s.id_salt.len() < 16 {
+            s.id_salt = ByteBuf::from(random_bytes::<16>()?.to_vec());
+        }
+        let fc_key =
+            seed(vault.master(), FIRST_CONTACT_INFO).map_err(|_| MessagingError::Crypto)?;
+        let card_key = seed(vault.master(), CARD_KEY_INFO).map_err(|_| MessagingError::Crypto)?;
+        let mut m = Self {
             my_address: address_name(me.identity_key()),
+            my_words: String::new(),
+            first_contact: String::new(),
+            fc_key,
+            card_key,
             me,
             s,
-        })
+        };
+        m.derive_id()?;
+        Ok(m)
+    }
+
+    /// The four words and the first-contact tag, from the salt and counter.
+    fn derive_id(&mut self) -> Result<(), MessagingError> {
+        self.my_words = id_words(self.me.identity_key(), &self.s.id_salt);
+        if self.my_words.is_empty() {
+            return Err(MessagingError::Crypto);
+        }
+        self.first_contact = hex(&hmac(
+            &self.fc_key[..],
+            &[FIRST_CONTACT_LABEL, &self.s.fc_counter.to_le_bytes()],
+        )?);
+        Ok(())
+    }
+
+    /// A new ID for the same identity: new four words, a new link and QR
+    /// code, a new first-contact tag. Contacts keep talking as before; the
+    /// old ID and link find nobody any more. The old first-contact tag is
+    /// still watched for a week, for messages already on their way.
+    pub fn renew_id(&mut self, now: SystemTime) -> Result<(), MessagingError> {
+        let until = unix_secs(now) + RETIRED_FC_SECS;
+        self.s.retired_fc.push((self.first_contact.clone(), until));
+        self.s.retired_words.push(self.my_words.clone());
+        self.s.id_salt = ByteBuf::from(random_bytes::<16>()?.to_vec());
+        self.s.fc_counter = self.s.fc_counter.wrapping_add(1);
+        self.derive_id()
+    }
+
+    /// Earlier IDs whose cards should be blanked on the relays; each is
+    /// handed out once.
+    pub fn take_retired_ids(&mut self) -> Vec<String> {
+        std::mem::take(&mut self.s.retired_words)
     }
 
     /// New prekeys and no contacts, for a vault that has never messaged.
@@ -523,6 +830,10 @@ impl Messaging {
                 identities: BTreeMap::new(),
                 sessions: BTreeMap::new(),
                 contacts: BTreeMap::new(),
+                id_salt: ByteBuf::from(random_bytes::<16>()?.to_vec()),
+                fc_counter: 0,
+                retired_fc: Vec::new(),
+                retired_words: Vec::new(),
             },
         )
     }
@@ -548,9 +859,30 @@ impl Messaging {
         &self.my_address
     }
 
-    /// The `KLC1:` card to give to contacts: what they need to start a
-    /// session, and the `name` to show them first. It holds no secret.
-    pub fn card(&self, name: &str) -> Result<String, MessagingError> {
+    /// This vault's Kilit ID: four words, shown with `@`.
+    pub fn kilit_id(&self) -> &str {
+        &self.my_words
+    }
+
+    /// The link (and QR code) that adds this vault: the ID to look the card
+    /// up by and the full address to check it against.
+    pub fn invite_link(&self) -> String {
+        format!("{LINK_PREFIX}id={}&a={}", self.my_words, self.my_address)
+    }
+
+    /// The key to sign the published card with.
+    pub fn card_key(&self) -> &[u8; 32] {
+        &self.card_key
+    }
+
+    /// The tag this vault's card is published under.
+    pub fn card_tag(&self) -> String {
+        card_tag(&self.my_words)
+    }
+
+    /// The card to publish: what a contact needs to start a session, the
+    /// first-contact tag and the `name` to show. It holds no secret.
+    pub fn card(&self, name: &str) -> Result<Vec<u8>, MessagingError> {
         let signed = SignedPreKeyRecord::deserialize(&self.s.signed_prekey)?;
         let kyber = KyberPreKeyRecord::deserialize(&self.s.kyber_prekey)?;
         let card = Card {
@@ -564,19 +896,21 @@ impl Messaging {
             kyber_prekey: ByteBuf::from(kyber.public_key()?.serialize().to_vec()),
             kyber_prekey_signature: ByteBuf::from(kyber.signature()?),
             identity: ByteBuf::from(self.me.identity_key().serialize().to_vec()),
+            first_contact: self.first_contact.clone(),
+            id_salt: self.s.id_salt.clone(),
         };
         let mut b = Vec::new();
         ciborium::into_writer(&card, &mut b).map_err(|_| MessagingError::Crypto)?;
-        Ok(armor(CARD_PREFIX, &b))
+        Ok(b)
     }
 
-    /// Adds the contact whose card `card` is (the bytes inside `KLC1:`) and
-    /// starts a session with them. The name on the card is used unless
-    /// `name` is given. Returns their address. The same card again starts a
-    /// new session.
+    /// Adds the contact whose card `card` is and starts a session with them.
+    /// With an invite, the card must be the one it names. The name on the
+    /// card is used unless `name` is given. Returns their address.
     pub fn add_contact(
         &mut self,
         card: &[u8],
+        invite: Option<&Invite>,
         name: Option<&str>,
         now: SystemTime,
     ) -> Result<String, MessagingError> {
@@ -586,6 +920,12 @@ impl Messaging {
         }
         let identity = IdentityKey::try_from(c.identity.as_slice()).map_err(not_a_card)?;
         let id = address_name(&identity);
+        let words = id_words(&identity, &c.id_salt);
+        if let Some(inv) = invite
+            && (inv.id != words || inv.address.as_ref().is_some_and(|a| *a != id))
+        {
+            return Err(MessagingError::NotACard);
+        }
         if id == self.my_address {
             return Err(MessagingError::OwnCard);
         }
@@ -628,6 +968,13 @@ impl Messaging {
         if meta.added == 0 {
             meta.added = unix_secs(now);
         }
+        // adding someone is answering them: a request becomes a contact
+        meta.state = ContactState::Accepted;
+        if !c.first_contact.is_empty() {
+            meta.first_contact = Some(c.first_contact);
+        }
+        meta.id_salt = c.id_salt;
+        meta.kilit_id = words;
         let given = short(name.unwrap_or(&c.name));
         if !given.is_empty() {
             meta.name = given;
@@ -636,25 +983,110 @@ impl Messaging {
         Ok(id)
     }
 
-    /// Seals `text` for a contact as `KLM1:` text.
+    fn mailbox(&self, contact: &str, recipient: &str, day: i64) -> Result<String, MessagingError> {
+        let theirs = self
+            .s
+            .identities
+            .get(contact)
+            .ok_or(MessagingError::NoContact)?;
+        let theirs =
+            IdentityKey::try_from(theirs.as_slice()).map_err(|_| MessagingError::Damaged)?;
+        let shared = self
+            .me
+            .private_key()
+            .calculate_agreement(theirs.public_key())
+            .map_err(|_| MessagingError::Crypto)?;
+        Ok(hex(&hmac(
+            &shared,
+            &[MAILBOX_LABEL, recipient.as_bytes(), &day.to_le_bytes()],
+        )?))
+    }
+
+    /// The tags to watch on the relays: this vault's first-contact tag and,
+    /// for every contact not blocked, today's mailbox with the days on
+    /// either side (clocks differ).
+    pub fn inbox_tags(&self, now: SystemTime) -> Result<Vec<String>, MessagingError> {
+        let day = unix_secs(now).div_euclid(DAY_SECS);
+        let mut tags = vec![self.first_contact.clone()];
+        tags.extend(
+            self.s
+                .retired_fc
+                .iter()
+                .filter(|(_, until)| *until > unix_secs(now))
+                .map(|(t, _)| t.clone()),
+        );
+        for (id, meta) in &self.s.contacts {
+            if meta.state == ContactState::Blocked || !self.s.identities.contains_key(id) {
+                continue;
+            }
+            for d in day - 1..=day + 1 {
+                tags.push(self.mailbox(id, &self.my_address, d)?);
+            }
+        }
+        Ok(tags)
+    }
+
+    /// Seals `text` for a contact, with the conversation's timer.
     pub fn encrypt(
         &mut self,
         contact: &str,
         text: &str,
         now: SystemTime,
-    ) -> Result<String, MessagingError> {
-        if text.len() > MAX_TEXT {
+    ) -> Result<Outgoing, MessagingError> {
+        let timer = self.timer(contact)?;
+        self.seal(
+            contact,
+            &Content {
+                text: text.to_owned(),
+                timer,
+                ..Content::default()
+            },
+            now,
+        )
+    }
+
+    /// Seals a message for a contact. Until they have written back, it goes
+    /// to their first-contact tag with a proof of work; after, to the
+    /// mailbox the two share today.
+    pub fn seal(
+        &mut self,
+        contact: &str,
+        content: &Content,
+        now: SystemTime,
+    ) -> Result<Outgoing, MessagingError> {
+        if content.text.len() > MAX_TEXT || content.timer > MAX_TIMER {
             return Err(MessagingError::TooLarge);
         }
-        if !self.s.contacts.contains_key(contact) {
-            return Err(MessagingError::NoContact);
+        let meta = self
+            .s
+            .contacts
+            .get(contact)
+            .ok_or(MessagingError::NoContact)?;
+        if meta.state == ContactState::Blocked {
+            return Err(MessagingError::Blocked);
         }
+        let first = !meta.knows_us;
+        let tag = match (&meta.first_contact, first) {
+            (Some(fc), true) => fc.clone(),
+            _ => self.mailbox(contact, contact, unix_secs(now).div_euclid(DAY_SECS))?,
+        };
+        let mut id = [0u8; 16];
+        getrandom::fill(&mut id).map_err(|_| MessagingError::Crypto)?;
         let mut body = Vec::new();
         ciborium::into_writer(
             &Body {
                 v: BODY_VERSION,
-                text: text.to_owned(),
+                id: ByteBuf::from(id.to_vec()),
+                text: content.text.clone(),
                 sent: unix_secs(now),
+                id_salt: self.s.id_salt.clone(),
+                receipts: content
+                    .receipts
+                    .iter()
+                    .map(|r| ByteBuf::from(r.clone()))
+                    .collect(),
+                timer: content.timer,
+                file: content.file.clone(),
             },
             &mut body,
         )
@@ -673,16 +1105,21 @@ impl Messaging {
             now,
             &mut rng(),
         ))?;
-        let mut out = vec![m.message_type() as u8];
-        out.extend_from_slice(m.serialize());
+        let payload = envelope(m.message_type() as u8, m.serialize(), first)?;
         self.s = s;
-        Ok(armor(MESSAGE_PREFIX, &out))
+        Ok(Outgoing {
+            tag,
+            payload,
+            id: id.to_vec(),
+        })
     }
 
-    /// Opens a message (the bytes inside `KLM1:`). A first message from
-    /// someone who has this vault's card makes them a contact, unnamed.
-    pub fn decrypt(&mut self, packet: &[u8], now: SystemTime) -> Result<Received, MessagingError> {
-        let (&kind, body) = packet.split_first().ok_or(MessagingError::NotAMessage)?;
+    /// Opens an envelope from the relays. A first message from someone who
+    /// has this vault's card makes them a request, if it carries the proof
+    /// of work; a message from a blocked contact is dropped.
+    pub fn decrypt(&mut self, payload: &[u8], now: SystemTime) -> Result<Received, MessagingError> {
+        let (inner, proven) = open_envelope(payload)?;
+        let (&kind, body) = inner.split_first().ok_or(MessagingError::NotAMessage)?;
         let me = address(&self.my_address)?;
         let (contact, plain, s) = match kind {
             PREKEY_MESSAGE => {
@@ -691,8 +1128,27 @@ impl Messaging {
                 if id == self.my_address {
                     return Err(MessagingError::NotAMessage);
                 }
-                if !self.s.contacts.contains_key(&id) && self.s.contacts.len() >= MAX_CONTACTS {
-                    return Err(MessagingError::TooLarge);
+                match self.s.contacts.get(&id) {
+                    Some(meta) if meta.state == ContactState::Blocked => {
+                        return Err(MessagingError::Blocked);
+                    }
+                    Some(_) => {}
+                    None => {
+                        // a stranger: they must have paid, and there must
+                        // be room for one more request
+                        if !proven {
+                            return Err(MessagingError::NotAMessage);
+                        }
+                        let waiting = self
+                            .s
+                            .contacts
+                            .values()
+                            .filter(|m| m.state == ContactState::Request)
+                            .count();
+                        if waiting >= MAX_REQUESTS || self.s.contacts.len() >= MAX_CONTACTS {
+                            return Err(MessagingError::TooLarge);
+                        }
+                    }
                 }
                 let mut s = self.s.clone();
                 let plain = run(message_decrypt_prekey(
@@ -719,7 +1175,10 @@ impl Messaging {
                 let m = SignalMessage::try_from(body)?;
                 // the message does not say who sent it: try each session
                 let mut opened = None;
-                for id in self.s.sessions.keys() {
+                for (id, meta) in &self.s.contacts {
+                    if meta.state == ContactState::Blocked || !self.s.sessions.contains_key(id) {
+                        continue;
+                    }
                     let mut s = self.s.clone();
                     let r = run(message_decrypt_signal(
                         &m,
@@ -754,20 +1213,42 @@ impl Messaging {
         }
         let mut s = s;
         let new_contact = !s.contacts.contains_key(&contact);
-        s.contacts.entry(contact.clone()).or_insert_with(|| Meta {
-            name: String::new(),
+        let meta = s.contacts.entry(contact.clone()).or_insert_with(|| Meta {
             added: unix_secs(now),
+            state: ContactState::Request,
+            ..Meta::default()
         });
+        // they wrote: they have the session, the daily mailbox works now
+        meta.knows_us = true;
+        if b.id_salt.len() >= 16 && b.id_salt != meta.id_salt {
+            if let Some(k) = s
+                .identities
+                .get(&contact)
+                .and_then(|k| IdentityKey::try_from(k.as_slice()).ok())
+            {
+                meta.kilit_id = id_words(&k, &b.id_salt);
+            }
+            meta.id_salt = b.id_salt;
+        }
+        // a receipt says nothing of the timer; anything else sets it
+        let only_receipts = b.text.is_empty() && b.file.is_none() && !b.receipts.is_empty();
+        if !only_receipts && b.timer <= MAX_TIMER {
+            meta.timer = b.timer;
+        }
         self.s = s;
         Ok(Received {
             contact,
             new_contact,
+            id: b.id.into_vec(),
             text: b.text,
             sent: b.sent,
+            receipts: b.receipts.into_iter().map(ByteBuf::into_vec).collect(),
+            timer: b.timer,
+            file: b.file,
         })
     }
 
-    /// The contacts, by name, unnamed ones last.
+    /// The contacts, requests and blocked ones included, by name.
     pub fn contacts(&self) -> Vec<ContactInfo> {
         let mut v: Vec<_> = self
             .s
@@ -775,21 +1256,61 @@ impl Messaging {
             .iter()
             .map(|(id, m)| ContactInfo {
                 id: id.clone(),
+                kilit_id: m.kilit_id.clone(),
                 name: m.name.clone(),
                 added: m.added,
+                state: m.state,
+                timer: m.timer,
             })
             .collect();
         v.sort_by_cached_key(|c| (c.name.is_empty(), c.name.to_lowercase(), c.id.clone()));
         v
     }
 
-    /// Gives a contact a name.
-    pub fn rename(&mut self, contact: &str, name: &str) -> Result<(), MessagingError> {
+    fn meta(&mut self, contact: &str) -> Result<&mut Meta, MessagingError> {
         self.s
             .contacts
             .get_mut(contact)
+            .ok_or(MessagingError::NoContact)
+    }
+
+    /// Gives a contact a name.
+    pub fn rename(&mut self, contact: &str, name: &str) -> Result<(), MessagingError> {
+        self.meta(contact)?.name = short(name);
+        Ok(())
+    }
+
+    /// The conversation's disappearing-message time, in seconds.
+    pub fn timer(&self, contact: &str) -> Result<u32, MessagingError> {
+        Ok(self
+            .s
+            .contacts
+            .get(contact)
             .ok_or(MessagingError::NoContact)?
-            .name = short(name);
+            .timer)
+    }
+
+    /// Sets the disappearing-message time; the next message tells them.
+    pub fn set_timer(&mut self, contact: &str, secs: u32) -> Result<(), MessagingError> {
+        if secs > MAX_TIMER {
+            return Err(MessagingError::TooLarge);
+        }
+        self.meta(contact)?.timer = secs;
+        Ok(())
+    }
+
+    /// Lets a request in.
+    pub fn accept(&mut self, contact: &str) -> Result<(), MessagingError> {
+        self.meta(contact)?.state = ContactState::Accepted;
+        Ok(())
+    }
+
+    /// Drops everything from a contact from now on, and stops watching for
+    /// them. Their identity stays, so they are recognised.
+    pub fn block(&mut self, contact: &str) -> Result<(), MessagingError> {
+        let m = self.meta(contact)?;
+        m.state = ContactState::Blocked;
+        self.s.sessions.remove(contact);
         Ok(())
     }
 
@@ -831,4 +1352,25 @@ impl Messaging {
             .collect::<Vec<_>>()
             .join(" "))
     }
+}
+
+/// The tag a card is published under: `kilit:` and the four words.
+pub fn card_tag(words: &str) -> String {
+    format!("kilit:{words}")
+}
+
+/// Whether a card fetched from the relays is the one `invite` names: its
+/// identity key hashes to the ID, and to the address when there is one.
+pub fn card_matches(card: &[u8], invite: &Invite) -> bool {
+    let Ok(c) = ciborium::from_reader::<Card, _>(card) else {
+        return false;
+    };
+    let Ok(identity) = IdentityKey::try_from(c.identity.as_slice()) else {
+        return false;
+    };
+    id_words(&identity, &c.id_salt) == invite.id
+        && invite
+            .address
+            .as_ref()
+            .is_none_or(|a| *a == address_name(&identity))
 }

@@ -1,6 +1,6 @@
 [package]
 name = "kilit-net"
-description = "Network gateway compartment: Tor control, onion door, Nostr relays"
+description = "Network gateway compartment: Nostr relays over Tor"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -10,6 +10,21 @@ publish.workspace = true
 
 [dependencies]
 kilit-ipc.workspace = true
+# Nostr events: BIP-340 Schnorr signatures on secp256k1
+k256 = { version = "0.13.4", default-features = false, features = ["schnorr", "std"] }
+sha2 = "0.10"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+getrandom = "0.4.3"
+# WebSockets over Tor's SOCKS port, TLS with the ring provider (no C
+# toolchain beyond what ring itself needs) and Mozilla's roots
+tokio = { version = "1.54.1", default-features = false, features = ["rt-multi-thread", "net", "time", "sync", "macros"] }
+tokio-socks = "0.5.3"
+tokio-rustls = { version = "0.26.6", default-features = false, features = ["ring", "tls12"] }
+rustls = { version = "0.23.46", default-features = false, features = ["ring", "std", "tls12"] }
+webpki-roots = "1.0.11"
+tokio-tungstenite = { version = "0.30.0", default-features = false, features = ["handshake"] }
+futures-util = { version = "0.3.34", default-features = false, features = ["sink", "std"] }
 
 [lints]
 workspace = true

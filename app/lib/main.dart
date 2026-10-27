@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'app.dart';
 import 'core/rust_core.dart';
 import 'platform/files.dart';
+import 'platform/tor.dart';
 import 'state/prefs.dart';
 import 'src/rust/frb_generated.dart';
 
@@ -29,6 +30,8 @@ Future<void> main(List<String> args) async {
       // on Windows a .klt opened from Explorer arrives as an argument
       files: PlatformFileAccess(args),
       prefs: prefs,
+      // the embedded Tor on Android; Windows gets tor.exe in stage 3
+      tor: TorController(NativeTor.load() ?? const NoTor(), dir.path),
     ),
   );
 }

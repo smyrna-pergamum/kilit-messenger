@@ -7,8 +7,9 @@ import 'frb_generated.dart';
 
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `engine`, `mac32`, `reply`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `from`, `from`, `from`, `from`, `from`, `from`, `from`
+// These functions are ignored because they are not marked as `pub`: `engine`, `mac32`, `network`, `offline`, `publish_now`, `reply`
+// These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `Network`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `from`, `from`, `from`, `from`, `from`, `from`
 
 /// The bytes the platform's hardware key must MAC for `pin`.
 Uint8List pinMacInput({required String pin}) =>
@@ -23,9 +24,38 @@ List<FoundPacket> findPackets({required String text}) =>
 Future<CleanReply> cleanMetadata({required List<int> data}) =>
     RustLib.instance.api.crateApiCleanMetadata(data: data);
 
+/// A camera frame (YUV 4:2:0 planes with the camera's strides) as a JPEG
+/// with no metadata, turned upright by `rotation` degrees clockwise. All in
+/// memory: the picture never touches the disk.
+Future<Uint8List> cameraJpeg({
+  required int width,
+  required int height,
+  required List<int> y,
+  required List<int> u,
+  required List<int> v,
+  required int yRow,
+  required int uvRow,
+  required int uvPixel,
+  required int rotation,
+}) => RustLib.instance.api.crateApiCameraJpeg(
+  width: width,
+  height: height,
+  y: y,
+  u: u,
+  v: v,
+  yRow: yRow,
+  uvRow: uvRow,
+  uvPixel: uvPixel,
+  rotation: rotation,
+);
+
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<KilitHandle>>
 abstract class KilitHandle implements RustOpaqueInterface {
-  /// Adds the contact whose card is in `text`; `name` overrides the card's.
+  /// Lets a request in.
+  Future<void> acceptContact({required String id});
+
+  /// Looks the card the link, QR code or `@ID` in `text` names up on the
+  /// relays, checks it and adds the contact. Needs the network.
   Future<ContactItem> addContact({required String text, String? name});
 
   /// Seals a file into the vault. At most 64 MiB.
@@ -37,6 +67,9 @@ abstract class KilitHandle implements RustOpaqueInterface {
 
   /// Seals a note into the vault.
   Future<ItemInfo> addNote({required String title, required String text});
+
+  /// Hears nothing more from a contact.
+  Future<void> blockContact({required String id});
 
   /// Changes the open software-key vault's PIN. `Unlocked` means changed.
   Future<UnlockReply> changePin({
@@ -56,7 +89,7 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// Removes the panic code.
   Future<void> clearPanic();
 
-  /// The contacts, newest conversation first.
+  /// The contacts, requests and blocked ones included, newest first.
   Future<List<ContactItem>> contacts();
 
   /// Makes a new vault sealed under `pin` with the software key, and
@@ -85,6 +118,10 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// Packet analysis for one item.
   Future<PacketReport> inspect({required String id});
 
+  /// Whether `text` is a Kilit link or `@ID` at all.
+  static bool isInvite({required String text}) =>
+      RustLib.instance.api.crateApiKilitHandleIsInvite(text: text);
+
   /// The vault's items, newest first.
   Future<List<ItemInfo>> items();
 
@@ -104,8 +141,20 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// Moves the unlocked software-key vault to the hardware key.
   Future<void> moveToHardware({required List<int> mac});
 
-  /// This vault's contact card (`KLC1:` text) with the name to show.
-  Future<String> myCard({required String name});
+  /// This vault's Kilit ID and invite link.
+  Future<MyKilitInfo> myKilit();
+
+  /// Connects to the relays through Tor's SOCKS port: publishes this
+  /// vault's card, watches its inbox, sends what waits in the outbox.
+  Future<void> netStart({required int socks});
+
+  /// Closes every relay connection.
+  void netStop();
+
+  /// One round of network work, called every few seconds while open:
+  /// opens what arrived, keeps the inbox watch and the card current,
+  /// hands queued messages to the relays and notes which they kept.
+  Future<NetTick> netTick();
 
   /// Opens the store in `dir`; `desktop` picks the larger Argon2id cost.
   static Future<KilitHandle> open({
@@ -131,6 +180,9 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// panic code's. Then delete the hardware key.
   Future<bool> panicWipeWithMac({required List<int> mac});
 
+  /// A sent or received file's bytes, to show or save.
+  Future<Uint8List> readAttachment({required String blob});
+
   /// An item's content, decrypted into memory: to show an image, or to
   /// save it unencrypted when the user asks for exactly that.
   Future<Uint8List> readFile({required String id});
@@ -138,14 +190,15 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// A text item's content, decrypted into memory to show it.
   Future<String> readText({required String id});
 
-  /// Opens every `KLM1:` message in pasted text.
-  Future<List<IncomingReply>> receive({required String text});
-
   /// Forgets a contact and the conversation.
   Future<void> removeContact({required String id});
 
   /// Names a contact.
   Future<void> renameContact({required String id, required String name});
+
+  /// A new Kilit ID: new words, link and QR code. Contacts stay; the old
+  /// ID and link stop working.
+  Future<MyKilitInfo> renewKilitId();
 
   /// The safety number to compare with a contact.
   Future<String> safetyNumber({required String id});
@@ -153,8 +206,19 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// A message as `KLT1:` text, to a shared passphrase or to this vault.
   Future<String> sealForCarrier({required String message, String? passphrase});
 
-  /// Seals a message for a contact; returns the `KLM1:` text to send.
-  Future<String> sendMessage({required String id, required String text});
+  /// Sends a file (at most 5 MiB) with `text` beside it. Pictures lose
+  /// their metadata first.
+  Future<ChatLine> sendFile({
+    required String id,
+    required String name,
+    required String mime,
+    required List<int> data,
+    required String text,
+  });
+
+  /// Seals a message for a contact and sends it; without the network it
+  /// waits in the outbox.
+  Future<ChatLine> sendMessage({required String id, required String text});
 
   /// Sets the four-digit panic code of a software-key vault.
   Future<void> setPanic({required String code});
@@ -162,11 +226,50 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// Sets the panic code of a hardware-key vault from the code's MAC.
   Future<void> setPanicWithMac({required List<int> mac});
 
+  /// Sets a conversation's disappearing-message time (seconds, 0 = off).
+  Future<void> setTimer({required String id, required int secs});
+
   /// Tries `pin` against a software-key vault.
   Future<UnlockReply> unlock({required String pin});
 
   /// Tries a hardware PIN MAC against a hardware-key vault.
   Future<UnlockReply> unlockWithMac({required List<int> mac});
+}
+
+/// A file on a line.
+class ChatFile {
+  /// The name to show.
+  final String name;
+
+  /// The media type.
+  final String mime;
+
+  /// Length in bytes.
+  final BigInt size;
+
+  /// Where it is kept; empty while its pieces are on their way.
+  final String blob;
+
+  const ChatFile({
+    required this.name,
+    required this.mime,
+    required this.size,
+    required this.blob,
+  });
+
+  @override
+  int get hashCode =>
+      name.hashCode ^ mime.hashCode ^ size.hashCode ^ blob.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ChatFile &&
+          runtimeType == other.runtimeType &&
+          name == other.name &&
+          mime == other.mime &&
+          size == other.size &&
+          blob == other.blob;
 }
 
 /// One line of a conversation.
@@ -183,16 +286,39 @@ class ChatLine {
   /// When the sender says they wrote it, Unix seconds.
   final PlatformInt64 sentUnix;
 
+  /// Outgoing only: a relay has it, or it waits for the network.
+  final bool onRelay;
+
+  /// Outgoing only: their phone opened it.
+  final bool delivered;
+
+  /// When it disappears, Unix seconds; 0 never.
+  final PlatformInt64 expiresUnix;
+
+  /// A file with it.
+  final ChatFile? file;
+
   const ChatLine({
     required this.outgoing,
     required this.text,
     required this.atUnix,
     required this.sentUnix,
+    required this.onRelay,
+    required this.delivered,
+    required this.expiresUnix,
+    this.file,
   });
 
   @override
   int get hashCode =>
-      outgoing.hashCode ^ text.hashCode ^ atUnix.hashCode ^ sentUnix.hashCode;
+      outgoing.hashCode ^
+      text.hashCode ^
+      atUnix.hashCode ^
+      sentUnix.hashCode ^
+      onRelay.hashCode ^
+      delivered.hashCode ^
+      expiresUnix.hashCode ^
+      file.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -202,7 +328,11 @@ class ChatLine {
           outgoing == other.outgoing &&
           text == other.text &&
           atUnix == other.atUnix &&
-          sentUnix == other.sentUnix;
+          sentUnix == other.sentUnix &&
+          onRelay == other.onRelay &&
+          delivered == other.delivered &&
+          expiresUnix == other.expiresUnix &&
+          file == other.file;
 }
 
 /// How cleaning a file went.
@@ -252,25 +382,43 @@ class ContactItem {
   /// The address (32 hex digits).
   final String id;
 
+  /// Their Kilit ID: four words.
+  final String kilitId;
+
   /// The name given; empty until one is.
   final String name;
 
   /// When they were added, Unix seconds.
   final PlatformInt64 addedUnix;
 
+  /// Accepted, request or blocked.
+  final ContactStanding standing;
+
+  /// Disappearing-message time in seconds; 0 keeps messages.
+  final int timer;
+
   /// The newest line, if any.
   final ChatLine? last;
 
   const ContactItem({
     required this.id,
+    required this.kilitId,
     required this.name,
     required this.addedUnix,
+    required this.standing,
+    required this.timer,
     this.last,
   });
 
   @override
   int get hashCode =>
-      id.hashCode ^ name.hashCode ^ addedUnix.hashCode ^ last.hashCode;
+      id.hashCode ^
+      kilitId.hashCode ^
+      name.hashCode ^
+      addedUnix.hashCode ^
+      standing.hashCode ^
+      timer.hashCode ^
+      last.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -278,9 +426,24 @@ class ContactItem {
       other is ContactItem &&
           runtimeType == other.runtimeType &&
           id == other.id &&
+          kilitId == other.kilitId &&
           name == other.name &&
           addedUnix == other.addedUnix &&
+          standing == other.standing &&
+          timer == other.timer &&
           last == other.last;
+}
+
+/// Where a contact stands.
+enum ContactStanding {
+  /// Added here, or a request that was accepted.
+  accepted,
+
+  /// Wrote first; waits in Requests.
+  request,
+
+  /// Nothing from them is heard.
+  blocked,
 }
 
 /// A `.klt` file ready to save or share.
@@ -380,55 +543,31 @@ class ImportReply {
           signedBy == other.signedBy;
 }
 
-/// What a message found in pasted text came to.
-enum IncomingKind {
-  /// Opened; see `contact` and `text`.
-  opened,
-
-  /// Opened before.
-  duplicate,
-
-  /// From no one with a session here.
-  unknown,
-
-  /// Damaged, or not a message.
-  damaged,
-
-  /// The chat app cut it off.
-  truncated,
-}
-
-/// One message found in pasted text.
-class IncomingReply {
-  /// What it came to.
-  final IncomingKind kind;
-
-  /// Who sent it, when opened.
+/// A message that arrived.
+class IncomingItem {
+  /// Who sent it.
   final String contact;
 
-  /// It made the sender a contact.
+  /// It made the sender a contact: a new request.
   final bool newContact;
 
-  /// The text, when opened.
+  /// The text.
   final String text;
 
-  const IncomingReply({
-    required this.kind,
+  const IncomingItem({
     required this.contact,
     required this.newContact,
     required this.text,
   });
 
   @override
-  int get hashCode =>
-      kind.hashCode ^ contact.hashCode ^ newContact.hashCode ^ text.hashCode;
+  int get hashCode => contact.hashCode ^ newContact.hashCode ^ text.hashCode;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is IncomingReply &&
+      other is IncomingItem &&
           runtimeType == other.runtimeType &&
-          kind == other.kind &&
           contact == other.contact &&
           newContact == other.newContact &&
           text == other.text;
@@ -599,6 +738,64 @@ class MessageReply {
           kind == other.kind &&
           text == other.text &&
           signedBy == other.signedBy;
+}
+
+/// This vault as others find it.
+class MyKilitInfo {
+  /// Four words, shown with `@`.
+  final String kilitId;
+
+  /// `kilit://add?…`, for the link and the QR code.
+  final String link;
+
+  const MyKilitInfo({required this.kilitId, required this.link});
+
+  @override
+  int get hashCode => kilitId.hashCode ^ link.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MyKilitInfo &&
+          runtimeType == other.runtimeType &&
+          kilitId == other.kilitId &&
+          link == other.link;
+}
+
+/// What one round of network work brought.
+class NetTick {
+  /// Messages that arrived and opened.
+  final List<IncomingItem> incoming;
+
+  /// Relays connected now.
+  final int relaysUp;
+
+  /// Relays in use.
+  final int relays;
+
+  /// Messages still waiting for a relay.
+  final int queued;
+
+  const NetTick({
+    required this.incoming,
+    required this.relaysUp,
+    required this.relays,
+    required this.queued,
+  });
+
+  @override
+  int get hashCode =>
+      incoming.hashCode ^ relaysUp.hashCode ^ relays.hashCode ^ queued.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NetTick &&
+          runtimeType == other.runtimeType &&
+          incoming == other.incoming &&
+          relaysUp == other.relaysUp &&
+          relays == other.relays &&
+          queued == other.queued;
 }
 
 /// "Paket analizi" for one item.

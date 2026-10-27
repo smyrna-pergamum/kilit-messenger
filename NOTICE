@@ -38,6 +38,14 @@ flutter_rust_bridge MIT             https://github.com/fzyzcjy/flutter_rust_brid
 Cargokit        MIT                 app/rust_builder/cargokit (copied by the bridge)
 JetBrains Mono  OFL-1.1             app/assets/fonts/OFL-JetBrainsMono.txt
 Tor             BSD-3-Clause    https://www.torproject.org/
+go-libtor       BSD-3-Clause    https://github.com/alexballas/go-libtor
+bine            MIT             https://github.com/cretz/bine
+BIP-39 words    MIT             core/crates/kilit-vault/src/bip39-english.txt
+k256            Apache-2.0 OR MIT   https://github.com/RustCrypto/elliptic-curves
+tokio, tungstenite, rustls, webpki-roots   MIT / Apache-2.0 / ISC / MPL-2.0
+qr_flutter      BSD-3-Clause    https://github.com/theyakka/qr.flutter
+flutter_zxing   MIT             https://github.com/khoren93/flutter_zxing
+zxing-cpp       Apache-2.0      https://github.com/zxing-cpp/zxing-cpp
 SQLCipher       BSD-3-Clause    https://www.zetetic.net/sqlcipher/
 
 libsignal is AGPL-3.0. Combining it with this GPL-3.0-or-later program is

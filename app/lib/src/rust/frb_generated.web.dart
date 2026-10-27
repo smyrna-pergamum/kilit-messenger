@@ -52,10 +52,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool dco_decode_bool(dynamic raw);
 
   @protected
+  ChatFile dco_decode_box_autoadd_chat_file(dynamic raw);
+
+  @protected
   ChatLine dco_decode_box_autoadd_chat_line(dynamic raw);
 
   @protected
   ItemInfo dco_decode_box_autoadd_item_info(dynamic raw);
+
+  @protected
+  ChatFile dco_decode_chat_file(dynamic raw);
 
   @protected
   ChatLine dco_decode_chat_line(dynamic raw);
@@ -68,6 +74,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ContactItem dco_decode_contact_item(dynamic raw);
+
+  @protected
+  ContactStanding dco_decode_contact_standing(dynamic raw);
 
   @protected
   ExportedKlt dco_decode_exported_klt(dynamic raw);
@@ -91,10 +100,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ImportReply dco_decode_import_reply(dynamic raw);
 
   @protected
-  IncomingKind dco_decode_incoming_kind(dynamic raw);
-
-  @protected
-  IncomingReply dco_decode_incoming_reply(dynamic raw);
+  IncomingItem dco_decode_incoming_item(dynamic raw);
 
   @protected
   ItemInfo dco_decode_item_info(dynamic raw);
@@ -121,7 +127,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<FoundPacket> dco_decode_list_found_packet(dynamic raw);
 
   @protected
-  List<IncomingReply> dco_decode_list_incoming_reply(dynamic raw);
+  List<IncomingItem> dco_decode_list_incoming_item(dynamic raw);
 
   @protected
   List<ItemInfo> dco_decode_list_item_info(dynamic raw);
@@ -142,7 +148,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   MessageReply dco_decode_message_reply(dynamic raw);
 
   @protected
+  MyKilitInfo dco_decode_my_kilit_info(dynamic raw);
+
+  @protected
+  NetTick dco_decode_net_tick(dynamic raw);
+
+  @protected
   String? dco_decode_opt_String(dynamic raw);
+
+  @protected
+  ChatFile? dco_decode_opt_box_autoadd_chat_file(dynamic raw);
 
   @protected
   ChatLine? dco_decode_opt_box_autoadd_chat_line(dynamic raw);
@@ -161,6 +176,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   SignedBy dco_decode_signed_by(dynamic raw);
+
+  @protected
+  int dco_decode_u_16(dynamic raw);
+
+  @protected
+  int dco_decode_u_32(dynamic raw);
 
   @protected
   BigInt dco_decode_u_64(dynamic raw);
@@ -205,10 +226,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool sse_decode_bool(SseDeserializer deserializer);
 
   @protected
+  ChatFile sse_decode_box_autoadd_chat_file(SseDeserializer deserializer);
+
+  @protected
   ChatLine sse_decode_box_autoadd_chat_line(SseDeserializer deserializer);
 
   @protected
   ItemInfo sse_decode_box_autoadd_item_info(SseDeserializer deserializer);
+
+  @protected
+  ChatFile sse_decode_chat_file(SseDeserializer deserializer);
 
   @protected
   ChatLine sse_decode_chat_line(SseDeserializer deserializer);
@@ -221,6 +248,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ContactItem sse_decode_contact_item(SseDeserializer deserializer);
+
+  @protected
+  ContactStanding sse_decode_contact_standing(SseDeserializer deserializer);
 
   @protected
   ExportedKlt sse_decode_exported_klt(SseDeserializer deserializer);
@@ -244,10 +274,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ImportReply sse_decode_import_reply(SseDeserializer deserializer);
 
   @protected
-  IncomingKind sse_decode_incoming_kind(SseDeserializer deserializer);
-
-  @protected
-  IncomingReply sse_decode_incoming_reply(SseDeserializer deserializer);
+  IncomingItem sse_decode_incoming_item(SseDeserializer deserializer);
 
   @protected
   ItemInfo sse_decode_item_info(SseDeserializer deserializer);
@@ -274,7 +301,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<FoundPacket> sse_decode_list_found_packet(SseDeserializer deserializer);
 
   @protected
-  List<IncomingReply> sse_decode_list_incoming_reply(
+  List<IncomingItem> sse_decode_list_incoming_item(
     SseDeserializer deserializer,
   );
 
@@ -297,7 +324,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   MessageReply sse_decode_message_reply(SseDeserializer deserializer);
 
   @protected
+  MyKilitInfo sse_decode_my_kilit_info(SseDeserializer deserializer);
+
+  @protected
+  NetTick sse_decode_net_tick(SseDeserializer deserializer);
+
+  @protected
   String? sse_decode_opt_String(SseDeserializer deserializer);
+
+  @protected
+  ChatFile? sse_decode_opt_box_autoadd_chat_file(SseDeserializer deserializer);
 
   @protected
   ChatLine? sse_decode_opt_box_autoadd_chat_line(SseDeserializer deserializer);
@@ -316,6 +352,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   SignedBy sse_decode_signed_by(SseDeserializer deserializer);
+
+  @protected
+  int sse_decode_u_16(SseDeserializer deserializer);
+
+  @protected
+  int sse_decode_u_32(SseDeserializer deserializer);
 
   @protected
   BigInt sse_decode_u_64(SseDeserializer deserializer);
@@ -363,6 +405,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_bool(bool self, SseSerializer serializer);
 
   @protected
+  void sse_encode_box_autoadd_chat_file(
+    ChatFile self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_chat_line(
     ChatLine self,
     SseSerializer serializer,
@@ -375,6 +423,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_chat_file(ChatFile self, SseSerializer serializer);
+
+  @protected
   void sse_encode_chat_line(ChatLine self, SseSerializer serializer);
 
   @protected
@@ -385,6 +436,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_contact_item(ContactItem self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_contact_standing(
+    ContactStanding self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_exported_klt(ExportedKlt self, SseSerializer serializer);
@@ -408,10 +465,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_import_reply(ImportReply self, SseSerializer serializer);
 
   @protected
-  void sse_encode_incoming_kind(IncomingKind self, SseSerializer serializer);
-
-  @protected
-  void sse_encode_incoming_reply(IncomingReply self, SseSerializer serializer);
+  void sse_encode_incoming_item(IncomingItem self, SseSerializer serializer);
 
   @protected
   void sse_encode_item_info(ItemInfo self, SseSerializer serializer);
@@ -447,8 +501,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_list_incoming_reply(
-    List<IncomingReply> self,
+  void sse_encode_list_incoming_item(
+    List<IncomingItem> self,
     SseSerializer serializer,
   );
 
@@ -477,7 +531,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_message_reply(MessageReply self, SseSerializer serializer);
 
   @protected
+  void sse_encode_my_kilit_info(MyKilitInfo self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_net_tick(NetTick self, SseSerializer serializer);
+
+  @protected
   void sse_encode_opt_String(String? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_box_autoadd_chat_file(
+    ChatFile? self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_opt_box_autoadd_chat_line(
@@ -502,6 +568,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_signed_by(SignedBy self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_u_16(int self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_u_32(int self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_64(BigInt self, SseSerializer serializer);

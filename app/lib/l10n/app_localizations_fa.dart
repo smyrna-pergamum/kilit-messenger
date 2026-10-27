@@ -170,61 +170,6 @@ class LFa extends L {
   String get navSettings => 'تنظیمات';
 
   @override
-  String get chatsLater => 'پیام‌رسانی از طریق Tor در مرحله 2 می‌آید.';
-
-  @override
-  String get chatsIntro =>
-      'پیام‌ها با پروتکل Signal ‏(PQXDH و SPQR، پساکوانتومی) سرتاسری رمزگذاری می‌شوند. تا وقتی شبکهٔ خود Kilit برسد، به‌صورت متنی منتقل می‌شوند که در هر برنامهٔ گفتگو کپی می‌کنید.';
-
-  @override
-  String get chatsEmpty =>
-      'هنوز مخاطبی ندارید. کارت خود را به کسی بدهید یا کارت او را اضافه کنید.';
-
-  @override
-  String get chatsShareCard => 'کارت من';
-
-  @override
-  String get chatsAddContact => 'افزودن مخاطب';
-
-  @override
-  String get chatsOpenClipboard => 'باز کردن از کلیپ‌بورد';
-
-  @override
-  String get chatsNothingOnClipboard =>
-      'در کلیپ‌بورد پیام Kilit یا کارت مخاطب نیست.';
-
-  @override
-  String get cardTitle => 'کارت مخاطب شما';
-
-  @override
-  String get cardName => 'نام نمایشی (اختیاری)';
-
-  @override
-  String get cardShow => 'ساخت کارت';
-
-  @override
-  String get cardHint =>
-      'این متن را برای کسی بفرستید که می‌خواهید با او گفتگو کنید. هیچ رازی در آن نیست. پس از اتصال، شماره‌های امنیتی را مقایسه کنید.';
-
-  @override
-  String get addContactTitle => 'افزودن مخاطب';
-
-  @override
-  String get addContactCard => 'کارت مخاطب او (KLC1:…)';
-
-  @override
-  String get addContactName => 'نام (اختیاری)';
-
-  @override
-  String get addContactGo => 'افزودن';
-
-  @override
-  String get addContactRefused => 'این کارت مخاطب نیست، یا کارت خود شماست.';
-
-  @override
-  String get contactUnnamed => 'مخاطب بی‌نام';
-
-  @override
   String get chatEmpty =>
       'هنوز پیامی نیست. نخستین پیامی که بنویسید نشست رمزگذاری‌شده را آغاز می‌کند.';
 
@@ -232,35 +177,11 @@ class LFa extends L {
   String get chatInput => 'پیام';
 
   @override
-  String get chatSend => 'رمزگذاری';
-
-  @override
-  String get chatPaste => 'باز کردن پاسخ از کلیپ‌بورد';
-
-  @override
-  String get chatSealedTitle => 'پیام رمزگذاری‌شده';
-
-  @override
-  String chatSealedHint(String name) {
-    return 'این را در برنامهٔ گفتگو کپی کنید و برای $name بفرستید. فقط او می‌تواند بازش کند.';
-  }
+  String get chatSend => 'ارسال';
 
   @override
   String get chatNewContact =>
-      'کسی که کارت شما را دارد برایتان نوشته است. نامی به او بدهید و پیش از اعتماد، شماره‌های امنیتی را مقایسه کنید.';
-
-  @override
-  String get chatOtherContact =>
-      'پیامی از مخاطب دیگری هم باز شد؛ در گفتگوی با اوست.';
-
-  @override
-  String get chatDuplicate => 'این پیام پیش‌تر باز شده است.';
-
-  @override
-  String get chatUnknown => 'این پیام از کسی نیست که با او نشستی دارید.';
-
-  @override
-  String get chatDamaged => 'پیام آسیب دیده است.';
+      'بدون اینکه اضافه‌اش کرده باشی برایت نوشته. برای پاسخ بپذیر یا مسدودش کن. پیش از اعتماد، شماره‌های امنیتی را مقایسه کنید.';
 
   @override
   String get safetyTitle => 'شمارهٔ امنیتی';
@@ -269,6 +190,202 @@ class LFa extends L {
   String safetyHint(String name) {
     return 'این ۶۰ رقم را با $name حضوری یا در تماس مقایسه کنید. اگر در هر دو گوشی یکسان باشد، کسی در میان نیست.';
   }
+
+  @override
+  String get attachCamera => 'دوربین';
+
+  @override
+  String get attachFile => 'عکس یا فایل';
+
+  @override
+  String get chatFileTooLarge =>
+      'برای ارسال بیش از حد بزرگ است: حداکثر ۵ مگابایت.';
+
+  @override
+  String get chatDelivered => 'تحویل شد';
+
+  @override
+  String get fileComing => 'در حال دریافت…';
+
+  @override
+  String get fileToVault => 'افزودن به گاوصندوق';
+
+  @override
+  String get fileSavedVault => 'به گاوصندوق افزوده شد.';
+
+  @override
+  String get timerTitle => 'پیام‌های ناپدیدشونده';
+
+  @override
+  String get timerHint =>
+      'پیام‌های تازهٔ این گفتگو پس از این زمان، در هر دو گوشی ناپدید می‌شوند.';
+
+  @override
+  String get timerOff => 'خاموش';
+
+  @override
+  String get timer5m => '۵ دقیقه';
+
+  @override
+  String get timer1h => '۱ ساعت';
+
+  @override
+  String get timer1d => '۱ روز';
+
+  @override
+  String get timer1w => '۱ هفته';
+
+  @override
+  String get renewTitle => 'تازه کردن شناسهٔ Kilit من';
+
+  @override
+  String get renewBody =>
+      'واژه‌های تازه، پیوند تازه و کد QR تازه می‌گیری. مخاطبانت مثل قبل با تو گفتگو می‌کنند؛ شناسه و پیوند قدیمی برای افراد تازه دیگر کار نمی‌کند.';
+
+  @override
+  String get renewGo => 'تازه کردن';
+
+  @override
+  String renewDone(String id) {
+    return 'شناسهٔ تازه‌ات: @$id';
+  }
+
+  @override
+  String get cameraNoCamera =>
+      'دوربین باز نشد. مجوز دوربین را در تنظیمات گوشی بررسی کن.';
+
+  @override
+  String get cameraShutter => 'گرفتن عکس';
+
+  @override
+  String get cameraRetake => 'گرفتن دوباره';
+
+  @override
+  String get cameraUse => 'استفاده';
+
+  @override
+  String get cameraIntro =>
+      'عکس‌ها فقط در حافظه گرفته می‌شوند: چیزی روی گوشی نوشته نمی‌شود و اطلاعات مکان یا دوربین ندارند.';
+
+  @override
+  String get cameraSendTo => 'ارسال برای…';
+
+  @override
+  String get cameraToVault => 'نگه‌داری در گاوصندوق';
+
+  @override
+  String get cameraSavedVault => 'عکس در گاوصندوق نگه داشته شد.';
+
+  @override
+  String get cameraNoContacts => 'هنوز مخاطبی برای ارسال نیست.';
+
+  @override
+  String cameraSent(String name) {
+    return 'برای $name ارسال شد.';
+  }
+
+  @override
+  String get chatsYourKilit => 'Kilit تو';
+
+  @override
+  String get chatsSearch => 'جستجو';
+
+  @override
+  String get chatsEmptyNew =>
+      'هنوز کسی اینجا نیست. کسی را اضافه کن یا کدت را به او نشان بده.';
+
+  @override
+  String get torChipReady => 'Tor آماده است';
+
+  @override
+  String torChipStarting(int progress) {
+    return 'Tor ‏$progress٪';
+  }
+
+  @override
+  String get torChipOff => 'Tor خاموش';
+
+  @override
+  String get addTitle => 'افزودن کسی';
+
+  @override
+  String get addHint =>
+      'کدش را اسکن کن یا آنچه به تو داده را بچسبان: یک پیوند یا یک @شناسه.';
+
+  @override
+  String get addScan => 'اسکن کد او';
+
+  @override
+  String get addField => 'پیوند Kilit یا @شناسه';
+
+  @override
+  String get addGo => 'افزودن';
+
+  @override
+  String get addSearching => 'در حال جستجو از طریق Tor…';
+
+  @override
+  String get addNotFound =>
+      'کسی با این شناسه پیدا نشد. بررسی کن یا کمی بعد دوباره امتحان کن.';
+
+  @override
+  String get addOffline =>
+      'هنوز به Tor وصل نیست. صبر کن تا «Tor آماده است» نمایش داده شود.';
+
+  @override
+  String get addNotInvite => 'این پیوند Kilit یا @شناسه نیست.';
+
+  @override
+  String get addShowMine => 'نمایش کد من';
+
+  @override
+  String get addShowMineHint => 'کد QR، پیوند و @شناسهٔ تو';
+
+  @override
+  String get myTitle => 'کد من';
+
+  @override
+  String get myHint =>
+      'هر کس این کد، پیوند یا @شناسهٔ تو را داشته باشد می‌تواند برایت بنویسد. نخستین پیامش تا وقتی بپذیری در درخواست‌ها می‌ماند.';
+
+  @override
+  String get myCopyLink => 'کپی پیوند';
+
+  @override
+  String myShareText(String id, String link) {
+    return 'مرا در Kilit اضافه کن: @$id\n$link';
+  }
+
+  @override
+  String get scanTitle => 'اسکن کد Kilit';
+
+  @override
+  String get scanHint => 'دوربین را به سمت کد QR بگیر.';
+
+  @override
+  String get requestsTitle => 'درخواست‌ها';
+
+  @override
+  String get requestsEmpty => 'درخواستی نیست.';
+
+  @override
+  String get requestHint =>
+      'بدون اینکه اضافه شده باشند برایت نوشته‌اند. تا نپذیری و پاسخ ندهی چیزی به آن‌ها نمی‌رسد.';
+
+  @override
+  String get requestAccept => 'پذیرفتن';
+
+  @override
+  String get requestDecline => 'رد کردن';
+
+  @override
+  String get requestBlock => 'مسدود کردن';
+
+  @override
+  String get chatOnRelay => 'روی رله‌ها';
+
+  @override
+  String get chatQueued => 'در انتظار شبکه';
 
   @override
   String get contactRename => 'تغییر نام';
@@ -281,17 +398,13 @@ class LFa extends L {
 
   @override
   String get contactRemoveBody =>
-      'نشست و کل گفتگو حذف می‌شود. برای نوشتن دوباره به کارت‌های یکدیگر نیاز دارید.';
+      'نشست و کل گفتگو حذف می‌شود. برای نوشتن دوباره، یکدیگر را دوباره اضافه کنید.';
 
   @override
   String get contactRemoveGo => 'حذف';
 
   @override
   String get save => 'ذخیره';
-
-  @override
-  String get cameraLater =>
-      'دوربینی که هرگز داده رمزنشده روی دیسک نمی‌نویسد در مرحله 2 می‌آید.';
 
   @override
   String get vaultAddNote => 'افزودن یادداشت';
@@ -604,6 +717,30 @@ class LFa extends L {
   @override
   String get protNetworkValue =>
       'متصل نیست: مرحله 1 هرگز آنلاین نمی‌شود. Tor در مرحله 2 می‌آید.';
+
+  @override
+  String get torOff => 'خاموش: Kilit آنلاین نمی‌شود.';
+
+  @override
+  String torStarting(int progress) {
+    return 'در حال اتصال… $progress٪';
+  }
+
+  @override
+  String get torReady => 'از طریق Tor وصل است.';
+
+  @override
+  String get torFailed => 'اتصال به Tor ممکن نشد.';
+
+  @override
+  String get torUnavailable => 'هنوز روی این دستگاه در دسترس نیست.';
+
+  @override
+  String get torSwitch => 'اتصال از طریق Tor';
+
+  @override
+  String get torSwitchHint =>
+      'Kilit فقط از طریق Tor به شبکه می‌رود. خاموش که باشد، آفلاین می‌ماند.';
 
   @override
   String get hwStrongbox => 'تراشه امنیتی StrongBox';

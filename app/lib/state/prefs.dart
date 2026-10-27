@@ -69,7 +69,13 @@ const supportedLanguages = {
 const defaultLanguage = 'en';
 
 class Prefs extends ChangeNotifier {
-  Prefs._(this._store, this._theme, this._language, this._clipboardHint);
+  Prefs._(
+    this._store,
+    this._theme,
+    this._language,
+    this._clipboardHint,
+    this._tor,
+  );
 
   static Future<Prefs> load(PrefsStore store) async {
     final v = await store.read();
@@ -83,6 +89,8 @@ class Prefs extends ChangeNotifier {
       theme,
       lang is String && supportedLanguages.containsKey(lang) ? lang : null,
       v['clipboardHint'] == true,
+      // absent: on, the way Kilit is meant to run
+      v['tor'] != false,
     );
   }
 
@@ -90,6 +98,7 @@ class Prefs extends ChangeNotifier {
   ThemeMode _theme;
   String? _language;
   bool _clipboardHint;
+  bool _tor;
 
   ThemeMode get themeMode => _theme;
 
@@ -98,6 +107,9 @@ class Prefs extends ChangeNotifier {
 
   /// Whether the vault offers to open a KLT1: message found on the clipboard.
   bool get clipboardHint => _clipboardHint;
+
+  /// Whether Kilit connects to Tor. Off, it never goes online.
+  bool get tor => _tor;
 
   Locale? get locale => _language == null ? null : Locale(_language!);
 
@@ -111,6 +123,7 @@ class Prefs extends ChangeNotifier {
       'theme': _theme.name,
       'language': _language,
       'clipboardHint': _clipboardHint,
+      'tor': _tor,
     });
   }
 
@@ -129,11 +142,17 @@ class Prefs extends ChangeNotifier {
     return _save();
   }
 
+  Future<void> setTor(bool on) {
+    _tor = on;
+    return _save();
+  }
+
   /// After the panic code: everything back to a new install's settings,
   /// except the language, so the person can still read the screen.
   Future<void> resetAfterPanic() {
     _theme = ThemeMode.system;
     _clipboardHint = false;
+    _tor = true;
     openSections
       ..clear()
       ..add('protections');

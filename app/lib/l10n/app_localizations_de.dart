@@ -172,62 +172,6 @@ class LDe extends L {
   String get navSettings => 'Einstellungen';
 
   @override
-  String get chatsLater => 'Nachrichten über Tor kommen in Phase 2.';
-
-  @override
-  String get chatsIntro =>
-      'Nachrichten sind mit dem Signal-Protokoll (PQXDH und SPQR, post-quanten) Ende-zu-Ende verschlüsselt. Bis Kilits eigenes Netz kommt, reisen sie als Text, den du in eine beliebige Chat-App kopierst.';
-
-  @override
-  String get chatsEmpty =>
-      'Noch keine Kontakte. Gib jemandem deine Karte oder füge seine hinzu.';
-
-  @override
-  String get chatsShareCard => 'Meine Karte';
-
-  @override
-  String get chatsAddContact => 'Kontakt hinzufügen';
-
-  @override
-  String get chatsOpenClipboard => 'Aus Zwischenablage öffnen';
-
-  @override
-  String get chatsNothingOnClipboard =>
-      'Keine Kilit-Nachricht und keine Kontaktkarte in der Zwischenablage.';
-
-  @override
-  String get cardTitle => 'Deine Kontaktkarte';
-
-  @override
-  String get cardName => 'Angezeigter Name (optional)';
-
-  @override
-  String get cardShow => 'Karte erstellen';
-
-  @override
-  String get cardHint =>
-      'Sende diesen Text an die Person, mit der du schreiben willst. Er enthält kein Geheimnis. Vergleicht nach dem Verbinden die Sicherheitsnummern.';
-
-  @override
-  String get addContactTitle => 'Kontakt hinzufügen';
-
-  @override
-  String get addContactCard => 'Ihre Kontaktkarte (KLC1:…)';
-
-  @override
-  String get addContactName => 'Name (optional)';
-
-  @override
-  String get addContactGo => 'Hinzufügen';
-
-  @override
-  String get addContactRefused =>
-      'Das ist keine Kontaktkarte oder deine eigene.';
-
-  @override
-  String get contactUnnamed => 'Unbenannter Kontakt';
-
-  @override
   String get chatEmpty =>
       'Noch keine Nachrichten. Die erste, die du schreibst, startet die verschlüsselte Sitzung.';
 
@@ -235,36 +179,11 @@ class LDe extends L {
   String get chatInput => 'Nachricht';
 
   @override
-  String get chatSend => 'Verschlüsseln';
-
-  @override
-  String get chatPaste => 'Antwort aus der Zwischenablage öffnen';
-
-  @override
-  String get chatSealedTitle => 'Verschlüsselte Nachricht';
-
-  @override
-  String chatSealedHint(String name) {
-    return 'Kopiere das in deine Chat-App und sende es an $name. Nur diese Person kann es öffnen.';
-  }
+  String get chatSend => 'Senden';
 
   @override
   String get chatNewContact =>
-      'Jemand mit deiner Karte hat dir geschrieben. Gib ihm einen Namen und vergleicht die Sicherheitsnummern, bevor du vertraust.';
-
-  @override
-  String get chatOtherContact =>
-      'Eine Nachricht eines anderen Kontakts wurde ebenfalls geöffnet; sie steht in dessen Unterhaltung.';
-
-  @override
-  String get chatDuplicate => 'Diese Nachricht wurde schon geöffnet.';
-
-  @override
-  String get chatUnknown =>
-      'Diese Nachricht stammt von niemandem, mit dem du eine Sitzung hast.';
-
-  @override
-  String get chatDamaged => 'Die Nachricht ist beschädigt.';
+      'Hat dir geschrieben, ohne hinzugefügt zu sein. Nimm an, um zu antworten, oder blockiere. Vergleicht die Sicherheitsnummern, bevor du vertraust.';
 
   @override
   String get safetyTitle => 'Sicherheitsnummer';
@@ -273,6 +192,201 @@ class LDe extends L {
   String safetyHint(String name) {
     return 'Vergleiche diese 60 Ziffern mit $name, persönlich oder am Telefon. Sind sie auf beiden Telefonen gleich, sitzt niemand dazwischen.';
   }
+
+  @override
+  String get attachCamera => 'Kamera';
+
+  @override
+  String get attachFile => 'Foto oder Datei';
+
+  @override
+  String get chatFileTooLarge => 'Zu groß zum Senden: höchstens 5 MB.';
+
+  @override
+  String get chatDelivered => 'Zugestellt';
+
+  @override
+  String get fileComing => 'Wird empfangen…';
+
+  @override
+  String get fileToVault => 'Zum Tresor hinzufügen';
+
+  @override
+  String get fileSavedVault => 'Zum Tresor hinzugefügt.';
+
+  @override
+  String get timerTitle => 'Selbstlöschende Nachrichten';
+
+  @override
+  String get timerHint =>
+      'Neue Nachrichten in diesem Chat verschwinden nach dieser Zeit, auf beiden Telefonen.';
+
+  @override
+  String get timerOff => 'Aus';
+
+  @override
+  String get timer5m => '5 Minuten';
+
+  @override
+  String get timer1h => '1 Stunde';
+
+  @override
+  String get timer1d => '1 Tag';
+
+  @override
+  String get timer1w => '1 Woche';
+
+  @override
+  String get renewTitle => 'Meine Kilit-ID erneuern';
+
+  @override
+  String get renewBody =>
+      'Du bekommst neue Wörter, einen neuen Link und einen neuen QR-Code. Deine Kontakte schreiben dir weiter wie bisher; die alte ID und der alte Link funktionieren für niemand Neues mehr.';
+
+  @override
+  String get renewGo => 'Erneuern';
+
+  @override
+  String renewDone(String id) {
+    return 'Deine neue ID: @$id';
+  }
+
+  @override
+  String get cameraNoCamera =>
+      'Die Kamera ließ sich nicht öffnen. Prüfe die Kameraberechtigung in den Einstellungen des Telefons.';
+
+  @override
+  String get cameraShutter => 'Foto aufnehmen';
+
+  @override
+  String get cameraRetake => 'Neu aufnehmen';
+
+  @override
+  String get cameraUse => 'Verwenden';
+
+  @override
+  String get cameraIntro =>
+      'Fotos entstehen nur im Speicher: Nichts wird auf das Telefon geschrieben, und sie enthalten keine Standort- oder Kameradaten.';
+
+  @override
+  String get cameraSendTo => 'Senden an…';
+
+  @override
+  String get cameraToVault => 'Im Tresor behalten';
+
+  @override
+  String get cameraSavedVault => 'Foto im Tresor behalten.';
+
+  @override
+  String get cameraNoContacts => 'Noch keine Kontakte zum Senden.';
+
+  @override
+  String cameraSent(String name) {
+    return 'An $name gesendet.';
+  }
+
+  @override
+  String get chatsYourKilit => 'Dein Kilit';
+
+  @override
+  String get chatsSearch => 'Suchen';
+
+  @override
+  String get chatsEmptyNew =>
+      'Noch niemand hier. Füge jemanden hinzu oder zeig deinen Code.';
+
+  @override
+  String get torChipReady => 'Tor bereit';
+
+  @override
+  String torChipStarting(int progress) {
+    return 'Tor $progress %';
+  }
+
+  @override
+  String get torChipOff => 'Tor aus';
+
+  @override
+  String get addTitle => 'Jemanden hinzufügen';
+
+  @override
+  String get addHint =>
+      'Scanne seinen Code oder füge ein, was er dir gegeben hat: einen Link oder eine @ID.';
+
+  @override
+  String get addScan => 'Seinen Code scannen';
+
+  @override
+  String get addField => 'Ein Kilit-Link oder eine @ID';
+
+  @override
+  String get addGo => 'Hinzufügen';
+
+  @override
+  String get addSearching => 'Suche über Tor…';
+
+  @override
+  String get addNotFound =>
+      'Niemand mit dieser ID gefunden. Prüfe sie oder versuche es gleich noch einmal.';
+
+  @override
+  String get addOffline =>
+      'Noch nicht mit Tor verbunden. Warte, bis „Tor bereit“ erscheint.';
+
+  @override
+  String get addNotInvite => 'Das ist kein Kilit-Link und keine @ID.';
+
+  @override
+  String get addShowMine => 'Meinen Code zeigen';
+
+  @override
+  String get addShowMineHint => 'Dein QR-Code, dein Link, deine @ID';
+
+  @override
+  String get myTitle => 'Mein Code';
+
+  @override
+  String get myHint =>
+      'Wer diesen Code, deinen Link oder deine @ID hat, kann dir schreiben. Die erste Nachricht wartet unter Anfragen, bis du annimmst.';
+
+  @override
+  String get myCopyLink => 'Link kopieren';
+
+  @override
+  String myShareText(String id, String link) {
+    return 'Füge mich auf Kilit hinzu: @$id\n$link';
+  }
+
+  @override
+  String get scanTitle => 'Kilit-Code scannen';
+
+  @override
+  String get scanHint => 'Halte die Kamera auf den QR-Code.';
+
+  @override
+  String get requestsTitle => 'Anfragen';
+
+  @override
+  String get requestsEmpty => 'Keine Anfragen.';
+
+  @override
+  String get requestHint =>
+      'Sie haben dir geschrieben, ohne hinzugefügt zu sein. Nichts erreicht sie, bis du annimmst und antwortest.';
+
+  @override
+  String get requestAccept => 'Annehmen';
+
+  @override
+  String get requestDecline => 'Ablehnen';
+
+  @override
+  String get requestBlock => 'Blockieren';
+
+  @override
+  String get chatOnRelay => 'Auf den Relays';
+
+  @override
+  String get chatQueued => 'Wartet auf das Netz';
 
   @override
   String get contactRename => 'Umbenennen';
@@ -285,17 +399,13 @@ class LDe extends L {
 
   @override
   String get contactRemoveBody =>
-      'Die Sitzung und die ganze Unterhaltung werden gelöscht. Um wieder zu schreiben, braucht ihr eure Karten erneut.';
+      'Die Sitzung und die ganze Unterhaltung werden gelöscht. Um wieder zu schreiben, fügt euch erneut hinzu.';
 
   @override
   String get contactRemoveGo => 'Löschen';
 
   @override
   String get save => 'Speichern';
-
-  @override
-  String get cameraLater =>
-      'Eine Kamera, die nie Klartext auf den Speicher schreibt, kommt in Phase 2.';
 
   @override
   String get vaultAddNote => 'Notiz hinzufügen';
@@ -611,6 +721,30 @@ class LDe extends L {
   @override
   String get protNetworkValue =>
       'Nicht verbunden: Phase 1 geht nie online. Tor kommt in Phase 2.';
+
+  @override
+  String get torOff => 'Aus: Kilit geht nicht online.';
+
+  @override
+  String torStarting(int progress) {
+    return 'Verbinde… $progress %';
+  }
+
+  @override
+  String get torReady => 'Über Tor verbunden.';
+
+  @override
+  String get torFailed => 'Keine Verbindung zu Tor möglich.';
+
+  @override
+  String get torUnavailable => 'Auf diesem Gerät noch nicht verfügbar.';
+
+  @override
+  String get torSwitch => 'Über Tor verbinden';
+
+  @override
+  String get torSwitchHint =>
+      'Kilit erreicht das Netz nur über Tor. Ausgeschaltet bleibt es offline.';
 
   @override
   String get hwStrongbox => 'StrongBox-Sicherheitschip';

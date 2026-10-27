@@ -1,23 +1,70 @@
-//! Contacts and conversations: the vault's Signal sessions
-//! ([`kilit_vault::messaging`]) and each contact's chat log, both sealed to
-//! the vault like the item index.
+//! Contacts and conversations over the relays: the vault's Signal sessions
+//! ([`kilit_vault::messaging`]), each contact's chat log, files and the
+//! outbox, all sealed to the vault like the item index.
+//!
+//! The engine never touches the network. It hands out events to publish
+//! (the card, messages from the outbox) and the filter to watch, and takes
+//! the events that arrived; `api.rs` moves them through `kilit_net::Net`.
+//!
+//! **Receipts.** A message from an accepted contact is answered with a
+//! receipt (a message whose only content is the ids it confirms); the
+//! sender's line then shows two ticks. A request is not answered until it
+//! is accepted, so a stranger learns nothing.
+//!
+//! **Files.** A file is sealed with a key of its own (XChaCha20-Poly1305),
+//! cut into pieces and posted under a random tag; the message that names
+//! it carries the key, the tag and the file's hash. The recipient watches
+//! the tag until every piece is in, then checks the hash.
+//!
+//! **Disappearing messages.** A conversation's timer goes with every
+//! message; a line is removed, file and all, once its time is up.
 
+use std::collections::{BTreeMap, HashMap};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use base64::Engine as _;
+use base64::engine::general_purpose::URL_SAFE_NO_PAD;
+use chacha20poly1305::aead::{Aead, Payload};
+use chacha20poly1305::{KeyInit, XChaCha20Poly1305, XNonce};
+use kilit_net::{Event, Filter};
 use kilit_vault::messaging::{
-    CARD_PREFIX, ContactInfo, Found, MESSAGE_PREFIX, Messaging, MessagingError, find,
+    ContactInfo, ContactState, Content, FileRef, Invite, Messaging, MessagingError, Received,
+    card_matches, card_tag, parse_invite,
 };
 use serde::{Deserialize, Serialize};
+use serde_bytes::ByteBuf;
+use sha2::{Digest, Sha256};
 
 use super::{Engine, EngineError};
 
 /// The Signal state: identity prekeys, contacts, sessions.
 const SIGNAL: &str = "signal";
 const SIGNAL_NAME: &str = "signal.cbor";
+const OUTBOX: &str = "outbox";
+const OUTBOX_NAME: &str = "outbox.cbor";
+const FILES: &str = "files";
+const FILES_NAME: &str = "files.cbor";
 const CHAT_NAME: &str = "chat.cbor";
 const CBOR: &str = "application/cbor";
 /// Lines kept per conversation; older ones drop off.
 const MAX_LINES: usize = 5000;
+/// Events waiting for a relay at most.
+const MAX_OUTBOX: usize = 4000;
+/// Kind of a message event: gift wraps (NIP-59) are what relays expect to
+/// be signed by throwaway keys.
+pub const MESSAGE_KIND: u32 = 1059;
+/// Kind of the published card: application data (NIP-78), replaceable per
+/// key and `d` tag.
+pub const CARD_KIND: u32 = 30078;
+/// How far back the inbox asks the relays.
+const INBOX_BACK: Duration = Duration::from_secs(7 * 86_400);
+/// A piece of a file, before sealing: small enough that every relay in use
+/// takes the event (base64 grows it by a third).
+const CHUNK: usize = 24 * 1024;
+/// The largest file sent: 5 MiB, some two hundred pieces.
+pub const MAX_FILE: usize = 5 * 1024 * 1024;
+/// Files being fetched at once at most.
+const MAX_PENDING_FILES: usize = 50;
 
 fn chat_blob(contact: &str) -> Result<String, EngineError> {
     if contact.len() == 32
@@ -31,15 +78,71 @@ fn chat_blob(contact: &str) -> Result<String, EngineError> {
     }
 }
 
+fn hex(b: &[u8]) -> String {
+    b.iter().map(|x| format!("{x:02x}")).collect()
+}
+
+/// Where a received or sent file is kept: `att-` and 16 hex digits.
+fn att_blob(id: &str) -> Result<String, EngineError> {
+    if id.len() == 16
+        && id
+            .bytes()
+            .all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase())
+    {
+        Ok(format!("att-{id}"))
+    } else {
+        Err(EngineError::NotFound)
+    }
+}
+
+fn random<const N: usize>() -> Result<[u8; N], EngineError> {
+    let mut b = [0u8; N];
+    getrandom::fill(&mut b).map_err(|_| EngineError::Storage("no system randomness".into()))?;
+    Ok(b)
+}
+
 fn messaging_err(e: MessagingError) -> EngineError {
     match e {
         MessagingError::NoContact => EngineError::NotFound,
         MessagingError::TooLarge => EngineError::TooLong,
         MessagingError::Damaged => EngineError::Damaged,
-        MessagingError::NotACard => EngineError::Rejected("not a contact card".into()),
-        MessagingError::OwnCard => EngineError::Rejected("this is your own card".into()),
+        MessagingError::NotACard => EngineError::Rejected("no card for this ID".into()),
+        MessagingError::OwnCard => EngineError::Rejected("this is your own ID".into()),
         e => EngineError::Rejected(format!("{e:?}")),
     }
+}
+
+/// The nonce of piece `i`: unique per piece under a key used for one file.
+fn chunk_nonce(i: u32) -> XNonce {
+    let mut n = [0u8; 24];
+    n[..4].copy_from_slice(&i.to_le_bytes());
+    XNonce::from(n)
+}
+
+/// Where an outgoing line is.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub enum LineState {
+    /// Waiting for a relay: no network, or none answered yet.
+    #[default]
+    Queued,
+    /// At least one relay stored it.
+    Sent,
+    /// Their phone opened it and said so.
+    Delivered,
+}
+
+/// A file on a line.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LineFile {
+    /// The name to show.
+    pub name: String,
+    /// The media type.
+    pub mime: String,
+    /// Its length in bytes.
+    pub size: u64,
+    /// Where it is kept once complete (`att-…`); empty while its pieces
+    /// are still coming.
+    pub blob: String,
 }
 
 /// One line of a conversation.
@@ -53,6 +156,21 @@ pub struct Line {
     pub at: i64,
     /// When the sender says they wrote it, Unix seconds.
     pub sent: i64,
+    /// For outgoing lines.
+    #[serde(default)]
+    pub state: LineState,
+    /// The event that carries it, for outgoing lines.
+    #[serde(default)]
+    pub event: String,
+    /// The message's own id, which receipts name.
+    #[serde(default)]
+    pub id: ByteBuf,
+    /// When it disappears, Unix seconds; 0 never.
+    #[serde(default)]
+    pub expires: i64,
+    /// A file with it.
+    #[serde(default)]
+    pub file: Option<LineFile>,
 }
 
 /// A contact with the newest line of the conversation, for the list.
@@ -60,37 +178,67 @@ pub struct Line {
 pub struct Contact {
     /// The address (32 hex digits).
     pub id: String,
+    /// Their Kilit ID, four words.
+    pub kilit_id: String,
     /// The name given; empty until one is.
     pub name: String,
     /// When they were added, Unix seconds.
     pub added: i64,
+    /// Accepted, a request, or blocked.
+    pub state: ContactState,
+    /// Disappearing-message time, seconds; 0 keeps messages.
+    pub timer: u32,
     /// The newest line, if there is one.
     pub last: Option<Line>,
 }
 
-/// What one message found in pasted text came to.
+/// A message that arrived and opened.
 #[derive(Debug, PartialEq, Eq)]
-pub enum Incoming {
-    /// Opened and added to the conversation with `contact`.
-    Opened {
-        /// Who sent it.
-        contact: String,
-        /// This message made them a contact.
-        new_contact: bool,
-        /// The text.
-        text: String,
-    },
-    /// Opened before.
-    Duplicate,
-    /// From no one with a session here.
-    Unknown,
-    /// Damaged, or not a message.
-    Damaged,
-    /// The chat app cut it off.
-    Truncated,
+pub struct Incoming {
+    /// Who sent it.
+    pub contact: String,
+    /// This message made them a contact: a new request.
+    pub new_contact: bool,
+    /// The text.
+    pub text: String,
+}
+
+/// This vault as others find it.
+#[derive(Debug, PartialEq, Eq)]
+pub struct MyKilit {
+    /// Four words, shown with `@`.
+    pub kilit_id: String,
+    /// `kilit://add?…`: the link and the QR code.
+    pub link: String,
+}
+
+#[derive(Default, Serialize, Deserialize)]
+struct Outbox {
+    events: Vec<Event>,
+}
+
+/// A file whose pieces are on their way.
+#[derive(Clone, Serialize, Deserialize)]
+struct Pending {
+    contact: String,
+    line: ByteBuf,
+    file: FileRef,
+    got: BTreeMap<u32, ByteBuf>,
+}
+
+#[derive(Default, Serialize, Deserialize)]
+struct Files {
+    /// By piece tag.
+    pending: BTreeMap<String, Pending>,
 }
 
 impl Engine {
+    fn system_now(&self) -> SystemTime {
+        UNIX_EPOCH + Duration::from_secs((self.now)().max(0) as u64)
+    }
+
+    /// The Signal state, made on first use and saved at once, so the card
+    /// published and the prekeys kept always agree.
     fn messaging(&self) -> Result<Messaging, EngineError> {
         let o = self.require_open()?;
         match self.store.read(SIGNAL)? {
@@ -98,7 +246,11 @@ impl Engine {
                 let (bytes, _) = self.open_mine(&packet)?;
                 Messaging::from_bytes(&o.vault, &bytes).map_err(messaging_err)
             }
-            None => Messaging::create(&o.vault).map_err(messaging_err),
+            None => {
+                let m = Messaging::create(&o.vault).map_err(messaging_err)?;
+                self.save_messaging(&m)?;
+                Ok(m)
+            }
         }
     }
 
@@ -108,34 +260,132 @@ impl Engine {
         Ok(self.store.write(SIGNAL, &packet)?)
     }
 
-    fn system_now(&self) -> SystemTime {
-        UNIX_EPOCH + Duration::from_secs((self.now)().max(0) as u64)
-    }
-
-    /// This vault's contact card, `KLC1:` text, with the name to show.
-    pub fn my_card(&self, name: &str) -> Result<String, EngineError> {
-        let m = self.messaging()?;
-        let card = m.card(name).map_err(messaging_err)?;
-        // the first card fixes the prekeys on it; keep them
-        if self.store.len(SIGNAL)?.is_none() {
-            self.save_messaging(&m)?;
-        }
-        Ok(card)
-    }
-
-    /// Adds the contact whose card is in `text`, with `name` or the card's.
-    pub fn add_contact(&mut self, text: &str, name: Option<&str>) -> Result<Contact, EngineError> {
-        let card = match find(CARD_PREFIX, text).into_iter().next() {
-            Some(Found::Packet(p)) => p,
-            Some(Found::Truncated) => {
-                return Err(EngineError::Rejected("the card was cut off".into()));
-            }
-            _ => return Err(EngineError::Rejected("not a contact card".into())),
+    fn load<T: Default + for<'de> Deserialize<'de>>(&self, blob: &str) -> Result<T, EngineError> {
+        let Some(packet) = self.store.read(blob)? else {
+            return Ok(T::default());
         };
+        let (bytes, _) = self.open_mine(&packet)?;
+        ciborium::from_reader(bytes.as_slice()).map_err(|_| EngineError::Damaged)
+    }
+
+    fn save<T: Serialize>(&self, blob: &str, name: &str, v: &T) -> Result<(), EngineError> {
+        let mut bytes = Vec::new();
+        ciborium::into_writer(v, &mut bytes).map_err(|_| EngineError::Damaged)?;
+        let packet = self.seal_to_me(name, CBOR, &bytes)?;
+        Ok(self.store.write(blob, &packet)?)
+    }
+
+    /// This vault's Kilit ID and invite link.
+    pub fn my_kilit(&self) -> Result<MyKilit, EngineError> {
+        let m = self.messaging()?;
+        Ok(MyKilit {
+            kilit_id: m.kilit_id().to_owned(),
+            link: m.invite_link(),
+        })
+    }
+
+    /// A new Kilit ID: new words, link and QR code. Contacts stay.
+    pub fn renew_kilit_id(&mut self) -> Result<MyKilit, EngineError> {
+        let mut m = self.messaging()?;
+        m.renew_id(self.system_now()).map_err(messaging_err)?;
+        self.save_messaging(&m)?;
+        self.my_kilit()
+    }
+
+    /// The card to publish, signed with the vault's card key.
+    pub fn card_event(&self) -> Result<Event, EngineError> {
+        let m = self.messaging()?;
+        let card = m.card("").map_err(messaging_err)?;
+        Event::sign(
+            m.card_key(),
+            (self.now)(),
+            CARD_KIND,
+            vec![vec!["d".into(), m.card_tag()]],
+            URL_SAFE_NO_PAD.encode(card),
+        )
+        .map_err(|_| EngineError::Damaged)
+    }
+
+    /// Empty cards under earlier IDs, which replace the old cards on the
+    /// relays so the old ID finds nobody. Each is handed out once.
+    pub fn retired_card_events(&mut self) -> Result<Vec<Event>, EngineError> {
+        let mut m = self.messaging()?;
+        let old = m.take_retired_ids();
+        if old.is_empty() {
+            return Ok(Vec::new());
+        }
+        self.save_messaging(&m)?;
+        old.iter()
+            .map(|w| {
+                Event::sign(
+                    m.card_key(),
+                    (self.now)(),
+                    CARD_KIND,
+                    vec![vec!["d".into(), card_tag(w)]],
+                    String::new(),
+                )
+                .map_err(|_| EngineError::Damaged)
+            })
+            .collect()
+    }
+
+    /// What to watch on the relays: messages to any of this vault's tags,
+    /// and the pieces of files on their way.
+    pub fn inbox_filter(&self) -> Result<Filter, EngineError> {
+        let m = self.messaging()?;
+        let mut tags = m.inbox_tags(self.system_now()).map_err(messaging_err)?;
+        let files: Files = self.load(FILES)?;
+        tags.extend(files.pending.keys().cloned());
+        Ok(Filter {
+            kinds: vec![MESSAGE_KIND],
+            tags: vec![('p', tags)],
+            since: Some((self.now)() - INBOX_BACK.as_secs() as i64),
+            limit: None,
+        })
+    }
+
+    /// Reads a link, a QR code's text or a typed `@ID`.
+    pub fn invite(text: &str) -> Result<Invite, EngineError> {
+        parse_invite(text).ok_or_else(|| EngineError::Rejected("not a Kilit ID or link".into()))
+    }
+
+    /// The filter that finds the card an invite names.
+    pub fn card_filter(invite: &Invite) -> Filter {
+        Filter {
+            kinds: vec![CARD_KIND],
+            tags: vec![('d', vec![card_tag(&invite.id)])],
+            since: None,
+            limit: Some(20),
+        }
+    }
+
+    /// Adds the contact `invite` names from the cards the relays returned:
+    /// the newest whose identity matches the invite. Others claiming the
+    /// same ID are ignored.
+    pub fn add_from_cards(
+        &mut self,
+        invite: &Invite,
+        cards: &[Event],
+        name: Option<&str>,
+    ) -> Result<Contact, EngineError> {
+        let mut found: Vec<(i64, Vec<u8>)> = cards
+            .iter()
+            .filter(|e| e.kind == CARD_KIND && !e.content.is_empty() && e.verify())
+            .filter_map(|e| Some((e.created_at, URL_SAFE_NO_PAD.decode(&e.content).ok()?)))
+            .collect();
+        found.sort_by_key(|(t, _)| std::cmp::Reverse(*t));
+        // each check runs Argon2id: the newest few are enough
+        let card = found
+            .into_iter()
+            .take(5)
+            .map(|(_, c)| c)
+            .find(|c| card_matches(c, invite))
+            .ok_or_else(|| EngineError::Rejected("no card for this ID".into()))?;
         let mut m = self.messaging()?;
         let id = m
             .add_contact(
                 &card,
+                Some(invite),
                 name.filter(|n| !n.trim().is_empty()),
                 self.system_now(),
             )
@@ -157,18 +407,22 @@ impl Engine {
         let last = self.chat(&c.id)?.pop();
         Ok(Contact {
             id: c.id,
+            kilit_id: c.kilit_id,
             name: c.name,
             added: c.added,
+            state: c.state,
+            timer: c.timer,
             last,
         })
     }
 
-    /// The contacts, newest conversation first.
+    /// The contacts, requests and blocked ones included, newest
+    /// conversation first.
     pub fn contacts(&self) -> Result<Vec<Contact>, EngineError> {
-        let m = match self.store.len(SIGNAL)? {
-            Some(_) => self.messaging()?,
-            None => return Ok(Vec::new()),
-        };
+        if self.store.len(SIGNAL)?.is_none() {
+            return Ok(Vec::new());
+        }
+        let m = self.messaging()?;
         let mut v = m
             .contacts()
             .into_iter()
@@ -178,20 +432,51 @@ impl Engine {
         Ok(v)
     }
 
-    /// Gives a contact a name.
-    pub fn rename_contact(&mut self, id: &str, name: &str) -> Result<(), EngineError> {
+    fn change_messaging(
+        &mut self,
+        f: impl FnOnce(&mut Messaging) -> Result<(), MessagingError>,
+    ) -> Result<(), EngineError> {
         let mut m = self.messaging()?;
-        m.rename(id, name).map_err(messaging_err)?;
+        f(&mut m).map_err(messaging_err)?;
         self.save_messaging(&m)
     }
 
-    /// Forgets a contact: session, identity key and conversation.
+    /// Gives a contact a name.
+    pub fn rename_contact(&mut self, id: &str, name: &str) -> Result<(), EngineError> {
+        self.change_messaging(|m| m.rename(id, name))
+    }
+
+    /// Lets a request in, and tells them their messages arrived.
+    pub fn accept_contact(&mut self, id: &str) -> Result<(), EngineError> {
+        self.change_messaging(|m| m.accept(id))?;
+        let ids: Vec<Vec<u8>> = self
+            .chat(id)?
+            .into_iter()
+            .filter(|l| !l.outgoing && !l.id.is_empty())
+            .map(|l| l.id.into_vec())
+            .collect();
+        self.send_receipts(id, ids)
+    }
+
+    /// Hears nothing more from a contact.
+    pub fn block_contact(&mut self, id: &str) -> Result<(), EngineError> {
+        self.change_messaging(|m| m.block(id))
+    }
+
+    /// Forgets a contact: session, identity key, conversation and files.
     pub fn remove_contact(&mut self, id: &str) -> Result<(), EngineError> {
         let blob = chat_blob(id)?;
-        let mut m = self.messaging()?;
-        m.remove(id).map_err(messaging_err)?;
-        self.save_messaging(&m)?;
+        for l in self.chat(id)? {
+            self.drop_file(&l)?;
+        }
+        self.change_messaging(|m| m.remove(id))?;
         Ok(self.store.delete(&blob)?)
+    }
+
+    /// Sets the conversation's disappearing-message time, in seconds; 0
+    /// keeps messages. The next message tells them.
+    pub fn set_timer(&mut self, id: &str, secs: u32) -> Result<(), EngineError> {
+        self.change_messaging(|m| m.set_timer(id, secs))
     }
 
     /// The safety number to compare with a contact.
@@ -199,93 +484,432 @@ impl Engine {
         self.messaging()?.safety_number(id).map_err(messaging_err)
     }
 
-    /// A conversation, oldest line first.
+    /// A conversation, oldest line first, without the lines whose time is
+    /// up.
     pub fn chat(&self, id: &str) -> Result<Vec<Line>, EngineError> {
-        let Some(packet) = self.store.read(&chat_blob(id)?)? else {
-            return Ok(Vec::new());
-        };
-        let (bytes, _) = self.open_mine(&packet)?;
-        ciborium::from_reader(bytes.as_slice()).map_err(|_| EngineError::Damaged)
+        let now = (self.now)();
+        let lines: Vec<Line> = self.load_chat(id)?;
+        Ok(lines
+            .into_iter()
+            .filter(|l| l.expires == 0 || l.expires > now)
+            .collect())
     }
 
-    fn append(&self, id: &str, line: Line) -> Result<(), EngineError> {
-        let mut lines = self.chat(id)?;
-        lines.push(line);
+    fn load_chat(&self, id: &str) -> Result<Vec<Line>, EngineError> {
+        self.load(&chat_blob(id)?)
+    }
+
+    fn save_chat(&self, id: &str, mut lines: Vec<Line>) -> Result<(), EngineError> {
         if lines.len() > MAX_LINES {
             lines.drain(..lines.len() - MAX_LINES);
         }
-        let mut bytes = Vec::new();
-        ciborium::into_writer(&lines, &mut bytes).map_err(|_| EngineError::Damaged)?;
-        let packet = self.seal_to_me(CHAT_NAME, CBOR, &bytes)?;
-        Ok(self.store.write(&chat_blob(id)?, &packet)?)
+        self.save(&chat_blob(id)?, CHAT_NAME, &lines)
     }
 
-    /// Seals `text` for a contact and returns the `KLM1:` text to send.
-    pub fn send_message(&mut self, id: &str, text: &str) -> Result<String, EngineError> {
+    fn drop_file(&self, l: &Line) -> Result<(), EngineError> {
+        if let Some(f) = &l.file
+            && !f.blob.is_empty()
+        {
+            self.store.delete(&f.blob)?;
+        }
+        Ok(())
+    }
+
+    /// Removes the lines whose time is up, with their files, from every
+    /// conversation. Run now and then; [`Engine::chat`] hides them anyway.
+    pub fn sweep_expired(&mut self) -> Result<(), EngineError> {
+        if self.store.len(SIGNAL)?.is_none() {
+            return Ok(());
+        }
+        let now = (self.now)();
+        for c in self.messaging()?.contacts() {
+            let lines = self.load_chat(&c.id)?;
+            let (gone, kept): (Vec<Line>, Vec<Line>) = lines
+                .into_iter()
+                .partition(|l| l.expires != 0 && l.expires <= now);
+            if !gone.is_empty() {
+                for l in &gone {
+                    self.drop_file(l)?;
+                }
+                self.save_chat(&c.id, kept)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn expires(&self, timer: u32) -> i64 {
+        if timer == 0 {
+            0
+        } else {
+            (self.now)() + i64::from(timer)
+        }
+    }
+
+    /// A file's bytes, sent or received.
+    pub fn read_attachment(&self, blob: &str) -> Result<Vec<u8>, EngineError> {
+        let blob = att_blob(blob.strip_prefix("att-").unwrap_or(blob))?;
+        let packet = self.store.read(&blob)?.ok_or(EngineError::NotFound)?;
+        Ok(self.open_mine(&packet)?.0)
+    }
+
+    fn queue(&self, events: Vec<Event>) -> Result<(), EngineError> {
+        let mut outbox: Outbox = self.load(OUTBOX)?;
+        if outbox.events.len() + events.len() > MAX_OUTBOX {
+            return Err(EngineError::TooLong);
+        }
+        outbox.events.extend(events);
+        self.save(OUTBOX, OUTBOX_NAME, &outbox)
+    }
+
+    fn message_event(&self, tag: String, payload: &[u8]) -> Result<Event, EngineError> {
+        Event::sign_once(
+            (self.now)(),
+            MESSAGE_KIND,
+            vec![vec!["p".into(), tag]],
+            URL_SAFE_NO_PAD.encode(payload),
+        )
+        .map_err(|_| EngineError::Damaged)
+    }
+
+    fn send_receipts(&mut self, contact: &str, ids: Vec<Vec<u8>>) -> Result<(), EngineError> {
+        if ids.is_empty() {
+            return Ok(());
+        }
         let mut m = self.messaging()?;
+        let out = m
+            .seal(
+                contact,
+                &Content {
+                    receipts: ids,
+                    ..Content::default()
+                },
+                self.system_now(),
+            )
+            .map_err(messaging_err)?;
+        let event = self.message_event(out.tag, &out.payload)?;
+        self.save_messaging(&m)?;
+        self.queue(vec![event])
+    }
+
+    /// Seals `text` for a contact and queues the event that carries it.
+    /// Returns the line as the conversation now shows it, and the events.
+    pub fn send_message(
+        &mut self,
+        id: &str,
+        text: &str,
+    ) -> Result<(Line, Vec<Event>), EngineError> {
+        self.send(id, text, None, Vec::new(), None)
+    }
+
+    /// Sends a file (at most [`MAX_FILE`]), with `text` beside it. Pictures
+    /// lose their metadata first.
+    pub fn send_file(
+        &mut self,
+        id: &str,
+        name: &str,
+        mime: &str,
+        data: &[u8],
+        text: &str,
+    ) -> Result<(Line, Vec<Event>), EngineError> {
+        let cleaned = match kilit_parse::clean(data) {
+            Ok(r) => r.data,
+            Err(_) => data.to_vec(),
+        };
+        if cleaned.len() > MAX_FILE {
+            return Err(EngineError::TooLong);
+        }
+        let key = random::<32>()?;
+        let tag = hex(&random::<32>()?);
+        let cipher = XChaCha20Poly1305::new_from_slice(&key).map_err(|_| EngineError::Damaged)?;
+        let mut pieces = Vec::new();
+        for (i, chunk) in cleaned.chunks(CHUNK).enumerate() {
+            let i = i as u32;
+            let sealed = cipher
+                .encrypt(
+                    &chunk_nonce(i),
+                    Payload {
+                        msg: chunk,
+                        aad: tag.as_bytes(),
+                    },
+                )
+                .map_err(|_| EngineError::Damaged)?;
+            let mut content = i.to_le_bytes().to_vec();
+            content.extend_from_slice(&sealed);
+            pieces.push(self.message_event(tag.clone(), &content)?);
+        }
+        let file = FileRef {
+            key: ByteBuf::from(key.to_vec()),
+            tag,
+            chunks: pieces.len() as u32,
+            size: cleaned.len() as u64,
+            sha256: ByteBuf::from(Sha256::digest(&cleaned).to_vec()),
+            name: name.chars().take(128).collect(),
+            mime: mime.chars().take(128).collect(),
+        };
+        // our own copy, sealed to the vault like everything else
+        let blob = att_blob(&hex(&random::<8>()?))?;
+        let packet = self.seal_to_me(&file.name, &file.mime, &cleaned)?;
+        self.store.write(&blob, &packet)?;
+        let shown = LineFile {
+            name: file.name.clone(),
+            mime: file.mime.clone(),
+            size: file.size,
+            blob,
+        };
+        self.send(id, text, Some(file), pieces, Some(shown))
+    }
+
+    fn send(
+        &mut self,
+        id: &str,
+        text: &str,
+        file: Option<FileRef>,
+        mut pieces: Vec<Event>,
+        shown: Option<LineFile>,
+    ) -> Result<(Line, Vec<Event>), EngineError> {
+        let mut m = self.messaging()?;
+        let timer = m.timer(id).map_err(messaging_err)?;
         let now = (self.now)();
         let out = m
-            .encrypt(id, text, self.system_now())
+            .seal(
+                id,
+                &Content {
+                    text: text.to_owned(),
+                    timer,
+                    file,
+                    ..Content::default()
+                },
+                self.system_now(),
+            )
             .map_err(messaging_err)?;
-        // the session moved on: keep it before anything else
+        let event = self.message_event(out.tag, &out.payload)?;
+        // the session moved on: keep it first, then the events, so a crash
+        // between them loses at worst this one message
         self.save_messaging(&m)?;
-        self.append(
-            id,
-            Line {
-                outgoing: true,
-                text: text.to_owned(),
-                at: now,
-                sent: now,
-            },
-        )?;
-        Ok(out)
+        // the pieces go first, so they are there when the message arrives
+        pieces.push(event.clone());
+        self.queue(pieces.clone())?;
+        let line = Line {
+            outgoing: true,
+            text: text.to_owned(),
+            at: now,
+            sent: now,
+            state: LineState::Queued,
+            event: event.id.clone(),
+            id: ByteBuf::from(out.id),
+            expires: self.expires(timer),
+            file: shown,
+        };
+        let mut lines = self.load_chat(id)?;
+        lines.push(line.clone());
+        self.save_chat(id, lines)?;
+        Ok((line, pieces))
     }
 
-    /// Opens every `KLM1:` message in pasted text.
-    pub fn receive(&mut self, text: &str) -> Result<Vec<Incoming>, EngineError> {
-        let found = find(MESSAGE_PREFIX, text);
-        if found.is_empty() {
-            return Ok(Vec::new());
+    /// Events waiting for a relay.
+    pub fn outbox(&self) -> Result<Vec<Event>, EngineError> {
+        Ok(self.load::<Outbox>(OUTBOX)?.events)
+    }
+
+    /// A relay stored these events: they leave the outbox, and their lines
+    /// show as sent.
+    pub fn mark_stored(&mut self, ids: &[String]) -> Result<(), EngineError> {
+        if ids.is_empty() {
+            return Ok(());
         }
+        let mut outbox: Outbox = self.load(OUTBOX)?;
+        outbox.events.retain(|e| !ids.contains(&e.id));
+        self.save(OUTBOX, OUTBOX_NAME, &outbox)?;
+        self.restate(
+            |l| l.state == LineState::Queued && ids.contains(&l.event),
+            LineState::Sent,
+        )
+    }
+
+    /// Sets the state of every outgoing line `which` picks.
+    fn restate(&mut self, which: impl Fn(&Line) -> bool, to: LineState) -> Result<(), EngineError> {
+        for c in self.messaging()?.contacts() {
+            let mut lines = self.load_chat(&c.id)?;
+            let mut changed = false;
+            for l in lines.iter_mut().filter(|l| l.outgoing && which(l)) {
+                l.state = to;
+                changed = true;
+            }
+            if changed {
+                self.save_chat(&c.id, lines)?;
+            }
+        }
+        Ok(())
+    }
+
+    /// Opens what arrived: messages, receipts, and pieces of files. What
+    /// does not open (old, not for us, from a blocked contact, a stranger
+    /// without the proof of work) is dropped without a word.
+    pub fn receive_events(&mut self, events: &[Event]) -> Result<Vec<Incoming>, EngineError> {
+        let mut files: Files = self.load(FILES)?;
+        let mut pieces: HashMap<String, Vec<&Event>> = HashMap::new();
+        let mut messages = Vec::new();
+        for e in events
+            .iter()
+            .filter(|e| e.kind == MESSAGE_KIND && e.verify())
+        {
+            match e.tag("p") {
+                Some(t) if files.pending.contains_key(t) => {
+                    pieces.entry(t.to_owned()).or_default().push(e);
+                }
+                _ => messages.push(e),
+            }
+        }
+
         let mut m = self.messaging()?;
-        let mut out = Vec::new();
-        for f in found {
-            let packet = match f {
-                Found::Packet(p) => p,
-                Found::Truncated => {
-                    out.push(Incoming::Truncated);
-                    continue;
-                }
-                Found::Malformed => {
-                    out.push(Incoming::Damaged);
-                    continue;
-                }
+        let mut opened = Vec::new();
+        let mut confirm: HashMap<String, Vec<Vec<u8>>> = HashMap::new();
+        let mut delivered: Vec<Vec<u8>> = Vec::new();
+        for e in messages {
+            let Ok(payload) = URL_SAFE_NO_PAD.decode(&e.content) else {
+                continue;
             };
-            out.push(match m.decrypt(&packet, self.system_now()) {
-                Ok(r) => {
-                    self.save_messaging(&m)?;
-                    self.append(
-                        &r.contact,
-                        Line {
-                            outgoing: false,
-                            text: r.text.clone(),
-                            at: (self.now)(),
-                            sent: r.sent,
-                        },
-                    )?;
-                    Incoming::Opened {
-                        contact: r.contact,
-                        new_contact: r.new_contact,
-                        text: r.text,
-                    }
-                }
-                Err(MessagingError::Duplicate) => Incoming::Duplicate,
-                Err(MessagingError::UnknownSender) => Incoming::Unknown,
+            let r: Received = match m.decrypt(&payload, self.system_now()) {
+                Ok(r) => r,
                 Err(MessagingError::Crypto) => return Err(EngineError::Damaged),
-                Err(_) => Incoming::Damaged,
+                Err(_) => continue,
+            };
+            // the session moved on: keep it before the line
+            self.save_messaging(&m)?;
+            delivered.extend(r.receipts.iter().cloned());
+            if r.text.is_empty() && r.file.is_none() {
+                continue;
+            }
+            let file = match &r.file {
+                Some(f) if f.chunks > 0 && f.chunks as usize <= MAX_FILE.div_ceil(CHUNK) + 1 => {
+                    if files.pending.len() < MAX_PENDING_FILES {
+                        files.pending.insert(
+                            f.tag.clone(),
+                            Pending {
+                                contact: r.contact.clone(),
+                                line: ByteBuf::from(r.id.clone()),
+                                file: f.clone(),
+                                got: BTreeMap::new(),
+                            },
+                        );
+                    }
+                    Some(LineFile {
+                        name: f.name.clone(),
+                        mime: f.mime.clone(),
+                        size: f.size,
+                        blob: String::new(),
+                    })
+                }
+                _ => None,
+            };
+            let mut lines = self.load_chat(&r.contact)?;
+            lines.push(Line {
+                outgoing: false,
+                text: r.text.clone(),
+                at: (self.now)(),
+                sent: r.sent,
+                state: LineState::Delivered,
+                event: String::new(),
+                id: ByteBuf::from(r.id.clone()),
+                expires: self.expires(r.timer),
+                file,
+            });
+            self.save_chat(&r.contact, lines)?;
+            let accepted = m
+                .contacts()
+                .iter()
+                .any(|c| c.id == r.contact && c.state == ContactState::Accepted);
+            if accepted {
+                confirm.entry(r.contact.clone()).or_default().push(r.id);
+            }
+            opened.push(Incoming {
+                contact: r.contact,
+                new_contact: r.new_contact,
+                text: r.text,
             });
         }
-        Ok(out)
+        self.save(FILES, FILES_NAME, &files)?;
+        if !delivered.is_empty() {
+            self.restate(
+                |l| l.state != LineState::Delivered && delivered.iter().any(|d| *d == *l.id),
+                LineState::Delivered,
+            )?;
+        }
+        for (contact, ids) in confirm {
+            self.send_receipts(&contact, ids)?;
+        }
+        self.take_pieces(&mut files, &pieces)?;
+        Ok(opened)
+    }
+
+    /// Opens the pieces that arrived; a file whose pieces are all in is
+    /// checked against its hash, kept, and shown on its line.
+    fn take_pieces(
+        &mut self,
+        files: &mut Files,
+        pieces: &HashMap<String, Vec<&Event>>,
+    ) -> Result<(), EngineError> {
+        if pieces.is_empty() {
+            return Ok(());
+        }
+        let mut done = Vec::new();
+        for (tag, events) in pieces {
+            let Some(p) = files.pending.get_mut(tag) else {
+                continue;
+            };
+            let Ok(cipher) = XChaCha20Poly1305::new_from_slice(&p.file.key) else {
+                continue;
+            };
+            for e in events {
+                let Ok(raw) = URL_SAFE_NO_PAD.decode(&e.content) else {
+                    continue;
+                };
+                let Some((idx, sealed)) = raw.split_first_chunk::<4>() else {
+                    continue;
+                };
+                let i = u32::from_le_bytes(*idx);
+                if i >= p.file.chunks || p.got.contains_key(&i) {
+                    continue;
+                }
+                if let Ok(plain) = cipher.decrypt(
+                    &chunk_nonce(i),
+                    Payload {
+                        msg: sealed,
+                        aad: tag.as_bytes(),
+                    },
+                ) {
+                    p.got.insert(i, ByteBuf::from(plain));
+                }
+            }
+            if p.got.len() == p.file.chunks as usize {
+                done.push(tag.clone());
+            }
+        }
+        for tag in done {
+            let Some(p) = files.pending.remove(&tag) else {
+                continue;
+            };
+            let whole: Vec<u8> = p.got.into_values().flat_map(ByteBuf::into_vec).collect();
+            let ok = whole.len() as u64 == p.file.size
+                && Sha256::digest(&whole).as_slice() == p.file.sha256.as_slice();
+            let mut lines = self.load_chat(&p.contact)?;
+            let Some(line) = lines.iter_mut().find(|l| !l.outgoing && l.id == p.line) else {
+                continue;
+            };
+            if ok {
+                let blob = att_blob(&hex(&random::<8>()?))?;
+                let packet = self.seal_to_me(&p.file.name, &p.file.mime, &whole)?;
+                self.store.write(&blob, &packet)?;
+                if let Some(f) = line.file.as_mut() {
+                    f.blob = blob;
+                }
+            } else {
+                // a file that does not match its hash is not kept
+                line.file = None;
+            }
+            self.save_chat(&p.contact, lines)?;
+        }
+        self.save(FILES, FILES_NAME, files)
     }
 }
 
@@ -301,76 +925,267 @@ mod tests {
         e
     }
 
-    #[test]
-    fn two_vaults_talk_through_pasted_text() {
-        let (da, db) = (tempfile::tempdir().unwrap(), tempfile::tempdir().unwrap());
-        let mut ayse = ready(&da, "482916");
-        let mut bora = ready(&db, "739204");
-        assert!(ayse.contacts().unwrap().is_empty());
+    /// Stands in for the relays: everything published, filtered on read.
+    #[derive(Default)]
+    struct Relays(Vec<Event>);
 
-        let card = bora.my_card("Bora").unwrap();
+    impl Relays {
+        fn get(&self, f: &Filter) -> Vec<Event> {
+            self.0.iter().filter(|e| f.matches(e)).cloned().collect()
+        }
+
+        /// Publishes the outbox and tells the engine a relay kept it.
+        fn take_outbox(&mut self, e: &mut Engine) {
+            let out = e.outbox().unwrap();
+            let ids: Vec<String> = out.iter().map(|x| x.id.clone()).collect();
+            self.0.extend(out);
+            e.mark_stored(&ids).unwrap();
+        }
+
+        fn deliver(&self, e: &mut Engine) -> Vec<Incoming> {
+            e.receive_events(&self.get(&e.inbox_filter().unwrap()))
+                .unwrap()
+        }
+    }
+
+    fn meet(ayse: &mut Engine, bora: &mut Engine, relays: &mut Relays) -> (String, String) {
+        relays.0.push(bora.card_event().unwrap());
+        let inv = Engine::invite(&bora.my_kilit().unwrap().link).unwrap();
         let c = ayse
-            .add_contact(&format!("Bora's card: {card}"), None)
+            .add_from_cards(&inv, &relays.get(&Engine::card_filter(&inv)), Some("Bora"))
             .unwrap();
-        assert_eq!((c.name.as_str(), c.last.is_none()), ("Bora", true));
-
-        let m = ayse.send_message(&c.id, "selam").unwrap();
-        let got = bora.receive(&m).unwrap();
-        let Some(Incoming::Opened {
-            contact,
-            new_contact: true,
-            text,
-        }) = got.into_iter().next()
-        else {
-            unreachable!("Bora opens Ayşe's first message");
-        };
-        assert_eq!(text, "selam");
-        assert_eq!(bora.receive(&m).unwrap(), vec![Incoming::Duplicate]);
-        bora.rename_contact(&contact, "Ayşe").unwrap();
-
-        let r = bora.send_message(&contact, "aleyküm selam").unwrap();
-        // the vault locks and opens in between: the session is in the store
-        ayse.lock();
-        ayse.unlock("482916".into()).unwrap();
-        ayse.receive(&r).unwrap();
-        let lines = ayse.chat(&c.id).unwrap();
-        assert_eq!(
-            lines
-                .iter()
-                .map(|l| (l.outgoing, l.text.as_str()))
-                .collect::<Vec<_>>(),
-            vec![(true, "selam"), (false, "aleyküm selam")]
-        );
-        assert_eq!(
-            ayse.contacts().unwrap()[0].last.as_ref().unwrap().text,
-            "aleyküm selam"
-        );
-        assert_eq!(
-            ayse.safety_number(&c.id).unwrap(),
-            bora.safety_number(&contact).unwrap()
-        );
-
-        ayse.remove_contact(&c.id).unwrap();
-        assert!(ayse.contacts().unwrap().is_empty());
-        assert!(ayse.chat(&c.id).unwrap().is_empty());
+        ayse.send_message(&c.id, "selam").unwrap();
+        relays.take_outbox(ayse);
+        let got = relays.deliver(bora);
+        let ayse_id = got[0].contact.clone();
+        bora.accept_contact(&ayse_id).unwrap();
+        relays.take_outbox(bora);
+        relays.deliver(ayse);
+        (ayse_id, c.id)
     }
 
     #[test]
-    fn cards_and_messages_that_are_not_are_refused() {
-        let d = tempfile::tempdir().unwrap();
-        let mut e = ready(&d, "482916");
+    fn two_vaults_find_each_other_and_talk_through_relays() {
+        let (da, db) = (tempfile::tempdir().unwrap(), tempfile::tempdir().unwrap());
+        let mut ayse = ready(&da, "482916");
+        let mut bora = ready(&db, "739204");
+        let mut relays = Relays::default();
+        relays.0.push(bora.card_event().unwrap());
+
+        // Ayşe types Bora's ID
+        let typed = format!("@{}", bora.my_kilit().unwrap().kilit_id);
+        let inv = Engine::invite(&typed).unwrap();
+        let cards = relays.get(&Engine::card_filter(&inv));
+        let c = ayse.add_from_cards(&inv, &cards, Some("Bora")).unwrap();
+        assert_eq!((c.name.as_str(), c.state), ("Bora", ContactState::Accepted));
+
+        let (line, _) = ayse.send_message(&c.id, "selam").unwrap();
+        assert_eq!(line.state, LineState::Queued);
+        relays.take_outbox(&mut ayse);
+        assert!(ayse.outbox().unwrap().is_empty());
+        assert_eq!(ayse.chat(&c.id).unwrap()[0].state, LineState::Sent);
+
+        let got = relays.deliver(&mut bora);
+        assert_eq!(got.len(), 1);
+        assert!(got[0].new_contact);
+        let ayse_id = got[0].contact.clone();
+        let req = &bora.contacts().unwrap()[0];
+        assert_eq!(req.state, ContactState::Request);
+        assert_eq!(req.kilit_id, ayse.my_kilit().unwrap().kilit_id);
+        // a request is not answered: Ayşe's line stays at one tick
+        assert!(bora.outbox().unwrap().is_empty());
+        bora.accept_contact(&ayse_id).unwrap();
+        // accepting answers it: two ticks
+        relays.take_outbox(&mut bora);
+        relays.deliver(&mut ayse);
+        assert_eq!(ayse.chat(&c.id).unwrap()[0].state, LineState::Delivered);
+
+        // the same events again open nothing new
+        assert!(relays.deliver(&mut bora).is_empty());
+
+        bora.send_message(&ayse_id, "aleyküm selam").unwrap();
+        relays.take_outbox(&mut bora);
+        ayse.lock();
+        ayse.unlock("482916".into()).unwrap();
+        let got = relays.deliver(&mut ayse);
+        assert_eq!(got[0].text, "aleyküm selam");
+        // Ayşe answers with a receipt on her own
+        relays.take_outbox(&mut ayse);
+        relays.deliver(&mut bora);
+        assert_eq!(
+            bora.chat(&ayse_id).unwrap().last().unwrap().state,
+            LineState::Delivered
+        );
+        assert_eq!(
+            ayse.safety_number(&c.id).unwrap(),
+            bora.safety_number(&ayse_id).unwrap()
+        );
+    }
+
+    #[test]
+    fn a_picture_arrives_in_pieces_and_whole() {
+        let (da, db) = (tempfile::tempdir().unwrap(), tempfile::tempdir().unwrap());
+        let mut ayse = ready(&da, "482916");
+        let mut bora = ready(&db, "739204");
+        let mut relays = Relays::default();
+        let (ayse_id, bora_id) = meet(&mut ayse, &mut bora, &mut relays);
+
+        let data: Vec<u8> = (0..70_000u32).map(|i| (i * 7 % 251) as u8).collect();
+        let (line, events) = ayse
+            .send_file(
+                &bora_id,
+                "veri.bin",
+                "application/octet-stream",
+                &data,
+                "dosya",
+            )
+            .unwrap();
+        assert_eq!(events.len(), 4, "three pieces and the message");
+        let mine = line.file.unwrap();
+        assert_eq!(ayse.read_attachment(&mine.blob).unwrap(), data);
+
+        // the message first, the pieces later, as relays may hand them out
+        let all = ayse.outbox().unwrap();
+        let (msg, pieces) = all.split_last().unwrap();
+        relays.0.push(msg.clone());
+        relays.deliver(&mut bora);
+        let l = bora.chat(&ayse_id).unwrap().last().unwrap().clone();
+        assert_eq!(l.text, "dosya");
+        assert_eq!(l.file.as_ref().unwrap().blob, "");
+        // the filter now asks for the pieces too
+        relays.0.extend(pieces.iter().cloned());
+        relays.deliver(&mut bora);
+        let l = bora.chat(&ayse_id).unwrap().last().unwrap().clone();
+        let f = l.file.unwrap();
+        assert_eq!((f.name.as_str(), f.size), ("veri.bin", 70_000));
+        assert_eq!(bora.read_attachment(&f.blob).unwrap(), data);
+        assert!(
+            ayse.send_file(&bora_id, "x", "x", &vec![0; MAX_FILE + 1], "")
+                .is_err()
+        );
+    }
+
+    #[test]
+    fn disappearing_messages_go_with_their_files() {
+        let (da, db) = (tempfile::tempdir().unwrap(), tempfile::tempdir().unwrap());
+        let mut ayse = ready(&da, "482916");
+        let mut bora = ready(&db, "739204");
+        let mut relays = Relays::default();
+        let (ayse_id, bora_id) = meet(&mut ayse, &mut bora, &mut relays);
+        ayse.set_timer(&bora_id, 60).unwrap();
+        let (line, _) = ayse
+            .send_file(
+                &bora_id,
+                "a.bin",
+                "application/octet-stream",
+                &[1, 2, 3],
+                "kısa",
+            )
+            .unwrap();
+        assert!(line.expires > 0);
+        relays.take_outbox(&mut ayse);
+        relays.deliver(&mut bora);
+        // the message names the file; its pieces come on the next round
+        relays.deliver(&mut bora);
+        assert_eq!(bora.contacts().unwrap()[0].timer, 60, "the timer travels");
+        let blob = bora
+            .chat(&ayse_id)
+            .unwrap()
+            .last()
+            .unwrap()
+            .file
+            .clone()
+            .unwrap()
+            .blob;
+        assert!(!blob.is_empty());
+
+        // a minute later
+        bora.now = || 4_102_444_800;
+        assert!(
+            bora.chat(&ayse_id)
+                .unwrap()
+                .iter()
+                .all(|l| l.text != "kısa")
+        );
+        bora.sweep_expired().unwrap();
+        assert!(bora.read_attachment(&blob).is_err(), "the file is gone too");
+    }
+
+    #[test]
+    fn a_new_id_blanks_the_old_card_and_keeps_contacts() {
+        let (da, db) = (tempfile::tempdir().unwrap(), tempfile::tempdir().unwrap());
+        let mut ayse = ready(&da, "482916");
+        let mut bora = ready(&db, "739204");
+        let mut relays = Relays::default();
+        let (ayse_id, bora_id) = meet(&mut ayse, &mut bora, &mut relays);
+        let old = bora.my_kilit().unwrap();
+        let new = bora.renew_kilit_id().unwrap();
+        assert_ne!(old.kilit_id, new.kilit_id);
+        let blanks = bora.retired_card_events().unwrap();
+        assert_eq!(blanks.len(), 1);
+        assert!(blanks[0].content.is_empty());
+        assert!(bora.retired_card_events().unwrap().is_empty());
+        // the old ID finds nobody once the blank replaces the card
+        relays.0.retain(|e| e.kind != CARD_KIND);
+        relays.0.extend(blanks);
+        relays.0.push(bora.card_event().unwrap());
+        let old_inv = Engine::invite(&old.link).unwrap();
+        let (dc,) = (tempfile::tempdir().unwrap(),);
+        let mut cem = ready(&dc, "135790");
+        assert!(
+            cem.add_from_cards(&old_inv, &relays.get(&Engine::card_filter(&old_inv)), None)
+                .is_err()
+        );
+        let new_inv = Engine::invite(&new.link).unwrap();
+        assert!(
+            cem.add_from_cards(&new_inv, &relays.get(&Engine::card_filter(&new_inv)), None)
+                .is_ok()
+        );
+        // Ayşe and Bora go on
+        bora.send_message(&ayse_id, "yeni kimlik").unwrap();
+        relays.take_outbox(&mut bora);
+        assert_eq!(relays.deliver(&mut ayse)[0].text, "yeni kimlik");
+        let shown = ayse
+            .contacts()
+            .unwrap()
+            .into_iter()
+            .find(|c| c.id == bora_id)
+            .unwrap();
+        assert_eq!(shown.kilit_id, new.kilit_id);
+    }
+
+    #[test]
+    fn a_card_under_the_wrong_id_is_not_added() {
+        let (da, db, dc) = (
+            tempfile::tempdir().unwrap(),
+            tempfile::tempdir().unwrap(),
+            tempfile::tempdir().unwrap(),
+        );
+        let mut ayse = ready(&da, "482916");
+        let bora = ready(&db, "739204");
+        let cem = ready(&dc, "135790");
+        let inv = Engine::invite(&bora.my_kilit().unwrap().link).unwrap();
+        // Cem publishes his own card under Bora's tag
+        let mut fake = cem.card_event().unwrap();
+        fake.tags = vec![vec!["d".into(), card_tag(&inv.id)]];
+        let fake = Event::sign(
+            &[7; 32],
+            fake.created_at,
+            CARD_KIND,
+            fake.tags,
+            fake.content,
+        )
+        .unwrap();
         assert!(matches!(
-            e.add_contact("hello", None),
+            ayse.add_from_cards(&inv, std::slice::from_ref(&fake), None),
             Err(EngineError::Rejected(_))
         ));
-        let own = e.my_card("me").unwrap();
-        assert!(matches!(
-            e.add_contact(&own, None),
-            Err(EngineError::Rejected(_))
-        ));
-        assert_eq!(e.receive("no message here").unwrap(), vec![]);
-        assert_eq!(e.receive("KLM1:AAAA").unwrap(), vec![Incoming::Truncated]);
-        assert_eq!(e.receive("KLM1:AAAA.").unwrap(), vec![Incoming::Damaged]);
+        // with the real one among them, the real one wins
+        let c = ayse
+            .add_from_cards(&inv, &[fake, bora.card_event().unwrap()], None)
+            .unwrap();
+        assert_eq!(c.kilit_id, inv.id);
+        assert!(Engine::invite("hello").is_err());
     }
 
     #[test]
@@ -378,8 +1193,9 @@ mod tests {
         let (da, db) = (tempfile::tempdir().unwrap(), tempfile::tempdir().unwrap());
         let mut ayse = ready(&da, "482916");
         let bora = ready(&db, "739204");
+        let inv = Engine::invite(&bora.my_kilit().unwrap().link).unwrap();
         let c = ayse
-            .add_contact(&bora.my_card("Bora").unwrap(), None)
+            .add_from_cards(&inv, &[bora.card_event().unwrap()], None)
             .unwrap();
         ayse.send_message(&c.id, "x").unwrap();
         ayse.set_panic("7391".into()).unwrap();

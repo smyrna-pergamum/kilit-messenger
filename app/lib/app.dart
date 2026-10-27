@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'core/kilit_core.dart';
 import 'l10n/app_localizations.dart';
 import 'platform/files.dart';
+import 'platform/tor.dart';
 import 'screens/lock_screen.dart';
 import 'screens/shell.dart';
 import 'state/prefs.dart';
@@ -21,11 +22,15 @@ class KilitApp extends StatefulWidget {
     required this.core,
     required this.files,
     required this.prefs,
+    this.tor,
   });
 
   final KilitCore core;
   final FileAccess files;
   final Prefs prefs;
+
+  /// Tor; none on a platform without it, and in widget tests.
+  final TorController? tor;
 
   @override
   State<KilitApp> createState() => _KilitAppState();
@@ -42,6 +47,15 @@ class _KilitAppState extends State<KilitApp> {
   late final AppLifecycleListener _lifecycle = AppLifecycleListener(
     onHide: _session.lock,
   );
+
+  late final TorController _tor =
+      widget.tor ?? TorController(const NoTor(), '');
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.prefs.tor) _tor.start();
+  }
 
   @override
   void dispose() {
@@ -83,6 +97,7 @@ class _KilitAppState extends State<KilitApp> {
               session: _session,
               files: widget.files,
               prefs: widget.prefs,
+              tor: _tor,
             ),
           },
         ),

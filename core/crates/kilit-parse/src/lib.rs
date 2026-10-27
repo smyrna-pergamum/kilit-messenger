@@ -9,6 +9,7 @@
 //! quality. The format is recognised by its bytes, never by a name or a
 //! media type someone else chose.
 
+pub mod camera;
 mod exif;
 mod jpeg;
 

@@ -45,7 +45,7 @@ class DevCore implements KilitCore {
     _kept.clear();
     _contacts.clear();
     _chats.clear();
-    _opened.clear();
+    _relay.clear();
     _pin = null;
     _panic = null;
     _failures = 0;
@@ -262,55 +262,153 @@ class DevCore implements KilitCore {
       ? CleanedFile.cleaned(bytes, const {HiddenData.exif, HiddenData.location})
       : const CleanedFile.failed(CleanOutcome.unsupported);
 
-  // ---- contacts: a stand-in that encrypts nothing. A card is
-  // `KLC1:DEV<base64 of id|name>.`; a message `KLM1:DEV<base64 of
-  // from|text>.` and opens on any DevCore.
+  // ---- contacts and chats: a stand-in that encrypts nothing and has no
+  // relays. Tests play the other phone with [deliver].
 
-  static const _myId = '0123456789abcdef0123456789abcdef';
+  static const myId = 'abandon-ability-able-about';
+  String _myId = myId;
+  final Map<String, Uint8List> _files = {};
+  int _nextFile = 1;
+  static const _myAddress = '0123456789abcdef0123456789abcdef';
   final Map<String, Contact> _contacts = {};
   final Map<String, List<ChatLine>> _chats = {};
-  final Set<String> _opened = {};
+  final List<Arrived> _relay = [];
+  bool _online = false;
 
-  /// A card as another DevCore would make it, for tests.
-  static String cardFor(String id, String name) =>
-      'KLC1:DEV${base64Url.encode(utf8.encode('$id|$name'))}.';
+  /// The address a DevCore gives the person with these four words.
+  static String addressOf(String words) =>
+      words.hashCode.toUnsigned(32).toRadixString(16).padLeft(32, '0');
 
-  /// A message as another DevCore would send it, for tests.
-  static String messageFrom(String id, String text) =>
-      'KLM1:DEV${base64Url.encode(utf8.encode('$id|$text'))}.';
+  /// A message from [words] that the next [netTick] brings in.
+  void deliver(String words, String text) {
+    final id = addressOf(words);
+    final isNew = !_contacts.containsKey(id);
+    if (isNew) {
+      _contacts[id] = Contact(
+        id: id,
+        kilitId: words,
+        name: '',
+        added: _clock(),
+        standing: Standing.request,
+      );
+    }
+    final now = _clock();
+    (_chats[id] ??= []).add(
+      ChatLine(outgoing: false, text: text, at: now, sent: now),
+    );
+    _relay.add(Arrived(id, text, request: isNew));
+  }
 
-  static (String, String)? _decode(String text, String prefix) {
-    final m = RegExp('$prefix:DEV([A-Za-z0-9_=-]*)\\.').firstMatch(text);
-    if (m == null) return null;
-    final s = utf8.decode(base64Url.decode(m.group(1)!));
-    final bar = s.indexOf('|');
-    return bar < 0 ? null : (s.substring(0, bar), s.substring(bar + 1));
+  static String? _words(String text) {
+    final t = text.trim();
+    final m =
+        RegExp(r'^kilit://add\?id=([a-z]+(?:-[a-z]+){3})(&a=[0-9a-f]{32})?$')
+            .firstMatch(t) ??
+        RegExp(r'^@([a-z]+(?:-[a-z]+){3})$').firstMatch(t.toLowerCase());
+    return m?.group(1);
   }
 
   Contact _withLast(Contact c) => Contact(
     id: c.id,
+    kilitId: c.kilitId,
     name: c.name,
     added: c.added,
+    standing: c.standing,
+    timer: c.timer,
     last: (_chats[c.id] ?? const []).lastOrNull,
   );
 
-  @override
-  Future<String> myCard(String name) async {
-    _requireOpen();
-    return cardFor(_myId, name);
+  /// Marks every outgoing line to [id] as opened on their phone, as a
+  /// receipt would; for tests.
+  void receiptFrom(String id) {
+    final lines = _chats[id];
+    if (lines == null) return;
+    for (var i = 0; i < lines.length; i++) {
+      final l = lines[i];
+      if (!l.outgoing) continue;
+      lines[i] = ChatLine(
+        outgoing: true,
+        text: l.text,
+        at: l.at,
+        sent: l.sent,
+        onRelay: true,
+        delivered: true,
+        expires: l.expires,
+        file: l.file,
+      );
+    }
+    _relay.add(Arrived(id, ''));
   }
+
+  @override
+  Future<MyKilit> myKilit() async =>
+      MyKilit(_myId, 'kilit://add?id=$_myId&a=$_myAddress');
+
+  @override
+  Future<MyKilit> renewKilitId() async {
+    _myId = 'zoo-zoo-zoo-${_myId == 'zoo-zoo-zoo-zoo' ? 'zone' : 'zoo'}';
+    return myKilit();
+  }
+
+  @override
+  Future<ChatLine> sendFile(
+    String id,
+    String name,
+    String mime,
+    Uint8List bytes, {
+    String text = '',
+  }) async {
+    _requireOpen();
+    if (bytes.length > maxChatFileBytes) throw StateError('too large');
+    final blob = 'att-${(_nextFile++).toRadixString(16).padLeft(16, '0')}';
+    _files[blob] = Uint8List.fromList(bytes);
+    final now = _clock();
+    final c = _contacts[id];
+    final line = ChatLine(
+      outgoing: true,
+      text: text,
+      at: now,
+      sent: now,
+      onRelay: _online,
+      expires: (c == null || c.timer == Duration.zero)
+          ? null
+          : now.add(c.timer),
+      file: ChatFile(name: name, mime: mime, size: bytes.length, blob: blob),
+    );
+    (_chats[id] ??= []).add(line);
+    return line;
+  }
+
+  @override
+  Future<Uint8List> readAttachment(String blob) async =>
+      _files[blob] ?? (throw StateError('no such file'));
+
+  @override
+  Future<void> setTimer(String id, Duration timer) async {
+    _contacts[id] = _contacts[id]!.withTimer(timer);
+  }
+
+  @override
+  Future<Uint8List> cameraJpeg(CameraFrame frame) async =>
+      Uint8List.fromList([0xFF, 0xD8, 0xFF, 0xD9]);
+
+  @override
+  bool isInvite(String text) => _words(text) != null;
 
   @override
   Future<Contact> addContact(String text, {String? name}) async {
     _requireOpen();
-    final card = _decode(text, 'KLC1');
-    if (card == null || card.$1 == _myId) throw const ContactRefused();
+    final words = _words(text);
+    if (words == null || words == myId) throw const ContactRefused();
+    if (!_online) throw const Offline();
+    final id = addressOf(words);
     final c = Contact(
-      id: card.$1,
-      name: (name == null || name.trim().isEmpty) ? card.$2 : name.trim(),
-      added: _clock(),
+      id: id,
+      kilitId: words,
+      name: name?.trim() ?? '',
+      added: _contacts[id]?.added ?? _clock(),
     );
-    _contacts[c.id] = c;
+    _contacts[id] = c;
     return _withLast(c);
   }
 
@@ -322,11 +420,29 @@ class DevCore implements KilitCore {
     return v;
   }
 
+  void _restand(String id, Standing s) {
+    final c = _contacts[id]!;
+    _contacts[id] = Contact(
+      id: id,
+      kilitId: c.kilitId,
+      name: c.name,
+      added: c.added,
+      standing: s,
+      timer: c.timer,
+    );
+  }
+
   @override
   Future<void> renameContact(String id, String name) async {
-    final c = _contacts[id]!;
-    _contacts[id] = Contact(id: id, name: name.trim(), added: c.added);
+    _contacts[id] = _contacts[id]!.named(name.trim());
   }
+
+  @override
+  Future<void> acceptContact(String id) async =>
+      _restand(id, Standing.accepted);
+
+  @override
+  Future<void> blockContact(String id) async => _restand(id, Standing.blocked);
 
   @override
   Future<void> removeContact(String id) async {
@@ -343,44 +459,39 @@ class DevCore implements KilitCore {
       List.of(_chats[id] ?? const []);
 
   @override
-  Future<String> sendMessage(String id, String text) async {
+  Future<ChatLine> sendMessage(String id, String text) async {
     _requireOpen();
     final now = _clock();
-    (_chats[id] ??= []).add(
-      ChatLine(outgoing: true, text: text, at: now, sent: now),
+    final c = _contacts[id];
+    final line = ChatLine(
+      outgoing: true,
+      text: text,
+      at: now,
+      sent: now,
+      onRelay: _online,
+      expires: (c == null || c.timer == Duration.zero)
+          ? null
+          : now.add(c.timer),
     );
-    return messageFrom(_myId, text);
+    (_chats[id] ??= []).add(line);
+    return line;
   }
 
   @override
-  Future<List<IncomingMessage>> receive(String text) async {
-    _requireOpen();
-    final m = _decode(text, 'KLM1');
-    if (m == null) {
-      return text.contains('KLM1:')
-          ? const [IncomingMessage(IncomingKind.damaged)]
-          : const [];
-    }
-    final (from, body) = m;
-    if (!_opened.add('$from|$body')) {
-      return const [IncomingMessage(IncomingKind.duplicate)];
-    }
-    final isNew = !_contacts.containsKey(from);
-    if (isNew) {
-      _contacts[from] = Contact(id: from, name: '', added: _clock());
-    }
-    final now = _clock();
-    (_chats[from] ??= []).add(
-      ChatLine(outgoing: false, text: body, at: now, sent: now),
+  Future<void> netStart(int socks) async => _online = true;
+
+  @override
+  void netStop() => _online = false;
+
+  @override
+  Future<NetTick> netTick() async {
+    final arrived = List.of(_relay);
+    _relay.clear();
+    return NetTick(
+      arrived: arrived,
+      relaysUp: _online ? 6 : 0,
+      relays: _online ? 6 : 0,
     );
-    return [
-      IncomingMessage(
-        IncomingKind.opened,
-        contact: from,
-        newContact: isNew,
-        text: body,
-      ),
-    ];
   }
 
   @override

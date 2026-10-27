@@ -38,6 +38,16 @@ dependencies:
     path: rust_builder
   flutter_rust_bridge: 2.13.0
   path_provider: 2.1.6
+  # Dart's C interop helpers, for engine-tor's libkilittor.so
+  ffi: 2.2.0
+  # draws the QR code of the invite link (pure Dart)
+  qr_flutter: 4.1.0
+  # reads QR codes with zxing-cpp on the device, from the camera stream in
+  # memory; no Google ML Kit, nothing written to disk
+  flutter_zxing: 3.1.0
+  # the in-app camera: frames are taken from the preview stream in memory,
+  # never with takePicture, which writes a file
+  camera: 0.12.1
 
 dev_dependencies:
   flutter_test:

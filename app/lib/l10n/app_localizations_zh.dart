@@ -167,91 +167,16 @@ class LZh extends L {
   String get navSettings => '设置';
 
   @override
-  String get chatsLater => '通过 Tor 收发消息将在第 2 阶段推出。';
-
-  @override
-  String get chatsIntro =>
-      '消息使用 Signal 协议（PQXDH 和 SPQR，抗量子）端到端加密。在 Kilit 自己的网络上线之前，消息以文本形式传送，你可以把它复制到任意聊天应用中。';
-
-  @override
-  String get chatsEmpty => '还没有联系人。把你的名片给别人，或添加对方的名片。';
-
-  @override
-  String get chatsShareCard => '我的名片';
-
-  @override
-  String get chatsAddContact => '添加联系人';
-
-  @override
-  String get chatsOpenClipboard => '从剪贴板打开';
-
-  @override
-  String get chatsNothingOnClipboard => '剪贴板中没有 Kilit 消息或联系人名片。';
-
-  @override
-  String get cardTitle => '你的联系人名片';
-
-  @override
-  String get cardName => '显示名称（可选）';
-
-  @override
-  String get cardShow => '生成名片';
-
-  @override
-  String get cardHint => '把这段文本发给你想交谈的人。其中不含任何机密。连接后请核对安全码。';
-
-  @override
-  String get addContactTitle => '添加联系人';
-
-  @override
-  String get addContactCard => '对方的联系人名片（KLC1:…）';
-
-  @override
-  String get addContactName => '名称（可选）';
-
-  @override
-  String get addContactGo => '添加';
-
-  @override
-  String get addContactRefused => '这不是联系人名片，或者是你自己的名片。';
-
-  @override
-  String get contactUnnamed => '未命名联系人';
-
-  @override
   String get chatEmpty => '还没有消息。你写下的第一条消息会开启加密会话。';
 
   @override
   String get chatInput => '消息';
 
   @override
-  String get chatSend => '加密';
+  String get chatSend => '发送';
 
   @override
-  String get chatPaste => '从剪贴板打开回复';
-
-  @override
-  String get chatSealedTitle => '加密消息';
-
-  @override
-  String chatSealedHint(String name) {
-    return '把这段内容复制到聊天应用并发送给 $name。只有对方能打开。';
-  }
-
-  @override
-  String get chatNewContact => '持有你名片的人给你发了消息。请给对方命名，并在信任前核对安全码。';
-
-  @override
-  String get chatOtherContact => '另一位联系人的消息也已打开，位于与其的对话中。';
-
-  @override
-  String get chatDuplicate => '这条消息之前已打开过。';
-
-  @override
-  String get chatUnknown => '这条消息不是来自与你有会话的人。';
-
-  @override
-  String get chatDamaged => '消息已损坏。';
+  String get chatNewContact => '对方在未被添加的情况下给你发了消息。接受后即可回复，或将其屏蔽。在信任对方前请核对安全码。';
 
   @override
   String get safetyTitle => '安全码';
@@ -260,6 +185,192 @@ class LZh extends L {
   String safetyHint(String name) {
     return '与 $name 当面或通话核对这 60 位数字。如果两部手机上一致，就说明中间没有他人。';
   }
+
+  @override
+  String get attachCamera => '相机';
+
+  @override
+  String get attachFile => '照片或文件';
+
+  @override
+  String get chatFileTooLarge => '文件过大，无法发送：最大 5 MB。';
+
+  @override
+  String get chatDelivered => '已送达';
+
+  @override
+  String get fileComing => '正在接收…';
+
+  @override
+  String get fileToVault => '添加到保险库';
+
+  @override
+  String get fileSavedVault => '已添加到保险库。';
+
+  @override
+  String get timerTitle => '阅后即焚消息';
+
+  @override
+  String get timerHint => '此对话中的新消息会在这段时间后从两部手机上消失。';
+
+  @override
+  String get timerOff => '关闭';
+
+  @override
+  String get timer5m => '5 分钟';
+
+  @override
+  String get timer1h => '1 小时';
+
+  @override
+  String get timer1d => '1 天';
+
+  @override
+  String get timer1w => '1 周';
+
+  @override
+  String get renewTitle => '更新我的 Kilit ID';
+
+  @override
+  String get renewBody =>
+      '你会获得新的单词、新的链接和新的二维码。联系人仍可像以前一样与你交流；旧 ID 和旧链接对新的人不再有效。';
+
+  @override
+  String get renewGo => '更新';
+
+  @override
+  String renewDone(String id) {
+    return '你的新 ID：@$id';
+  }
+
+  @override
+  String get cameraNoCamera => '无法打开相机。请在手机设置中检查相机权限。';
+
+  @override
+  String get cameraShutter => '拍照';
+
+  @override
+  String get cameraRetake => '重拍';
+
+  @override
+  String get cameraUse => '使用';
+
+  @override
+  String get cameraIntro => '照片只在内存中拍摄：不会向手机写入任何内容，也不含位置或相机信息。';
+
+  @override
+  String get cameraSendTo => '发送给…';
+
+  @override
+  String get cameraToVault => '保存在保险库';
+
+  @override
+  String get cameraSavedVault => '照片已保存在保险库。';
+
+  @override
+  String get cameraNoContacts => '还没有可以发送的联系人。';
+
+  @override
+  String cameraSent(String name) {
+    return '已发送给 $name。';
+  }
+
+  @override
+  String get chatsYourKilit => '你的 Kilit';
+
+  @override
+  String get chatsSearch => '搜索';
+
+  @override
+  String get chatsEmptyNew => '这里还没有人。添加某人，或向对方展示你的二维码。';
+
+  @override
+  String get torChipReady => 'Tor 就绪';
+
+  @override
+  String torChipStarting(int progress) {
+    return 'Tor $progress%';
+  }
+
+  @override
+  String get torChipOff => 'Tor 已关闭';
+
+  @override
+  String get addTitle => '添加联系人';
+
+  @override
+  String get addHint => '扫描对方的二维码，或粘贴对方给你的链接或 @ID。';
+
+  @override
+  String get addScan => '扫描对方的二维码';
+
+  @override
+  String get addField => 'Kilit 链接或 @ID';
+
+  @override
+  String get addGo => '添加';
+
+  @override
+  String get addSearching => '正在通过 Tor 查找…';
+
+  @override
+  String get addNotFound => '未找到此 ID 对应的人。请检查后稍后再试。';
+
+  @override
+  String get addOffline => '尚未连接 Tor。请等到显示“Tor 就绪”。';
+
+  @override
+  String get addNotInvite => '这不是 Kilit 链接或 @ID。';
+
+  @override
+  String get addShowMine => '显示我的二维码';
+
+  @override
+  String get addShowMineHint => '你的二维码、链接和 @ID';
+
+  @override
+  String get myTitle => '我的二维码';
+
+  @override
+  String get myHint => '任何拥有此二维码、你的链接或 @ID 的人都可以给你发消息。对方的第一条消息会在“请求”中等待，直到你接受。';
+
+  @override
+  String get myCopyLink => '复制链接';
+
+  @override
+  String myShareText(String id, String link) {
+    return '在 Kilit 上添加我：@$id\n$link';
+  }
+
+  @override
+  String get scanTitle => '扫描 Kilit 二维码';
+
+  @override
+  String get scanHint => '将相机对准二维码。';
+
+  @override
+  String get requestsTitle => '请求';
+
+  @override
+  String get requestsEmpty => '没有请求。';
+
+  @override
+  String get requestHint => '对方在未被添加的情况下给你发了消息。在你接受并回复之前，对方收不到任何内容。';
+
+  @override
+  String get requestAccept => '接受';
+
+  @override
+  String get requestDecline => '拒绝';
+
+  @override
+  String get requestBlock => '屏蔽';
+
+  @override
+  String get chatOnRelay => '已存于中继';
+
+  @override
+  String get chatQueued => '等待网络';
 
   @override
   String get contactRename => '重命名';
@@ -271,16 +382,13 @@ class LZh extends L {
   String get contactRemoveTitle => '删除此联系人？';
 
   @override
-  String get contactRemoveBody => '会话和整个对话都会被删除。要再次通信，需要双方重新交换名片。';
+  String get contactRemoveBody => '会话和整个对话都会被删除。要再次通信，请重新互相添加。';
 
   @override
   String get contactRemoveGo => '删除';
 
   @override
   String get save => '保存';
-
-  @override
-  String get cameraLater => '从不将明文写入磁盘的相机将在第 2 阶段推出。';
 
   @override
   String get vaultAddNote => '添加笔记';
@@ -577,6 +685,29 @@ class LZh extends L {
 
   @override
   String get protNetworkValue => '未连接：第 1 阶段从不联网。Tor 将在第 2 阶段推出。';
+
+  @override
+  String get torOff => '已关闭：Kilit 不会联网。';
+
+  @override
+  String torStarting(int progress) {
+    return '正在连接… $progress%';
+  }
+
+  @override
+  String get torReady => '已通过 Tor 连接。';
+
+  @override
+  String get torFailed => '无法连接到 Tor。';
+
+  @override
+  String get torUnavailable => '此设备暂不可用。';
+
+  @override
+  String get torSwitch => '通过 Tor 连接';
+
+  @override
+  String get torSwitchHint => 'Kilit 只通过 Tor 访问网络。关闭时保持离线。';
 
   @override
   String get hwStrongbox => 'StrongBox 安全芯片';
