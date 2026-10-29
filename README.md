@@ -4,8 +4,9 @@ Hesapsız, telefon numarasız, uçtan uca ve post-kuantum şifreli bir mesajlaş
 uygulaması ve dosya kasası. Mesajlar Signal protokolüyle (PQXDH, Kyber1024)
 şifrelenir ve yalnızca Tor üzerinden açık Nostr relay'lerine bırakılır; sunucu
 yoktur. Tor engelliyse yerleşik obfs4 ya da snowflake köprüleri, veya
-kullanıcının kendi köprüleri kullanılır. Belge, resim ve videolar `.klt`
-paketlerine şifrelenir.
+kullanıcının kendi köprüleri kullanılır. En fazla 20 kişilik gruplar
+desteklenir; grup mesajları her üyeye ayrı ayrı şifrelenir. Belge, resim ve
+videolar `.klt` paketlerine şifrelenir.
 
 > **Durum:** Alfa. Android'de iki telefon arasında denendi. Güvenlik denetiminden geçmedi.
 

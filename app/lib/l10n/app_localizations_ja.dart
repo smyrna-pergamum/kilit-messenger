@@ -864,4 +864,115 @@ class LJa extends L {
 
   @override
   String get resendDone => '再送しました。';
+
+  @override
+  String get newGroup => '新しいグループ';
+
+  @override
+  String get groupName => 'グループ名';
+
+  @override
+  String groupPick(int count) {
+    return '最大 $count 人を選択';
+  }
+
+  @override
+  String get groupCreate => '作成';
+
+  @override
+  String groupMembers(int count) {
+    return '$count 人';
+  }
+
+  @override
+  String get groupInfo => 'グループ情報';
+
+  @override
+  String get groupAdmin => '管理者';
+
+  @override
+  String get groupYou => 'あなた';
+
+  @override
+  String get groupAddPeople => 'メンバーを追加';
+
+  @override
+  String get groupRemove => 'グループから外す';
+
+  @override
+  String get groupRename => 'グループ名を変更';
+
+  @override
+  String get groupEnd => 'グループを終了';
+
+  @override
+  String get groupEndConfirm => '全員に対してグループを終了しますか？以後だれも書き込めません。';
+
+  @override
+  String get groupLeave => 'グループを退出';
+
+  @override
+  String get groupLeaveConfirm => 'このグループを退出しますか？メッセージは届かなくなります。';
+
+  @override
+  String get groupDelete => 'グループを削除';
+
+  @override
+  String get groupEnded => 'このグループは終了しました。';
+
+  @override
+  String get groupGone => 'あなたはこのグループのメンバーではなくなりました。';
+
+  @override
+  String groupDeliveredTo(int n, int total) {
+    return '$total 人中 $n 人に配信';
+  }
+
+  @override
+  String get groupNoContacts => '先に連絡先を追加してください。グループは追加した人で作ります。';
+
+  @override
+  String groupFull(int max) {
+    return 'グループは最大 $max 人です。';
+  }
+
+  @override
+  String groupNoticeCreated(String who) {
+    return 'グループ作成：$who';
+  }
+
+  @override
+  String groupNoticeJoined(String who) {
+    return '$who があなたを追加しました';
+  }
+
+  @override
+  String groupNoticeAdded(String who, String whom) {
+    return '追加：$whom（$who）';
+  }
+
+  @override
+  String groupNoticeRemoved(String who, String whom) {
+    return '削除：$whom（$who）';
+  }
+
+  @override
+  String groupNoticeLeft(String who) {
+    return '退出：$who';
+  }
+
+  @override
+  String groupNoticeRenamed(String who, String name) {
+    return '新しいグループ名「$name」（$who）';
+  }
+
+  @override
+  String groupNoticeEnded(String who) {
+    return 'グループ終了：$who';
+  }
+
+  @override
+  String groupNoticeRemovedYou(String who) {
+    return '$who があなたを外しました';
+  }
 }

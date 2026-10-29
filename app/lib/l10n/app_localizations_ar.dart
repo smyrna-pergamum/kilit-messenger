@@ -885,4 +885,118 @@ class LAr extends L {
 
   @override
   String get resendDone => 'أُعيد الإرسال.';
+
+  @override
+  String get newGroup => 'مجموعة جديدة';
+
+  @override
+  String get groupName => 'اسم المجموعة';
+
+  @override
+  String groupPick(int count) {
+    return 'اختر حتى $count أشخاص';
+  }
+
+  @override
+  String get groupCreate => 'إنشاء';
+
+  @override
+  String groupMembers(int count) {
+    return '$count أشخاص';
+  }
+
+  @override
+  String get groupInfo => 'معلومات المجموعة';
+
+  @override
+  String get groupAdmin => 'المشرف';
+
+  @override
+  String get groupYou => 'أنت';
+
+  @override
+  String get groupAddPeople => 'إضافة أشخاص';
+
+  @override
+  String get groupRemove => 'إزالة من المجموعة';
+
+  @override
+  String get groupRename => 'إعادة تسمية المجموعة';
+
+  @override
+  String get groupEnd => 'إنهاء المجموعة';
+
+  @override
+  String get groupEndConfirm =>
+      'إنهاء المجموعة للجميع؟ لن يستطيع أحد الكتابة فيها بعد ذلك.';
+
+  @override
+  String get groupLeave => 'مغادرة المجموعة';
+
+  @override
+  String get groupLeaveConfirm =>
+      'مغادرة هذه المجموعة؟ لن تصلك رسائلها بعد الآن.';
+
+  @override
+  String get groupDelete => 'حذف المجموعة';
+
+  @override
+  String get groupEnded => 'انتهت هذه المجموعة.';
+
+  @override
+  String get groupGone => 'لم تعد في هذه المجموعة.';
+
+  @override
+  String groupDeliveredTo(int n, int total) {
+    return 'وصلت إلى $n من $total';
+  }
+
+  @override
+  String get groupNoContacts =>
+      'أضف جهات اتصال أولًا: تتكوّن المجموعة من أشخاص أضفتهم.';
+
+  @override
+  String groupFull(int max) {
+    return 'تتسع المجموعة لـ $max شخصًا كحد أقصى.';
+  }
+
+  @override
+  String groupNoticeCreated(String who) {
+    return 'أنشأ المجموعة: $who';
+  }
+
+  @override
+  String groupNoticeJoined(String who) {
+    return 'أضافك $who';
+  }
+
+  @override
+  String groupNoticeAdded(String who, String whom) {
+    return 'أُضيف: $whom · بواسطة: $who';
+  }
+
+  @override
+  String groupNoticeRemoved(String who, String whom) {
+    return 'أُزيل: $whom · بواسطة: $who';
+  }
+
+  @override
+  String groupNoticeLeft(String who) {
+    return 'غادر: $who';
+  }
+
+  @override
+  String groupNoticeRenamed(String who, String name) {
+    return 'الاسم الجديد للمجموعة «$name» · $who';
+  }
+
+  @override
+  String groupNoticeEnded(String who) {
+    return 'أنهى المجموعة: $who';
+  }
+
+  @override
+  String groupNoticeRemovedYou(String who) {
+    return 'أزالك $who';
+  }
 }

@@ -45,6 +45,8 @@ class DevCore implements KilitCore {
     _kept.clear();
     _contacts.clear();
     _chats.clear();
+    _groups.clear();
+    _groupChats.clear();
     _relay.clear();
     _pin = null;
     _panic = null;
@@ -399,6 +401,242 @@ class DevCore implements KilitCore {
   Future<void> resendMessage(String id, String line) async {
     _requireOpen();
     resent.add(line);
+  }
+
+  // ---- groups: the same stand-in; [groupMessage] plays a member.
+
+  final Map<String, Group> _groups = {};
+  final Map<String, List<ChatLine>> _groupChats = {};
+  int _nextGroup = 1;
+
+  GroupMember _memberOf(String id) {
+    if (id == _myAddress) {
+      return GroupMember(id: id, kilitId: _myId, me: true);
+    }
+    final c = _contacts[id];
+    return GroupMember(
+      id: id,
+      kilitId: c?.kilitId ?? 'zoo-zoo-zoo-zoo',
+      name: c?.name ?? '',
+    );
+  }
+
+  Group _put(
+    Group g, {
+    String? name,
+    List<GroupMember>? members,
+    bool? ended,
+    bool? gone,
+  }) => _groups[g.id] = Group(
+    id: g.id,
+    name: name ?? g.name,
+    adminId: g.adminId,
+    admin: g.admin,
+    members: members ?? g.members,
+    added: g.added,
+    ended: ended ?? g.ended,
+    gone: gone ?? g.gone,
+  );
+
+  void _notice(
+    String gid,
+    int what,
+    String from, [
+    List<String> about = const [],
+    String text = '',
+  ]) {
+    final now = _clock();
+    (_groupChats[gid] ??= []).add(
+      ChatLine(
+        outgoing: false,
+        text: text,
+        at: now,
+        sent: now,
+        from: from,
+        notice: what,
+        about: about,
+      ),
+    );
+  }
+
+  Group _withLastGroup(Group g) => Group(
+    id: g.id,
+    name: g.name,
+    adminId: g.adminId,
+    admin: g.admin,
+    members: [for (final m in g.members) _memberOf(m.id)],
+    added: g.added,
+    ended: g.ended,
+    gone: g.gone,
+    last: (_groupChats[g.id] ?? const []).lastOrNull,
+  );
+
+  Group _admin(String id) {
+    final g = _groups[id];
+    if (g == null || !g.admin || g.closed) throw StateError('not the admin');
+    return g;
+  }
+
+  @override
+  Future<List<Group>> groups() async =>
+      [for (final g in _groups.values) _withLastGroup(g)].reversed.toList();
+
+  @override
+  Future<Group> group(String id) async =>
+      _withLastGroup(_groups[id] ?? (throw StateError('no such group')));
+
+  @override
+  Future<List<ChatLine>> groupChat(String id) async =>
+      List.of(_groupChats[id] ?? const []);
+
+  @override
+  Future<Group> createGroup(String name, List<String> members) async {
+    _requireOpen();
+    if (members.isEmpty || members.length >= maxGroup) {
+      throw StateError('a group holds 2 to $maxGroup people');
+    }
+    for (final m in members) {
+      if (_contacts[m]?.standing != Standing.accepted) {
+        throw StateError('only contacts can be added');
+      }
+    }
+    final id = (_nextGroup++).toRadixString(16).padLeft(32, 'a');
+    final g = _put(
+      Group(
+        id: id,
+        name: name.trim(),
+        adminId: _myAddress,
+        admin: true,
+        members: [_memberOf(_myAddress), for (final m in members) _memberOf(m)],
+        added: _clock(),
+      ),
+    );
+    _notice(id, GroupNotice.created, _myAddress);
+    return _withLastGroup(g);
+  }
+
+  ChatLine _groupLine(String id, String text, ChatFile? file) {
+    final g = _groups[id];
+    if (g == null || g.closed) throw StateError('closed');
+    final now = _clock();
+    final line = ChatLine(
+      id: _lineId(),
+      outgoing: true,
+      text: text,
+      at: now,
+      sent: now,
+      onRelay: _online,
+      recipients: g.members.length - 1,
+      file: file,
+    );
+    (_groupChats[id] ??= []).add(line);
+    return line;
+  }
+
+  @override
+  Future<ChatLine> sendGroupMessage(String id, String text) async {
+    _requireOpen();
+    return _groupLine(id, text, null);
+  }
+
+  @override
+  Future<ChatLine> sendGroupFile(
+    String id,
+    String name,
+    String mime,
+    Uint8List bytes, {
+    String text = '',
+  }) async {
+    _requireOpen();
+    final blob = 'att-${(_nextFile++).toRadixString(16).padLeft(16, '0')}';
+    _files[blob] = Uint8List.fromList(bytes);
+    return _groupLine(
+      id,
+      text,
+      ChatFile(name: name, mime: mime, size: bytes.length, blob: blob),
+    );
+  }
+
+  @override
+  Future<void> resendGroupMessage(String id, String line) async =>
+      resent.add(line);
+
+  @override
+  Future<void> renameGroup(String id, String name) async {
+    _put(_admin(id), name: name.trim());
+    _notice(id, GroupNotice.renamed, _myAddress, const [], name.trim());
+  }
+
+  @override
+  Future<void> addGroupMembers(String id, List<String> members) async {
+    final g = _admin(id);
+    final add = members.where((m) => g.member(m) == null).toList();
+    if (g.members.length + add.length > maxGroup) {
+      throw StateError('a group holds at most $maxGroup people');
+    }
+    _put(g, members: [...g.members, for (final m in add) _memberOf(m)]);
+    _notice(id, GroupNotice.added, _myAddress, add);
+  }
+
+  @override
+  Future<void> removeGroupMember(String id, String member) async {
+    final g = _admin(id);
+    final left = g.members.where((m) => m.id != member).toList();
+    _put(g, members: left, ended: left.length < 2);
+    _notice(id, GroupNotice.removed, _myAddress, [member]);
+  }
+
+  @override
+  Future<void> endGroup(String id) async {
+    _put(_admin(id), ended: true);
+    _notice(id, GroupNotice.ended, _myAddress);
+  }
+
+  @override
+  Future<void> leaveGroup(String id) async {
+    final g = _groups[id]!;
+    if (g.admin) return endGroup(id);
+    _put(g, gone: true);
+    _notice(id, GroupNotice.left, _myAddress);
+  }
+
+  @override
+  Future<void> deleteGroup(String id) async {
+    if (!(_groups[id]?.closed ?? false)) throw StateError('leave first');
+    _groups.remove(id);
+    _groupChats.remove(id);
+  }
+
+  /// A group [id] made by contact [admin], with this vault and [others]
+  /// in it, that the next [netTick] brings in.
+  String joinGroup(String admin, String name, List<String> others) {
+    final id = (_nextGroup++).toRadixString(16).padLeft(32, 'b');
+    _put(
+      Group(
+        id: id,
+        name: name,
+        adminId: admin,
+        members: [
+          _memberOf(admin),
+          _memberOf(_myAddress),
+          for (final o in others) _memberOf(o),
+        ],
+        added: _clock(),
+      ),
+    );
+    _notice(id, GroupNotice.joined, admin);
+    _relay.add(Arrived(admin, '', group: id));
+    return id;
+  }
+
+  /// A message from member [from] in group [id] that the next [netTick]
+  /// brings in.
+  void groupMessage(String id, String from, String text) {
+    final now = _clock();
+    (_groupChats[id] ??= []).add(
+      ChatLine(outgoing: false, text: text, at: now, sent: now, from: from),
+    );
+    _relay.add(Arrived(from, text, group: id));
   }
 
   @override

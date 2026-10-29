@@ -7,7 +7,7 @@ import 'frb_generated.dart';
 
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `engine`, `mac32`, `network`, `offline`, `publish_now`, `reply`
+// These functions are ignored because they are not marked as `pub`: `engine`, `group_item`, `mac32`, `network`, `offline`, `publish_now`, `reply`, `unhex16`
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `Network`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `from`, `from`, `from`, `from`, `from`, `from`
 
@@ -65,6 +65,12 @@ abstract class KilitHandle implements RustOpaqueInterface {
     required List<int> data,
   });
 
+  /// Admin: adds contacts to a group.
+  Future<void> addGroupMembers({
+    required String id,
+    required List<String> members,
+  });
+
   /// Seals a note into the vault.
   Future<ItemInfo> addNote({required String title, required String text});
 
@@ -92,6 +98,12 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// The contacts, requests and blocked ones included, newest first.
   Future<List<ContactItem>> contacts();
 
+  /// Makes a group of this vault and `members` (contacts, at most 19).
+  Future<GroupItem> createGroup({
+    required String name,
+    required List<String> members,
+  });
+
   /// Makes a new vault sealed under `pin` with the software key, and
   /// leaves it unlocked. Only for devices without a hardware key.
   Future<void> createVault({required String pin});
@@ -100,14 +112,29 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// unlocked.
   Future<void> createVaultWithMac({required List<int> mac});
 
+  /// Forgets a group that ended or was left, with its conversation.
+  Future<void> deleteGroup({required String id});
+
   /// Removes an item.
   Future<void> deleteItem({required String id});
+
+  /// Admin: ends a group for everyone.
+  Future<void> endGroup({required String id});
 
   /// An item as a `.klt` file, to a shared passphrase or to this vault.
   Future<ExportedKlt> exportKlt({required String id, String? passphrase});
 
   /// The safety number.
   Future<String> fingerprint();
+
+  /// One group.
+  Future<GroupItem> group({required String id});
+
+  /// A group's conversation, oldest first.
+  Future<List<ChatLine>> groupChat({required String id});
+
+  /// The groups, newest conversation first.
+  Future<List<GroupItem>> groups();
 
   /// Whether a vault exists.
   Future<bool> hasVault();
@@ -134,6 +161,9 @@ abstract class KilitHandle implements RustOpaqueInterface {
 
   /// What protects this vault's PIN.
   PinKeyKind keyKind();
+
+  /// Leaves a group (the admin ends it instead).
+  Future<void> leaveGroup({required String id});
 
   /// Drops every key and decrypted entry.
   void lock();
@@ -193,12 +223,21 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// Forgets a contact and the conversation.
   Future<void> removeContact({required String id});
 
+  /// Admin: takes someone out of a group.
+  Future<void> removeGroupMember({required String id, required String member});
+
   /// Names a contact.
   Future<void> renameContact({required String id, required String name});
+
+  /// Admin: renames a group.
+  Future<void> renameGroup({required String id, required String name});
 
   /// A new Kilit ID: new words, link and QR code. Contacts stay; the old
   /// ID and link stop working.
   Future<MyKilitInfo> renewKilitId();
+
+  /// Sends a group message again to the members who have not got it.
+  Future<void> resendGroupMessage({required String id, required String line});
 
   /// Sends a message that has not been delivered again now, with its
   /// file's pieces. `line` is [`ChatLine::id`].
@@ -219,6 +258,18 @@ abstract class KilitHandle implements RustOpaqueInterface {
     required List<int> data,
     required String text,
   });
+
+  /// Sends a file (at most 5 MiB) to a group.
+  Future<ChatLine> sendGroupFile({
+    required String id,
+    required String name,
+    required String mime,
+    required List<int> data,
+    required String text,
+  });
+
+  /// Sends text to a group.
+  Future<ChatLine> sendGroupMessage({required String id, required String text});
 
   /// Seals a message for a contact and sends it; without the network it
   /// waits in the outbox.
@@ -305,6 +356,21 @@ class ChatLine {
   /// A file with it.
   final ChatFile? file;
 
+  /// In a group: who wrote it, or did what the notice says.
+  final String from;
+
+  /// In a group: a change instead of a message; 0 for a message. 1 made,
+  /// 2 you were added, 3 added, 4 removed, 5 left, 6 renamed (the text is
+  /// the new name), 7 ended, 8 you were removed.
+  final int notice;
+
+  /// Who a notice is about.
+  final List<String> about;
+
+  /// An outgoing group message: how many members have it, of how many.
+  final int deliveredTo;
+  final int recipients;
+
   const ChatLine({
     required this.id,
     required this.outgoing,
@@ -315,6 +381,11 @@ class ChatLine {
     required this.delivered,
     required this.expiresUnix,
     this.file,
+    required this.from,
+    required this.notice,
+    required this.about,
+    required this.deliveredTo,
+    required this.recipients,
   });
 
   @override
@@ -327,7 +398,12 @@ class ChatLine {
       onRelay.hashCode ^
       delivered.hashCode ^
       expiresUnix.hashCode ^
-      file.hashCode;
+      file.hashCode ^
+      from.hashCode ^
+      notice.hashCode ^
+      about.hashCode ^
+      deliveredTo.hashCode ^
+      recipients.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -342,7 +418,12 @@ class ChatLine {
           onRelay == other.onRelay &&
           delivered == other.delivered &&
           expiresUnix == other.expiresUnix &&
-          file == other.file;
+          file == other.file &&
+          from == other.from &&
+          notice == other.notice &&
+          about == other.about &&
+          deliveredTo == other.deliveredTo &&
+          recipients == other.recipients;
 }
 
 /// How cleaning a file went.
@@ -454,6 +535,9 @@ enum ContactStanding {
 
   /// Nothing from them is heard.
   blocked,
+
+  /// Known only through a group; not shown in the chats.
+  member,
 }
 
 /// A `.klt` file ready to save or share.
@@ -512,6 +596,103 @@ class FoundPacket {
           packet == other.packet;
 }
 
+/// A group, with its newest line.
+class GroupItem {
+  /// 32 hex digits.
+  final String id;
+  final String name;
+
+  /// The admin's address.
+  final String adminId;
+
+  /// This vault is the admin.
+  final bool admin;
+  final List<GroupMemberItem> members;
+
+  /// The admin ended it.
+  final bool ended;
+
+  /// This vault left or was taken out.
+  final bool gone;
+  final PlatformInt64 addedUnix;
+  final ChatLine? last;
+
+  const GroupItem({
+    required this.id,
+    required this.name,
+    required this.adminId,
+    required this.admin,
+    required this.members,
+    required this.ended,
+    required this.gone,
+    required this.addedUnix,
+    this.last,
+  });
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      name.hashCode ^
+      adminId.hashCode ^
+      admin.hashCode ^
+      members.hashCode ^
+      ended.hashCode ^
+      gone.hashCode ^
+      addedUnix.hashCode ^
+      last.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GroupItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          adminId == other.adminId &&
+          admin == other.admin &&
+          members == other.members &&
+          ended == other.ended &&
+          gone == other.gone &&
+          addedUnix == other.addedUnix &&
+          last == other.last;
+}
+
+/// Someone in a group.
+class GroupMemberItem {
+  /// The address (32 hex digits).
+  final String id;
+
+  /// Their Kilit ID: four words.
+  final String kilitId;
+
+  /// The name given to them here; empty when none.
+  final String name;
+
+  /// This vault.
+  final bool me;
+
+  const GroupMemberItem({
+    required this.id,
+    required this.kilitId,
+    required this.name,
+    required this.me,
+  });
+
+  @override
+  int get hashCode =>
+      id.hashCode ^ kilitId.hashCode ^ name.hashCode ^ me.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GroupMemberItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          kilitId == other.kilitId &&
+          name == other.name &&
+          me == other.me;
+}
+
 /// How importing a `.klt` file went.
 enum ImportKind {
   /// In the vault now; see `item`.
@@ -564,14 +745,19 @@ class IncomingItem {
   /// The text.
   final String text;
 
+  /// The group it came in; empty one to one.
+  final String group;
+
   const IncomingItem({
     required this.contact,
     required this.newContact,
     required this.text,
+    required this.group,
   });
 
   @override
-  int get hashCode => contact.hashCode ^ newContact.hashCode ^ text.hashCode;
+  int get hashCode =>
+      contact.hashCode ^ newContact.hashCode ^ text.hashCode ^ group.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -580,7 +766,8 @@ class IncomingItem {
           runtimeType == other.runtimeType &&
           contact == other.contact &&
           newContact == other.newContact &&
-          text == other.text;
+          text == other.text &&
+          group == other.group;
 }
 
 /// One vault item as the list shows it.

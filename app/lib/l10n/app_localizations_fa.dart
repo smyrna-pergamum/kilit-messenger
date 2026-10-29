@@ -891,4 +891,118 @@ class LFa extends L {
 
   @override
   String get resendDone => 'دوباره فرستاده شد.';
+
+  @override
+  String get newGroup => 'گروه جدید';
+
+  @override
+  String get groupName => 'نام گروه';
+
+  @override
+  String groupPick(int count) {
+    return 'حداکثر $count نفر را انتخاب کنید';
+  }
+
+  @override
+  String get groupCreate => 'ساختن';
+
+  @override
+  String groupMembers(int count) {
+    return '$count نفر';
+  }
+
+  @override
+  String get groupInfo => 'اطلاعات گروه';
+
+  @override
+  String get groupAdmin => 'مدیر';
+
+  @override
+  String get groupYou => 'شما';
+
+  @override
+  String get groupAddPeople => 'افزودن افراد';
+
+  @override
+  String get groupRemove => 'حذف از گروه';
+
+  @override
+  String get groupRename => 'تغییر نام گروه';
+
+  @override
+  String get groupEnd => 'پایان گروه';
+
+  @override
+  String get groupEndConfirm =>
+      'گروه برای همه پایان یابد؟ پس از آن کسی نمی‌تواند در آن بنویسد.';
+
+  @override
+  String get groupLeave => 'ترک گروه';
+
+  @override
+  String get groupLeaveConfirm =>
+      'این گروه را ترک می‌کنید؟ پیام‌هایش دیگر به شما نمی‌رسد.';
+
+  @override
+  String get groupDelete => 'حذف گروه';
+
+  @override
+  String get groupEnded => 'این گروه پایان یافته است.';
+
+  @override
+  String get groupGone => 'شما دیگر در این گروه نیستید.';
+
+  @override
+  String groupDeliveredTo(int n, int total) {
+    return 'به $n از $total نفر رسید';
+  }
+
+  @override
+  String get groupNoContacts =>
+      'ابتدا مخاطب اضافه کنید: گروه از افرادی که افزوده‌اید ساخته می‌شود.';
+
+  @override
+  String groupFull(int max) {
+    return 'هر گروه حداکثر $max نفر دارد.';
+  }
+
+  @override
+  String groupNoticeCreated(String who) {
+    return 'سازنده گروه: $who';
+  }
+
+  @override
+  String groupNoticeJoined(String who) {
+    return '$who شما را اضافه کرد';
+  }
+
+  @override
+  String groupNoticeAdded(String who, String whom) {
+    return 'افزوده شد: $whom · توسط: $who';
+  }
+
+  @override
+  String groupNoticeRemoved(String who, String whom) {
+    return 'حذف شد: $whom · توسط: $who';
+  }
+
+  @override
+  String groupNoticeLeft(String who) {
+    return 'ترک کرد: $who';
+  }
+
+  @override
+  String groupNoticeRenamed(String who, String name) {
+    return 'نام جدید گروه «$name» · $who';
+  }
+
+  @override
+  String groupNoticeEnded(String who) {
+    return 'پایان‌دهنده گروه: $who';
+  }
+
+  @override
+  String groupNoticeRemovedYou(String who) {
+    return '$who شما را حذف کرد';
+  }
 }

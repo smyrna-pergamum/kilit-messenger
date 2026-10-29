@@ -18,6 +18,8 @@ import '../widgets/lock_button.dart';
 import 'camera_screen.dart';
 import 'vault_screen.dart' show formatDate;
 
+part 'group_screen.dart';
+
 /// A contact's name, or their Kilit ID until they get one.
 String contactLabel(Contact c) => c.name.isNotEmpty ? c.name : '@${c.kilitId}';
 
@@ -59,6 +61,7 @@ class ChatsScreen extends StatefulWidget {
 class _ChatsScreenState extends State<ChatsScreen> {
   KilitCore get core => widget.session.core;
   late Future<List<Contact>> _contacts = core.contacts();
+  late Future<List<Group>> _groups = core.groups();
   late Future<MyKilit> _me = core.myKilit();
   int _seen = -1;
   String? _search;
@@ -94,7 +97,35 @@ class _ChatsScreenState extends State<ChatsScreen> {
   void _reload() => setState(() {
     _seen = widget.chats.revision;
     _contacts = core.contacts();
+    _groups = core.groups();
   });
+
+  Future<void> _openGroup(Group g) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => GroupScreen(
+          core: core,
+          chats: widget.chats,
+          files: widget.files,
+          group: g,
+        ),
+      ),
+    );
+    _reload();
+  }
+
+  Future<void> _newGroup() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => NewGroupScreen(
+          core: core,
+          chats: widget.chats,
+          files: widget.files,
+        ),
+      ),
+    );
+    _reload();
+  }
 
   Future<void> _open(Contact c) async {
     await Navigator.of(context).push(
@@ -155,10 +186,11 @@ class _ChatsScreenState extends State<ChatsScreen> {
     final now = DateTime.now();
     final big = Theme.of(context).textTheme.headlineMedium;
     return SafeArea(
-      child: FutureBuilder<List<Contact>>(
-        future: _contacts,
+      child: FutureBuilder<(List<Contact>, List<Group>)>(
+        future: Future.wait([_contacts, _groups])
+            .then((v) => (v[0] as List<Contact>, v[1] as List<Group>)),
         builder: (context, snap) {
-          final all = snap.data ?? const <Contact>[];
+          final all = snap.data?.$1 ?? const <Contact>[];
           final waiting = all.where((c) => c.standing == Standing.request);
           final q = _search?.trim().toLowerCase() ?? '';
           final talking = all
@@ -170,6 +202,22 @@ class _ChatsScreenState extends State<ChatsScreen> {
                     c.kilitId.contains(q),
               )
               .toList();
+          final groups = (snap.data?.$2 ?? const <Group>[])
+              .where((g) => q.isEmpty || g.name.toLowerCase().contains(q))
+              .toList();
+          // one list, newest conversation first
+          final rows = <(DateTime, Widget)>[
+            for (final c in talking)
+              (
+                c.last?.at ?? c.added,
+                _ContactTile(contact: c, onTap: () => _open(c)),
+              ),
+            for (final g in groups)
+              (
+                g.last?.at ?? g.added,
+                _GroupTile(group: g, onTap: () => _openGroup(g)),
+              ),
+          ]..sort((a, b) => b.$1.compareTo(a.$1));
           return CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
@@ -245,6 +293,12 @@ class _ChatsScreenState extends State<ChatsScreen> {
                                   () => _search = _search == null ? '' : null,
                                 ),
                               ),
+                              IconButton(
+                                key: const ValueKey('new-group'),
+                                tooltip: l.newGroup,
+                                icon: const Icon(Icons.group_add_outlined),
+                                onPressed: _newGroup,
+                              ),
                               IconButton.outlined(
                                 key: const ValueKey('add-contact'),
                                 tooltip: l.addTitle,
@@ -302,7 +356,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
                     ),
                   ),
                 ),
-              if (snap.hasData && talking.isEmpty && waiting.isEmpty)
+              if (snap.hasData && rows.isEmpty && waiting.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
                   child: Center(
@@ -338,11 +392,8 @@ class _ChatsScreenState extends State<ChatsScreen> {
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
                   sliver: SliverList.builder(
-                    itemCount: talking.length,
-                    itemBuilder: (context, i) => _ContactTile(
-                      contact: talking[i],
-                      onTap: () => _open(talking[i]),
-                    ),
+                    itemCount: rows.length,
+                    itemBuilder: (context, i) => rows[i].$2,
                   ),
                 ),
             ],
@@ -1449,11 +1500,15 @@ class _Bubble extends StatelessWidget {
     required this.core,
     required this.files,
     this.onResend,
+    this.sender,
   });
 
   final ChatLine line;
   final KilitCore core;
   final FileAccess files;
+
+  /// In a group: who wrote an incoming line.
+  final String? sender;
 
   /// For an outgoing message not delivered yet.
   final VoidCallback? onResend;
@@ -1464,13 +1519,16 @@ class _Bubble extends StatelessWidget {
     final l = L.of(context);
     final mine = line.outgoing;
     final file = line.file;
-    final (IconData icon, String tip, String key, Color color) = !mine
+    var (IconData icon, String tip, String key, Color color) = !mine
         ? (Icons.done, '', '', t.textMuted)
         : line.delivered
         ? (Icons.done_all, l.chatDelivered, 'line-delivered', t.accent)
         : line.onRelay
         ? (Icons.done, l.chatOnRelay, 'line-sent', t.textMuted)
         : (Icons.schedule, l.chatQueued, 'line-queued', t.textMuted);
+    if (mine && line.recipients > 0) {
+      tip = l.groupDeliveredTo(line.deliveredTo, line.recipients);
+    }
     return Align(
       alignment: mine
           ? AlignmentDirectional.centerEnd
@@ -1488,6 +1546,19 @@ class _Bubble extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
+            if (sender != null)
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  sender!,
+                  key: const ValueKey('line-sender'),
+                  style: TextStyle(
+                    color: t.accent,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             if (file != null) _FileView(file: file, core: core, files: files),
             if (line.text.isNotEmpty)
               SelectableText(line.text, style: TextStyle(color: t.text)),

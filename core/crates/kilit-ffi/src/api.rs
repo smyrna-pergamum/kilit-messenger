@@ -412,6 +412,52 @@ pub struct ChatLine {
     pub expires_unix: i64,
     /// A file with it.
     pub file: Option<ChatFile>,
+    /// In a group: who wrote it, or did what the notice says.
+    pub from: String,
+    /// In a group: a change instead of a message; 0 for a message. 1 made,
+    /// 2 you were added, 3 added, 4 removed, 5 left, 6 renamed (the text is
+    /// the new name), 7 ended, 8 you were removed.
+    pub notice: u8,
+    /// Who a notice is about.
+    pub about: Vec<String>,
+    /// An outgoing group message: how many members have it, of how many.
+    pub delivered_to: u32,
+    /// An outgoing group message: how many members it went to.
+    pub recipients: u32,
+}
+
+/// Someone in a group.
+pub struct GroupMemberItem {
+    /// The address (32 hex digits).
+    pub id: String,
+    /// Their Kilit ID: four words.
+    pub kilit_id: String,
+    /// The name given to them here; empty when none.
+    pub name: String,
+    /// This vault.
+    pub me: bool,
+}
+
+/// A group, with its newest line.
+pub struct GroupItem {
+    /// 32 hex digits.
+    pub id: String,
+    /// Its name.
+    pub name: String,
+    /// The admin's address.
+    pub admin_id: String,
+    /// This vault is the admin.
+    pub admin: bool,
+    /// Everyone in it, this vault included.
+    pub members: Vec<GroupMemberItem>,
+    /// The admin ended it.
+    pub ended: bool,
+    /// This vault left or was taken out.
+    pub gone: bool,
+    /// When this vault joined, Unix seconds.
+    pub added_unix: i64,
+    /// The newest line, if any.
+    pub last: Option<ChatLine>,
 }
 
 /// A file on a line.
@@ -443,6 +489,15 @@ impl From<engine::Line> for ChatLine {
                 size: f.size,
                 blob: f.blob,
             }),
+            from: l.from,
+            notice: l.notice,
+            about: l.about,
+            delivered_to: l
+                .to
+                .iter()
+                .filter(|t| t.state == engine::LineState::Delivered)
+                .count() as u32,
+            recipients: l.to.len() as u32,
         }
     }
 }
@@ -455,6 +510,8 @@ pub enum ContactStanding {
     Request,
     /// Nothing from them is heard.
     Blocked,
+    /// Known only through a group; not shown in the chats.
+    Member,
 }
 
 /// A contact, with the newest line of the conversation.
@@ -487,6 +544,7 @@ impl From<engine::Contact> for ContactItem {
                 S::Accepted => ContactStanding::Accepted,
                 S::Request => ContactStanding::Request,
                 S::Blocked => ContactStanding::Blocked,
+                S::Member => ContactStanding::Member,
             },
             timer: c.timer,
             last: c.last.map(Into::into),
@@ -502,6 +560,8 @@ pub struct IncomingItem {
     pub new_contact: bool,
     /// The text.
     pub text: String,
+    /// The group it came in; empty one to one.
+    pub group: String,
 }
 
 /// This vault as others find it.
@@ -532,6 +592,9 @@ struct Network {
     published: HashMap<String, Instant>,
     card_published: Option<Instant>,
     resend_checked: Option<Instant>,
+    /// Cards of group members the relays gave, waiting for the next round.
+    cards: Arc<Mutex<Vec<kilit_net::Event>>>,
+    cards_asked: Option<Instant>,
 }
 
 /// Queued events are handed to the relays again this often until one keeps
@@ -542,6 +605,8 @@ const CARD_REPUBLISH: Duration = Duration::from_secs(6 * 3600);
 const RESEND_CHECK: Duration = Duration::from_secs(600);
 /// How long a card lookup waits for the relays.
 const LOOKUP_WAIT: Duration = Duration::from_secs(25);
+/// Group members' cards still missing are asked for again this often.
+const CARDS_AGAIN: Duration = Duration::from_secs(120);
 
 /// A message kept in the vault.
 pub struct KeptReply {
@@ -700,6 +765,8 @@ impl KilitHandle {
             published: HashMap::new(),
             card_published: None,
             resend_checked: None,
+            cards: Arc::new(Mutex::new(Vec::new())),
+            cards_asked: None,
         });
         drop(slot);
         self.net_tick().map(|_| ())
@@ -752,6 +819,29 @@ impl KilitHandle {
             n.card_published = Some(Instant::now());
         }
 
+        // group members not known yet: their cards are fetched off the
+        // vault's lock, and taken on a later round
+        let fetched = n
+            .cards
+            .lock()
+            .map(|mut c| std::mem::take(&mut *c))
+            .unwrap_or_default();
+        if !fetched.is_empty() {
+            e.add_member_cards(&fetched)?;
+        }
+        let missing = e.missing_members()?;
+        if !missing.is_empty() && n.cards_asked.is_none_or(|t| t.elapsed() > CARDS_AGAIN) {
+            n.cards_asked = Some(Instant::now());
+            let (net, out) = (n.net.clone(), n.cards.clone());
+            let filter = Engine::cards_filter(&missing);
+            std::thread::spawn(move || {
+                let got = net.query(&filter, LOOKUP_WAIT);
+                if let Ok(mut c) = out.lock() {
+                    c.extend(got);
+                }
+            });
+        }
+
         if n.resend_checked.is_none_or(|t| t.elapsed() > RESEND_CHECK) {
             e.resend_due()?;
             n.resend_checked = Some(Instant::now());
@@ -782,6 +872,7 @@ impl KilitHandle {
                     contact: i.contact,
                     new_contact: i.new_contact,
                     text: i.text,
+                    group: i.group,
                 })
                 .collect(),
             relays_up: status.iter().filter(|s| s.connected).count() as u32,
@@ -929,6 +1020,145 @@ impl KilitHandle {
             all[before.min(all.len())..].to_vec()
         };
         self.publish_now(events)
+    }
+
+    fn group_item(
+        e: &Engine,
+        g: engine::Group,
+        last: Option<engine::Line>,
+    ) -> Result<GroupItem, KilitError> {
+        let me = e.my_address()?;
+        let contacts = e.contacts()?;
+        Ok(GroupItem {
+            members: g
+                .roster
+                .members
+                .iter()
+                .map(|x| GroupMemberItem {
+                    id: x.address.clone(),
+                    kilit_id: x.kilit_id.clone(),
+                    name: contacts
+                        .iter()
+                        .find(|c| c.id == x.address)
+                        .map(|c| c.name.clone())
+                        .unwrap_or_default(),
+                    me: x.address == me,
+                })
+                .collect(),
+            admin: g.admin == me,
+            id: g.id,
+            name: g.roster.name,
+            admin_id: g.admin,
+            ended: g.roster.ended,
+            gone: g.gone,
+            added_unix: g.added,
+            last: last.map(Into::into),
+        })
+    }
+
+    /// The groups, newest conversation first.
+    pub fn groups(&self) -> Result<Vec<GroupItem>, KilitError> {
+        let e = self.engine()?;
+        e.groups()?
+            .into_iter()
+            .map(|(g, l)| Self::group_item(&e, g, l))
+            .collect()
+    }
+
+    /// One group.
+    pub fn group(&self, id: String) -> Result<GroupItem, KilitError> {
+        let e = self.engine()?;
+        let g = e.group(&id)?;
+        let last = e.group_chat(&id)?.pop();
+        Self::group_item(&e, g, last)
+    }
+
+    /// A group's conversation, oldest first.
+    pub fn group_chat(&self, id: String) -> Result<Vec<ChatLine>, KilitError> {
+        Ok(self
+            .engine()?
+            .group_chat(&id)?
+            .into_iter()
+            .map(Into::into)
+            .collect())
+    }
+
+    /// Makes a group of this vault and `members` (contacts, at most 19).
+    pub fn create_group(
+        &self,
+        name: String,
+        members: Vec<String>,
+    ) -> Result<GroupItem, KilitError> {
+        let (g, events) = self.engine()?.create_group(&name, &members)?;
+        self.publish_now(events)?;
+        let e = self.engine()?;
+        let last = e.group_chat(&g.id)?.pop();
+        Self::group_item(&e, g, last)
+    }
+
+    /// Sends text to a group.
+    pub fn send_group_message(&self, id: String, text: String) -> Result<ChatLine, KilitError> {
+        let (line, events) = self.engine()?.send_group_message(&id, &text)?;
+        self.publish_now(events)?;
+        Ok(line.into())
+    }
+
+    /// Sends a file (at most 5 MiB) to a group.
+    pub fn send_group_file(
+        &self,
+        id: String,
+        name: String,
+        mime: String,
+        data: Vec<u8>,
+        text: String,
+    ) -> Result<ChatLine, KilitError> {
+        let (line, events) = self
+            .engine()?
+            .send_group_file(&id, &name, &mime, &data, &text)?;
+        self.publish_now(events)?;
+        Ok(line.into())
+    }
+
+    /// Sends a group message again to the members who have not got it.
+    pub fn resend_group_message(&self, id: String, line: String) -> Result<(), KilitError> {
+        let line = unhex16(&line)?;
+        let events = self.engine()?.resend_group_message(&id, &line)?;
+        self.publish_now(events)
+    }
+
+    /// Admin: renames a group.
+    pub fn rename_group(&self, id: String, name: String) -> Result<(), KilitError> {
+        let events = self.engine()?.rename_group(&id, &name)?;
+        self.publish_now(events)
+    }
+
+    /// Admin: adds contacts to a group.
+    pub fn add_group_members(&self, id: String, members: Vec<String>) -> Result<(), KilitError> {
+        let events = self.engine()?.add_group_members(&id, &members)?;
+        self.publish_now(events)
+    }
+
+    /// Admin: takes someone out of a group.
+    pub fn remove_group_member(&self, id: String, member: String) -> Result<(), KilitError> {
+        let events = self.engine()?.remove_group_member(&id, &member)?;
+        self.publish_now(events)
+    }
+
+    /// Admin: ends a group for everyone.
+    pub fn end_group(&self, id: String) -> Result<(), KilitError> {
+        let events = self.engine()?.end_group(&id)?;
+        self.publish_now(events)
+    }
+
+    /// Leaves a group (the admin ends it instead).
+    pub fn leave_group(&self, id: String) -> Result<(), KilitError> {
+        let events = self.engine()?.leave_group(&id)?;
+        self.publish_now(events)
+    }
+
+    /// Forgets a group that ended or was left, with its conversation.
+    pub fn delete_group(&self, id: String) -> Result<(), KilitError> {
+        Ok(self.engine()?.delete_group(&id)?)
     }
 
     /// Sets a conversation's disappearing-message time (seconds, 0 = off).
@@ -1092,4 +1322,14 @@ impl KilitHandle {
             signed_by,
         }
     }
+}
+
+/// A message id from its 32 hex digits.
+fn unhex16(s: &str) -> Result<Vec<u8>, KilitError> {
+    Ok((0..s.len())
+        .step_by(2)
+        .map(|i| s.get(i..i + 2).and_then(|h| u8::from_str_radix(h, 16).ok()))
+        .collect::<Option<Vec<u8>>>()
+        .filter(|b| b.len() == 16)
+        .ok_or(EngineError::NotFound)?)
 }

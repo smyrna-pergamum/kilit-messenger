@@ -886,4 +886,118 @@ class LTr extends L {
 
   @override
   String get resendDone => 'Tekrar gönderildi.';
+
+  @override
+  String get newGroup => 'Yeni grup';
+
+  @override
+  String get groupName => 'Grup adı';
+
+  @override
+  String groupPick(int count) {
+    return 'En fazla $count kişi seçin';
+  }
+
+  @override
+  String get groupCreate => 'Oluştur';
+
+  @override
+  String groupMembers(int count) {
+    return '$count kişi';
+  }
+
+  @override
+  String get groupInfo => 'Grup bilgisi';
+
+  @override
+  String get groupAdmin => 'yönetici';
+
+  @override
+  String get groupYou => 'Siz';
+
+  @override
+  String get groupAddPeople => 'Kişi ekle';
+
+  @override
+  String get groupRemove => 'Gruptan çıkar';
+
+  @override
+  String get groupRename => 'Grubu yeniden adlandır';
+
+  @override
+  String get groupEnd => 'Grubu bitir';
+
+  @override
+  String get groupEndConfirm =>
+      'Grup herkes için bitirilsin mi? Bundan sonra kimse yazamaz.';
+
+  @override
+  String get groupLeave => 'Gruptan ayrıl';
+
+  @override
+  String get groupLeaveConfirm =>
+      'Gruptan ayrılmak istiyor musunuz? Mesajları artık size gelmez.';
+
+  @override
+  String get groupDelete => 'Grubu sil';
+
+  @override
+  String get groupEnded => 'Bu grup bitirildi.';
+
+  @override
+  String get groupGone => 'Artık bu grupta değilsiniz.';
+
+  @override
+  String groupDeliveredTo(int n, int total) {
+    return '$total kişiden $n kişiye ulaştı';
+  }
+
+  @override
+  String get groupNoContacts =>
+      'Önce kişi ekleyin: grup, eklediğiniz kişilerden kurulur.';
+
+  @override
+  String groupFull(int max) {
+    return 'Bir grupta en fazla $max kişi olabilir.';
+  }
+
+  @override
+  String groupNoticeCreated(String who) {
+    return 'Grubu kuran: $who';
+  }
+
+  @override
+  String groupNoticeJoined(String who) {
+    return '$who sizi gruba ekledi';
+  }
+
+  @override
+  String groupNoticeAdded(String who, String whom) {
+    return 'Gruba eklendi: $whom · ekleyen: $who';
+  }
+
+  @override
+  String groupNoticeRemoved(String who, String whom) {
+    return 'Gruptan çıkarıldı: $whom · çıkaran: $who';
+  }
+
+  @override
+  String groupNoticeLeft(String who) {
+    return 'Gruptan ayrıldı: $who';
+  }
+
+  @override
+  String groupNoticeRenamed(String who, String name) {
+    return 'Grubun yeni adı “$name” · $who';
+  }
+
+  @override
+  String groupNoticeEnded(String who) {
+    return 'Grubu bitiren: $who';
+  }
+
+  @override
+  String groupNoticeRemovedYou(String who) {
+    return '$who sizi gruptan çıkardı';
+  }
 }

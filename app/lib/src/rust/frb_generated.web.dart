@@ -88,6 +88,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FoundPacket dco_decode_found_packet(dynamic raw);
 
   @protected
+  GroupItem dco_decode_group_item(dynamic raw);
+
+  @protected
+  GroupMemberItem dco_decode_group_member_item(dynamic raw);
+
+  @protected
   int dco_decode_i_32(dynamic raw);
 
   @protected
@@ -125,6 +131,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<FoundPacket> dco_decode_list_found_packet(dynamic raw);
+
+  @protected
+  List<GroupItem> dco_decode_list_group_item(dynamic raw);
+
+  @protected
+  List<GroupMemberItem> dco_decode_list_group_member_item(dynamic raw);
 
   @protected
   List<IncomingItem> dco_decode_list_incoming_item(dynamic raw);
@@ -262,6 +274,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FoundPacket sse_decode_found_packet(SseDeserializer deserializer);
 
   @protected
+  GroupItem sse_decode_group_item(SseDeserializer deserializer);
+
+  @protected
+  GroupMemberItem sse_decode_group_member_item(SseDeserializer deserializer);
+
+  @protected
   int sse_decode_i_32(SseDeserializer deserializer);
 
   @protected
@@ -299,6 +317,14 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<FoundPacket> sse_decode_list_found_packet(SseDeserializer deserializer);
+
+  @protected
+  List<GroupItem> sse_decode_list_group_item(SseDeserializer deserializer);
+
+  @protected
+  List<GroupMemberItem> sse_decode_list_group_member_item(
+    SseDeserializer deserializer,
+  );
 
   @protected
   List<IncomingItem> sse_decode_list_incoming_item(
@@ -453,6 +479,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_found_packet(FoundPacket self, SseSerializer serializer);
 
   @protected
+  void sse_encode_group_item(GroupItem self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_group_member_item(
+    GroupMemberItem self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_i_32(int self, SseSerializer serializer);
 
   @protected
@@ -497,6 +532,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_list_found_packet(
     List<FoundPacket> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_group_item(
+    List<GroupItem> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_group_member_item(
+    List<GroupMemberItem> self,
     SseSerializer serializer,
   );
 

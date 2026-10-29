@@ -69,7 +69,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => -1771973796;
+  int get rustContentHash => 507553982;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -97,6 +97,12 @@ abstract class RustLibApi extends BaseApi {
     required String name,
     required String mime,
     required List<int> data,
+  });
+
+  Future<void> crateApiKilitHandleAddGroupMembers({
+    required KilitHandle that,
+    required String id,
+    required List<String> members,
   });
 
   Future<ItemInfo> crateApiKilitHandleAddNote({
@@ -133,6 +139,12 @@ abstract class RustLibApi extends BaseApi {
     required KilitHandle that,
   });
 
+  Future<GroupItem> crateApiKilitHandleCreateGroup({
+    required KilitHandle that,
+    required String name,
+    required List<String> members,
+  });
+
   Future<void> crateApiKilitHandleCreateVault({
     required KilitHandle that,
     required String pin,
@@ -143,7 +155,17 @@ abstract class RustLibApi extends BaseApi {
     required List<int> mac,
   });
 
+  Future<void> crateApiKilitHandleDeleteGroup({
+    required KilitHandle that,
+    required String id,
+  });
+
   Future<void> crateApiKilitHandleDeleteItem({
+    required KilitHandle that,
+    required String id,
+  });
+
+  Future<void> crateApiKilitHandleEndGroup({
     required KilitHandle that,
     required String id,
   });
@@ -155,6 +177,20 @@ abstract class RustLibApi extends BaseApi {
   });
 
   Future<String> crateApiKilitHandleFingerprint({required KilitHandle that});
+
+  Future<GroupItem> crateApiKilitHandleGroup({
+    required KilitHandle that,
+    required String id,
+  });
+
+  Future<List<ChatLine>> crateApiKilitHandleGroupChat({
+    required KilitHandle that,
+    required String id,
+  });
+
+  Future<List<GroupItem>> crateApiKilitHandleGroups({
+    required KilitHandle that,
+  });
 
   Future<bool> crateApiKilitHandleHasVault({required KilitHandle that});
 
@@ -181,6 +217,11 @@ abstract class RustLibApi extends BaseApi {
   });
 
   PinKeyKind crateApiKilitHandleKeyKind({required KilitHandle that});
+
+  Future<void> crateApiKilitHandleLeaveGroup({
+    required KilitHandle that,
+    required String id,
+  });
 
   void crateApiKilitHandleLock({required KilitHandle that});
 
@@ -243,7 +284,19 @@ abstract class RustLibApi extends BaseApi {
     required String id,
   });
 
+  Future<void> crateApiKilitHandleRemoveGroupMember({
+    required KilitHandle that,
+    required String id,
+    required String member,
+  });
+
   Future<void> crateApiKilitHandleRenameContact({
+    required KilitHandle that,
+    required String id,
+    required String name,
+  });
+
+  Future<void> crateApiKilitHandleRenameGroup({
     required KilitHandle that,
     required String id,
     required String name,
@@ -251,6 +304,12 @@ abstract class RustLibApi extends BaseApi {
 
   Future<MyKilitInfo> crateApiKilitHandleRenewKilitId({
     required KilitHandle that,
+  });
+
+  Future<void> crateApiKilitHandleResendGroupMessage({
+    required KilitHandle that,
+    required String id,
+    required String line,
   });
 
   Future<void> crateApiKilitHandleResendMessage({
@@ -276,6 +335,21 @@ abstract class RustLibApi extends BaseApi {
     required String name,
     required String mime,
     required List<int> data,
+    required String text,
+  });
+
+  Future<ChatLine> crateApiKilitHandleSendGroupFile({
+    required KilitHandle that,
+    required String id,
+    required String name,
+    required String mime,
+    required List<int> data,
+    required String text,
+  });
+
+  Future<ChatLine> crateApiKilitHandleSendGroupMessage({
+    required KilitHandle that,
+    required String id,
     required String text,
   });
 
@@ -468,6 +542,46 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
+  Future<void> crateApiKilitHandleAddGroupMembers({
+    required KilitHandle that,
+    required String id,
+    required List<String> members,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(id, serializer);
+          sse_encode_list_String(members, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 4,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleAddGroupMembersConstMeta,
+        argValues: [that, id, members],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleAddGroupMembersConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_add_group_members",
+        argNames: ["that", "id", "members"],
+      );
+
+  @override
   Future<ItemInfo> crateApiKilitHandleAddNote({
     required KilitHandle that,
     required String title,
@@ -486,7 +600,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 4,
+            funcId: 5,
             port: port_,
           );
         },
@@ -523,7 +637,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 5,
+            funcId: 6,
             port: port_,
           );
         },
@@ -563,7 +677,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 6,
+            funcId: 7,
             port: port_,
           );
         },
@@ -603,7 +717,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 7,
+            funcId: 8,
             port: port_,
           );
         },
@@ -641,7 +755,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 8,
+            funcId: 9,
             port: port_,
           );
         },
@@ -674,7 +788,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 9,
+            funcId: 10,
             port: port_,
           );
         },
@@ -710,7 +824,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 10,
+            funcId: 11,
             port: port_,
           );
         },
@@ -732,6 +846,46 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<GroupItem> crateApiKilitHandleCreateGroup({
+    required KilitHandle that,
+    required String name,
+    required List<String> members,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(name, serializer);
+          sse_encode_list_String(members, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 12,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_group_item,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleCreateGroupConstMeta,
+        argValues: [that, name, members],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleCreateGroupConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_create_group",
+        argNames: ["that", "name", "members"],
+      );
+
+  @override
   Future<void> crateApiKilitHandleCreateVault({
     required KilitHandle that,
     required String pin,
@@ -748,7 +902,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 11,
+            funcId: 13,
             port: port_,
           );
         },
@@ -786,7 +940,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 12,
+            funcId: 14,
             port: port_,
           );
         },
@@ -808,6 +962,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<void> crateApiKilitHandleDeleteGroup({
+    required KilitHandle that,
+    required String id,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(id, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 15,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleDeleteGroupConstMeta,
+        argValues: [that, id],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleDeleteGroupConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_delete_group",
+        argNames: ["that", "id"],
+      );
+
+  @override
   Future<void> crateApiKilitHandleDeleteItem({
     required KilitHandle that,
     required String id,
@@ -824,7 +1016,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 13,
+            funcId: 16,
             port: port_,
           );
         },
@@ -842,6 +1034,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiKilitHandleDeleteItemConstMeta =>
       const TaskConstMeta(
         debugName: "KilitHandle_delete_item",
+        argNames: ["that", "id"],
+      );
+
+  @override
+  Future<void> crateApiKilitHandleEndGroup({
+    required KilitHandle that,
+    required String id,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(id, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 17,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleEndGroupConstMeta,
+        argValues: [that, id],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleEndGroupConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_end_group",
         argNames: ["that", "id"],
       );
 
@@ -864,7 +1094,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 14,
+            funcId: 18,
             port: port_,
           );
         },
@@ -898,7 +1128,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 15,
+            funcId: 19,
             port: port_,
           );
         },
@@ -920,6 +1150,114 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<GroupItem> crateApiKilitHandleGroup({
+    required KilitHandle that,
+    required String id,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(id, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 20,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_group_item,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleGroupConstMeta,
+        argValues: [that, id],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleGroupConstMeta => const TaskConstMeta(
+    debugName: "KilitHandle_group",
+    argNames: ["that", "id"],
+  );
+
+  @override
+  Future<List<ChatLine>> crateApiKilitHandleGroupChat({
+    required KilitHandle that,
+    required String id,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(id, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 21,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_chat_line,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleGroupChatConstMeta,
+        argValues: [that, id],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleGroupChatConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_group_chat",
+        argNames: ["that", "id"],
+      );
+
+  @override
+  Future<List<GroupItem>> crateApiKilitHandleGroups({
+    required KilitHandle that,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 22,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_group_item,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleGroupsConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleGroupsConstMeta =>
+      const TaskConstMeta(debugName: "KilitHandle_groups", argNames: ["that"]);
+
+  @override
   Future<bool> crateApiKilitHandleHasVault({required KilitHandle that}) {
     return handler.executeNormal(
       NormalTask(
@@ -932,7 +1270,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 16,
+            funcId: 23,
             port: port_,
           );
         },
@@ -972,7 +1310,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 17,
+            funcId: 24,
             port: port_,
           );
         },
@@ -1010,7 +1348,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 18,
+            funcId: 25,
             port: port_,
           );
         },
@@ -1037,7 +1375,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(text, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 19)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 26)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_bool,
@@ -1069,7 +1407,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 20,
+            funcId: 27,
             port: port_,
           );
         },
@@ -1108,7 +1446,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 21,
+            funcId: 28,
             port: port_,
           );
         },
@@ -1139,7 +1477,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 22)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 29)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_pin_key_kind,
@@ -1158,6 +1496,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
+  Future<void> crateApiKilitHandleLeaveGroup({
+    required KilitHandle that,
+    required String id,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(id, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 30,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleLeaveGroupConstMeta,
+        argValues: [that, id],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleLeaveGroupConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_leave_group",
+        argNames: ["that", "id"],
+      );
+
+  @override
   void crateApiKilitHandleLock({required KilitHandle that}) {
     return handler.executeSync(
       SyncTask(
@@ -1167,7 +1543,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 23)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 31)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -1200,7 +1576,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 24,
+            funcId: 32,
             port: port_,
           );
         },
@@ -1234,7 +1610,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 25,
+            funcId: 33,
             port: port_,
           );
         },
@@ -1271,7 +1647,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 26,
+            funcId: 34,
             port: port_,
           );
         },
@@ -1302,7 +1678,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 27)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 35)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -1333,7 +1709,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 28,
+            funcId: 36,
             port: port_,
           );
         },
@@ -1367,7 +1743,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 29,
+            funcId: 37,
             port: port_,
           );
         },
@@ -1407,7 +1783,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 30,
+            funcId: 38,
             port: port_,
           );
         },
@@ -1441,7 +1817,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 31,
+            funcId: 39,
             port: port_,
           );
         },
@@ -1479,7 +1855,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 32,
+            funcId: 40,
             port: port_,
           );
         },
@@ -1517,7 +1893,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 33,
+            funcId: 41,
             port: port_,
           );
         },
@@ -1555,7 +1931,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 34,
+            funcId: 42,
             port: port_,
           );
         },
@@ -1593,7 +1969,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 35,
+            funcId: 43,
             port: port_,
           );
         },
@@ -1631,7 +2007,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 36,
+            funcId: 44,
             port: port_,
           );
         },
@@ -1669,7 +2045,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 37,
+            funcId: 45,
             port: port_,
           );
         },
@@ -1691,6 +2067,46 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<void> crateApiKilitHandleRemoveGroupMember({
+    required KilitHandle that,
+    required String id,
+    required String member,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(id, serializer);
+          sse_encode_String(member, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 46,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleRemoveGroupMemberConstMeta,
+        argValues: [that, id, member],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleRemoveGroupMemberConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_remove_group_member",
+        argNames: ["that", "id", "member"],
+      );
+
+  @override
   Future<void> crateApiKilitHandleRenameContact({
     required KilitHandle that,
     required String id,
@@ -1709,7 +2125,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 38,
+            funcId: 47,
             port: port_,
           );
         },
@@ -1731,6 +2147,46 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<void> crateApiKilitHandleRenameGroup({
+    required KilitHandle that,
+    required String id,
+    required String name,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(id, serializer);
+          sse_encode_String(name, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 48,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleRenameGroupConstMeta,
+        argValues: [that, id, name],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleRenameGroupConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_rename_group",
+        argNames: ["that", "id", "name"],
+      );
+
+  @override
   Future<MyKilitInfo> crateApiKilitHandleRenewKilitId({
     required KilitHandle that,
   }) {
@@ -1745,7 +2201,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 39,
+            funcId: 49,
             port: port_,
           );
         },
@@ -1767,6 +2223,46 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<void> crateApiKilitHandleResendGroupMessage({
+    required KilitHandle that,
+    required String id,
+    required String line,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(id, serializer);
+          sse_encode_String(line, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 50,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleResendGroupMessageConstMeta,
+        argValues: [that, id, line],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleResendGroupMessageConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_resend_group_message",
+        argNames: ["that", "id", "line"],
+      );
+
+  @override
   Future<void> crateApiKilitHandleResendMessage({
     required KilitHandle that,
     required String id,
@@ -1785,7 +2281,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 40,
+            funcId: 51,
             port: port_,
           );
         },
@@ -1823,7 +2319,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 41,
+            funcId: 52,
             port: port_,
           );
         },
@@ -1863,7 +2359,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 42,
+            funcId: 53,
             port: port_,
           );
         },
@@ -1909,7 +2405,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 43,
+            funcId: 54,
             port: port_,
           );
         },
@@ -1931,6 +2427,92 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<ChatLine> crateApiKilitHandleSendGroupFile({
+    required KilitHandle that,
+    required String id,
+    required String name,
+    required String mime,
+    required List<int> data,
+    required String text,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(id, serializer);
+          sse_encode_String(name, serializer);
+          sse_encode_String(mime, serializer);
+          sse_encode_list_prim_u_8_loose(data, serializer);
+          sse_encode_String(text, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 55,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_chat_line,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleSendGroupFileConstMeta,
+        argValues: [that, id, name, mime, data, text],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleSendGroupFileConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_send_group_file",
+        argNames: ["that", "id", "name", "mime", "data", "text"],
+      );
+
+  @override
+  Future<ChatLine> crateApiKilitHandleSendGroupMessage({
+    required KilitHandle that,
+    required String id,
+    required String text,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerKilitHandle(
+            that,
+            serializer,
+          );
+          sse_encode_String(id, serializer);
+          sse_encode_String(text, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 56,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_chat_line,
+          decodeErrorData: sse_decode_kilit_error,
+        ),
+        constMeta: kCrateApiKilitHandleSendGroupMessageConstMeta,
+        argValues: [that, id, text],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiKilitHandleSendGroupMessageConstMeta =>
+      const TaskConstMeta(
+        debugName: "KilitHandle_send_group_message",
+        argNames: ["that", "id", "text"],
+      );
+
+  @override
   Future<ChatLine> crateApiKilitHandleSendMessage({
     required KilitHandle that,
     required String id,
@@ -1949,7 +2531,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 44,
+            funcId: 57,
             port: port_,
           );
         },
@@ -1987,7 +2569,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 45,
+            funcId: 58,
             port: port_,
           );
         },
@@ -2025,7 +2607,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 46,
+            funcId: 59,
             port: port_,
           );
         },
@@ -2065,7 +2647,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 47,
+            funcId: 60,
             port: port_,
           );
         },
@@ -2103,7 +2685,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 48,
+            funcId: 61,
             port: port_,
           );
         },
@@ -2140,7 +2722,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 49,
+            funcId: 62,
             port: port_,
           );
         },
@@ -2189,7 +2771,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 50,
+            funcId: 63,
             port: port_,
           );
         },
@@ -2229,7 +2811,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 51,
+            funcId: 64,
             port: port_,
           );
         },
@@ -2254,7 +2836,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(text, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 52)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 65)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_found_packet,
@@ -2279,7 +2861,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 53,
+            funcId: 66,
             port: port_,
           );
         },
@@ -2304,7 +2886,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(pin, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 54)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 67)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -2403,8 +2985,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ChatLine dco_decode_chat_line(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 9)
-      throw Exception('unexpected arr length: expect 9 but see ${arr.length}');
+    if (arr.length != 14)
+      throw Exception('unexpected arr length: expect 14 but see ${arr.length}');
     return ChatLine(
       id: dco_decode_String(arr[0]),
       outgoing: dco_decode_bool(arr[1]),
@@ -2415,6 +2997,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       delivered: dco_decode_bool(arr[6]),
       expiresUnix: dco_decode_i_64(arr[7]),
       file: dco_decode_opt_box_autoadd_chat_file(arr[8]),
+      from: dco_decode_String(arr[9]),
+      notice: dco_decode_u_8(arr[10]),
+      about: dco_decode_list_String(arr[11]),
+      deliveredTo: dco_decode_u_32(arr[12]),
+      recipients: dco_decode_u_32(arr[13]),
     );
   }
 
@@ -2491,6 +3078,39 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  GroupItem dco_decode_group_item(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 9)
+      throw Exception('unexpected arr length: expect 9 but see ${arr.length}');
+    return GroupItem(
+      id: dco_decode_String(arr[0]),
+      name: dco_decode_String(arr[1]),
+      adminId: dco_decode_String(arr[2]),
+      admin: dco_decode_bool(arr[3]),
+      members: dco_decode_list_group_member_item(arr[4]),
+      ended: dco_decode_bool(arr[5]),
+      gone: dco_decode_bool(arr[6]),
+      addedUnix: dco_decode_i_64(arr[7]),
+      last: dco_decode_opt_box_autoadd_chat_line(arr[8]),
+    );
+  }
+
+  @protected
+  GroupMemberItem dco_decode_group_member_item(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return GroupMemberItem(
+      id: dco_decode_String(arr[0]),
+      kilitId: dco_decode_String(arr[1]),
+      name: dco_decode_String(arr[2]),
+      me: dco_decode_bool(arr[3]),
+    );
+  }
+
+  @protected
   int dco_decode_i_32(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as int;
@@ -2525,12 +3145,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   IncomingItem dco_decode_incoming_item(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 3)
-      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
     return IncomingItem(
       contact: dco_decode_String(arr[0]),
       newContact: dco_decode_bool(arr[1]),
       text: dco_decode_String(arr[2]),
+      group: dco_decode_String(arr[3]),
     );
   }
 
@@ -2602,6 +3223,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   List<FoundPacket> dco_decode_list_found_packet(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_found_packet).toList();
+  }
+
+  @protected
+  List<GroupItem> dco_decode_list_group_item(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_group_item).toList();
+  }
+
+  @protected
+  List<GroupMemberItem> dco_decode_list_group_member_item(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_group_member_item).toList();
   }
 
   @protected
@@ -2883,6 +3516,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_delivered = sse_decode_bool(deserializer);
     var var_expiresUnix = sse_decode_i_64(deserializer);
     var var_file = sse_decode_opt_box_autoadd_chat_file(deserializer);
+    var var_from = sse_decode_String(deserializer);
+    var var_notice = sse_decode_u_8(deserializer);
+    var var_about = sse_decode_list_String(deserializer);
+    var var_deliveredTo = sse_decode_u_32(deserializer);
+    var var_recipients = sse_decode_u_32(deserializer);
     return ChatLine(
       id: var_id,
       outgoing: var_outgoing,
@@ -2893,6 +3531,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       delivered: var_delivered,
       expiresUnix: var_expiresUnix,
       file: var_file,
+      from: var_from,
+      notice: var_notice,
+      about: var_about,
+      deliveredTo: var_deliveredTo,
+      recipients: var_recipients,
     );
   }
 
@@ -2968,6 +3611,46 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  GroupItem sse_decode_group_item(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_id = sse_decode_String(deserializer);
+    var var_name = sse_decode_String(deserializer);
+    var var_adminId = sse_decode_String(deserializer);
+    var var_admin = sse_decode_bool(deserializer);
+    var var_members = sse_decode_list_group_member_item(deserializer);
+    var var_ended = sse_decode_bool(deserializer);
+    var var_gone = sse_decode_bool(deserializer);
+    var var_addedUnix = sse_decode_i_64(deserializer);
+    var var_last = sse_decode_opt_box_autoadd_chat_line(deserializer);
+    return GroupItem(
+      id: var_id,
+      name: var_name,
+      adminId: var_adminId,
+      admin: var_admin,
+      members: var_members,
+      ended: var_ended,
+      gone: var_gone,
+      addedUnix: var_addedUnix,
+      last: var_last,
+    );
+  }
+
+  @protected
+  GroupMemberItem sse_decode_group_member_item(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_id = sse_decode_String(deserializer);
+    var var_kilitId = sse_decode_String(deserializer);
+    var var_name = sse_decode_String(deserializer);
+    var var_me = sse_decode_bool(deserializer);
+    return GroupMemberItem(
+      id: var_id,
+      kilitId: var_kilitId,
+      name: var_name,
+      me: var_me,
+    );
+  }
+
+  @protected
   int sse_decode_i_32(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getInt32();
@@ -3001,10 +3684,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_contact = sse_decode_String(deserializer);
     var var_newContact = sse_decode_bool(deserializer);
     var var_text = sse_decode_String(deserializer);
+    var var_group = sse_decode_String(deserializer);
     return IncomingItem(
       contact: var_contact,
       newContact: var_newContact,
       text: var_text,
+      group: var_group,
     );
   }
 
@@ -3094,6 +3779,32 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var ans_ = <FoundPacket>[];
     for (var idx_ = 0; idx_ < len_; ++idx_) {
       ans_.add(sse_decode_found_packet(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
+  List<GroupItem> sse_decode_list_group_item(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <GroupItem>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_group_item(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
+  List<GroupMemberItem> sse_decode_list_group_member_item(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <GroupMemberItem>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_group_member_item(deserializer));
     }
     return ans_;
   }
@@ -3418,6 +4129,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_bool(self.delivered, serializer);
     sse_encode_i_64(self.expiresUnix, serializer);
     sse_encode_opt_box_autoadd_chat_file(self.file, serializer);
+    sse_encode_String(self.from, serializer);
+    sse_encode_u_8(self.notice, serializer);
+    sse_encode_list_String(self.about, serializer);
+    sse_encode_u_32(self.deliveredTo, serializer);
+    sse_encode_u_32(self.recipients, serializer);
   }
 
   @protected
@@ -3476,6 +4192,32 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_group_item(GroupItem self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.id, serializer);
+    sse_encode_String(self.name, serializer);
+    sse_encode_String(self.adminId, serializer);
+    sse_encode_bool(self.admin, serializer);
+    sse_encode_list_group_member_item(self.members, serializer);
+    sse_encode_bool(self.ended, serializer);
+    sse_encode_bool(self.gone, serializer);
+    sse_encode_i_64(self.addedUnix, serializer);
+    sse_encode_opt_box_autoadd_chat_line(self.last, serializer);
+  }
+
+  @protected
+  void sse_encode_group_member_item(
+    GroupMemberItem self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.id, serializer);
+    sse_encode_String(self.kilitId, serializer);
+    sse_encode_String(self.name, serializer);
+    sse_encode_bool(self.me, serializer);
+  }
+
+  @protected
   void sse_encode_i_32(int self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putInt32(self);
@@ -3507,6 +4249,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_String(self.contact, serializer);
     sse_encode_bool(self.newContact, serializer);
     sse_encode_String(self.text, serializer);
+    sse_encode_String(self.group, serializer);
   }
 
   @protected
@@ -3585,6 +4328,30 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_i_32(self.length, serializer);
     for (final item in self) {
       sse_encode_found_packet(item, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_list_group_item(
+    List<GroupItem> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_group_item(item, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_list_group_member_item(
+    List<GroupMemberItem> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_group_member_item(item, serializer);
     }
   }
 
@@ -3845,6 +4612,16 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
     data: data,
   );
 
+  /// Admin: adds contacts to a group.
+  Future<void> addGroupMembers({
+    required String id,
+    required List<String> members,
+  }) => RustLib.instance.api.crateApiKilitHandleAddGroupMembers(
+    that: this,
+    id: id,
+    members: members,
+  );
+
   /// Seals a note into the vault.
   Future<ItemInfo> addNote({required String title, required String text}) =>
       RustLib.instance.api.crateApiKilitHandleAddNote(
@@ -3889,6 +4666,16 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
   Future<List<ContactItem>> contacts() =>
       RustLib.instance.api.crateApiKilitHandleContacts(that: this);
 
+  /// Makes a group of this vault and `members` (contacts, at most 19).
+  Future<GroupItem> createGroup({
+    required String name,
+    required List<String> members,
+  }) => RustLib.instance.api.crateApiKilitHandleCreateGroup(
+    that: this,
+    name: name,
+    members: members,
+  );
+
   /// Makes a new vault sealed under `pin` with the software key, and
   /// leaves it unlocked. Only for devices without a hardware key.
   Future<void> createVault({required String pin}) =>
@@ -3901,9 +4688,17 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
       .api
       .crateApiKilitHandleCreateVaultWithMac(that: this, mac: mac);
 
+  /// Forgets a group that ended or was left, with its conversation.
+  Future<void> deleteGroup({required String id}) =>
+      RustLib.instance.api.crateApiKilitHandleDeleteGroup(that: this, id: id);
+
   /// Removes an item.
   Future<void> deleteItem({required String id}) =>
       RustLib.instance.api.crateApiKilitHandleDeleteItem(that: this, id: id);
+
+  /// Admin: ends a group for everyone.
+  Future<void> endGroup({required String id}) =>
+      RustLib.instance.api.crateApiKilitHandleEndGroup(that: this, id: id);
 
   /// An item as a `.klt` file, to a shared passphrase or to this vault.
   Future<ExportedKlt> exportKlt({required String id, String? passphrase}) =>
@@ -3916,6 +4711,18 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
   /// The safety number.
   Future<String> fingerprint() =>
       RustLib.instance.api.crateApiKilitHandleFingerprint(that: this);
+
+  /// One group.
+  Future<GroupItem> group({required String id}) =>
+      RustLib.instance.api.crateApiKilitHandleGroup(that: this, id: id);
+
+  /// A group's conversation, oldest first.
+  Future<List<ChatLine>> groupChat({required String id}) =>
+      RustLib.instance.api.crateApiKilitHandleGroupChat(that: this, id: id);
+
+  /// The groups, newest conversation first.
+  Future<List<GroupItem>> groups() =>
+      RustLib.instance.api.crateApiKilitHandleGroups(that: this);
 
   /// Whether a vault exists.
   Future<bool> hasVault() =>
@@ -3954,6 +4761,10 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
   /// What protects this vault's PIN.
   PinKeyKind keyKind() =>
       RustLib.instance.api.crateApiKilitHandleKeyKind(that: this);
+
+  /// Leaves a group (the admin ends it instead).
+  Future<void> leaveGroup({required String id}) =>
+      RustLib.instance.api.crateApiKilitHandleLeaveGroup(that: this, id: id);
 
   /// Drops every key and decrypted entry.
   void lock() => RustLib.instance.api.crateApiKilitHandleLock(that: this);
@@ -4025,9 +4836,27 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
   Future<void> removeContact({required String id}) =>
       RustLib.instance.api.crateApiKilitHandleRemoveContact(that: this, id: id);
 
+  /// Admin: takes someone out of a group.
+  Future<void> removeGroupMember({
+    required String id,
+    required String member,
+  }) => RustLib.instance.api.crateApiKilitHandleRemoveGroupMember(
+    that: this,
+    id: id,
+    member: member,
+  );
+
   /// Names a contact.
   Future<void> renameContact({required String id, required String name}) =>
       RustLib.instance.api.crateApiKilitHandleRenameContact(
+        that: this,
+        id: id,
+        name: name,
+      );
+
+  /// Admin: renames a group.
+  Future<void> renameGroup({required String id, required String name}) =>
+      RustLib.instance.api.crateApiKilitHandleRenameGroup(
         that: this,
         id: id,
         name: name,
@@ -4037,6 +4866,14 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
   /// ID and link stop working.
   Future<MyKilitInfo> renewKilitId() =>
       RustLib.instance.api.crateApiKilitHandleRenewKilitId(that: this);
+
+  /// Sends a group message again to the members who have not got it.
+  Future<void> resendGroupMessage({required String id, required String line}) =>
+      RustLib.instance.api.crateApiKilitHandleResendGroupMessage(
+        that: this,
+        id: id,
+        line: line,
+      );
 
   /// Sends a message that has not been delivered again now, with its
   /// file's pieces. `line` is [`ChatLine::id`].
@@ -4075,6 +4912,32 @@ class KilitHandleImpl extends RustOpaque implements KilitHandle {
     name: name,
     mime: mime,
     data: data,
+    text: text,
+  );
+
+  /// Sends a file (at most 5 MiB) to a group.
+  Future<ChatLine> sendGroupFile({
+    required String id,
+    required String name,
+    required String mime,
+    required List<int> data,
+    required String text,
+  }) => RustLib.instance.api.crateApiKilitHandleSendGroupFile(
+    that: this,
+    id: id,
+    name: name,
+    mime: mime,
+    data: data,
+    text: text,
+  );
+
+  /// Sends text to a group.
+  Future<ChatLine> sendGroupMessage({
+    required String id,
+    required String text,
+  }) => RustLib.instance.api.crateApiKilitHandleSendGroupMessage(
+    that: this,
+    id: id,
     text: text,
   );
 

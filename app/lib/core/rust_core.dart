@@ -266,6 +266,11 @@ class RustCore implements KilitCore {
 
   static ChatLine _line(rust.ChatLine l) => ChatLine(
     id: l.id,
+    from: l.from,
+    notice: l.notice,
+    about: l.about,
+    deliveredTo: l.deliveredTo,
+    recipients: l.recipients,
     outgoing: l.outgoing,
     text: l.text,
     at: _time(l.atUnix.toInt()),
@@ -292,6 +297,7 @@ class RustCore implements KilitCore {
       rust.ContactStanding.accepted => Standing.accepted,
       rust.ContactStanding.request => Standing.request,
       rust.ContactStanding.blocked => Standing.blocked,
+      rust.ContactStanding.member => Standing.member,
     },
     timer: Duration(seconds: c.timer),
     last: c.last == null ? null : _line(c.last!),
@@ -371,6 +377,84 @@ class RustCore implements KilitCore {
   Future<void> resendMessage(String id, String line) =>
       _h.resendMessage(id: id, line: line);
 
+  static Group _group(rust.GroupItem g) => Group(
+    id: g.id,
+    name: g.name,
+    adminId: g.adminId,
+    admin: g.admin,
+    members: [
+      for (final m in g.members)
+        GroupMember(id: m.id, kilitId: m.kilitId, name: m.name, me: m.me),
+    ],
+    ended: g.ended,
+    gone: g.gone,
+    added: _time(g.addedUnix.toInt()),
+    last: g.last == null ? null : _line(g.last!),
+  );
+
+  @override
+  Future<List<Group>> groups() async => [
+    for (final g in await _h.groups()) _group(g),
+  ];
+
+  @override
+  Future<Group> group(String id) async => _group(await _h.group(id: id));
+
+  @override
+  Future<List<ChatLine>> groupChat(String id) async => [
+    for (final l in await _h.groupChat(id: id)) _line(l),
+  ];
+
+  @override
+  Future<Group> createGroup(String name, List<String> members) async =>
+      _group(await _h.createGroup(name: name, members: members));
+
+  @override
+  Future<ChatLine> sendGroupMessage(String id, String text) async =>
+      _line(await _h.sendGroupMessage(id: id, text: text));
+
+  @override
+  Future<ChatLine> sendGroupFile(
+    String id,
+    String name,
+    String mime,
+    Uint8List bytes, {
+    String text = '',
+  }) async => _line(
+    await _h.sendGroupFile(
+      id: id,
+      name: name,
+      mime: mime,
+      data: bytes,
+      text: text,
+    ),
+  );
+
+  @override
+  Future<void> resendGroupMessage(String id, String line) =>
+      _h.resendGroupMessage(id: id, line: line);
+
+  @override
+  Future<void> renameGroup(String id, String name) =>
+      _h.renameGroup(id: id, name: name);
+
+  @override
+  Future<void> addGroupMembers(String id, List<String> members) =>
+      _h.addGroupMembers(id: id, members: members);
+
+  @override
+  Future<void> removeGroupMember(String id, String member) =>
+      _h.removeGroupMember(id: id, member: member);
+
+  @override
+  Future<void> endGroup(String id) => _h.endGroup(id: id);
+
+  @override
+  Future<void> leaveGroup(String id) => _h.leaveGroup(id: id);
+
+  @override
+  Future<void> deleteGroup(String id) => _h.deleteGroup(id: id);
+
   @override
   Future<MyKilit> renewKilitId() async {
     final m = await _h.renewKilitId();
@@ -402,7 +486,7 @@ class RustCore implements KilitCore {
     return NetTick(
       arrived: [
         for (final i in t.incoming)
-          Arrived(i.contact, i.text, request: i.newContact),
+          Arrived(i.contact, i.text, request: i.newContact, group: i.group),
       ],
       relaysUp: t.relaysUp,
       relays: t.relays,

@@ -888,4 +888,118 @@ class LVi extends L {
 
   @override
   String get resendDone => 'Đã gửi lại.';
+
+  @override
+  String get newGroup => 'Nhóm mới';
+
+  @override
+  String get groupName => 'Tên nhóm';
+
+  @override
+  String groupPick(int count) {
+    return 'Chọn tối đa $count người';
+  }
+
+  @override
+  String get groupCreate => 'Tạo';
+
+  @override
+  String groupMembers(int count) {
+    return '$count người';
+  }
+
+  @override
+  String get groupInfo => 'Thông tin nhóm';
+
+  @override
+  String get groupAdmin => 'quản trị';
+
+  @override
+  String get groupYou => 'Bạn';
+
+  @override
+  String get groupAddPeople => 'Thêm người';
+
+  @override
+  String get groupRemove => 'Xóa khỏi nhóm';
+
+  @override
+  String get groupRename => 'Đổi tên nhóm';
+
+  @override
+  String get groupEnd => 'Kết thúc nhóm';
+
+  @override
+  String get groupEndConfirm =>
+      'Kết thúc nhóm cho mọi người? Sau đó không ai viết vào nhóm được nữa.';
+
+  @override
+  String get groupLeave => 'Rời nhóm';
+
+  @override
+  String get groupLeaveConfirm =>
+      'Rời nhóm này? Tin nhắn của nhóm sẽ không đến với bạn nữa.';
+
+  @override
+  String get groupDelete => 'Xóa nhóm';
+
+  @override
+  String get groupEnded => 'Nhóm này đã kết thúc.';
+
+  @override
+  String get groupGone => 'Bạn không còn trong nhóm này.';
+
+  @override
+  String groupDeliveredTo(int n, int total) {
+    return 'Đã đến $n/$total người';
+  }
+
+  @override
+  String get groupNoContacts =>
+      'Hãy thêm liên hệ trước: nhóm gồm những người bạn đã thêm.';
+
+  @override
+  String groupFull(int max) {
+    return 'Một nhóm có tối đa $max người.';
+  }
+
+  @override
+  String groupNoticeCreated(String who) {
+    return 'Người tạo nhóm: $who';
+  }
+
+  @override
+  String groupNoticeJoined(String who) {
+    return '$who đã thêm bạn';
+  }
+
+  @override
+  String groupNoticeAdded(String who, String whom) {
+    return 'Đã thêm: $whom · bởi: $who';
+  }
+
+  @override
+  String groupNoticeRemoved(String who, String whom) {
+    return 'Đã xóa: $whom · bởi: $who';
+  }
+
+  @override
+  String groupNoticeLeft(String who) {
+    return 'Đã rời nhóm: $who';
+  }
+
+  @override
+  String groupNoticeRenamed(String who, String name) {
+    return 'Tên nhóm mới “$name” · $who';
+  }
+
+  @override
+  String groupNoticeEnded(String who) {
+    return 'Người kết thúc nhóm: $who';
+  }
+
+  @override
+  String groupNoticeRemovedYou(String who) {
+    return '$who đã xóa bạn';
+  }
 }

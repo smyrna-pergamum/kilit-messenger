@@ -118,6 +118,43 @@ uygular. Süresi dolan satır, dosyasıyla birlikte kasadan silinir.
 - Kamera fotoğrafları önizleme akışından bellekte alınır. YUV kare Rust'ta
   JPEG'e çevrilir ve diske hiçbir şey yazılmaz.
 
+## Gruplar
+
+- En fazla 20 kişi, kuran dahil. Gruplar ikili çalışır: bir grup mesajı
+  her üyeye, onunla olan bire bir Signal oturumu üzerinden ayrı ayrı
+  mühürlenir. Tüm kopyalar aynı 16 baytlık mesaj kimliğini taşır. Relay'de
+  bir grup mesajı sıradan bir mesajdan ayırt edilemez.
+- Mesaj gövdesi `group` alanı taşır: grubun 16 baytlık rastgele kimliği,
+  isteğe bağlı olarak üye listesi (`roster`) ve isteğe bağlı olarak `leave`
+  (ayrılma) işareti.
+- **Üye listesi** zaman damgası, ad, üyeler (adres + dört kelime) ve
+  "bitirildi" işaretinden oluşur. Listeyi yalnızca kuran (yönetici)
+  gönderir; adlandırma, ekleme, çıkarma ve bitirme hep daha yeni damgalı yeni
+  bir listedir. Başkasından gelen ya da daha eski damgalı liste yok sayılır.
+  Yönetici listeyi her mesajına da ekler, böylece bir değişikliği kaçıran
+  üye yetişir.
+- **Gruba kim ekleyebilir:** Yalnızca kabul edilmiş bir kişi. Tanımadığınız
+  birinin gönderdiği liste hiçbir şey açmaz.
+- **Tanımadığınız üyeler:** Kilit, listedeki dört kelimeden kartlarını
+  relay'lerden alır ve karttaki kimliğin özetinin listedeki adresle
+  uyuştuğunu denetler. Kişi gizli bir "grup üyesi" olarak saklanır: sohbet
+  listesinde ve İstekler'de görünmez. Böyle biri size bire bir yazarsa
+  İstekler'e düşer. Kartı henüz gelmemiş üyenin kopyası kart gelene kadar
+  bekler.
+- Bir üyenin size ilk yazışı, her yabancı gibi iş kanıtıyla ilk temas
+  etiketinize gelir. Mesaj bildiğiniz bir gruba aitse ve gönderen o grubun
+  üyesiyse grup üyesi olarak alınır; değilse kişi kaydı hiç tutulmaz.
+- Her üye bir grup mesajını alındı bildirimiyle yanıtlar. Gönderenin
+  satırında örneğin "3 kişiden 2 kişiye ulaştı" görünür. Ulaşmayan kopyalar
+  bire bir mesajlar gibi günde bir kez, bir hafta boyunca yeniden gönderilir.
+- Yönetici gruptan ayrılamaz, grubu bitirir. Üye ayrılınca herkese `leave`
+  gider; yönetici yeni listeyi gönderir. İki kişiden aza düşen grup biter.
+  Çıkarılan üyeye de yeni liste gider, böylece çıkarıldığını öğrenir.
+- Bilinen sınırlar: grup değişiklik iletileri (liste, ayrılma) teslim
+  izlenmeden gider ve yeniden gönderilmez; yöneticinin sonraki mesajı
+  listeyi yine de taşır. Grup sohbetlerinde süreli mesaj yoktur. Dört
+  kelimesini yenileyen bir üyenin kartı eski kelimelerle bulunamaz.
+
 ## Relay'in gördükleri
 
 - Tek kullanımlık anahtarlar, her gün değişen rastgele görünen bir etiket, şifreli

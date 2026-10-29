@@ -28,14 +28,18 @@ use chacha20poly1305::aead::{Aead, Payload};
 use chacha20poly1305::{KeyInit, XChaCha20Poly1305, XNonce};
 use kilit_net::{Event, Filter};
 use kilit_vault::messaging::{
-    ContactInfo, ContactState, Content, FileRef, Invite, Messaging, MessagingError, Received,
-    card_matches, card_tag, parse_invite,
+    ContactInfo, ContactState, Content, FileRef, GroupWire, Invite, MAX_GROUP, MAX_GROUP_NAME,
+    MAX_TEXT, Messaging, MessagingError, Received, Roster, RosterMember, card_matches, card_tag,
+    parse_invite,
 };
 use serde::{Deserialize, Serialize};
 use serde_bytes::ByteBuf;
 use sha2::{Digest, Sha256};
 
 use super::{Engine, EngineError};
+
+mod groups;
+pub use groups::{Group, Target};
 
 /// The Signal state: identity prekeys, contacts, sessions.
 const SIGNAL: &str = "signal";
@@ -152,7 +156,7 @@ pub struct LineFile {
 }
 
 /// One line of a conversation.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Line {
     /// Written here (true) or received.
     pub outgoing: bool,
@@ -186,6 +190,19 @@ pub struct Line {
     pub tries: u32,
     #[serde(default)]
     pub tried: i64,
+    /// In a group: who wrote an incoming line, or did what a notice says.
+    #[serde(default)]
+    pub from: String,
+    /// In a group: each member's copy of an outgoing line.
+    #[serde(default)]
+    pub to: Vec<Target>,
+    /// In a group: a change rather than a message (see `groups::notice`); 0 for a
+    /// message.
+    #[serde(default)]
+    pub notice: u8,
+    /// Who a notice is about.
+    #[serde(default)]
+    pub about: Vec<String>,
 }
 
 /// A contact with the newest line of the conversation, for the list.
@@ -216,6 +233,8 @@ pub struct Incoming {
     pub new_contact: bool,
     /// The text.
     pub text: String,
+    /// The group it came in; empty one to one.
+    pub group: String,
 }
 
 /// This vault as others find it.
@@ -239,6 +258,9 @@ struct Pending {
     line: ByteBuf,
     file: FileRef,
     got: BTreeMap<u32, ByteBuf>,
+    /// Set when the line is in a group's conversation.
+    #[serde(default)]
+    group: String,
 }
 
 #[derive(Default, Serialize, Deserialize)]
@@ -626,6 +648,17 @@ impl Engine {
         data: &[u8],
         text: &str,
     ) -> Result<(Line, Vec<Event>), EngineError> {
+        let (file, pieces, shown) = self.prepare_file(name, mime, data)?;
+        self.send(id, text, Some(file), pieces, Some(shown))
+    }
+
+    /// Cleans a file, seals it into pieces and keeps a copy here.
+    fn prepare_file(
+        &mut self,
+        name: &str,
+        mime: &str,
+        data: &[u8],
+    ) -> Result<(FileRef, Vec<Event>, LineFile), EngineError> {
         let cleaned = match kilit_parse::clean(data) {
             Ok(r) => r.data,
             Err(_) => data.to_vec(),
@@ -655,7 +688,7 @@ impl Engine {
             size: file.size,
             blob,
         };
-        self.send(id, text, Some(file), pieces, Some(shown))
+        Ok((file, pieces, shown))
     }
 
     /// A file's pieces, each its own event under the file's tag. The same
@@ -722,8 +755,7 @@ impl Engine {
             expires: self.expires(timer),
             file: shown,
             file_ref: file,
-            tries: 0,
-            tried: 0,
+            ..Line::default()
         };
         let mut lines = self.load_chat(id)?;
         lines.push(line.clone());
@@ -808,7 +840,7 @@ impl Engine {
                 sent += 1;
             }
         }
-        Ok(sent)
+        Ok(sent + self.resend_due_groups()?)
     }
 
     /// Events waiting for a relay.
@@ -828,7 +860,8 @@ impl Engine {
         self.restate(
             |l| l.state == LineState::Queued && ids.contains(&l.event),
             LineState::Sent,
-        )
+        )?;
+        self.restate_groups(ids, &[])
     }
 
     /// Sets the state of every outgoing line `which` picks.
@@ -869,21 +902,37 @@ impl Engine {
         let mut m = self.messaging()?;
         let mut opened = Vec::new();
         let mut confirm: HashMap<String, Vec<Vec<u8>>> = HashMap::new();
-        let mut delivered: Vec<Vec<u8>> = Vec::new();
+        let mut delivered: Vec<(String, Vec<u8>)> = Vec::new();
+        let mut rosters = Vec::new();
         for e in messages {
             let Ok(payload) = URL_SAFE_NO_PAD.decode(&e.content) else {
                 continue;
             };
-            let r: Received = match m.decrypt(&payload, self.system_now()) {
+            let mut r: Received = match m.decrypt(&payload, self.system_now()) {
                 Ok(r) => r,
                 Err(MessagingError::Crypto) => return Err(EngineError::Damaged),
                 Err(_) => continue,
             };
             // the session moved on: keep it before the line
             self.save_messaging(&m)?;
-            delivered.extend(r.receipts.iter().cloned());
+            delivered.extend(r.receipts.iter().map(|id| (r.contact.clone(), id.clone())));
+            if let Some(wire) = r.group.take() {
+                let told =
+                    self.take_group(&mut m, r, wire, &mut files, &mut confirm, &mut rosters)?;
+                opened.extend(told);
+                continue;
+            }
             if r.text.is_empty() && r.file.is_none() {
                 continue;
+            }
+            // a group member writing one to one is a request like anyone
+            if m.contacts()
+                .iter()
+                .any(|c| c.id == r.contact && c.state == ContactState::Member)
+            {
+                m.set_state(&r.contact, ContactState::Request)
+                    .map_err(messaging_err)?;
+                self.save_messaging(&m)?;
             }
             let accepted = m
                 .contacts()
@@ -908,6 +957,7 @@ impl Engine {
                             line: old.id.clone(),
                             file: f.clone(),
                             got: BTreeMap::new(),
+                            group: String::new(),
                         },
                     );
                 }
@@ -923,6 +973,7 @@ impl Engine {
                                 line: ByteBuf::from(r.id.clone()),
                                 file: f.clone(),
                                 got: BTreeMap::new(),
+                                group: String::new(),
                             },
                         );
                     }
@@ -945,9 +996,7 @@ impl Engine {
                 id: ByteBuf::from(r.id.clone()),
                 expires: self.expires(r.timer),
                 file,
-                file_ref: None,
-                tries: 0,
-                tried: 0,
+                ..Line::default()
             });
             self.save_chat(&r.contact, lines)?;
             if accepted {
@@ -957,18 +1006,21 @@ impl Engine {
                 contact: r.contact,
                 new_contact: r.new_contact,
                 text: r.text,
+                group: String::new(),
             });
         }
         self.save(FILES, FILES_NAME, &files)?;
         if !delivered.is_empty() {
             self.restate(
-                |l| l.state != LineState::Delivered && delivered.iter().any(|d| *d == *l.id),
+                |l| l.state != LineState::Delivered && delivered.iter().any(|(_, d)| *d == *l.id),
                 LineState::Delivered,
             )?;
+            self.restate_groups(&[], &delivered)?;
         }
         for (contact, ids) in confirm {
             self.send_receipts(&contact, ids)?;
         }
+        self.send_rosters(&rosters)?;
         self.take_pieces(&mut files, &pieces)?;
         Ok(opened)
     }
@@ -1017,13 +1069,16 @@ impl Engine {
             }
         }
         for tag in done {
-            let Some(p) = files.pending.remove(&tag) else {
+            let Some(mut p) = files.pending.remove(&tag) else {
                 continue;
             };
-            let whole: Vec<u8> = p.got.into_values().flat_map(ByteBuf::into_vec).collect();
+            let whole: Vec<u8> = std::mem::take(&mut p.got)
+                .into_values()
+                .flat_map(ByteBuf::into_vec)
+                .collect();
             let ok = whole.len() as u64 == p.file.size
                 && Sha256::digest(&whole).as_slice() == p.file.sha256.as_slice();
-            let mut lines = self.load_chat(&p.contact)?;
+            let mut lines = self.file_lines(&p)?;
             let Some(line) = lines.iter_mut().find(|l| !l.outgoing && l.id == p.line) else {
                 continue;
             };
@@ -1038,7 +1093,7 @@ impl Engine {
                 // a file that does not match its hash is not kept
                 line.file = None;
             }
-            self.save_chat(&p.contact, lines)?;
+            self.save_file_lines(&p, lines)?;
         }
         self.save(FILES, FILES_NAME, files)
     }
@@ -1263,6 +1318,190 @@ mod tests {
         );
         let f = lines.last().unwrap().file.clone().unwrap();
         assert_eq!(bora.read_attachment(&f.blob).unwrap(), data);
+    }
+
+    fn line_count(e: &Engine, g: &str) -> usize {
+        e.group_chat(g)
+            .unwrap()
+            .iter()
+            .filter(|l| l.notice == 0)
+            .count()
+    }
+
+    #[test]
+    fn a_group_of_three_where_two_have_never_met() {
+        let (da, db, dc) = (
+            tempfile::tempdir().unwrap(),
+            tempfile::tempdir().unwrap(),
+            tempfile::tempdir().unwrap(),
+        );
+        let mut ayse = ready(&da, "482916");
+        let mut bora = ready(&db, "739204");
+        let mut can = ready(&dc, "615283");
+        let mut relays = Relays::default();
+        let (_, bora_id) = meet(&mut ayse, &mut bora, &mut relays);
+        let (_, can_id) = meet(&mut ayse, &mut can, &mut relays);
+        let ayse_id = ayse.my_address().unwrap();
+
+        // only contacts go in
+        assert!(ayse.create_group("Aile", &["0".repeat(32)]).is_err());
+        let (g, _) = ayse
+            .create_group("Aile", &[bora_id.clone(), can_id.clone()])
+            .unwrap();
+        relays.take_outbox(&mut ayse);
+        let told = relays.deliver(&mut bora);
+        assert_eq!(told[0].group, g.id);
+        relays.deliver(&mut can);
+        let bg = bora.group(&g.id).unwrap();
+        assert_eq!(
+            (bg.roster.name.as_str(), bg.admin.as_str()),
+            ("Aile", ayse_id.as_str())
+        );
+        assert_eq!(bg.roster.members.len(), 3);
+        assert_eq!(bora.group_chat(&g.id).unwrap()[0].notice, groups::notice::JOINED);
+
+        // the admin writes: both have it, both answer, two of two
+        ayse.send_group_message(&g.id, "merhaba").unwrap();
+        relays.take_outbox(&mut ayse);
+        let got = relays.deliver(&mut bora);
+        assert_eq!(
+            (got[0].text.as_str(), got[0].group.as_str()),
+            ("merhaba", g.id.as_str())
+        );
+        relays.deliver(&mut can);
+        relays.take_outbox(&mut bora);
+        relays.take_outbox(&mut can);
+        relays.deliver(&mut ayse);
+        let mine = ayse.group_chat(&g.id).unwrap().pop().unwrap();
+        assert_eq!(mine.state, LineState::Delivered);
+        assert!(mine.to.iter().all(|t| t.state == LineState::Delivered));
+        // nothing of the group shows one to one
+        assert!(
+            bora.chat(&ayse.my_address().unwrap())
+                .unwrap()
+                .iter()
+                .all(|l| l.text != "merhaba")
+        );
+
+        // Bora does not know Can: the message waits for Can's card
+        let (line, _) = bora.send_group_message(&g.id, "selam Can").unwrap();
+        assert_eq!(line.state, LineState::Queued);
+        let missing = bora.missing_members().unwrap();
+        assert_eq!(missing.len(), 1);
+        assert_eq!(missing[0].address.as_deref(), Some(can_id.as_str()));
+        relays.0.push(can.card_event().unwrap());
+        // a card that is not Can's does nothing
+        assert!(
+            bora.add_member_cards(&[ayse.card_event().unwrap()])
+                .unwrap()
+                .is_empty()
+        );
+        let cards = relays.get(&Engine::cards_filter(&missing));
+        assert_eq!(bora.add_member_cards(&cards).unwrap().len(), 1);
+        assert!(bora.missing_members().unwrap().is_empty());
+        let can_seen = bora.contacts().unwrap();
+        let c = can_seen.iter().find(|c| c.id == can_id).unwrap();
+        assert_eq!(c.state, ContactState::Member);
+        relays.take_outbox(&mut bora);
+        relays.deliver(&mut ayse);
+        let got = relays.deliver(&mut can);
+        assert_eq!(got.len(), 1);
+        assert_eq!(got[0].text, "selam Can");
+        assert!(!got[0].new_contact);
+        // for Can, Bora is one of the group, not a request
+        let b = can
+            .contacts()
+            .unwrap()
+            .into_iter()
+            .find(|c| c.id == bora_id)
+            .unwrap();
+        assert_eq!(b.state, ContactState::Member);
+        relays.take_outbox(&mut can);
+        relays.take_outbox(&mut ayse);
+        relays.deliver(&mut bora);
+        let mine = bora.group_chat(&g.id).unwrap().pop().unwrap();
+        assert_eq!(mine.state, LineState::Delivered);
+
+        // and Can answers Bora straight away
+        can.send_group_message(&g.id, "selam Bora").unwrap();
+        relays.take_outbox(&mut can);
+        let got = relays.deliver(&mut bora);
+        assert_eq!(got[0].text, "selam Bora");
+        assert_eq!(line_count(&bora, &g.id), 3);
+
+        // the admin takes Can out; Can can no longer write in it
+        ayse.remove_group_member(&g.id, &can_id).unwrap();
+        relays.take_outbox(&mut ayse);
+        relays.deliver(&mut bora);
+        relays.deliver(&mut can);
+        let cg = can.group(&g.id).unwrap();
+        assert!(cg.gone);
+        assert_eq!(
+            can.group_chat(&g.id).unwrap().last().unwrap().notice,
+            groups::notice::REMOVED_YOU
+        );
+        assert!(can.send_group_message(&g.id, "hey").is_err());
+        assert_eq!(bora.group(&g.id).unwrap().roster.members.len(), 2);
+        // only the admin changes the group
+        assert!(bora.rename_group(&g.id, "Bizim").is_err());
+
+        // Bora leaves: two became one, and the group ends
+        bora.leave_group(&g.id).unwrap();
+        relays.take_outbox(&mut bora);
+        relays.deliver(&mut ayse);
+        let ag = ayse.group(&g.id).unwrap();
+        assert!(ag.roster.ended);
+        assert!(ayse.delete_group(&g.id).is_ok());
+        assert!(ayse.groups().unwrap().is_empty());
+    }
+
+    #[test]
+    fn a_group_message_from_someone_outside_it_is_dropped() {
+        let (da, db, dc) = (
+            tempfile::tempdir().unwrap(),
+            tempfile::tempdir().unwrap(),
+            tempfile::tempdir().unwrap(),
+        );
+        let mut ayse = ready(&da, "482916");
+        let mut bora = ready(&db, "739204");
+        let mut can = ready(&dc, "615283");
+        let mut relays = Relays::default();
+        let (_, bora_id) = meet(&mut ayse, &mut bora, &mut relays);
+        let (_, can_bora) = meet(&mut can, &mut bora, &mut relays);
+        let (g, _) = ayse.create_group("İki", std::slice::from_ref(&bora_id)).unwrap();
+        relays.take_outbox(&mut ayse);
+        relays.deliver(&mut bora);
+        // Can knows Bora but is not in the group; Can makes a group of the
+        // same id up by hand and writes in it
+        let wire = GroupWire {
+            id: ByteBuf::from(groups_unhex(&g.id)),
+            roster: None,
+            leave: false,
+        };
+        let mut m = can.messaging().unwrap();
+        let out = m
+            .seal(
+                &can_bora,
+                &Content {
+                    text: "içeri girdim".into(),
+                    group: Some(wire),
+                    ..Content::default()
+                },
+                can.system_now(),
+            )
+            .unwrap();
+        can.save_messaging(&m).unwrap();
+        let ev = can.message_event(out.tag, &out.payload).unwrap();
+        relays.0.push(ev);
+        assert!(relays.deliver(&mut bora).is_empty());
+        assert_eq!(line_count(&bora, &g.id), 0);
+    }
+
+    fn groups_unhex(s: &str) -> Vec<u8> {
+        (0..s.len())
+            .step_by(2)
+            .map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap())
+            .collect()
     }
 
     #[test]

@@ -1736,6 +1736,180 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Sent again.'**
   String get resendDone;
+
+  /// No description provided for @newGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'New group'**
+  String get newGroup;
+
+  /// No description provided for @groupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Group name'**
+  String get groupName;
+
+  /// No description provided for @groupPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose up to {count} people'**
+  String groupPick(int count);
+
+  /// No description provided for @groupCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get groupCreate;
+
+  /// No description provided for @groupMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} people'**
+  String groupMembers(int count);
+
+  /// No description provided for @groupInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Group info'**
+  String get groupInfo;
+
+  /// No description provided for @groupAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'admin'**
+  String get groupAdmin;
+
+  /// No description provided for @groupYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get groupYou;
+
+  /// No description provided for @groupAddPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'Add people'**
+  String get groupAddPeople;
+
+  /// No description provided for @groupRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from group'**
+  String get groupRemove;
+
+  /// No description provided for @groupRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename group'**
+  String get groupRename;
+
+  /// No description provided for @groupEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End group'**
+  String get groupEnd;
+
+  /// No description provided for @groupEndConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'End the group for everyone? Nobody can write in it after this.'**
+  String get groupEndConfirm;
+
+  /// No description provided for @groupLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave group'**
+  String get groupLeave;
+
+  /// No description provided for @groupLeaveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave this group? Its messages stop coming to you.'**
+  String get groupLeaveConfirm;
+
+  /// No description provided for @groupDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete group'**
+  String get groupDelete;
+
+  /// No description provided for @groupEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'This group has ended.'**
+  String get groupEnded;
+
+  /// No description provided for @groupGone.
+  ///
+  /// In en, this message translates to:
+  /// **'You are no longer in this group.'**
+  String get groupGone;
+
+  /// No description provided for @groupDeliveredTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered to {n} of {total}'**
+  String groupDeliveredTo(int n, int total);
+
+  /// No description provided for @groupNoContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Add contacts first: a group is made of people you added.'**
+  String get groupNoContacts;
+
+  /// No description provided for @groupFull.
+  ///
+  /// In en, this message translates to:
+  /// **'A group holds up to {max} people.'**
+  String groupFull(int max);
+
+  /// No description provided for @groupNoticeCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'{who} created the group'**
+  String groupNoticeCreated(String who);
+
+  /// No description provided for @groupNoticeJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'{who} added you'**
+  String groupNoticeJoined(String who);
+
+  /// No description provided for @groupNoticeAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{who} added {whom}'**
+  String groupNoticeAdded(String who, String whom);
+
+  /// No description provided for @groupNoticeRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{who} removed {whom}'**
+  String groupNoticeRemoved(String who, String whom);
+
+  /// No description provided for @groupNoticeLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{who} left'**
+  String groupNoticeLeft(String who);
+
+  /// No description provided for @groupNoticeRenamed.
+  ///
+  /// In en, this message translates to:
+  /// **'{who} named the group “{name}”'**
+  String groupNoticeRenamed(String who, String name);
+
+  /// No description provided for @groupNoticeEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'{who} ended the group'**
+  String groupNoticeEnded(String who);
+
+  /// No description provided for @groupNoticeRemovedYou.
+  ///
+  /// In en, this message translates to:
+  /// **'{who} removed you'**
+  String groupNoticeRemovedYou(String who);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

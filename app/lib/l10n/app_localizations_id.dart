@@ -889,4 +889,118 @@ class LId extends L {
 
   @override
   String get resendDone => 'Terkirim lagi.';
+
+  @override
+  String get newGroup => 'Grup baru';
+
+  @override
+  String get groupName => 'Nama grup';
+
+  @override
+  String groupPick(int count) {
+    return 'Pilih hingga $count orang';
+  }
+
+  @override
+  String get groupCreate => 'Buat';
+
+  @override
+  String groupMembers(int count) {
+    return '$count orang';
+  }
+
+  @override
+  String get groupInfo => 'Info grup';
+
+  @override
+  String get groupAdmin => 'admin';
+
+  @override
+  String get groupYou => 'Anda';
+
+  @override
+  String get groupAddPeople => 'Tambah orang';
+
+  @override
+  String get groupRemove => 'Keluarkan dari grup';
+
+  @override
+  String get groupRename => 'Ganti nama grup';
+
+  @override
+  String get groupEnd => 'Akhiri grup';
+
+  @override
+  String get groupEndConfirm =>
+      'Akhiri grup untuk semua? Setelah ini tidak ada yang bisa menulis di dalamnya.';
+
+  @override
+  String get groupLeave => 'Keluar dari grup';
+
+  @override
+  String get groupLeaveConfirm =>
+      'Keluar dari grup ini? Pesannya tidak akan sampai ke Anda lagi.';
+
+  @override
+  String get groupDelete => 'Hapus grup';
+
+  @override
+  String get groupEnded => 'Grup ini telah berakhir.';
+
+  @override
+  String get groupGone => 'Anda tidak lagi di grup ini.';
+
+  @override
+  String groupDeliveredTo(int n, int total) {
+    return 'Terkirim ke $n dari $total';
+  }
+
+  @override
+  String get groupNoContacts =>
+      'Tambahkan kontak dulu: grup dibentuk dari orang yang Anda tambahkan.';
+
+  @override
+  String groupFull(int max) {
+    return 'Satu grup berisi paling banyak $max orang.';
+  }
+
+  @override
+  String groupNoticeCreated(String who) {
+    return 'Pembuat grup: $who';
+  }
+
+  @override
+  String groupNoticeJoined(String who) {
+    return '$who menambahkan Anda';
+  }
+
+  @override
+  String groupNoticeAdded(String who, String whom) {
+    return 'Ditambahkan: $whom · oleh: $who';
+  }
+
+  @override
+  String groupNoticeRemoved(String who, String whom) {
+    return 'Dikeluarkan: $whom · oleh: $who';
+  }
+
+  @override
+  String groupNoticeLeft(String who) {
+    return 'Keluar: $who';
+  }
+
+  @override
+  String groupNoticeRenamed(String who, String name) {
+    return 'Nama baru grup “$name” · $who';
+  }
+
+  @override
+  String groupNoticeEnded(String who) {
+    return 'Grup diakhiri oleh: $who';
+  }
+
+  @override
+  String groupNoticeRemovedYou(String who) {
+    return '$who mengeluarkan Anda';
+  }
 }

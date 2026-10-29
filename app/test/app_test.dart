@@ -643,6 +643,110 @@ void main() {
     tor.stop();
   });
 
+  testWidgets('a group is made from contacts and talks', (tester) async {
+    final tor = readyTor();
+    addTearDown(tor.dispose);
+    final (core, _) = await startApp(tester, tor: tor);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    await letTorUp(tester);
+    await addSomeone(tester, boraLink);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    final bora = DevCore.addressOf(boraWords);
+
+    await tester.tap(find.byKey(const ValueKey('new-group')));
+    await tester.pumpAndSettle();
+    // a name and at least one person
+    expect(
+      tester
+          .widget<TextButton>(find.byKey(const ValueKey('group-create')))
+          .onPressed,
+      isNull,
+    );
+    await tester.enterText(find.byKey(const ValueKey('group-name')), 'Aile');
+    await tester.tap(find.byKey(ValueKey('pick-$bora')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('group-create')));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<Text>(find.byKey(const ValueKey('group-title'))).data,
+      'Aile',
+    );
+    expect(find.text('You created the group'), findsOneWidget);
+
+    await tester.enterText(find.byKey(const ValueKey('chat-input')), 'merhaba');
+    await tester.tap(find.byKey(const ValueKey('chat-send')));
+    await tester.pumpAndSettle();
+    expect(find.text('merhaba'), findsOneWidget);
+    final gid = (await core.groups()).single.id;
+    core.groupMessage(gid, bora, 'selam herkese');
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+    expect(find.text('selam herkese'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.byKey(const ValueKey('line-sender'))).data,
+      '@$boraWords',
+    );
+
+    // the admin renames it and sees the members
+    await tester.tap(find.byKey(const ValueKey('group-info')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(ValueKey('member-$bora')), findsOneWidget);
+    expect(find.textContaining('admin'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('group-rename')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('rename-input')),
+      'Bizimkiler',
+    );
+    await tester.tap(find.byKey(const ValueKey('rename-save')));
+    await tester.pumpAndSettle();
+    expect(find.text('Bizimkiler'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('You named the group “Bizimkiler”'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byKey(ValueKey('group-$gid')), findsOneWidget);
+    tor.stop();
+  });
+
+  testWidgets('a group someone else made can be left', (tester) async {
+    final tor = readyTor();
+    addTearDown(tor.dispose);
+    final (core, _) = await startApp(tester, tor: tor);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    await letTorUp(tester);
+    await addSomeone(tester, boraLink);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    final bora = DevCore.addressOf(boraWords);
+    final gid = core.joinGroup(bora, 'Okul', const []);
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(ValueKey('group-$gid')));
+    await tester.pumpAndSettle();
+    expect(find.text('@$boraWords added you'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('group-info')));
+    await tester.pumpAndSettle();
+    // not the admin: no changes, only leaving
+    expect(find.byKey(const ValueKey('group-rename')), findsNothing);
+    expect(find.byKey(const ValueKey('group-add')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('group-end-or-leave')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('confirm-yes')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('group-delete')), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('group-closed')), findsOneWidget);
+    expect(find.byKey(const ValueKey('chat-input')), findsNothing);
+    tor.stop();
+  });
+
   testWidgets('a stranger waits in Requests until accepted', (tester) async {
     final tor = readyTor();
     addTearDown(tor.dispose);

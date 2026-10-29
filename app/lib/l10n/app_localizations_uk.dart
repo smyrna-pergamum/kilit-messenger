@@ -893,4 +893,118 @@ class LUk extends L {
 
   @override
   String get resendDone => 'Надіслано знову.';
+
+  @override
+  String get newGroup => 'Нова група';
+
+  @override
+  String get groupName => 'Назва групи';
+
+  @override
+  String groupPick(int count) {
+    return 'Виберіть до $count осіб';
+  }
+
+  @override
+  String get groupCreate => 'Створити';
+
+  @override
+  String groupMembers(int count) {
+    return 'Учасників: $count';
+  }
+
+  @override
+  String get groupInfo => 'Про групу';
+
+  @override
+  String get groupAdmin => 'адмін';
+
+  @override
+  String get groupYou => 'Ви';
+
+  @override
+  String get groupAddPeople => 'Додати людей';
+
+  @override
+  String get groupRemove => 'Вилучити з групи';
+
+  @override
+  String get groupRename => 'Перейменувати групу';
+
+  @override
+  String get groupEnd => 'Завершити групу';
+
+  @override
+  String get groupEndConfirm =>
+      'Завершити групу для всіх? Після цього в ній ніхто не зможе писати.';
+
+  @override
+  String get groupLeave => 'Вийти з групи';
+
+  @override
+  String get groupLeaveConfirm =>
+      'Вийти з цієї групи? Її повідомлення більше не надходитимуть вам.';
+
+  @override
+  String get groupDelete => 'Видалити групу';
+
+  @override
+  String get groupEnded => 'Цю групу завершено.';
+
+  @override
+  String get groupGone => 'Ви більше не в цій групі.';
+
+  @override
+  String groupDeliveredTo(int n, int total) {
+    return 'Доставлено: $n з $total';
+  }
+
+  @override
+  String get groupNoContacts =>
+      'Спершу додайте контакти: група складається з людей, яких ви додали.';
+
+  @override
+  String groupFull(int max) {
+    return 'У групі не більше $max осіб.';
+  }
+
+  @override
+  String groupNoticeCreated(String who) {
+    return 'Групу створив(ла): $who';
+  }
+
+  @override
+  String groupNoticeJoined(String who) {
+    return '$who додав(ла) вас';
+  }
+
+  @override
+  String groupNoticeAdded(String who, String whom) {
+    return 'Додано: $whom · ким: $who';
+  }
+
+  @override
+  String groupNoticeRemoved(String who, String whom) {
+    return 'Вилучено: $whom · ким: $who';
+  }
+
+  @override
+  String groupNoticeLeft(String who) {
+    return 'Вийшов(ла): $who';
+  }
+
+  @override
+  String groupNoticeRenamed(String who, String name) {
+    return 'Нова назва групи «$name» · $who';
+  }
+
+  @override
+  String groupNoticeEnded(String who) {
+    return 'Групу завершив(ла): $who';
+  }
+
+  @override
+  String groupNoticeRemovedYou(String who) {
+    return '$who вилучив(ла) вас';
+  }
 }

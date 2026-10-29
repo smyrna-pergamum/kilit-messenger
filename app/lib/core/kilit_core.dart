@@ -142,6 +142,40 @@ abstract interface class KilitCore {
   /// and link stop working.
   Future<MyKilit> renewKilitId();
 
+  /// The groups, newest conversation first.
+  Future<List<Group>> groups();
+  Future<Group> group(String id);
+
+  /// A group's conversation, notices included, oldest first.
+  Future<List<ChatLine>> groupChat(String id);
+
+  /// Makes a group of this vault and [members] (contacts, at most
+  /// [maxGroup] - 1); this vault is its admin.
+  Future<Group> createGroup(String name, List<String> members);
+  Future<ChatLine> sendGroupMessage(String id, String text);
+  Future<ChatLine> sendGroupFile(
+    String id,
+    String name,
+    String mime,
+    Uint8List bytes, {
+    String text = '',
+  });
+
+  /// Sends a group message again to the members who have not got it.
+  Future<void> resendGroupMessage(String id, String line);
+
+  /// Admin only.
+  Future<void> renameGroup(String id, String name);
+  Future<void> addGroupMembers(String id, List<String> members);
+  Future<void> removeGroupMember(String id, String member);
+  Future<void> endGroup(String id);
+
+  /// Leaves a group; the admin ends it instead.
+  Future<void> leaveGroup(String id);
+
+  /// Forgets a group that ended or was left.
+  Future<void> deleteGroup(String id);
+
   /// A camera frame as a JPEG with no metadata, turned upright, all in
   /// memory.
   Future<Uint8List> cameraJpeg(CameraFrame frame);
@@ -156,6 +190,73 @@ abstract interface class KilitCore {
 
 /// The largest file sent in a chat.
 const maxChatFileBytes = 5 * 1024 * 1024;
+
+/// Most people in a group, its maker included.
+const maxGroup = 20;
+
+/// What a group notice line says (its [ChatLine.notice]).
+abstract final class GroupNotice {
+  static const created = 1;
+  static const joined = 2;
+  static const added = 3;
+  static const removed = 4;
+  static const left = 5;
+  static const renamed = 6;
+  static const ended = 7;
+  static const removedYou = 8;
+}
+
+class GroupMember {
+  const GroupMember({
+    required this.id,
+    required this.kilitId,
+    this.name = '',
+    this.me = false,
+  });
+  final String id;
+  final String kilitId;
+
+  /// The name given here; empty when none.
+  final String name;
+
+  /// This vault.
+  final bool me;
+}
+
+class Group {
+  const Group({
+    required this.id,
+    required this.name,
+    required this.adminId,
+    required this.members,
+    required this.added,
+    this.admin = false,
+    this.ended = false,
+    this.gone = false,
+    this.last,
+  });
+  final String id;
+  final String name;
+  final String adminId;
+
+  /// This vault is the admin.
+  final bool admin;
+  final List<GroupMember> members;
+
+  /// The admin ended it.
+  final bool ended;
+
+  /// This vault left or was taken out.
+  final bool gone;
+  final DateTime added;
+  final ChatLine? last;
+
+  /// Nobody writes in it any more, here.
+  bool get closed => ended || gone;
+
+  GroupMember? member(String id) =>
+      members.where((m) => m.id == id).firstOrNull;
+}
 
 /// One YUV 4:2:0 frame from the camera, plane by plane.
 class CameraFrame {
@@ -206,6 +307,11 @@ class MyKilit {
 class ChatLine {
   const ChatLine({
     this.id = '',
+    this.from = '',
+    this.notice = 0,
+    this.about = const [],
+    this.deliveredTo = 0,
+    this.recipients = 0,
     required this.outgoing,
     required this.text,
     required this.at,
@@ -218,6 +324,19 @@ class ChatLine {
 
   /// The message's id; names it to [KilitCore.resendMessage].
   final String id;
+
+  /// In a group: who wrote it, or did what the notice says.
+  final String from;
+
+  /// In a group: a [GroupNotice] instead of a message; 0 for a message.
+  final int notice;
+
+  /// Who a notice is about.
+  final List<String> about;
+
+  /// An outgoing group message: how many members have it, of how many.
+  final int deliveredTo;
+  final int recipients;
 
   /// Written on this device.
   final bool outgoing;
@@ -258,7 +377,9 @@ class ChatFile {
   bool get isImage => mime.startsWith('image/');
 }
 
-enum Standing { accepted, request, blocked }
+/// Where someone stands; [member]s are known only through a group and
+/// stay out of the chats.
+enum Standing { accepted, request, blocked, member }
 
 class Contact {
   const Contact({
@@ -308,9 +429,17 @@ class Contact {
 }
 
 class Arrived {
-  const Arrived(this.contact, this.text, {this.request = false});
+  const Arrived(
+    this.contact,
+    this.text, {
+    this.request = false,
+    this.group = '',
+  });
   final String contact;
   final String text;
+
+  /// The group it came in; empty one to one.
+  final String group;
 
   /// From someone not yet a contact: it waits in Requests.
   final bool request;

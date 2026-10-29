@@ -275,7 +275,7 @@ pub struct Invite {
     pub address: Option<String>,
 }
 
-fn is_words(s: &str) -> bool {
+pub(crate) fn is_words(s: &str) -> bool {
     let parts: Vec<&str> = s.split('-').collect();
     parts.len() == 4
         && parts
@@ -341,6 +341,9 @@ pub enum ContactState {
     Request,
     /// Messages are dropped and no mailbox is watched for them.
     Blocked,
+    /// Known only as a member of a group: not in the chats or Requests.
+    /// Writing one to one makes them a request.
+    Member,
 }
 
 #[derive(Clone, Default, Serialize, Deserialize)]
@@ -435,6 +438,66 @@ pub struct FileRef {
     pub mime: String,
 }
 
+/// Most people in a group, its maker included.
+pub const MAX_GROUP: usize = 20;
+/// Longest group name, in characters.
+pub const MAX_GROUP_NAME: usize = 64;
+
+/// Someone in a group: their address and their four words, so a member who
+/// does not know them can fetch their card.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RosterMember {
+    /// Their address (32 hex digits).
+    pub address: String,
+    /// Their four words.
+    pub kilit_id: String,
+}
+
+/// A group as its maker set it last. A newer stamp replaces an older one.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Roster {
+    /// When the maker set it, Unix seconds; only ever goes up.
+    pub stamp: i64,
+    /// The group's name.
+    pub name: String,
+    /// Everyone in it, the maker included.
+    pub members: Vec<RosterMember>,
+    /// The maker ended it: nobody writes in it any more.
+    #[serde(default)]
+    pub ended: bool,
+}
+
+impl Roster {
+    /// Whether it holds together: a name, 2 to [`MAX_GROUP`] different
+    /// people with well-formed addresses and words.
+    pub fn sound(&self) -> bool {
+        let mut seen = std::collections::BTreeSet::new();
+        self.name.chars().count() <= MAX_GROUP_NAME
+            && (2..=MAX_GROUP).contains(&self.members.len())
+            && self.members.iter().all(|m| {
+                m.address.len() == 32
+                    && m.address
+                        .bytes()
+                        .all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f'))
+                    && is_words(&m.kilit_id)
+                    && seen.insert(m.address.clone())
+            })
+    }
+}
+
+/// Marks a message as one in a group.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GroupWire {
+    /// The group's id, 16 random bytes.
+    pub id: ByteBuf,
+    /// From the maker: who is in it now.
+    #[serde(default)]
+    pub roster: Option<Roster>,
+    /// The sender left.
+    #[serde(default)]
+    pub leave: bool,
+}
+
 /// What one message carries.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Content {
@@ -448,7 +511,10 @@ pub struct Content {
     pub file: Option<FileRef>,
     /// Sending a message again: its id (16 bytes) and when it was written,
     /// so the recipient knows it for the same one. None for a new message.
+    /// A group message sent to each member uses one id for all.
     pub again: Option<(Vec<u8>, i64)>,
+    /// A group message, or a change to a group.
+    pub group: Option<GroupWire>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -469,6 +535,8 @@ struct Body {
     timer: u32,
     #[serde(default)]
     file: Option<FileRef>,
+    #[serde(default)]
+    group: Option<GroupWire>,
 }
 
 /// A contact as the list shows it.
@@ -507,6 +575,8 @@ pub struct Received {
     pub timer: u32,
     /// A file, when there is one.
     pub file: Option<FileRef>,
+    /// Set when it belongs to a group.
+    pub group: Option<GroupWire>,
 }
 
 fn pad(mut b: Vec<u8>) -> Vec<u8> {
@@ -917,6 +987,47 @@ impl Messaging {
         name: Option<&str>,
         now: SystemTime,
     ) -> Result<String, MessagingError> {
+        self.take_card(card, invite, name, ContactState::Accepted, now)
+    }
+
+    /// Starts a session with a group member from their card, which must be
+    /// the one `invite` (their words and address, from the group) names.
+    /// Someone not known yet becomes a [`ContactState::Member`]; anyone
+    /// known keeps where they stand.
+    pub fn add_member(
+        &mut self,
+        card: &[u8],
+        invite: &Invite,
+        now: SystemTime,
+    ) -> Result<String, MessagingError> {
+        if invite.address.is_none() {
+            return Err(MessagingError::NotACard);
+        }
+        let state = invite
+            .address
+            .as_ref()
+            .and_then(|a| self.s.contacts.get(a))
+            .map_or(ContactState::Member, |m| m.state);
+        if state == ContactState::Blocked {
+            return Err(MessagingError::Blocked);
+        }
+        self.take_card(card, Some(invite), None, state, now)
+    }
+
+    /// Moves a contact between request, member and contact.
+    pub fn set_state(&mut self, contact: &str, state: ContactState) -> Result<(), MessagingError> {
+        self.meta(contact)?.state = state;
+        Ok(())
+    }
+
+    fn take_card(
+        &mut self,
+        card: &[u8],
+        invite: Option<&Invite>,
+        name: Option<&str>,
+        state: ContactState,
+        now: SystemTime,
+    ) -> Result<String, MessagingError> {
         let c: Card = ciborium::from_reader(card).map_err(not_a_card)?;
         if c.v != CARD_VERSION {
             return Err(MessagingError::NotACard);
@@ -972,7 +1083,7 @@ impl Messaging {
             meta.added = unix_secs(now);
         }
         // adding someone is answering them: a request becomes a contact
-        meta.state = ContactState::Accepted;
+        meta.state = state;
         if !c.first_contact.is_empty() {
             meta.first_contact = Some(c.first_contact);
         }
@@ -1098,6 +1209,7 @@ impl Messaging {
                     .collect(),
                 timer: content.timer,
                 file: content.file.clone(),
+                group: content.group.clone(),
             },
             &mut body,
         )
@@ -1241,9 +1353,10 @@ impl Messaging {
             }
             meta.id_salt = b.id_salt;
         }
-        // a receipt says nothing of the timer; anything else sets it
+        // a receipt says nothing of the timer, nor does a group message;
+        // anything else sets it
         let only_receipts = b.text.is_empty() && b.file.is_none() && !b.receipts.is_empty();
-        if !only_receipts && b.timer <= MAX_TIMER {
+        if !only_receipts && b.group.is_none() && b.timer <= MAX_TIMER {
             meta.timer = b.timer;
         }
         self.s = s;
@@ -1256,6 +1369,7 @@ impl Messaging {
             receipts: b.receipts.into_iter().map(ByteBuf::into_vec).collect(),
             timer: b.timer,
             file: b.file,
+            group: b.group,
         })
     }
 

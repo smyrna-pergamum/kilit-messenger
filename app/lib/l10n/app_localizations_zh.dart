@@ -850,4 +850,115 @@ class LZh extends L {
 
   @override
   String get resendDone => '已重新发送。';
+
+  @override
+  String get newGroup => '新建群组';
+
+  @override
+  String get groupName => '群组名称';
+
+  @override
+  String groupPick(int count) {
+    return '最多选择 $count 人';
+  }
+
+  @override
+  String get groupCreate => '创建';
+
+  @override
+  String groupMembers(int count) {
+    return '$count 人';
+  }
+
+  @override
+  String get groupInfo => '群组信息';
+
+  @override
+  String get groupAdmin => '管理员';
+
+  @override
+  String get groupYou => '你';
+
+  @override
+  String get groupAddPeople => '添加成员';
+
+  @override
+  String get groupRemove => '移出群组';
+
+  @override
+  String get groupRename => '重命名群组';
+
+  @override
+  String get groupEnd => '结束群组';
+
+  @override
+  String get groupEndConfirm => '要为所有人结束群组吗？之后任何人都不能再发言。';
+
+  @override
+  String get groupLeave => '退出群组';
+
+  @override
+  String get groupLeaveConfirm => '要退出此群组吗？之后不会再收到它的消息。';
+
+  @override
+  String get groupDelete => '删除群组';
+
+  @override
+  String get groupEnded => '此群组已结束。';
+
+  @override
+  String get groupGone => '你已不在此群组中。';
+
+  @override
+  String groupDeliveredTo(int n, int total) {
+    return '已送达 $n/$total';
+  }
+
+  @override
+  String get groupNoContacts => '请先添加联系人：群组由你添加的人组成。';
+
+  @override
+  String groupFull(int max) {
+    return '一个群组最多 $max 人。';
+  }
+
+  @override
+  String groupNoticeCreated(String who) {
+    return '创建者：$who';
+  }
+
+  @override
+  String groupNoticeJoined(String who) {
+    return '$who 把你加入了群组';
+  }
+
+  @override
+  String groupNoticeAdded(String who, String whom) {
+    return '已加入：$whom（$who 添加）';
+  }
+
+  @override
+  String groupNoticeRemoved(String who, String whom) {
+    return '已移出：$whom（$who 操作）';
+  }
+
+  @override
+  String groupNoticeLeft(String who) {
+    return '已退出：$who';
+  }
+
+  @override
+  String groupNoticeRenamed(String who, String name) {
+    return '群组新名称“$name”（$who）';
+  }
+
+  @override
+  String groupNoticeEnded(String who) {
+    return '结束者：$who';
+  }
+
+  @override
+  String groupNoticeRemovedYou(String who) {
+    return '$who 把你移出了群组';
+  }
 }

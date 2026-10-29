@@ -895,4 +895,118 @@ class LFr extends L {
 
   @override
   String get resendDone => 'Renvoyé.';
+
+  @override
+  String get newGroup => 'Nouveau groupe';
+
+  @override
+  String get groupName => 'Nom du groupe';
+
+  @override
+  String groupPick(int count) {
+    return 'Choisissez jusqu\'à $count personnes';
+  }
+
+  @override
+  String get groupCreate => 'Créer';
+
+  @override
+  String groupMembers(int count) {
+    return '$count personnes';
+  }
+
+  @override
+  String get groupInfo => 'Infos du groupe';
+
+  @override
+  String get groupAdmin => 'admin';
+
+  @override
+  String get groupYou => 'Vous';
+
+  @override
+  String get groupAddPeople => 'Ajouter des personnes';
+
+  @override
+  String get groupRemove => 'Retirer du groupe';
+
+  @override
+  String get groupRename => 'Renommer le groupe';
+
+  @override
+  String get groupEnd => 'Terminer le groupe';
+
+  @override
+  String get groupEndConfirm =>
+      'Terminer le groupe pour tous ? Plus personne ne pourra y écrire.';
+
+  @override
+  String get groupLeave => 'Quitter le groupe';
+
+  @override
+  String get groupLeaveConfirm =>
+      'Quitter ce groupe ? Ses messages ne vous parviendront plus.';
+
+  @override
+  String get groupDelete => 'Supprimer le groupe';
+
+  @override
+  String get groupEnded => 'Ce groupe est terminé.';
+
+  @override
+  String get groupGone => 'Vous ne faites plus partie de ce groupe.';
+
+  @override
+  String groupDeliveredTo(int n, int total) {
+    return 'Remis à $n sur $total';
+  }
+
+  @override
+  String get groupNoContacts =>
+      'Ajoutez d\'abord des contacts : un groupe réunit des personnes que vous avez ajoutées.';
+
+  @override
+  String groupFull(int max) {
+    return 'Un groupe compte au plus $max personnes.';
+  }
+
+  @override
+  String groupNoticeCreated(String who) {
+    return 'Groupe créé par : $who';
+  }
+
+  @override
+  String groupNoticeJoined(String who) {
+    return '$who vous a ajouté';
+  }
+
+  @override
+  String groupNoticeAdded(String who, String whom) {
+    return 'Ajouté : $whom · par : $who';
+  }
+
+  @override
+  String groupNoticeRemoved(String who, String whom) {
+    return 'Retiré : $whom · par : $who';
+  }
+
+  @override
+  String groupNoticeLeft(String who) {
+    return 'A quitté : $who';
+  }
+
+  @override
+  String groupNoticeRenamed(String who, String name) {
+    return 'Nouveau nom du groupe « $name » · $who';
+  }
+
+  @override
+  String groupNoticeEnded(String who) {
+    return 'Groupe terminé par : $who';
+  }
+
+  @override
+  String groupNoticeRemovedYou(String who) {
+    return '$who vous a retiré';
+  }
 }
