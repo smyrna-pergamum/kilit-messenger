@@ -1,8 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Aşama 1 is offline: no INTERNET permission in release builds. The
-         debug and profile manifests add it only for Flutter's tooling. -->
+    <!-- The embedded Tor needs the network; nothing else in Kilit opens a
+         connection, and everything goes through Tor. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- The camera plugin asks for the microphone for video; Kilit takes
+         stills only (enableAudio: false), so it is taken out again. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove"/>
 
     <application
         android:label="Kilit"

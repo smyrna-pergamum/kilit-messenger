@@ -1,15 +1,19 @@
-# KLT1 test vektörleri
+# KLT1 test vectors
 
-Bu dosyalar her Kilit sürümünde açılabilmelidir. `core/crates/kilit-klt/tests/vectors.rs`
-bunu denetler. Yalnızca biçim sürümü değişirse yeniden üretilirler:
+Every Kilit release must be able to open these files.
+`core/crates/kilit-klt/tests/vectors.rs` checks that. They are made again
+only when the format version changes:
 
-    KILIT_WRITE_VECTORS=1 cargo test -p kilit-klt --test vectors the_signed
+```bash
+KILIT_WRITE_VECTORS=1 cargo test -p kilit-klt --test vectors the_signed
+```
 
-Anahtarlar ve parola herkese açıktır; yalnızca test içindir.
+The keys and the passphrase are public, for testing only. The Turkish text
+below is the vectors' actual content and must stay exactly as it is.
 
-| Dosya | Açan | İmza | İçerik |
+| File | Opened by | Signature | Content |
 | --- | --- | --- | --- |
-| `xwing-signed-v1.klt` | X-Wing, tohum 32 × `0x42` | Ed25519 ve ML-DSA-65, tohum 32 × `0x07` | `Kilit KLT1 test vektörü.\n` |
-| `passphrase-v1.klt` | Parola `kilit test vektörü bir`, Argon2id 64 MiB, t=3, p=1 | Yok | aynı |
+| `xwing-signed-v1.klt` | X-Wing, seed 32 × `0x42` | Ed25519 and ML-DSA-65, seed 32 × `0x07` | `Kilit KLT1 test vektörü.\n` |
+| `passphrase-v1.klt` | Passphrase `kilit test vektörü bir`, Argon2id 64 MiB, t=3, p=1 | None | the same |
 
-Dosya adı her ikisinde de `vektor.txt`, MIME türü `text/plain`.
+In both, the file name is `vektor.txt` and the MIME type is `text/plain`.

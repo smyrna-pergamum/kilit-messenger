@@ -12,7 +12,7 @@ import '../widgets/panic_code.dart';
 import 'change_pin_dialog.dart';
 
 /// Shown in "About"; kept in step with pubspec.yaml's version.
-const appVersion = '0.1.0-alpha';
+const appVersion = '0.1.1-alpha';
 
 String pinProtectionName(L l, PinProtection p) => switch (p) {
   PinProtection.strongbox => l.hwStrongbox,
