@@ -7,7 +7,7 @@ version = "0.0.1"
 edition = "2024"
 rust-version = "1.99"
 license = "GPL-3.0-or-later"
-repository = "https://github.com/OWNER/kilit-messenger"
+repository = "https://github.com/smyrna-pergamum/kilit-messenger"
 publish = false
 
 [workspace.dependencies]
