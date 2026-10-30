@@ -26,8 +26,11 @@ RUN curl -fsSL "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/x8
     && /tmp/rustup-init -y --no-modify-path --profile minimal --default-toolchain none \
     && rm /tmp/rustup-init
 COPY core/rust-toolchain.toml /tmp/toolchain/rust-toolchain.toml
+# registry and git exist in the image so the volumes build.sh mounts on
+# them start out writable for the calling user, not owned by root
 RUN cd /tmp/toolchain && rustup toolchain install \
     && rustup show active-toolchain \
+    && mkdir -p /opt/cargo/registry /opt/cargo/git \
     && chmod -R a+rwX /opt/cargo /opt/rustup
 
 # protoc: libsignal turns its .proto files into Rust (prost-build) while it
