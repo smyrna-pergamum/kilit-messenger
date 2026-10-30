@@ -1358,7 +1358,10 @@ mod tests {
             ("Aile", ayse_id.as_str())
         );
         assert_eq!(bg.roster.members.len(), 3);
-        assert_eq!(bora.group_chat(&g.id).unwrap()[0].notice, groups::notice::JOINED);
+        assert_eq!(
+            bora.group_chat(&g.id).unwrap()[0].notice,
+            groups::notice::JOINED
+        );
 
         // the admin writes: both have it, both answer, two of two
         ayse.send_group_message(&g.id, "merhaba").unwrap();
@@ -1468,7 +1471,9 @@ mod tests {
         let mut relays = Relays::default();
         let (_, bora_id) = meet(&mut ayse, &mut bora, &mut relays);
         let (_, can_bora) = meet(&mut can, &mut bora, &mut relays);
-        let (g, _) = ayse.create_group("İki", std::slice::from_ref(&bora_id)).unwrap();
+        let (g, _) = ayse
+            .create_group("İki", std::slice::from_ref(&bora_id))
+            .unwrap();
         relays.take_outbox(&mut ayse);
         relays.deliver(&mut bora);
         // Can knows Bora but is not in the group; Can makes a group of the
