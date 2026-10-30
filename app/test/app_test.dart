@@ -557,7 +557,7 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
     expect(find.text('Bora'), findsOneWidget);
-    expect(find.text('→ selam'), findsOneWidget);
+    expect(find.text('You: selam'), findsOneWidget);
     tor.stop();
   });
 

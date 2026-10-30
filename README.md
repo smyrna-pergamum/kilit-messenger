@@ -1,11 +1,43 @@
-# Kilit
+<p align="center">
+  <img src="docs/assets/icon.png" width="128" alt="Kilit icon: a brass padlock">
+</p>
 
-[Türkçe](README.tr.md)
+<h1 align="center">Kilit</h1>
+
+<p align="center">
+  <b>A private messenger and encrypted vault.</b><br>
+  No account, no phone number, no server. Post-quantum Signal protocol, over Tor only.
+</p>
+
+<p align="center">
+  <a href="https://github.com/smyrna-pergamum/kilit-messenger/releases"><img alt="Release" src="https://img.shields.io/github/v/release/smyrna-pergamum/kilit-messenger?include_prereleases&label=release&color=E0A84A"></a>
+  <a href="https://github.com/smyrna-pergamum/kilit-messenger/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/smyrna-pergamum/kilit-messenger/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="LICENSE"><img alt="License: GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-blue"></a>
+  <img alt="Android 7.0+" src="https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white">
+</p>
+
+<p align="center">
+  <a href="https://github.com/smyrna-pergamum/kilit-messenger/releases"><b>Download the APK</b></a>
+  ·
+  <a href="README.tr.md">Türkçe</a>
+</p>
 
 A messenger and encrypted file vault with no account, no phone number and no
 server of its own. Messages are end-to-end encrypted with the Signal protocol
 in its post-quantum form, and they leave the phone only through Tor, to public
 Nostr relays.
+
+<p align="center">
+  <img src="docs/screenshots/01-chats.png" width="24%" alt="Chats: contacts, a group and a request">
+  <img src="docs/screenshots/02-chat.png" width="24%" alt="A conversation with delivery ticks and a file">
+  <img src="docs/screenshots/03-group.png" width="24%" alt="A group with three people">
+  <img src="docs/screenshots/04-my-kilit.png" width="24%" alt="Your code: QR, link and @ID">
+</p>
+<p align="center">
+  <img src="docs/screenshots/05-bridges.png" width="24%" alt="Tor connection: automatic, obfs4, Snowflake or your own bridges">
+  <img src="docs/screenshots/06-lock.png" width="24%" alt="The lock screen: the digits are shuffled every time">
+</p>
+<p align="center"><sub>The people and messages are made up. Kilit blocks screenshots on the phone, so these are drawn from the real screens by <code>app/tool/screenshots</code>.</sub></p>
 
 > **Alpha. Not audited.** Kilit has had no independent security review. Do
 > not rely on it where your life or freedom depends on it.
@@ -57,7 +89,9 @@ Nostr relays.
 ## Install
 
 Download the APK from [Releases](https://github.com/smyrna-pergamum/kilit-messenger/releases).
-It runs on Android 7.0 or later.
+It runs on Android 7.0 or later. Kilit asks for two permissions: the network,
+which only its embedded Tor uses, and the camera, for photos you take in a
+chat.
 
 Before installing, check two things:
 

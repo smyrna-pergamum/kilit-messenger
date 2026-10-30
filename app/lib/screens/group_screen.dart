@@ -68,7 +68,7 @@ class _GroupTile extends StatelessWidget {
             ? l.groupMembers(g.members.length)
             : last.notice != 0
             ? names.noticeText(last)
-            : '${last.outgoing ? '→ ' : '${names.of(last.from)}: '}${last.text}',
+            : '${last.outgoing ? l.groupYou : names.of(last.from)}: ${last.text}',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(color: t.textMuted),

@@ -1,11 +1,43 @@
-# Kilit
+<p align="center">
+  <img src="docs/assets/icon.png" width="128" alt="Kilit simgesi: pirinç bir asma kilit">
+</p>
 
-[English](README.md)
+<h1 align="center">Kilit</h1>
+
+<p align="center">
+  <b>Gizli bir mesajlaşma uygulaması ve şifreli kasa.</b><br>
+  Hesap, telefon numarası ve sunucu yok. Kuantum sonrası Signal protokolü, yalnızca Tor üzerinden.
+</p>
+
+<p align="center">
+  <a href="https://github.com/smyrna-pergamum/kilit-messenger/releases"><img alt="Release" src="https://img.shields.io/github/v/release/smyrna-pergamum/kilit-messenger?include_prereleases&label=release&color=E0A84A"></a>
+  <a href="https://github.com/smyrna-pergamum/kilit-messenger/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/smyrna-pergamum/kilit-messenger/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="LICENSE"><img alt="License: GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-blue"></a>
+  <img alt="Android 7.0+" src="https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white">
+</p>
+
+<p align="center">
+  <a href="https://github.com/smyrna-pergamum/kilit-messenger/releases"><b>APK'yı indir</b></a>
+  ·
+  <a href="README.md">English</a>
+</p>
 
 Hesap, telefon numarası ve kendi sunucusu olmayan bir mesajlaşma uygulaması
 ve şifreli dosya kasası. Mesajlar Signal protokolünün kuantum sonrası
 sürümüyle uçtan uca şifrelenir ve telefondan yalnızca Tor üzerinden, açık
 Nostr relay'lerine çıkar.
+
+<p align="center">
+  <img src="docs/screenshots/01-chats.png" width="24%" alt="Sohbetler: kişiler, bir grup ve bir istek">
+  <img src="docs/screenshots/02-chat.png" width="24%" alt="Teslim tikleri ve bir dosyayla bir sohbet">
+  <img src="docs/screenshots/03-group.png" width="24%" alt="Üç kişilik bir grup">
+  <img src="docs/screenshots/04-my-kilit.png" width="24%" alt="Kodunuz: QR, bağlantı ve @kimlik">
+</p>
+<p align="center">
+  <img src="docs/screenshots/05-bridges.png" width="24%" alt="Tor bağlantısı: otomatik, obfs4, Snowflake ya da kendi köprüleriniz">
+  <img src="docs/screenshots/06-lock.png" width="24%" alt="Kilit ekranı: rakamlar her açılışta karışır">
+</p>
+<p align="center"><sub>Kişiler ve mesajlar uydurmadır. Kilit telefonda ekran görüntüsü alınmasını engellediği için bu görüntüler gerçek ekranlardan <code>app/tool/screenshots</code> ile çizilir.</sub></p>
 
 > **Alfa sürüm, denetlenmedi.** Kilit bağımsız bir güvenlik denetiminden
 > geçmedi. Hayatınızın ya da özgürlüğünüzün bağlı olduğu durumlarda
@@ -61,7 +93,9 @@ Nostr relay'lerine çıkar.
 ## Kurulum
 
 APK'yı [Releases](https://github.com/smyrna-pergamum/kilit-messenger/releases)
-sayfasından indirin. Android 7.0 ve sonrasında çalışır.
+sayfasından indirin. Android 7.0 ve sonrasında çalışır. Kilit iki izin
+ister: yalnızca gömülü Tor'un kullandığı ağ izni ve sohbette çektiğiniz
+fotoğraflar için kamera.
 
 Kurmadan önce iki şeyi denetleyin:
 

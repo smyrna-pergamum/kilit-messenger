@@ -436,7 +436,7 @@ class _ContactTile extends StatelessWidget {
       subtitle: Text(
         last == null
             ? '@${c.kilitId}'
-            : '${last.outgoing ? '→ ' : ''}${last.text}',
+            : '${last.outgoing ? '${L.of(context).groupYou}: ' : ''}${last.text}',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(color: t.textMuted),
@@ -1544,19 +1544,19 @@ class _Bubble extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          // theirs from the start edge, ours from the end
+          crossAxisAlignment: mine
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
             if (sender != null)
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: Text(
-                  sender!,
-                  key: const ValueKey('line-sender'),
-                  style: TextStyle(
-                    color: t.accent,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
+              Text(
+                sender!,
+                key: const ValueKey('line-sender'),
+                style: TextStyle(
+                  color: t.accent,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             if (file != null) _FileView(file: file, core: core, files: files),
