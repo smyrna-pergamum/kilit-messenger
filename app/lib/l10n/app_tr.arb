@@ -300,5 +300,21 @@
   "groupNoticeRemovedYou": "{who} sizi gruptan çıkardı",
   "emojiButton": "Emoji ve çıkartmalar",
   "stickers": "Çıkartmalar",
-  "stickerLine": "Çıkartma"
+  "stickerLine": "Çıkartma",
+  "devicesTitle": "Bağlı cihazlar",
+  "devicesIntro": "Kilit kimliğiniz en fazla 5 cihazda olabilir: telefonunuz ve bağladığınız bilgisayarlar. Her birinin kendi anahtarları vardır ve mesajlar hepsine ulaşır.",
+  "deviceThis": "Bu cihaz",
+  "devicePhone": "Telefon",
+  "deviceNumber": "Cihaz {n}",
+  "deviceLink": "Bilgisayar bağla",
+  "deviceRemove": "Kaldır",
+  "deviceRemoveConfirm": "Bu cihaz kaldırılsın mı? Mesajlarınız artık ona gitmez. Cihaz kaybolduysa Kilit kimliğinizi de yenileyin.",
+  "linkToPhone": "Telefonuma bağla",
+  "linkToPhoneHint": "Bu cihazı telefonunuzdaki Kilit kimliğinin bir cihazı yapın. Telefonda: Ayarlar, Bağlı cihazlar, Bilgisayar bağla. Sonra bu kodu okutun.",
+  "linkOnlyNew": "Yalnızca henüz kişisi olmayan yeni bir Kilit bir telefona bağlanabilir.",
+  "linkWaiting": "Öbür cihaz bekleniyor. İkisinin de Tor'a bağlı olması gerekir.",
+  "linkCompare": "Öbür ekranda aynı kodun göründüğünü denetleyin:",
+  "linkDone": "Bağlandı. Mesajlar artık iki cihaza da ulaşıyor.",
+  "linkNotCode": "Bu bir Kilit bağlama kodu değil.",
+  "linkedToPhone": "Bu cihaz, telefonunuzdaki Kilit kimliğine bağlı."
 }

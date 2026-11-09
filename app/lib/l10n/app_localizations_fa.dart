@@ -1016,4 +1016,59 @@ class LFa extends L {
 
   @override
   String get stickerLine => 'استیکر';
+
+  @override
+  String get devicesTitle => 'دستگاه‌های پیوندشده';
+
+  @override
+  String get devicesIntro =>
+      'شناسه Kilit شما می‌تواند روی حداکثر ۵ دستگاه باشد: گوشی و رایانه‌هایی که پیوند می‌دهید. هرکدام کلیدهای خود را دارد و پیام‌ها به همه می‌رسد.';
+
+  @override
+  String get deviceThis => 'این دستگاه';
+
+  @override
+  String get devicePhone => 'گوشی';
+
+  @override
+  String deviceNumber(int n) {
+    return 'دستگاه $n';
+  }
+
+  @override
+  String get deviceLink => 'پیوند یک رایانه';
+
+  @override
+  String get deviceRemove => 'حذف';
+
+  @override
+  String get deviceRemoveConfirm =>
+      'این دستگاه حذف شود؟ دیگر پیام‌هایتان به آن نمی‌رسد. اگر گم شده، شناسه Kilit را هم تازه کنید.';
+
+  @override
+  String get linkToPhone => 'پیوند به گوشی من';
+
+  @override
+  String get linkToPhoneHint =>
+      'این دستگاه را دستگاهی از شناسه Kilit گوشی‌تان کنید. روی گوشی: تنظیمات، دستگاه‌های پیوندشده، پیوند یک رایانه. سپس این کد را اسکن کنید.';
+
+  @override
+  String get linkOnlyNew =>
+      'فقط یک Kilit تازه بدون مخاطب را می‌توان به گوشی پیوند داد.';
+
+  @override
+  String get linkWaiting => 'در انتظار دستگاه دیگر. هر دو به Tor نیاز دارند.';
+
+  @override
+  String get linkCompare => 'بررسی کنید صفحه دیگر همین کد را نشان می‌دهد:';
+
+  @override
+  String get linkDone => 'پیوند شد. پیام‌ها اکنون به هر دو دستگاه می‌رسد.';
+
+  @override
+  String get linkNotCode => 'این کد پیوند Kilit نیست.';
+
+  @override
+  String get linkedToPhone =>
+      'این دستگاه به شناسه Kilit گوشی شما پیوند خورده است.';
 }

@@ -471,6 +471,44 @@ class RustCore implements KilitCore {
   }
 
   @override
+  Future<bool> isPrimary() => _h.isPrimary();
+
+  @override
+  Future<String> linkOffer() => _h.linkOffer();
+
+  @override
+  Future<String> linkAccept(String text, String name) =>
+      _h.linkAccept(text: text, name: name);
+
+  @override
+  Future<LinkStatus> linkState() async {
+    final s = await _h.linkState();
+    return LinkStatus(
+      offer: s.offer,
+      waiting: s.waiting,
+      code: s.code,
+      done: s.done,
+    );
+  }
+
+  @override
+  Future<void> linkCancel() => _h.linkCancel();
+
+  @override
+  Future<List<LinkedDevice>> devices() async => [
+    for (final d in await _h.devices())
+      LinkedDevice(
+        id: d.id,
+        name: d.name,
+        added: d.addedUnix.toInt() == 0 ? null : _time(d.addedUnix.toInt()),
+        isThis: d.this_,
+      ),
+  ];
+
+  @override
+  Future<void> unlinkDevice(int id) => _h.unlinkDevice(id: id);
+
+  @override
   Future<Uint8List> cameraJpeg(CameraFrame f) => rust.cameraJpeg(
     width: f.width,
     height: f.height,

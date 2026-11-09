@@ -300,5 +300,21 @@
   "groupNoticeRemovedYou": "{who} があなたを外しました",
   "emojiButton": "絵文字とステッカー",
   "stickers": "ステッカー",
-  "stickerLine": "ステッカー"
+  "stickerLine": "ステッカー",
+  "devicesTitle": "リンク済みデバイス",
+  "devicesIntro": "Kilit ID は最大 5 台のデバイスで使えます：スマートフォンと、リンクしたパソコン。各デバイスに専用の鍵があり、メッセージはすべてに届きます。",
+  "deviceThis": "このデバイス",
+  "devicePhone": "スマートフォン",
+  "deviceNumber": "デバイス {n}",
+  "deviceLink": "パソコンをリンク",
+  "deviceRemove": "削除",
+  "deviceRemoveConfirm": "このデバイスを削除しますか？以後メッセージは届きません。紛失した場合は Kilit ID も更新してください。",
+  "linkToPhone": "スマートフォンにリンク",
+  "linkToPhoneHint": "このデバイスをスマートフォンの Kilit ID のデバイスにします。スマートフォンで：設定、リンク済みデバイス、パソコンをリンク。次にこのコードを読み取ります。",
+  "linkOnlyNew": "連絡先のない新しい Kilit だけがスマートフォンにリンクできます。",
+  "linkWaiting": "もう一方のデバイスを待っています。両方に Tor が必要です。",
+  "linkCompare": "もう一方の画面に同じコードが表示されていることを確認してください：",
+  "linkDone": "リンクしました。メッセージは両方のデバイスに届きます。",
+  "linkNotCode": "これは Kilit のリンクコードではありません。",
+  "linkedToPhone": "このデバイスはスマートフォンの Kilit ID にリンクされています。"
 }

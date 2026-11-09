@@ -1928,6 +1928,102 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Sticker'**
   String get stickerLine;
+
+  /// No description provided for @devicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked devices'**
+  String get devicesTitle;
+
+  /// No description provided for @devicesIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Kilit ID can be on up to 5 devices: your phone and computers you link. Each has its own keys, and messages reach all of them.'**
+  String get devicesIntro;
+
+  /// No description provided for @deviceThis.
+  ///
+  /// In en, this message translates to:
+  /// **'This device'**
+  String get deviceThis;
+
+  /// No description provided for @devicePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get devicePhone;
+
+  /// No description provided for @deviceNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Device {n}'**
+  String deviceNumber(int n);
+
+  /// No description provided for @deviceLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Link a computer'**
+  String get deviceLink;
+
+  /// No description provided for @deviceRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get deviceRemove;
+
+  /// No description provided for @deviceRemoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this device? It stops getting your messages. If it was lost, renew your Kilit ID too.'**
+  String get deviceRemoveConfirm;
+
+  /// No description provided for @linkToPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Link to my phone'**
+  String get linkToPhone;
+
+  /// No description provided for @linkToPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Make this a device of your phone\'s Kilit ID. On the phone: Settings, Linked devices, Link a computer. Then scan this code.'**
+  String get linkToPhoneHint;
+
+  /// No description provided for @linkOnlyNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Only a new Kilit, with no contacts yet, can be linked to a phone.'**
+  String get linkOnlyNew;
+
+  /// No description provided for @linkWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the other device. Both need Tor.'**
+  String get linkWaiting;
+
+  /// No description provided for @linkCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Check that the other screen shows the same code:'**
+  String get linkCompare;
+
+  /// No description provided for @linkDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked. Messages now reach both devices.'**
+  String get linkDone;
+
+  /// No description provided for @linkNotCode.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not a Kilit linking code.'**
+  String get linkNotCode;
+
+  /// No description provided for @linkedToPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'This device is linked to your phone\'s Kilit ID.'**
+  String get linkedToPhone;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

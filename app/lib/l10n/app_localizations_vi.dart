@@ -1014,4 +1014,59 @@ class LVi extends L {
 
   @override
   String get stickerLine => 'Nhãn dán';
+
+  @override
+  String get devicesTitle => 'Thiết bị đã liên kết';
+
+  @override
+  String get devicesIntro =>
+      'ID Kilit của bạn có thể ở trên tối đa 5 thiết bị: điện thoại và các máy tính bạn liên kết. Mỗi thiết bị có khóa riêng và tin nhắn đến tất cả.';
+
+  @override
+  String get deviceThis => 'Thiết bị này';
+
+  @override
+  String get devicePhone => 'Điện thoại';
+
+  @override
+  String deviceNumber(int n) {
+    return 'Thiết bị $n';
+  }
+
+  @override
+  String get deviceLink => 'Liên kết máy tính';
+
+  @override
+  String get deviceRemove => 'Gỡ';
+
+  @override
+  String get deviceRemoveConfirm =>
+      'Gỡ thiết bị này? Tin nhắn của bạn sẽ không đến đó nữa. Nếu bị mất, hãy làm mới cả ID Kilit.';
+
+  @override
+  String get linkToPhone => 'Liên kết với điện thoại của tôi';
+
+  @override
+  String get linkToPhoneHint =>
+      'Biến thiết bị này thành thiết bị của ID Kilit trên điện thoại. Trên điện thoại: Cài đặt, Thiết bị đã liên kết, Liên kết máy tính. Rồi quét mã này.';
+
+  @override
+  String get linkOnlyNew =>
+      'Chỉ Kilit mới, chưa có liên hệ, mới liên kết được với điện thoại.';
+
+  @override
+  String get linkWaiting => 'Đang chờ thiết bị kia. Cả hai cần Tor.';
+
+  @override
+  String get linkCompare => 'Kiểm tra màn hình kia hiện cùng mã:';
+
+  @override
+  String get linkDone => 'Đã liên kết. Tin nhắn giờ đến cả hai thiết bị.';
+
+  @override
+  String get linkNotCode => 'Đó không phải mã liên kết Kilit.';
+
+  @override
+  String get linkedToPhone =>
+      'Thiết bị này đã liên kết với ID Kilit trên điện thoại của bạn.';
 }

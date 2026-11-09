@@ -300,5 +300,21 @@
   "groupNoticeRemovedYou": "{who} 把你移出了群组",
   "emojiButton": "表情和贴纸",
   "stickers": "贴纸",
-  "stickerLine": "贴纸"
+  "stickerLine": "贴纸",
+  "devicesTitle": "已关联设备",
+  "devicesIntro": "你的 Kilit ID 最多可在 5 台设备上使用：你的手机和你关联的电脑。每台设备有自己的密钥，消息会送达所有设备。",
+  "deviceThis": "此设备",
+  "devicePhone": "手机",
+  "deviceNumber": "设备 {n}",
+  "deviceLink": "关联电脑",
+  "deviceRemove": "移除",
+  "deviceRemoveConfirm": "移除此设备？它将不再收到你的消息。如果设备丢失，也请更新你的 Kilit ID。",
+  "linkToPhone": "关联到我的手机",
+  "linkToPhoneHint": "让此设备成为你手机上 Kilit ID 的一台设备。在手机上：设置、已关联设备、关联电脑，然后扫描此代码。",
+  "linkOnlyNew": "只有尚无联系人的新 Kilit 才能关联到手机。",
+  "linkWaiting": "正在等待另一台设备。两台都需要 Tor。",
+  "linkCompare": "确认另一块屏幕显示相同的代码：",
+  "linkDone": "已关联。消息现在会送达两台设备。",
+  "linkNotCode": "这不是 Kilit 关联代码。",
+  "linkedToPhone": "此设备已关联到你手机上的 Kilit ID。"
 }

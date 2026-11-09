@@ -1017,4 +1017,59 @@ class LEn extends L {
 
   @override
   String get stickerLine => 'Sticker';
+
+  @override
+  String get devicesTitle => 'Linked devices';
+
+  @override
+  String get devicesIntro =>
+      'Your Kilit ID can be on up to 5 devices: your phone and computers you link. Each has its own keys, and messages reach all of them.';
+
+  @override
+  String get deviceThis => 'This device';
+
+  @override
+  String get devicePhone => 'Phone';
+
+  @override
+  String deviceNumber(int n) {
+    return 'Device $n';
+  }
+
+  @override
+  String get deviceLink => 'Link a computer';
+
+  @override
+  String get deviceRemove => 'Remove';
+
+  @override
+  String get deviceRemoveConfirm =>
+      'Remove this device? It stops getting your messages. If it was lost, renew your Kilit ID too.';
+
+  @override
+  String get linkToPhone => 'Link to my phone';
+
+  @override
+  String get linkToPhoneHint =>
+      'Make this a device of your phone\'s Kilit ID. On the phone: Settings, Linked devices, Link a computer. Then scan this code.';
+
+  @override
+  String get linkOnlyNew =>
+      'Only a new Kilit, with no contacts yet, can be linked to a phone.';
+
+  @override
+  String get linkWaiting => 'Waiting for the other device. Both need Tor.';
+
+  @override
+  String get linkCompare => 'Check that the other screen shows the same code:';
+
+  @override
+  String get linkDone => 'Linked. Messages now reach both devices.';
+
+  @override
+  String get linkNotCode => 'That is not a Kilit linking code.';
+
+  @override
+  String get linkedToPhone =>
+      'This device is linked to your phone\'s Kilit ID.';
 }

@@ -403,6 +403,58 @@ class DevCore implements KilitCore {
     resent.add(line);
   }
 
+  // ---- devices: a stand-in; [finishLink] plays the other device.
+
+  bool _primary = true;
+  LinkStatus _link = const LinkStatus();
+  final List<LinkedDevice> _devices = [];
+
+  @override
+  Future<bool> isPrimary() async => _primary;
+
+  @override
+  Future<String> linkOffer() async {
+    _requireOpen();
+    if (_contacts.isNotEmpty) throw StateError('only a new Kilit');
+    const offer = 'kilit://link?k=AAAA&t=00112233445566778899aabbccddeeff';
+    _link = const LinkStatus(offer: offer);
+    return offer;
+  }
+
+  @override
+  Future<String> linkAccept(String text, String name) async {
+    _requireOpen();
+    if (!text.startsWith('kilit://link?')) throw StateError('not a link');
+    _link = const LinkStatus(waiting: true, code: '123 456');
+    return '123 456';
+  }
+
+  @override
+  Future<LinkStatus> linkState() async => _link;
+
+  @override
+  Future<void> linkCancel() async => _link = const LinkStatus();
+
+  /// The other device answered: linking is done. On the new device it is
+  /// now a device of the phone's ID.
+  void finishLink({String name = 'Windows · DESK'}) {
+    if (_link.offer != null) _primary = false;
+    _link = LinkStatus(code: _link.code ?? '123 456', done: true);
+    _devices.add(LinkedDevice(id: 2, name: name, added: _clock()));
+    _relay.add(const Arrived('', ''));
+  }
+
+  @override
+  Future<List<LinkedDevice>> devices() async => [
+    LinkedDevice(id: 1, name: _primary ? '' : 'Android', isThis: _primary),
+    for (final d in _devices)
+      LinkedDevice(id: d.id, name: d.name, added: d.added, isThis: !_primary),
+  ];
+
+  @override
+  Future<void> unlinkDevice(int id) async =>
+      _devices.removeWhere((d) => d.id == id);
+
   // ---- groups: the same stand-in; [groupMessage] plays a member.
 
   final Map<String, Group> _groups = {};

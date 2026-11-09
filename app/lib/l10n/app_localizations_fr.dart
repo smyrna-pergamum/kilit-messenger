@@ -1021,4 +1021,62 @@ class LFr extends L {
 
   @override
   String get stickerLine => 'Sticker';
+
+  @override
+  String get devicesTitle => 'Appareils associés';
+
+  @override
+  String get devicesIntro =>
+      'Votre ID Kilit peut être sur jusqu\'à 5 appareils : votre téléphone et les ordinateurs que vous associez. Chacun a ses propres clés et les messages atteignent tous.';
+
+  @override
+  String get deviceThis => 'Cet appareil';
+
+  @override
+  String get devicePhone => 'Téléphone';
+
+  @override
+  String deviceNumber(int n) {
+    return 'Appareil $n';
+  }
+
+  @override
+  String get deviceLink => 'Associer un ordinateur';
+
+  @override
+  String get deviceRemove => 'Retirer';
+
+  @override
+  String get deviceRemoveConfirm =>
+      'Retirer cet appareil ? Il ne recevra plus vos messages. S\'il est perdu, renouvelez aussi votre ID Kilit.';
+
+  @override
+  String get linkToPhone => 'Associer à mon téléphone';
+
+  @override
+  String get linkToPhoneHint =>
+      'Faites de cet appareil un appareil de l\'ID Kilit de votre téléphone. Sur le téléphone : Réglages, Appareils associés, Associer un ordinateur. Puis scannez ce code.';
+
+  @override
+  String get linkOnlyNew =>
+      'Seul un Kilit neuf, sans contacts, peut être associé à un téléphone.';
+
+  @override
+  String get linkWaiting =>
+      'En attente de l\'autre appareil. Les deux ont besoin de Tor.';
+
+  @override
+  String get linkCompare =>
+      'Vérifiez que l\'autre écran affiche le même code :';
+
+  @override
+  String get linkDone =>
+      'Associé. Les messages atteignent maintenant les deux appareils.';
+
+  @override
+  String get linkNotCode => 'Ce n\'est pas un code d\'association Kilit.';
+
+  @override
+  String get linkedToPhone =>
+      'Cet appareil est associé à l\'ID Kilit de votre téléphone.';
 }

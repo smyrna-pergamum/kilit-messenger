@@ -300,5 +300,21 @@
   "groupNoticeRemovedYou": "{who} te quitó",
   "emojiButton": "Emoji y stickers",
   "stickers": "Stickers",
-  "stickerLine": "Sticker"
+  "stickerLine": "Sticker",
+  "devicesTitle": "Dispositivos vinculados",
+  "devicesIntro": "Tu ID de Kilit puede estar en hasta 5 dispositivos: tu teléfono y los ordenadores que vincules. Cada uno tiene sus propias claves y los mensajes llegan a todos.",
+  "deviceThis": "Este dispositivo",
+  "devicePhone": "Teléfono",
+  "deviceNumber": "Dispositivo {n}",
+  "deviceLink": "Vincular un ordenador",
+  "deviceRemove": "Quitar",
+  "deviceRemoveConfirm": "¿Quitar este dispositivo? Dejará de recibir tus mensajes. Si se perdió, renueva también tu ID de Kilit.",
+  "linkToPhone": "Vincular a mi teléfono",
+  "linkToPhoneHint": "Haz de este un dispositivo de la ID de Kilit de tu teléfono. En el teléfono: Ajustes, Dispositivos vinculados, Vincular un ordenador. Luego escanea este código.",
+  "linkOnlyNew": "Solo un Kilit nuevo, sin contactos, puede vincularse a un teléfono.",
+  "linkWaiting": "Esperando al otro dispositivo. Ambos necesitan Tor.",
+  "linkCompare": "Comprueba que la otra pantalla muestra el mismo código:",
+  "linkDone": "Vinculado. Los mensajes llegan ahora a ambos dispositivos.",
+  "linkNotCode": "Eso no es un código de vinculación de Kilit.",
+  "linkedToPhone": "Este dispositivo está vinculado a la ID de Kilit de tu teléfono."
 }

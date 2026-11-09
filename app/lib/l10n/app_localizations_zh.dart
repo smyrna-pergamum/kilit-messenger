@@ -970,4 +970,56 @@ class LZh extends L {
 
   @override
   String get stickerLine => '贴纸';
+
+  @override
+  String get devicesTitle => '已关联设备';
+
+  @override
+  String get devicesIntro =>
+      '你的 Kilit ID 最多可在 5 台设备上使用：你的手机和你关联的电脑。每台设备有自己的密钥，消息会送达所有设备。';
+
+  @override
+  String get deviceThis => '此设备';
+
+  @override
+  String get devicePhone => '手机';
+
+  @override
+  String deviceNumber(int n) {
+    return '设备 $n';
+  }
+
+  @override
+  String get deviceLink => '关联电脑';
+
+  @override
+  String get deviceRemove => '移除';
+
+  @override
+  String get deviceRemoveConfirm => '移除此设备？它将不再收到你的消息。如果设备丢失，也请更新你的 Kilit ID。';
+
+  @override
+  String get linkToPhone => '关联到我的手机';
+
+  @override
+  String get linkToPhoneHint =>
+      '让此设备成为你手机上 Kilit ID 的一台设备。在手机上：设置、已关联设备、关联电脑，然后扫描此代码。';
+
+  @override
+  String get linkOnlyNew => '只有尚无联系人的新 Kilit 才能关联到手机。';
+
+  @override
+  String get linkWaiting => '正在等待另一台设备。两台都需要 Tor。';
+
+  @override
+  String get linkCompare => '确认另一块屏幕显示相同的代码：';
+
+  @override
+  String get linkDone => '已关联。消息现在会送达两台设备。';
+
+  @override
+  String get linkNotCode => '这不是 Kilit 关联代码。';
+
+  @override
+  String get linkedToPhone => '此设备已关联到你手机上的 Kilit ID。';
 }

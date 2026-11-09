@@ -146,6 +146,27 @@ abstract interface class KilitCore {
   /// and link stop working.
   Future<MyKilit> renewKilitId();
 
+  /// Whether this is the phone the Kilit ID was made on: it links devices.
+  Future<bool> isPrimary();
+
+  /// A new device: starts linking to a phone. Returns the text to show as
+  /// a QR code; the phone scans it.
+  Future<String> linkOffer();
+
+  /// The phone: links the device whose QR code said [text]. Returns the
+  /// code both screens show.
+  Future<String> linkAccept(String text, String name);
+
+  /// Where linking stands.
+  Future<LinkStatus> linkState();
+  Future<void> linkCancel();
+
+  /// This Kilit ID's devices, this one included.
+  Future<List<LinkedDevice>> devices();
+
+  /// The phone: takes a linked device off this ID.
+  Future<void> unlinkDevice(int id);
+
   /// The groups, newest conversation first.
   Future<List<Group>> groups();
   Future<Group> group(String id);
@@ -195,6 +216,40 @@ abstract interface class KilitCore {
 
 /// The largest file sent in a chat.
 const maxChatFileBytes = 5 * 1024 * 1024;
+
+/// Where linking a device stands.
+class LinkStatus {
+  const LinkStatus({
+    this.offer,
+    this.waiting = false,
+    this.code,
+    this.done = false,
+  });
+
+  /// A new device: the text its QR code shows, while it waits.
+  final String? offer;
+
+  /// The phone: waiting for the new device to answer.
+  final bool waiting;
+
+  /// The code to compare on both screens.
+  final String? code;
+  final bool done;
+}
+
+/// One of this Kilit ID's devices; 1 is the phone the ID was made on.
+class LinkedDevice {
+  const LinkedDevice({
+    required this.id,
+    this.name = '',
+    this.added,
+    this.isThis = false,
+  });
+  final int id;
+  final String name;
+  final DateTime? added;
+  final bool isThis;
+}
 
 /// Most people in a group, its maker included.
 const maxGroup = 20;

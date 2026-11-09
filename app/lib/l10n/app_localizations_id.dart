@@ -1016,4 +1016,59 @@ class LId extends L {
 
   @override
   String get stickerLine => 'Stiker';
+
+  @override
+  String get devicesTitle => 'Perangkat tertaut';
+
+  @override
+  String get devicesIntro =>
+      'ID Kilit Anda bisa ada di hingga 5 perangkat: ponsel dan komputer yang Anda tautkan. Masing-masing punya kunci sendiri, dan pesan sampai ke semuanya.';
+
+  @override
+  String get deviceThis => 'Perangkat ini';
+
+  @override
+  String get devicePhone => 'Ponsel';
+
+  @override
+  String deviceNumber(int n) {
+    return 'Perangkat $n';
+  }
+
+  @override
+  String get deviceLink => 'Tautkan komputer';
+
+  @override
+  String get deviceRemove => 'Hapus';
+
+  @override
+  String get deviceRemoveConfirm =>
+      'Hapus perangkat ini? Pesan Anda tidak akan sampai ke sana lagi. Jika hilang, perbarui juga ID Kilit Anda.';
+
+  @override
+  String get linkToPhone => 'Tautkan ke ponsel saya';
+
+  @override
+  String get linkToPhoneHint =>
+      'Jadikan ini perangkat dari ID Kilit ponsel Anda. Di ponsel: Pengaturan, Perangkat tertaut, Tautkan komputer. Lalu pindai kode ini.';
+
+  @override
+  String get linkOnlyNew =>
+      'Hanya Kilit baru tanpa kontak yang bisa ditautkan ke ponsel.';
+
+  @override
+  String get linkWaiting => 'Menunggu perangkat lain. Keduanya perlu Tor.';
+
+  @override
+  String get linkCompare =>
+      'Periksa bahwa layar lain menampilkan kode yang sama:';
+
+  @override
+  String get linkDone => 'Tertaut. Pesan kini sampai ke kedua perangkat.';
+
+  @override
+  String get linkNotCode => 'Itu bukan kode penautan Kilit.';
+
+  @override
+  String get linkedToPhone => 'Perangkat ini tertaut ke ID Kilit ponsel Anda.';
 }

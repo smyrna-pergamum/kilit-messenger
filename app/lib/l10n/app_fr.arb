@@ -300,5 +300,21 @@
   "groupNoticeRemovedYou": "{who} vous a retiré",
   "emojiButton": "Emoji et stickers",
   "stickers": "Stickers",
-  "stickerLine": "Sticker"
+  "stickerLine": "Sticker",
+  "devicesTitle": "Appareils associés",
+  "devicesIntro": "Votre ID Kilit peut être sur jusqu'à 5 appareils : votre téléphone et les ordinateurs que vous associez. Chacun a ses propres clés et les messages atteignent tous.",
+  "deviceThis": "Cet appareil",
+  "devicePhone": "Téléphone",
+  "deviceNumber": "Appareil {n}",
+  "deviceLink": "Associer un ordinateur",
+  "deviceRemove": "Retirer",
+  "deviceRemoveConfirm": "Retirer cet appareil ? Il ne recevra plus vos messages. S'il est perdu, renouvelez aussi votre ID Kilit.",
+  "linkToPhone": "Associer à mon téléphone",
+  "linkToPhoneHint": "Faites de cet appareil un appareil de l'ID Kilit de votre téléphone. Sur le téléphone : Réglages, Appareils associés, Associer un ordinateur. Puis scannez ce code.",
+  "linkOnlyNew": "Seul un Kilit neuf, sans contacts, peut être associé à un téléphone.",
+  "linkWaiting": "En attente de l'autre appareil. Les deux ont besoin de Tor.",
+  "linkCompare": "Vérifiez que l'autre écran affiche le même code :",
+  "linkDone": "Associé. Les messages atteignent maintenant les deux appareils.",
+  "linkNotCode": "Ce n'est pas un code d'association Kilit.",
+  "linkedToPhone": "Cet appareil est associé à l'ID Kilit de votre téléphone."
 }

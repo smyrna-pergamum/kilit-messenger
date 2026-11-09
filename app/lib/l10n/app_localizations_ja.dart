@@ -984,4 +984,57 @@ class LJa extends L {
 
   @override
   String get stickerLine => 'ステッカー';
+
+  @override
+  String get devicesTitle => 'リンク済みデバイス';
+
+  @override
+  String get devicesIntro =>
+      'Kilit ID は最大 5 台のデバイスで使えます：スマートフォンと、リンクしたパソコン。各デバイスに専用の鍵があり、メッセージはすべてに届きます。';
+
+  @override
+  String get deviceThis => 'このデバイス';
+
+  @override
+  String get devicePhone => 'スマートフォン';
+
+  @override
+  String deviceNumber(int n) {
+    return 'デバイス $n';
+  }
+
+  @override
+  String get deviceLink => 'パソコンをリンク';
+
+  @override
+  String get deviceRemove => '削除';
+
+  @override
+  String get deviceRemoveConfirm =>
+      'このデバイスを削除しますか？以後メッセージは届きません。紛失した場合は Kilit ID も更新してください。';
+
+  @override
+  String get linkToPhone => 'スマートフォンにリンク';
+
+  @override
+  String get linkToPhoneHint =>
+      'このデバイスをスマートフォンの Kilit ID のデバイスにします。スマートフォンで：設定、リンク済みデバイス、パソコンをリンク。次にこのコードを読み取ります。';
+
+  @override
+  String get linkOnlyNew => '連絡先のない新しい Kilit だけがスマートフォンにリンクできます。';
+
+  @override
+  String get linkWaiting => 'もう一方のデバイスを待っています。両方に Tor が必要です。';
+
+  @override
+  String get linkCompare => 'もう一方の画面に同じコードが表示されていることを確認してください：';
+
+  @override
+  String get linkDone => 'リンクしました。メッセージは両方のデバイスに届きます。';
+
+  @override
+  String get linkNotCode => 'これは Kilit のリンクコードではありません。';
+
+  @override
+  String get linkedToPhone => 'このデバイスはスマートフォンの Kilit ID にリンクされています。';
 }

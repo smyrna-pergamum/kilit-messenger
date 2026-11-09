@@ -1013,4 +1013,60 @@ class LTr extends L {
 
   @override
   String get stickerLine => 'Çıkartma';
+
+  @override
+  String get devicesTitle => 'Bağlı cihazlar';
+
+  @override
+  String get devicesIntro =>
+      'Kilit kimliğiniz en fazla 5 cihazda olabilir: telefonunuz ve bağladığınız bilgisayarlar. Her birinin kendi anahtarları vardır ve mesajlar hepsine ulaşır.';
+
+  @override
+  String get deviceThis => 'Bu cihaz';
+
+  @override
+  String get devicePhone => 'Telefon';
+
+  @override
+  String deviceNumber(int n) {
+    return 'Cihaz $n';
+  }
+
+  @override
+  String get deviceLink => 'Bilgisayar bağla';
+
+  @override
+  String get deviceRemove => 'Kaldır';
+
+  @override
+  String get deviceRemoveConfirm =>
+      'Bu cihaz kaldırılsın mı? Mesajlarınız artık ona gitmez. Cihaz kaybolduysa Kilit kimliğinizi de yenileyin.';
+
+  @override
+  String get linkToPhone => 'Telefonuma bağla';
+
+  @override
+  String get linkToPhoneHint =>
+      'Bu cihazı telefonunuzdaki Kilit kimliğinin bir cihazı yapın. Telefonda: Ayarlar, Bağlı cihazlar, Bilgisayar bağla. Sonra bu kodu okutun.';
+
+  @override
+  String get linkOnlyNew =>
+      'Yalnızca henüz kişisi olmayan yeni bir Kilit bir telefona bağlanabilir.';
+
+  @override
+  String get linkWaiting =>
+      'Öbür cihaz bekleniyor. İkisinin de Tor\'a bağlı olması gerekir.';
+
+  @override
+  String get linkCompare => 'Öbür ekranda aynı kodun göründüğünü denetleyin:';
+
+  @override
+  String get linkDone => 'Bağlandı. Mesajlar artık iki cihaza da ulaşıyor.';
+
+  @override
+  String get linkNotCode => 'Bu bir Kilit bağlama kodu değil.';
+
+  @override
+  String get linkedToPhone =>
+      'Bu cihaz, telefonunuzdaki Kilit kimliğine bağlı.';
 }

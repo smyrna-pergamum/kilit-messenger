@@ -160,7 +160,17 @@ Future<void> openSettingsSection(WidgetTester tester, String id) async {
   await tester.tap(find.byIcon(Icons.settings_outlined));
   await tester.pumpAndSettle();
   final header = find.byKey(ValueKey('section-$id'));
-  await tester.ensureVisible(header);
+  // the list builds lazily: scroll until the header exists
+  await tester.scrollUntilVisible(
+    header,
+    300,
+    scrollable: find
+        .descendant(
+          of: find.byKey(const ValueKey('settings-list')),
+          matching: find.byType(Scrollable),
+        )
+        .first,
+  );
   await tester.pumpAndSettle();
   await tester.tap(header);
   await tester.pumpAndSettle();
@@ -677,6 +687,79 @@ void main() {
     expect(find.byKey(const ValueKey('sticker-kilit-love')), findsWidgets);
     // the text being written stays
     expect(field.controller!.text, 'hi 😀');
+    tor.stop();
+  });
+
+  testWidgets('a new Kilit links to a phone with a QR code', (tester) async {
+    final (core, _) = await startApp(tester);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    await openSettingsSection(tester, 'devices');
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('device-link-to-phone')),
+    );
+    await tester.tap(find.byKey(const ValueKey('device-link-to-phone')));
+    // the waiting spinner never settles: pump by the clock
+    for (var i = 0; i < 3; i++) {
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+    expect(find.byKey(const ValueKey('link-qr')), findsOneWidget);
+    // the phone answers: linked, and the code shows
+    core.finishLink();
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('link-done')), findsOneWidget);
+    expect(find.text('123 456'), findsOneWidget);
+    await tester.tap(find.text('Close'));
+    await tester.pumpAndSettle();
+    // a linked device does not link others nor take them off
+    expect(find.byKey(const ValueKey('device-link')), findsNothing);
+    expect(find.byKey(const ValueKey('device-remove-1')), findsNothing);
+  });
+
+  testWidgets('the phone links a computer and can take it off', (tester) async {
+    final tor = readyTor();
+    addTearDown(tor.dispose);
+    final (core, _) = await startApp(tester, tor: tor);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    await letTorUp(tester);
+    await addSomeone(tester, boraLink);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await openSettingsSection(tester, 'devices');
+    await tester.ensureVisible(find.byKey(const ValueKey('device-link')));
+    expect(await core.linkAccept('kilit://link?k=AAAA&t=00', 'x'), '123 456');
+    await core.linkCancel();
+    // the scanner is replaced by what the computer showed
+    final link = core.linkAccept(
+      'kilit://link?k=AAAA&t=00112233445566778899aabbccddeeff',
+      'Android',
+    );
+    expect(await link, '123 456');
+    core.finishLink();
+    await tester.tap(find.byIcon(Icons.chat_bubble_outline));
+    await tester.pumpAndSettle();
+    // back in Settings: the section is still open
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('device-2')),
+      300,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const ValueKey('settings-list')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Windows · DESK'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('device-remove-2')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('device-remove-yes')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('device-2')), findsNothing);
     tor.stop();
   });
 

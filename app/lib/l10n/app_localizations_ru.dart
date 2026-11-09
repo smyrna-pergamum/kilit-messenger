@@ -1018,4 +1018,60 @@ class LRu extends L {
 
   @override
   String get stickerLine => 'Стикер';
+
+  @override
+  String get devicesTitle => 'Связанные устройства';
+
+  @override
+  String get devicesIntro =>
+      'Ваш Kilit ID может быть на 5 устройствах: телефоне и связанных компьютерах. У каждого свои ключи, и сообщения доходят до всех.';
+
+  @override
+  String get deviceThis => 'Это устройство';
+
+  @override
+  String get devicePhone => 'Телефон';
+
+  @override
+  String deviceNumber(int n) {
+    return 'Устройство $n';
+  }
+
+  @override
+  String get deviceLink => 'Связать компьютер';
+
+  @override
+  String get deviceRemove => 'Удалить';
+
+  @override
+  String get deviceRemoveConfirm =>
+      'Удалить это устройство? Ваши сообщения больше не будут на него приходить. Если оно утеряно, обновите и Kilit ID.';
+
+  @override
+  String get linkToPhone => 'Связать с моим телефоном';
+
+  @override
+  String get linkToPhoneHint =>
+      'Сделайте это устройство устройством Kilit ID вашего телефона. На телефоне: Настройки, Связанные устройства, Связать компьютер. Затем отсканируйте этот код.';
+
+  @override
+  String get linkOnlyNew =>
+      'Связать с телефоном можно только новый Kilit без контактов.';
+
+  @override
+  String get linkWaiting => 'Ожидание другого устройства. Обоим нужен Tor.';
+
+  @override
+  String get linkCompare => 'Убедитесь, что на другом экране тот же код:';
+
+  @override
+  String get linkDone =>
+      'Связано. Сообщения теперь приходят на оба устройства.';
+
+  @override
+  String get linkNotCode => 'Это не код связывания Kilit.';
+
+  @override
+  String get linkedToPhone =>
+      'Это устройство связано с Kilit ID вашего телефона.';
 }

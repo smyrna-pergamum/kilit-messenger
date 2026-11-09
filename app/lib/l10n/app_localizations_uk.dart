@@ -1018,4 +1018,60 @@ class LUk extends L {
 
   @override
   String get stickerLine => 'Стікер';
+
+  @override
+  String get devicesTitle => 'Пов\'язані пристрої';
+
+  @override
+  String get devicesIntro =>
+      'Ваш Kilit ID може бути на 5 пристроях: телефоні та пов\'язаних комп\'ютерах. Кожен має свої ключі, і повідомлення доходять до всіх.';
+
+  @override
+  String get deviceThis => 'Цей пристрій';
+
+  @override
+  String get devicePhone => 'Телефон';
+
+  @override
+  String deviceNumber(int n) {
+    return 'Пристрій $n';
+  }
+
+  @override
+  String get deviceLink => 'Пов\'язати комп\'ютер';
+
+  @override
+  String get deviceRemove => 'Вилучити';
+
+  @override
+  String get deviceRemoveConfirm =>
+      'Вилучити цей пристрій? Ваші повідомлення більше не надходитимуть на нього. Якщо його втрачено, оновіть і Kilit ID.';
+
+  @override
+  String get linkToPhone => 'Пов\'язати з моїм телефоном';
+
+  @override
+  String get linkToPhoneHint =>
+      'Зробіть цей пристрій пристроєм Kilit ID вашого телефона. На телефоні: Налаштування, Пов\'язані пристрої, Пов\'язати комп\'ютер. Потім відскануйте цей код.';
+
+  @override
+  String get linkOnlyNew =>
+      'Пов\'язати з телефоном можна лише новий Kilit без контактів.';
+
+  @override
+  String get linkWaiting => 'Очікування іншого пристрою. Обом потрібен Tor.';
+
+  @override
+  String get linkCompare => 'Переконайтеся, що на іншому екрані той самий код:';
+
+  @override
+  String get linkDone =>
+      'Пов\'язано. Повідомлення тепер надходять на обидва пристрої.';
+
+  @override
+  String get linkNotCode => 'Це не код пов\'язування Kilit.';
+
+  @override
+  String get linkedToPhone =>
+      'Цей пристрій пов\'язаний з Kilit ID вашого телефона.';
 }

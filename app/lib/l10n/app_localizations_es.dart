@@ -1021,4 +1021,62 @@ class LEs extends L {
 
   @override
   String get stickerLine => 'Sticker';
+
+  @override
+  String get devicesTitle => 'Dispositivos vinculados';
+
+  @override
+  String get devicesIntro =>
+      'Tu ID de Kilit puede estar en hasta 5 dispositivos: tu teléfono y los ordenadores que vincules. Cada uno tiene sus propias claves y los mensajes llegan a todos.';
+
+  @override
+  String get deviceThis => 'Este dispositivo';
+
+  @override
+  String get devicePhone => 'Teléfono';
+
+  @override
+  String deviceNumber(int n) {
+    return 'Dispositivo $n';
+  }
+
+  @override
+  String get deviceLink => 'Vincular un ordenador';
+
+  @override
+  String get deviceRemove => 'Quitar';
+
+  @override
+  String get deviceRemoveConfirm =>
+      '¿Quitar este dispositivo? Dejará de recibir tus mensajes. Si se perdió, renueva también tu ID de Kilit.';
+
+  @override
+  String get linkToPhone => 'Vincular a mi teléfono';
+
+  @override
+  String get linkToPhoneHint =>
+      'Haz de este un dispositivo de la ID de Kilit de tu teléfono. En el teléfono: Ajustes, Dispositivos vinculados, Vincular un ordenador. Luego escanea este código.';
+
+  @override
+  String get linkOnlyNew =>
+      'Solo un Kilit nuevo, sin contactos, puede vincularse a un teléfono.';
+
+  @override
+  String get linkWaiting =>
+      'Esperando al otro dispositivo. Ambos necesitan Tor.';
+
+  @override
+  String get linkCompare =>
+      'Comprueba que la otra pantalla muestra el mismo código:';
+
+  @override
+  String get linkDone =>
+      'Vinculado. Los mensajes llegan ahora a ambos dispositivos.';
+
+  @override
+  String get linkNotCode => 'Eso no es un código de vinculación de Kilit.';
+
+  @override
+  String get linkedToPhone =>
+      'Este dispositivo está vinculado a la ID de Kilit de tu teléfono.';
 }

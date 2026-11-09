@@ -300,5 +300,21 @@
   "groupNoticeRemovedYou": "{who} đã xóa bạn",
   "emojiButton": "Biểu tượng cảm xúc và nhãn dán",
   "stickers": "Nhãn dán",
-  "stickerLine": "Nhãn dán"
+  "stickerLine": "Nhãn dán",
+  "devicesTitle": "Thiết bị đã liên kết",
+  "devicesIntro": "ID Kilit của bạn có thể ở trên tối đa 5 thiết bị: điện thoại và các máy tính bạn liên kết. Mỗi thiết bị có khóa riêng và tin nhắn đến tất cả.",
+  "deviceThis": "Thiết bị này",
+  "devicePhone": "Điện thoại",
+  "deviceNumber": "Thiết bị {n}",
+  "deviceLink": "Liên kết máy tính",
+  "deviceRemove": "Gỡ",
+  "deviceRemoveConfirm": "Gỡ thiết bị này? Tin nhắn của bạn sẽ không đến đó nữa. Nếu bị mất, hãy làm mới cả ID Kilit.",
+  "linkToPhone": "Liên kết với điện thoại của tôi",
+  "linkToPhoneHint": "Biến thiết bị này thành thiết bị của ID Kilit trên điện thoại. Trên điện thoại: Cài đặt, Thiết bị đã liên kết, Liên kết máy tính. Rồi quét mã này.",
+  "linkOnlyNew": "Chỉ Kilit mới, chưa có liên hệ, mới liên kết được với điện thoại.",
+  "linkWaiting": "Đang chờ thiết bị kia. Cả hai cần Tor.",
+  "linkCompare": "Kiểm tra màn hình kia hiện cùng mã:",
+  "linkDone": "Đã liên kết. Tin nhắn giờ đến cả hai thiết bị.",
+  "linkNotCode": "Đó không phải mã liên kết Kilit.",
+  "linkedToPhone": "Thiết bị này đã liên kết với ID Kilit trên điện thoại của bạn."
 }

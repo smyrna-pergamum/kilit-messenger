@@ -300,5 +300,21 @@
   "groupNoticeRemovedYou": "{who} mengeluarkan Anda",
   "emojiButton": "Emoji dan stiker",
   "stickers": "Stiker",
-  "stickerLine": "Stiker"
+  "stickerLine": "Stiker",
+  "devicesTitle": "Perangkat tertaut",
+  "devicesIntro": "ID Kilit Anda bisa ada di hingga 5 perangkat: ponsel dan komputer yang Anda tautkan. Masing-masing punya kunci sendiri, dan pesan sampai ke semuanya.",
+  "deviceThis": "Perangkat ini",
+  "devicePhone": "Ponsel",
+  "deviceNumber": "Perangkat {n}",
+  "deviceLink": "Tautkan komputer",
+  "deviceRemove": "Hapus",
+  "deviceRemoveConfirm": "Hapus perangkat ini? Pesan Anda tidak akan sampai ke sana lagi. Jika hilang, perbarui juga ID Kilit Anda.",
+  "linkToPhone": "Tautkan ke ponsel saya",
+  "linkToPhoneHint": "Jadikan ini perangkat dari ID Kilit ponsel Anda. Di ponsel: Pengaturan, Perangkat tertaut, Tautkan komputer. Lalu pindai kode ini.",
+  "linkOnlyNew": "Hanya Kilit baru tanpa kontak yang bisa ditautkan ke ponsel.",
+  "linkWaiting": "Menunggu perangkat lain. Keduanya perlu Tor.",
+  "linkCompare": "Periksa bahwa layar lain menampilkan kode yang sama:",
+  "linkDone": "Tertaut. Pesan kini sampai ke kedua perangkat.",
+  "linkNotCode": "Itu bukan kode penautan Kilit.",
+  "linkedToPhone": "Perangkat ini tertaut ke ID Kilit ponsel Anda."
 }

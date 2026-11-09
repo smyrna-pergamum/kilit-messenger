@@ -1022,4 +1022,60 @@ class LDe extends L {
 
   @override
   String get stickerLine => 'Sticker';
+
+  @override
+  String get devicesTitle => 'Verknüpfte Geräte';
+
+  @override
+  String get devicesIntro =>
+      'Deine Kilit-ID kann auf bis zu 5 Geräten sein: deinem Telefon und Computern, die du verknüpfst. Jedes hat eigene Schlüssel, und Nachrichten erreichen alle.';
+
+  @override
+  String get deviceThis => 'Dieses Gerät';
+
+  @override
+  String get devicePhone => 'Telefon';
+
+  @override
+  String deviceNumber(int n) {
+    return 'Gerät $n';
+  }
+
+  @override
+  String get deviceLink => 'Computer verknüpfen';
+
+  @override
+  String get deviceRemove => 'Entfernen';
+
+  @override
+  String get deviceRemoveConfirm =>
+      'Dieses Gerät entfernen? Es bekommt deine Nachrichten nicht mehr. Ging es verloren, erneuere auch deine Kilit-ID.';
+
+  @override
+  String get linkToPhone => 'Mit meinem Telefon verknüpfen';
+
+  @override
+  String get linkToPhoneHint =>
+      'Mach dieses Gerät zu einem Gerät der Kilit-ID deines Telefons. Am Telefon: Einstellungen, Verknüpfte Geräte, Computer verknüpfen. Dann diesen Code scannen.';
+
+  @override
+  String get linkOnlyNew =>
+      'Nur ein neues Kilit ohne Kontakte kann mit einem Telefon verknüpft werden.';
+
+  @override
+  String get linkWaiting => 'Warte auf das andere Gerät. Beide brauchen Tor.';
+
+  @override
+  String get linkCompare =>
+      'Prüfe, dass der andere Bildschirm denselben Code zeigt:';
+
+  @override
+  String get linkDone => 'Verknüpft. Nachrichten erreichen jetzt beide Geräte.';
+
+  @override
+  String get linkNotCode => 'Das ist kein Kilit-Verknüpfungscode.';
+
+  @override
+  String get linkedToPhone =>
+      'Dieses Gerät ist mit der Kilit-ID deines Telefons verknüpft.';
 }

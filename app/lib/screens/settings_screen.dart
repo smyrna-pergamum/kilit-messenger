@@ -10,9 +10,10 @@ import '../theme/theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/panic_code.dart';
 import 'change_pin_dialog.dart';
+import 'devices_screen.dart';
 
 /// Shown in "About"; kept in step with pubspec.yaml's version.
-const appVersion = '0.1.3-alpha';
+const appVersion = '0.1.4-alpha';
 
 String pinProtectionName(L l, PinProtection p) => switch (p) {
   PinProtection.strongbox => l.hwStrongbox,
@@ -141,6 +142,13 @@ class SettingsScreen extends StatelessWidget {
               title: l.settingsBridges,
               children: [_TorRoutes(prefs: prefs, tor: tor)],
             ),
+          _Section(
+            open: prefs.openSections,
+            id: 'devices',
+            icon: Icons.devices_outlined,
+            title: l.devicesTitle,
+            children: [DevicesSection(core: core)],
+          ),
           _Section(
             open: prefs.openSections,
             id: 'panic',

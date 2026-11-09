@@ -520,5 +520,28 @@
   },
   "emojiButton": "Emoji and stickers",
   "stickers": "Stickers",
-  "stickerLine": "Sticker"
+  "stickerLine": "Sticker",
+  "devicesTitle": "Linked devices",
+  "devicesIntro": "Your Kilit ID can be on up to 5 devices: your phone and computers you link. Each has its own keys, and messages reach all of them.",
+  "deviceThis": "This device",
+  "devicePhone": "Phone",
+  "deviceNumber": "Device {n}",
+  "deviceLink": "Link a computer",
+  "deviceRemove": "Remove",
+  "deviceRemoveConfirm": "Remove this device? It stops getting your messages. If it was lost, renew your Kilit ID too.",
+  "linkToPhone": "Link to my phone",
+  "linkToPhoneHint": "Make this a device of your phone's Kilit ID. On the phone: Settings, Linked devices, Link a computer. Then scan this code.",
+  "linkOnlyNew": "Only a new Kilit, with no contacts yet, can be linked to a phone.",
+  "linkWaiting": "Waiting for the other device. Both need Tor.",
+  "linkCompare": "Check that the other screen shows the same code:",
+  "linkDone": "Linked. Messages now reach both devices.",
+  "linkNotCode": "That is not a Kilit linking code.",
+  "linkedToPhone": "This device is linked to your phone's Kilit ID.",
+  "@deviceNumber": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -1010,4 +1010,57 @@ class LAr extends L {
 
   @override
   String get stickerLine => 'ملصق';
+
+  @override
+  String get devicesTitle => 'الأجهزة المرتبطة';
+
+  @override
+  String get devicesIntro =>
+      'يمكن أن تكون هوية Kilit على 5 أجهزة كحد أقصى: هاتفك وأجهزة الكمبيوتر التي تربطها. لكل منها مفاتيحه، والرسائل تصل إليها كلها.';
+
+  @override
+  String get deviceThis => 'هذا الجهاز';
+
+  @override
+  String get devicePhone => 'الهاتف';
+
+  @override
+  String deviceNumber(int n) {
+    return 'الجهاز $n';
+  }
+
+  @override
+  String get deviceLink => 'ربط كمبيوتر';
+
+  @override
+  String get deviceRemove => 'إزالة';
+
+  @override
+  String get deviceRemoveConfirm =>
+      'إزالة هذا الجهاز؟ لن تصله رسائلك بعد الآن. إن فُقد، جدّد هوية Kilit أيضًا.';
+
+  @override
+  String get linkToPhone => 'الربط بهاتفي';
+
+  @override
+  String get linkToPhoneHint =>
+      'اجعل هذا الجهاز جهازًا لهوية Kilit على هاتفك. على الهاتف: الإعدادات، الأجهزة المرتبطة، ربط كمبيوتر. ثم امسح هذا الرمز.';
+
+  @override
+  String get linkOnlyNew => 'لا يمكن ربط إلا Kilit جديد بلا جهات اتصال بهاتف.';
+
+  @override
+  String get linkWaiting => 'في انتظار الجهاز الآخر. كلاهما يحتاج إلى Tor.';
+
+  @override
+  String get linkCompare => 'تحقق من أن الشاشة الأخرى تعرض الرمز نفسه:';
+
+  @override
+  String get linkDone => 'تم الربط. تصل الرسائل الآن إلى الجهازين.';
+
+  @override
+  String get linkNotCode => 'هذا ليس رمز ربط Kilit.';
+
+  @override
+  String get linkedToPhone => 'هذا الجهاز مرتبط بهوية Kilit على هاتفك.';
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,6 +18,7 @@ import '../theme/tokens.dart';
 import '../widgets/emoji_panel.dart';
 import '../widgets/lock_button.dart';
 import 'camera_screen.dart';
+import 'devices_screen.dart' show LinkOfferScreen;
 import 'vault_screen.dart' show formatDate;
 
 part 'group_screen.dart';
@@ -392,6 +394,24 @@ class _ChatsScreenState extends State<ChatsScreen> {
                             icon: const Icon(Icons.person_add_alt_1_outlined),
                             label: Text(l.addTitle),
                           ),
+                          // a computer is often a second device: offer it
+                          if (!Platform.isAndroid && !Platform.isIOS) ...[
+                            const SizedBox(height: 8),
+                            TextButton.icon(
+                              key: const ValueKey('chats-link-to-phone'),
+                              onPressed: () async {
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => LinkOfferScreen(core: core),
+                                  ),
+                                );
+                                _reload();
+                                setState(() => _me = core.myKilit());
+                              },
+                              icon: const Icon(Icons.phonelink_outlined),
+                              label: Text(l.linkToPhone),
+                            ),
+                          ],
                         ],
                       ),
                     ),
