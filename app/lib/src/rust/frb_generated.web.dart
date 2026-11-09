@@ -79,6 +79,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ContactStanding dco_decode_contact_standing(dynamic raw);
 
   @protected
+  DeviceItem dco_decode_device_item(dynamic raw);
+
+  @protected
   ExportedKlt dco_decode_exported_klt(dynamic raw);
 
   @protected
@@ -121,6 +124,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   KilitErrorKind dco_decode_kilit_error_kind(dynamic raw);
 
   @protected
+  LinkStatus dco_decode_link_status(dynamic raw);
+
+  @protected
   List<String> dco_decode_list_String(dynamic raw);
 
   @protected
@@ -128,6 +134,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<ContactItem> dco_decode_list_contact_item(dynamic raw);
+
+  @protected
+  List<DeviceItem> dco_decode_list_device_item(dynamic raw);
 
   @protected
   List<FoundPacket> dco_decode_list_found_packet(dynamic raw);
@@ -265,6 +274,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ContactStanding sse_decode_contact_standing(SseDeserializer deserializer);
 
   @protected
+  DeviceItem sse_decode_device_item(SseDeserializer deserializer);
+
+  @protected
   ExportedKlt sse_decode_exported_klt(SseDeserializer deserializer);
 
   @protected
@@ -307,6 +319,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   KilitErrorKind sse_decode_kilit_error_kind(SseDeserializer deserializer);
 
   @protected
+  LinkStatus sse_decode_link_status(SseDeserializer deserializer);
+
+  @protected
   List<String> sse_decode_list_String(SseDeserializer deserializer);
 
   @protected
@@ -314,6 +329,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<ContactItem> sse_decode_list_contact_item(SseDeserializer deserializer);
+
+  @protected
+  List<DeviceItem> sse_decode_list_device_item(SseDeserializer deserializer);
 
   @protected
   List<FoundPacket> sse_decode_list_found_packet(SseDeserializer deserializer);
@@ -470,6 +488,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_device_item(DeviceItem self, SseSerializer serializer);
+
+  @protected
   void sse_encode_exported_klt(ExportedKlt self, SseSerializer serializer);
 
   @protected
@@ -518,6 +539,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_link_status(LinkStatus self, SseSerializer serializer);
+
+  @protected
   void sse_encode_list_String(List<String> self, SseSerializer serializer);
 
   @protected
@@ -526,6 +550,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_list_contact_item(
     List<ContactItem> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_device_item(
+    List<DeviceItem> self,
     SseSerializer serializer,
   );
 

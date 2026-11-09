@@ -118,6 +118,9 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// Removes an item.
   Future<void> deleteItem({required String id});
 
+  /// This ID's devices.
+  Future<List<DeviceItem>> devices();
+
   /// Admin: ends a group for everyone.
   Future<void> endGroup({required String id});
 
@@ -149,6 +152,9 @@ abstract class KilitHandle implements RustOpaqueInterface {
   static bool isInvite({required String text}) =>
       RustLib.instance.api.crateApiKilitHandleIsInvite(text: text);
 
+  /// Whether this is the phone the ID was made on (it links devices).
+  Future<bool> isPrimary();
+
   /// The vault's items, newest first.
   Future<List<ItemInfo>> items();
 
@@ -164,6 +170,20 @@ abstract class KilitHandle implements RustOpaqueInterface {
 
   /// Leaves a group (the admin ends it instead).
   Future<void> leaveGroup({required String id});
+
+  /// The phone: links the device whose QR code said `text`. Returns the
+  /// code both screens show.
+  Future<String> linkAccept({required String text, required String name});
+
+  /// Stops a linking under way.
+  Future<void> linkCancel();
+
+  /// A new device: starts linking to a phone. Returns the text to show
+  /// as a QR code.
+  Future<String> linkOffer();
+
+  /// Where linking stands.
+  Future<LinkStatus> linkState();
 
   /// Drops every key and decrypted entry.
   void lock();
@@ -289,6 +309,9 @@ abstract class KilitHandle implements RustOpaqueInterface {
 
   /// Sets a conversation's disappearing-message time (seconds, 0 = off).
   Future<void> setTimer({required String id, required int secs});
+
+  /// The phone: takes a linked device off this ID.
+  Future<void> unlinkDevice({required int id});
 
   /// Tries `pin` against a software-key vault.
   Future<UnlockReply> unlock({required String pin});
@@ -552,6 +575,42 @@ enum ContactStanding {
 
   /// Known only through a group; not shown in the chats.
   member,
+}
+
+/// One of this Kilit ID's devices.
+class DeviceItem {
+  /// Its number; 1 is the phone the ID was made on.
+  final int id;
+
+  /// Its name, as it gave it; empty when unknown.
+  final String name;
+
+  /// When it was linked, Unix seconds; 0 for the phone.
+  final PlatformInt64 addedUnix;
+
+  /// The device this runs on.
+  final bool this_;
+
+  const DeviceItem({
+    required this.id,
+    required this.name,
+    required this.addedUnix,
+    required this.this_,
+  });
+
+  @override
+  int get hashCode =>
+      id.hashCode ^ name.hashCode ^ addedUnix.hashCode ^ this_.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DeviceItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          addedUnix == other.addedUnix &&
+          this_ == other.this_;
 }
 
 /// A `.klt` file ready to save or share.
@@ -912,6 +971,42 @@ enum KilitErrorKind {
 
   /// The device's storage failed.
   storage,
+}
+
+/// Where linking a device stands.
+class LinkStatus {
+  /// A new device: the text its QR code shows, while it waits.
+  final String? offer;
+
+  /// The phone: waiting for the new device to answer.
+  final bool waiting;
+
+  /// The code to compare on both screens.
+  final String? code;
+
+  /// Linking finished.
+  final bool done;
+
+  const LinkStatus({
+    this.offer,
+    required this.waiting,
+    this.code,
+    required this.done,
+  });
+
+  @override
+  int get hashCode =>
+      offer.hashCode ^ waiting.hashCode ^ code.hashCode ^ done.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LinkStatus &&
+          runtimeType == other.runtimeType &&
+          offer == other.offer &&
+          waiting == other.waiting &&
+          code == other.code &&
+          done == other.done;
 }
 
 /// How opening a pasted message went.

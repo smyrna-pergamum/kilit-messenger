@@ -378,3 +378,158 @@ fn a_new_id_keeps_the_contacts_and_retires_the_old_link() {
     bora.restart();
     assert_eq!(bora.m.kilit_id(), id);
 }
+
+/// Ayşe's phone links her computer: the same ID, a device of its own.
+/// Bora learns of it from her card and writes to both; the computer writes
+/// to Bora; the phone and the computer copy each other what they send.
+#[test]
+fn a_linked_device_talks_as_the_same_id() {
+    let (mut ayse, mut bora, ayse_id, bora_id) = pair();
+    let card = ayse.m.card("Ayşe").unwrap();
+    bora.m
+        .add_contact(&card, Some(&ayse.invite()), None, now())
+        .unwrap();
+
+    // the phone hands its secrets to the computer; the computer shows the
+    // phone its own bundle
+    let (package, device) = ayse.m.link_package().unwrap();
+    assert_eq!(device, 2);
+    let pc_vault = vault(3);
+    let mut pc = Messaging::create_linked(&pc_vault, &package, now()).unwrap();
+    assert_eq!(pc.my_address(), ayse_id);
+    assert_eq!(pc.kilit_id(), ayse.m.kilit_id());
+    assert_eq!(pc.device_id(), 2);
+    ayse.m
+        .add_own_device(2, &pc.device_bundle().unwrap(), now())
+        .unwrap();
+    assert_eq!(ayse.m.own_devices(), vec![2]);
+    assert_eq!(pc.own_devices(), vec![1]);
+    // a linked device is not one that links others
+    assert!(pc.link_package().is_err());
+
+    // Bora takes Ayşe's new card: two devices
+    bora.m
+        .take_contact_card(&ayse_id, &ayse.m.card("").unwrap(), now())
+        .unwrap();
+    assert_eq!(bora.m.devices_of(&ayse_id), vec![1, 2]);
+    let to_pc = bora
+        .m
+        .seal_to(
+            &ayse_id,
+            2,
+            &Content {
+                text: "bilgisayara".into(),
+                ..Content::default()
+            },
+            now(),
+        )
+        .unwrap();
+    assert!(pc.inbox_tags(now()).unwrap().contains(&to_pc.tag));
+    assert!(!ayse.m.inbox_tags(now()).unwrap().contains(&to_pc.tag));
+    let r = pc.decrypt(&to_pc.payload, now()).unwrap();
+    assert_eq!(
+        (r.contact.as_str(), r.text.as_str(), r.device),
+        (bora_id.as_str(), "bilgisayara", 1)
+    );
+
+    // the computer writes to Bora as Ayşe, from device 2
+    let from_pc = pc
+        .seal(
+            &bora_id,
+            &Content {
+                text: "bilgisayardan".into(),
+                ..Content::default()
+            },
+            now(),
+        )
+        .unwrap();
+    assert!(bora.m.inbox_tags(now()).unwrap().contains(&from_pc.tag));
+    let r = bora.m.decrypt(&from_pc.payload, now()).unwrap();
+    assert_eq!(
+        (r.contact.as_str(), r.text.as_str(), r.device, r.own),
+        (ayse_id.as_str(), "bilgisayardan", 2, false)
+    );
+
+    // the phone copies the computer what it sent, and the other way round
+    let copy = ayse
+        .m
+        .seal_own(
+            2,
+            &Content {
+                text: "telefondan".into(),
+                sync_to: bora_id.clone(),
+                ..Content::default()
+            },
+            now(),
+        )
+        .unwrap();
+    assert!(pc.inbox_tags(now()).unwrap().contains(&copy.tag));
+    let r = pc.decrypt(&copy.payload, now()).unwrap();
+    assert!(r.own);
+    assert_eq!(
+        (r.sync_to.as_str(), r.text.as_str(), r.device),
+        (bora_id.as_str(), "telefondan", 1)
+    );
+    let back = pc
+        .seal_own(
+            1,
+            &Content {
+                text: "geri".into(),
+                sync_to: bora_id.clone(),
+                ..Content::default()
+            },
+            now(),
+        )
+        .unwrap();
+    let r = ayse.m.decrypt(&back.payload, now()).unwrap();
+    assert!(r.own);
+    assert_eq!(r.device, 2);
+    // not to itself
+    assert!(pc.seal_own(2, &Content::default(), now()).is_err());
+
+    // the computer's state survives a restart, linked secrets and all
+    let bytes = pc.to_bytes().unwrap();
+    let mut pc = Messaging::from_bytes(&pc_vault, &bytes).unwrap();
+    assert_eq!(pc.my_address(), ayse_id);
+    let again = bora
+        .m
+        .seal_to(
+            &ayse_id,
+            2,
+            &Content {
+                text: "yine".into(),
+                ..Content::default()
+            },
+            now(),
+        )
+        .unwrap();
+    assert_eq!(pc.decrypt(&again.payload, now()).unwrap().text, "yine");
+
+    // the phone takes the computer off: Bora's next card drops it
+    ayse.m.remove_own_device(2).unwrap();
+    bora.m
+        .take_contact_card(&ayse_id, &ayse.m.card("").unwrap(), now())
+        .unwrap();
+    assert_eq!(bora.m.devices_of(&ayse_id), vec![1]);
+}
+
+/// A stranger's first message comes from their phone; device numbers above
+/// 1 are only for people already known.
+#[test]
+fn a_stranger_cannot_write_from_a_linked_device() {
+    let (ayse, mut bora, _ayse_id, _bora_id) = pair();
+    let (package, _) = ayse.m.link_package().unwrap();
+    let mut pc = Messaging::create_linked(&vault(3), &package, now()).unwrap();
+    // Bora never added Ayşe: her computer is a stranger's device to him
+    let out = pc
+        .seal(
+            bora.m.my_address(),
+            &Content {
+                text: "merhaba".into(),
+                ..Content::default()
+            },
+            now(),
+        )
+        .unwrap();
+    assert!(bora.m.decrypt(&out.payload, now()).is_err());
+}

@@ -78,6 +78,9 @@ struct Groups {
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Target {
     pub address: String,
+    /// Which of their devices; 0 and 1 are their phone.
+    #[serde(default)]
+    pub device: u32,
     /// The event that carries it; empty while their card is awaited.
     pub event: String,
     pub state: LineState,
@@ -106,11 +109,15 @@ impl Engine {
         self.save(GROUPS, GROUPS_NAME, g)
     }
 
-    fn load_group_chat(&self, id: &str) -> Result<Vec<Line>, EngineError> {
+    pub(super) fn load_group_chat(&self, id: &str) -> Result<Vec<Line>, EngineError> {
         self.load(&group_blob(id)?)
     }
 
-    fn save_group_chat(&self, id: &str, mut lines: Vec<Line>) -> Result<(), EngineError> {
+    pub(super) fn save_group_chat(
+        &self,
+        id: &str,
+        mut lines: Vec<Line>,
+    ) -> Result<(), EngineError> {
         if lines.len() > MAX_LINES {
             lines.drain(..lines.len() - MAX_LINES);
         }
@@ -178,13 +185,75 @@ impl Engine {
         &self,
         m: &mut Messaging,
         to: &str,
+        device: u32,
         content: &Content,
     ) -> Result<Option<Event>, EngineError> {
-        match m.seal(to, content, self.system_now()) {
+        match m.seal_to(to, device.max(1), content, self.system_now()) {
             Ok(out) => Ok(Some(self.message_event(out.tag, &out.payload)?)),
             Err(MessagingError::NoContact | MessagingError::Blocked) => Ok(None),
             Err(e) => Err(messaging_err(e)),
         }
+    }
+
+    /// Seals `content` for every device of a member; none while their card
+    /// is awaited.
+    fn seal_member(
+        &self,
+        m: &mut Messaging,
+        to: &str,
+        content: &Content,
+    ) -> Result<Vec<(u32, Event)>, EngineError> {
+        let mut out = Vec::new();
+        if !m.contacts().iter().any(|c| c.id == to) {
+            return Ok(out);
+        }
+        for d in m.devices_of(to) {
+            if let Some(e) = self.seal_for(m, to, d, content)? {
+                out.push((d, e));
+            }
+        }
+        Ok(out)
+    }
+
+    /// An own device's copy of a change to a group: the roster from the
+    /// admin (this ID), or this ID leaving.
+    pub(super) fn take_own_group(&mut self, me: &str, wire: &GroupWire) -> Result<(), EngineError> {
+        if wire.id.len() != 16 {
+            return Ok(());
+        }
+        let gid = hex(&wire.id);
+        let mut all = self.groups_all()?;
+        if wire.leave {
+            if let Some(g) = all.list.get_mut(&gid) {
+                g.gone = true;
+            }
+            return self.save_groups(&all);
+        }
+        let Some(roster) = wire.roster.clone().filter(|r| r.sound()) else {
+            return Ok(());
+        };
+        match all.list.get_mut(&gid) {
+            Some(g) if g.admin == me && roster.stamp > g.roster.stamp => {
+                g.gone = !roster.members.iter().any(|x| x.address == me);
+                g.roster = roster;
+            }
+            None if roster.members.iter().any(|x| x.address == me) => {
+                all.list.insert(
+                    gid.clone(),
+                    Group {
+                        id: gid.clone(),
+                        admin: me.to_owned(),
+                        roster,
+                        gone: false,
+                        added: (self.now)(),
+                    },
+                );
+                self.save_groups(&all)?;
+                return self.notice(&gid, notice::CREATED, me, Vec::new(), "");
+            }
+            _ => return Ok(()),
+        }
+        self.save_groups(&all)
     }
 
     /// Sends a group's roster to `to`, as the admin. Returns the events.
@@ -201,10 +270,13 @@ impl Engine {
         let mut events = Vec::new();
         let me = m.my_address().to_owned();
         for a in to.iter().filter(|a| **a != me) {
-            if let Some(e) = self.seal_for(&mut m, a, &content)? {
-                events.push(e);
-            }
+            events.extend(
+                self.seal_member(&mut m, a, &content)?
+                    .into_iter()
+                    .map(|(_, e)| e),
+            );
         }
+        events.extend(self.copy_to_own(&mut m, &format!("group:{}", g.id), &content)?);
         self.save_messaging(&m)?;
         self.queue(events.clone())?;
         Ok(events)
@@ -380,10 +452,13 @@ impl Engine {
                 ..Content::default()
             };
             for x in g.roster.members.iter().filter(|x| x.address != me) {
-                if let Some(e) = self.seal_for(&mut m, &x.address, &content)? {
-                    events.push(e);
-                }
+                events.extend(
+                    self.seal_member(&mut m, &x.address, &content)?
+                        .into_iter()
+                        .map(|(_, e)| e),
+                );
             }
+            events.extend(self.copy_to_own(&mut m, &format!("group:{id}"), &content)?);
             self.save_messaging(&m)?;
             self.queue(events.clone())?;
         }
@@ -493,17 +568,26 @@ impl Engine {
         };
         let content = self.group_content(&g, &me, &line)?;
         for x in g.roster.members.iter().filter(|x| x.address != me) {
-            let event = self.seal_for(&mut m, &x.address, &content)?;
-            let mut t = Target {
-                address: x.address.clone(),
-                ..Target::default()
-            };
-            if let Some(e) = event {
-                t.event = e.id.clone();
+            let sealed = self.seal_member(&mut m, &x.address, &content)?;
+            if sealed.is_empty() {
+                // their card is awaited: the copy goes once it comes
+                line.to.push(Target {
+                    address: x.address.clone(),
+                    device: 1,
+                    ..Target::default()
+                });
+            }
+            for (d, e) in sealed {
+                line.to.push(Target {
+                    address: x.address.clone(),
+                    device: d,
+                    event: e.id.clone(),
+                    ..Target::default()
+                });
                 pieces.push(e);
             }
-            line.to.push(t);
         }
+        pieces.extend(self.copy_to_own(&mut m, &format!("group:{id}"), &content)?);
         self.save_messaging(&m)?;
         self.queue(pieces.clone())?;
         line.state = sum(&line.to);
@@ -533,6 +617,12 @@ impl Engine {
                         address: Some(x.address.clone()),
                     });
                 }
+            }
+        }
+        // a linked device: contacts whose bundle the phone did not have
+        for inv in m.without_session() {
+            if out.iter().all(|i| i.address != inv.address) {
+                out.push(inv);
             }
         }
         Ok(out)
@@ -597,13 +687,26 @@ impl Engine {
                     continue;
                 }
                 let content = self.group_content(&g, &me, l)?;
+                let mut more = Vec::new();
                 for t in l.to.iter_mut().filter(|t| t.event.is_empty()) {
-                    if let Some(e) = self.seal_for(&mut m, &t.address, &content)? {
+                    let mut sealed = self.seal_member(&mut m, &t.address, &content)?.into_iter();
+                    if let Some((d, e)) = sealed.next() {
+                        t.device = d;
                         t.event = e.id.clone();
                         events.push(e);
                         changed = true;
                     }
+                    for (d, e) in sealed {
+                        more.push(Target {
+                            address: t.address.clone(),
+                            device: d,
+                            event: e.id.clone(),
+                            ..Target::default()
+                        });
+                        events.push(e);
+                    }
                 }
+                l.to.extend(more);
                 l.state = sum(&l.to);
             }
             if changed {
@@ -651,7 +754,7 @@ impl Engine {
                 t.state == LineState::Sent
                     && (before == i64::MIN || (t.tries < MAX_RESENDS && t.tried.max(at) <= before))
             }) {
-                if let Some(e) = self.seal_for(&mut m, &t.address, &content)? {
+                if let Some(e) = self.seal_for(&mut m, &t.address, t.device, &content)? {
                     t.event = e.id.clone();
                     t.state = LineState::Queued;
                     t.tries += 1;

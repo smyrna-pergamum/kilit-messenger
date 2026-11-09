@@ -428,6 +428,30 @@ pub struct ChatLine {
     pub recipients: u32,
 }
 
+/// Where linking a device stands.
+pub struct LinkStatus {
+    /// A new device: the text its QR code shows, while it waits.
+    pub offer: Option<String>,
+    /// The phone: waiting for the new device to answer.
+    pub waiting: bool,
+    /// The code to compare on both screens.
+    pub code: Option<String>,
+    /// Linking finished.
+    pub done: bool,
+}
+
+/// One of this Kilit ID's devices.
+pub struct DeviceItem {
+    /// Its number; 1 is the phone the ID was made on.
+    pub id: u32,
+    /// Its name, as it gave it; empty when unknown.
+    pub name: String,
+    /// When it was linked, Unix seconds; 0 for the phone.
+    pub added_unix: i64,
+    /// The device this runs on.
+    pub this: bool,
+}
+
 /// Someone in a group.
 pub struct GroupMemberItem {
     /// The address (32 hex digits).
@@ -815,8 +839,13 @@ impl KilitHandle {
             n.net.watch(filter.clone());
             n.watching = Some(filter);
         }
-        if n.card_published
-            .is_none_or(|t| t.elapsed() > CARD_REPUBLISH)
+        // only the phone publishes the card; a device came or went: again
+        if e.take_card_dirty()? {
+            n.card_published = None;
+        }
+        if e.is_primary()?
+            && n.card_published
+                .is_none_or(|t| t.elapsed() > CARD_REPUBLISH)
         {
             n.net.publish(e.card_event()?);
             n.card_published = Some(Instant::now());
@@ -1057,6 +1086,61 @@ impl KilitHandle {
             added_unix: g.added,
             last: last.map(Into::into),
         })
+    }
+
+    /// Whether this is the phone the ID was made on (it links devices).
+    pub fn is_primary(&self) -> Result<bool, KilitError> {
+        Ok(self.engine()?.is_primary()?)
+    }
+
+    /// A new device: starts linking to a phone. Returns the text to show
+    /// as a QR code.
+    pub fn link_offer(&self) -> Result<String, KilitError> {
+        Ok(self.engine()?.link_offer()?)
+    }
+
+    /// The phone: links the device whose QR code said `text`. Returns the
+    /// code both screens show.
+    pub fn link_accept(&self, text: String, name: String) -> Result<String, KilitError> {
+        let (events, code) = self.engine()?.link_accept(&text, &name)?;
+        self.publish_now(events)?;
+        Ok(code)
+    }
+
+    /// Where linking stands.
+    pub fn link_state(&self) -> Result<LinkStatus, KilitError> {
+        let s = self.engine()?.link_state()?;
+        Ok(LinkStatus {
+            offer: s.offer,
+            waiting: s.waiting,
+            code: s.code,
+            done: s.done,
+        })
+    }
+
+    /// Stops a linking under way.
+    pub fn link_cancel(&self) -> Result<(), KilitError> {
+        Ok(self.engine()?.link_cancel()?)
+    }
+
+    /// This ID's devices.
+    pub fn devices(&self) -> Result<Vec<DeviceItem>, KilitError> {
+        Ok(self
+            .engine()?
+            .devices()?
+            .into_iter()
+            .map(|d| DeviceItem {
+                id: d.id,
+                name: d.name,
+                added_unix: d.added,
+                this: d.this,
+            })
+            .collect())
+    }
+
+    /// The phone: takes a linked device off this ID.
+    pub fn unlink_device(&self, id: u32) -> Result<(), KilitError> {
+        Ok(self.engine()?.unlink_device(id)?)
     }
 
     /// The groups, newest conversation first.

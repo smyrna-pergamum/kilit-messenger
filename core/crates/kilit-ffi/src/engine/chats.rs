@@ -38,7 +38,10 @@ use sha2::{Digest, Sha256};
 
 use super::{Engine, EngineError};
 
+mod devices;
 mod groups;
+#[cfg(test)]
+use devices::LINK_URL;
 pub use groups::{Group, Target};
 
 /// The Signal state: identity prekeys, contacts, sessions.
@@ -376,6 +379,7 @@ impl Engine {
         let mut tags = m.inbox_tags(self.system_now()).map_err(messaging_err)?;
         let files: Files = self.load(FILES)?;
         tags.extend(files.pending.keys().cloned());
+        tags.extend(self.link_tags()?);
         Ok(Filter {
             kinds: vec![MESSAGE_KIND],
             tags: vec![('p', tags)],
@@ -431,6 +435,17 @@ impl Engine {
             )
             .map_err(messaging_err)?;
         self.save_messaging(&m)?;
+        // the ID's other devices add them too
+        let copy = Content {
+            card: Some(card.clone()),
+            text: name.unwrap_or_default().to_owned(),
+            ..Content::default()
+        };
+        let events = self.copy_to_own(&mut m, &format!("add:{id}"), &copy)?;
+        if !events.is_empty() {
+            self.save_messaging(&m)?;
+            self.queue(events)?;
+        }
         self.contact(&m, &id)
     }
 
@@ -616,19 +631,17 @@ impl Engine {
             return Ok(());
         }
         let mut m = self.messaging()?;
-        let out = m
-            .seal(
-                contact,
-                &Content {
-                    receipts: ids,
-                    ..Content::default()
-                },
-                self.system_now(),
-            )
-            .map_err(messaging_err)?;
-        let event = self.message_event(out.tag, &out.payload)?;
+        // to every device: whichever sent it shows the two ticks
+        let events = self.seal_all(
+            &mut m,
+            contact,
+            &Content {
+                receipts: ids,
+                ..Content::default()
+            },
+        )?;
         self.save_messaging(&m)?;
-        self.queue(vec![event])
+        self.queue(events)
     }
 
     /// Seals `text` for a contact and queues the event that carries it.
@@ -741,25 +754,25 @@ impl Engine {
         let mut m = self.messaging()?;
         let timer = m.timer(id).map_err(messaging_err)?;
         let now = (self.now)();
-        let out = m
-            .seal(
-                id,
-                &Content {
-                    text: text.to_owned(),
-                    timer,
-                    file: file.clone(),
-                    sticker: sticker.to_owned(),
-                    ..Content::default()
-                },
-                self.system_now(),
-            )
-            .map_err(messaging_err)?;
-        let event = self.message_event(out.tag, &out.payload)?;
+        // one id for every device's copy
+        let mid = random::<16>()?.to_vec();
+        let content = Content {
+            text: text.to_owned(),
+            timer,
+            file: file.clone(),
+            sticker: sticker.to_owned(),
+            again: Some((mid.clone(), now)),
+            ..Content::default()
+        };
+        let sealed = self.seal_all(&mut m, id, &content)?;
+        let event = sealed.first().cloned().ok_or(EngineError::NotFound)?;
+        let copies = self.copy_to_own(&mut m, id, &content)?;
         // the session moved on: keep it first, then the events, so a crash
         // between them loses at worst this one message
         self.save_messaging(&m)?;
         // the pieces go first, so they are there when the message arrives
-        pieces.push(event.clone());
+        pieces.extend(sealed);
+        pieces.extend(copies);
         self.queue(pieces.clone())?;
         let line = Line {
             outgoing: true,
@@ -768,7 +781,7 @@ impl Engine {
             sent: now,
             state: LineState::Queued,
             event: event.id.clone(),
-            id: ByteBuf::from(out.id),
+            id: ByteBuf::from(mid),
             expires: self.expires(timer),
             file: shown,
             file_ref: file,
@@ -796,21 +809,19 @@ impl Engine {
         }
         let mut m = self.messaging()?;
         let timer = m.timer(contact).map_err(messaging_err)?;
-        let out = m
-            .seal(
-                contact,
-                &Content {
-                    text: line.text.clone(),
-                    timer,
-                    file: line.file_ref.clone(),
-                    sticker: line.sticker.clone(),
-                    again: Some((line.id.to_vec(), line.sent)),
-                    ..Content::default()
-                },
-                self.system_now(),
-            )
-            .map_err(messaging_err)?;
-        let event = self.message_event(out.tag, &out.payload)?;
+        let sealed = self.seal_all(
+            &mut m,
+            contact,
+            &Content {
+                text: line.text.clone(),
+                timer,
+                file: line.file_ref.clone(),
+                sticker: line.sticker.clone(),
+                again: Some((line.id.to_vec(), line.sent)),
+                ..Content::default()
+            },
+        )?;
+        let event = sealed.first().cloned().ok_or(EngineError::NotFound)?;
         self.save_messaging(&m)?;
         let mut events = Vec::new();
         if pieces
@@ -820,7 +831,7 @@ impl Engine {
             let data = self.read_attachment(&shown.blob)?;
             events = self.pieces(&f.key, &f.tag, &data)?;
         }
-        events.push(event.clone());
+        events.extend(sealed);
         self.queue(events)?;
         let l = &mut lines[i];
         l.event = event.id;
@@ -918,6 +929,10 @@ impl Engine {
             }
         }
 
+        let messages = self.take_link_events(messages)?;
+        if self.store.len(SIGNAL)?.is_none() {
+            return Ok(Vec::new());
+        }
         let mut m = self.messaging()?;
         let mut opened = Vec::new();
         let mut confirm: HashMap<String, Vec<Vec<u8>>> = HashMap::new();
@@ -934,7 +949,18 @@ impl Engine {
             };
             // the session moved on: keep it before the line
             self.save_messaging(&m)?;
+            if r.own {
+                self.take_own(&mut m, r, &mut files)?;
+                continue;
+            }
             delivered.extend(r.receipts.iter().map(|id| (r.contact.clone(), id.clone())));
+            // a contact's devices changed: their card came along
+            if let Some(card) = r.card.take()
+                && m.take_contact_card(&r.contact, &card, self.system_now())
+                    .is_ok()
+            {
+                self.save_messaging(&m)?;
+            }
             if let Some(wire) = r.group.take() {
                 let told =
                     self.take_group(&mut m, r, wire, &mut files, &mut confirm, &mut rosters)?;
@@ -1099,7 +1125,7 @@ impl Engine {
             let ok = whole.len() as u64 == p.file.size
                 && Sha256::digest(&whole).as_slice() == p.file.sha256.as_slice();
             let mut lines = self.file_lines(&p)?;
-            let Some(line) = lines.iter_mut().find(|l| !l.outgoing && l.id == p.line) else {
+            let Some(line) = lines.iter_mut().find(|l| l.id == p.line) else {
                 continue;
             };
             if ok {
@@ -1555,6 +1581,119 @@ mod tests {
             ayse.chat(&bora_id).unwrap().pop().unwrap().state,
             LineState::Delivered
         );
+    }
+
+    #[test]
+    fn a_phone_links_a_computer_and_both_talk_as_one() {
+        let (da, db, dc) = (
+            tempfile::tempdir().unwrap(),
+            tempfile::tempdir().unwrap(),
+            tempfile::tempdir().unwrap(),
+        );
+        let mut ayse = ready(&da, "482916");
+        let mut bora = ready(&db, "739204");
+        let mut pc = ready(&dc, "615283");
+        let mut relays = Relays::default();
+        let (ayse_id, bora_id) = meet(&mut ayse, &mut bora, &mut relays);
+
+        // a device with contacts cannot become another's
+        assert!(ayse.link_offer().is_err());
+        let offer = pc.link_offer().unwrap();
+        assert!(offer.starts_with(LINK_URL));
+        assert_eq!(
+            pc.link_state().unwrap().offer.as_deref(),
+            Some(offer.as_str())
+        );
+        assert!(
+            ayse.link_accept("kilit://link?k=AAAA&t=00", "Telefon")
+                .is_err()
+        );
+        let (_, code) = ayse.link_accept(&offer, "Telefon").unwrap();
+        assert!(ayse.link_state().unwrap().waiting);
+        relays.take_outbox(&mut ayse);
+
+        // the computer takes the package and answers
+        relays.deliver(&mut pc);
+        let s = pc.link_state().unwrap();
+        assert!(s.done);
+        assert_eq!(s.code.as_deref(), Some(code.as_str()));
+        assert_eq!(
+            pc.my_kilit().unwrap().kilit_id,
+            ayse.my_kilit().unwrap().kilit_id
+        );
+        assert!(!pc.is_primary().unwrap());
+        // the contacts came along, the conversations did not
+        assert_eq!(pc.contacts().unwrap().len(), 1);
+        assert!(pc.chat(&bora_id).unwrap().is_empty());
+        relays.take_outbox(&mut pc);
+
+        // the phone takes the answer: two devices, contacts told
+        relays.deliver(&mut ayse);
+        assert!(ayse.link_state().unwrap().done);
+        let devices = ayse.devices().unwrap();
+        assert_eq!(devices.iter().map(|d| d.id).collect::<Vec<_>>(), vec![1, 2]);
+        assert!(devices[0].this);
+        assert!(ayse.take_card_dirty().unwrap());
+        relays.take_outbox(&mut ayse);
+        relays.deliver(&mut bora);
+
+        // Bora writes once: both of Ayşe's devices have it
+        bora.send_message(&ayse_id, "ikisine").unwrap();
+        relays.take_outbox(&mut bora);
+        assert_eq!(relays.deliver(&mut ayse).len(), 1);
+        assert_eq!(relays.deliver(&mut pc).len(), 1);
+        assert_eq!(pc.chat(&bora_id).unwrap().last().unwrap().text, "ikisine");
+
+        // the computer writes: Bora has it from Ayşe, the phone has a copy
+        let (line, _) = pc.send_message(&bora_id, "bilgisayardan").unwrap();
+        relays.take_outbox(&mut pc);
+        let got = relays.deliver(&mut bora);
+        assert_eq!(
+            (got[0].contact.as_str(), got[0].text.as_str()),
+            (ayse_id.as_str(), "bilgisayardan")
+        );
+        relays.deliver(&mut ayse);
+        let copy = ayse.chat(&bora_id).unwrap().last().unwrap().clone();
+        assert!(copy.outgoing);
+        assert_eq!(
+            (copy.text.as_str(), copy.id.clone()),
+            ("bilgisayardan", line.id.clone())
+        );
+        // Bora's receipt reaches the computer too
+        relays.take_outbox(&mut bora);
+        relays.deliver(&mut pc);
+        assert_eq!(
+            pc.chat(&bora_id).unwrap().last().unwrap().state,
+            LineState::Delivered
+        );
+
+        // a group the phone makes is on the computer too, and the
+        // computer writes in it
+        let (g, _) = ayse
+            .create_group("Aile", std::slice::from_ref(&bora_id))
+            .unwrap();
+        relays.take_outbox(&mut ayse);
+        relays.deliver(&mut bora);
+        relays.deliver(&mut pc);
+        assert_eq!(pc.group(&g.id).unwrap().admin, ayse_id);
+        pc.send_group_message(&g.id, "gruptan").unwrap();
+        relays.take_outbox(&mut pc);
+        let got = relays.deliver(&mut bora);
+        assert_eq!(
+            (got[0].text.as_str(), got[0].group.as_str()),
+            ("gruptan", g.id.as_str())
+        );
+
+        // the phone takes the computer off; Bora writes to the phone only
+        relays.take_outbox(&mut bora);
+        ayse.unlink_device(2).unwrap();
+        relays.take_outbox(&mut ayse);
+        relays.deliver(&mut bora);
+        relays.take_outbox(&mut bora);
+        bora.send_message(&ayse_id, "yalnız telefona").unwrap();
+        let out = bora.outbox().unwrap();
+        relays.take_outbox(&mut bora);
+        assert_eq!(out.len(), 1);
     }
 
     #[test]

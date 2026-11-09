@@ -63,6 +63,11 @@ const STATE_VERSION: u8 = 1;
 const CARD_VERSION: u8 = 1;
 const BODY_VERSION: u8 = 1;
 const ENVELOPE_VERSION: u8 = 1;
+/// An envelope from a device other than 1: it names the sending device.
+const ENVELOPE_VERSION_DEVICE: u8 = 2;
+/// Most devices one Kilit ID can have: the phone and four more.
+pub const MAX_DEVICES: u32 = 5;
+const LINK_VERSION: u8 = 1;
 const FLAG_POW: u8 = 1;
 /// libsignal's message type bytes.
 const PREKEY_MESSAGE: u8 = 3;
@@ -165,9 +170,21 @@ fn not_a_card<E>(_: E) -> MessagingError {
     MessagingError::NotACard
 }
 
-fn address(name: &str) -> Result<ProtocolAddress, MessagingError> {
-    let device = DeviceId::new(1).map_err(|_| MessagingError::Crypto)?;
+fn device_address(name: &str, device: u32) -> Result<ProtocolAddress, MessagingError> {
+    let d = u8::try_from(device).map_err(|_| MessagingError::Damaged)?;
+    let device = DeviceId::new(d).map_err(|_| MessagingError::Damaged)?;
     Ok(ProtocolAddress::new(name.to_owned(), device))
+}
+
+/// Where a session is kept: device 1 under the bare address, as before
+/// devices existed; others as `address.device`.
+fn session_key(a: &ProtocolAddress) -> String {
+    let d = u32::from(a.device_id());
+    if d <= 1 {
+        a.name().to_owned()
+    } else {
+        format!("{}.{d}", a.name())
+    }
 }
 
 fn hex(b: &[u8]) -> String {
@@ -346,6 +363,34 @@ pub enum ContactState {
     Member,
 }
 
+/// What it takes to start a session with one device: its prekeys, signed
+/// with the identity all of an ID's devices share.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct DeviceBundle {
+    /// The device's Signal registration id.
+    pub registration_id: u32,
+    /// Its signed EC prekey's id.
+    pub signed_prekey_id: u32,
+    /// Its signed EC prekey.
+    pub signed_prekey: ByteBuf,
+    /// The identity's signature on it.
+    pub signed_prekey_signature: ByteBuf,
+    /// Its last-resort Kyber1024 prekey's id.
+    pub kyber_prekey_id: u32,
+    /// Its last-resort Kyber1024 prekey.
+    pub kyber_prekey: ByteBuf,
+    /// The identity's signature on it.
+    pub kyber_prekey_signature: ByteBuf,
+}
+
+/// A linked device's copy of the secrets the phone derives from its vault.
+#[derive(Clone, Serialize, Deserialize)]
+struct Linked {
+    identity: ByteBuf,
+    fc_key: ByteBuf,
+    card_key: ByteBuf,
+}
+
 #[derive(Clone, Default, Serialize, Deserialize)]
 struct Meta {
     name: String,
@@ -370,6 +415,15 @@ struct Meta {
     /// them.
     #[serde(default)]
     timer: u32,
+    /// Their phone's bundle, from their card, so a device linked later can
+    /// start its own session with them.
+    #[serde(default)]
+    bundle: Option<DeviceBundle>,
+    /// Their other devices (2 and up), and the version of that list.
+    #[serde(default)]
+    devices: BTreeMap<u32, DeviceBundle>,
+    #[serde(default)]
+    devices_version: u32,
 }
 
 /// Kept apart, so each of libsignal's stores borrows its own part.
@@ -396,6 +450,17 @@ struct State {
     /// Earlier IDs whose cards are to be blanked on the relays.
     #[serde(default)]
     retired_words: Vec<String>,
+    /// This device's number; 0 or 1 is the phone that made the ID.
+    #[serde(default)]
+    device_id: u32,
+    /// Set on a linked device: the secrets the phone gave it.
+    #[serde(default)]
+    linked: Option<Linked>,
+    /// The ID's other devices, by number, and the version of that list.
+    #[serde(default)]
+    own_devices: BTreeMap<u32, DeviceBundle>,
+    #[serde(default)]
+    devices_version: u32,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -416,6 +481,42 @@ struct Card {
     /// What the four words come from.
     #[serde(default)]
     id_salt: ByteBuf,
+    /// The ID's other devices (2 and up); the fields above are device 1's.
+    #[serde(default)]
+    devices: BTreeMap<u32, DeviceBundle>,
+    #[serde(default)]
+    devices_version: u32,
+}
+
+impl Card {
+    fn bundle(&self) -> DeviceBundle {
+        DeviceBundle {
+            registration_id: self.registration_id,
+            signed_prekey_id: self.signed_prekey_id,
+            signed_prekey: self.signed_prekey.clone(),
+            signed_prekey_signature: self.signed_prekey_signature.clone(),
+            kyber_prekey_id: self.kyber_prekey_id,
+            kyber_prekey: self.kyber_prekey.clone(),
+            kyber_prekey_signature: self.kyber_prekey_signature.clone(),
+        }
+    }
+}
+
+/// What a phone hands a device it links: the ID's secrets, its contacts and
+/// their keys, and the number the new device gets. No session and no
+/// message history.
+#[derive(Serialize, Deserialize)]
+struct LinkPackage {
+    v: u8,
+    device_id: u32,
+    identity: ByteBuf,
+    fc_key: ByteBuf,
+    card_key: ByteBuf,
+    id_salt: ByteBuf,
+    fc_counter: u32,
+    card: ByteBuf,
+    identities: BTreeMap<String, ByteBuf>,
+    contacts: BTreeMap<String, Meta>,
 }
 
 /// A file sent with a message. The file travels encrypted in pieces of its
@@ -517,6 +618,12 @@ pub struct Content {
     pub group: Option<GroupWire>,
     /// A sticker, by name; the app draws it. Empty for none.
     pub sticker: String,
+    /// To this ID's own other devices: whom the message went to (an
+    /// address, or `group:` and a group's id), so they show it as sent; or
+    /// `add:` and an address for a contact added, with their card.
+    pub sync_to: String,
+    /// The sender's current card, when its devices changed.
+    pub card: Option<Vec<u8>>,
 }
 
 /// Longest sticker name. A name is lowercase letters, digits and `-`.
@@ -553,6 +660,10 @@ struct Body {
     group: Option<GroupWire>,
     #[serde(default)]
     sticker: String,
+    #[serde(default)]
+    sync_to: String,
+    #[serde(default)]
+    card: Option<ByteBuf>,
 }
 
 /// A contact as the list shows it.
@@ -595,6 +706,14 @@ pub struct Received {
     pub group: Option<GroupWire>,
     /// A sticker's name; empty for none, and for a name that is not one.
     pub sticker: String,
+    /// The sending device.
+    pub device: u32,
+    /// From this ID's own other device: a copy of what it sent.
+    pub own: bool,
+    /// On a copy from an own device: whom it went to.
+    pub sync_to: String,
+    /// The sender's card, when they sent it along.
+    pub card: Option<Vec<u8>>,
 }
 
 fn pad(mut b: Vec<u8>) -> Vec<u8> {
@@ -615,11 +734,22 @@ fn unpad(b: &[u8]) -> Result<&[u8], MessagingError> {
     Ok(&b[..end])
 }
 
-/// `version | flags | [nonce] | signal type | signal message`
-fn envelope(kind: u8, msg: &[u8], pow: bool) -> Result<Vec<u8>, MessagingError> {
-    let mut inner = vec![kind];
+/// `version | flags | [nonce] | [device] | signal type | signal message`.
+/// Device 1 writes version 1 without the device byte, as before devices
+/// existed; any other device writes version 2 with it.
+fn envelope(kind: u8, msg: &[u8], pow: bool, device: u32) -> Result<Vec<u8>, MessagingError> {
+    let mut inner = Vec::with_capacity(msg.len() + 2);
+    if device > 1 {
+        inner.push(u8::try_from(device).map_err(|_| MessagingError::Damaged)?);
+    }
+    inner.push(kind);
     inner.extend_from_slice(msg);
-    let mut out = vec![ENVELOPE_VERSION, if pow { FLAG_POW } else { 0 }];
+    let version = if device > 1 {
+        ENVELOPE_VERSION_DEVICE
+    } else {
+        ENVELOPE_VERSION
+    };
+    let mut out = vec![version, if pow { FLAG_POW } else { 0 }];
     if pow {
         out.extend_from_slice(&pow_solve(&inner, POW_BITS)?.to_le_bytes());
     }
@@ -627,15 +757,33 @@ fn envelope(kind: u8, msg: &[u8], pow: bool) -> Result<Vec<u8>, MessagingError> 
     Ok(out)
 }
 
-/// The Signal part of an envelope, and whether its proof of work holds.
-fn open_envelope(e: &[u8]) -> Result<(&[u8], bool), MessagingError> {
-    match e {
-        [ENVELOPE_VERSION, 0, inner @ ..] => Ok((inner, false)),
-        [ENVELOPE_VERSION, FLAG_POW, rest @ ..] if rest.len() > 8 => {
+/// The Signal part of an envelope, whether its proof of work holds, and
+/// the sending device.
+fn open_envelope(e: &[u8]) -> Result<(&[u8], bool, u32), MessagingError> {
+    let (version, flags, rest) = match e {
+        [
+            v @ (ENVELOPE_VERSION | ENVELOPE_VERSION_DEVICE),
+            f,
+            rest @ ..,
+        ] => (*v, *f, rest),
+        _ => return Err(MessagingError::NotAMessage),
+    };
+    let (inner, proven) = match flags {
+        0 => (rest, false),
+        FLAG_POW if rest.len() > 8 => {
             let (nonce, inner) = rest.split_at(8);
             let nonce =
                 u64::from_le_bytes(nonce.try_into().map_err(|_| MessagingError::NotAMessage)?);
-            Ok((inner, pow_ok(inner, nonce, POW_BITS)))
+            (inner, pow_ok(inner, nonce, POW_BITS))
+        }
+        _ => return Err(MessagingError::NotAMessage),
+    };
+    if version == ENVELOPE_VERSION {
+        return Ok((inner, proven, 1));
+    }
+    match inner {
+        [d, signal @ ..] if (2..=MAX_DEVICES).contains(&u32::from(*d)) => {
+            Ok((signal, proven, u32::from(*d)))
         }
         _ => Err(MessagingError::NotAMessage),
     }
@@ -701,7 +849,7 @@ impl SessionStore for Sessions<'_> {
         &self,
         address: &ProtocolAddress,
     ) -> Result<Option<SessionRecord>, SignalProtocolError> {
-        match self.0.get(address.name()) {
+        match self.0.get(&session_key(address)) {
             Some(b) => Ok(Some(SessionRecord::deserialize(b)?)),
             None => Ok(None),
         }
@@ -712,10 +860,8 @@ impl SessionStore for Sessions<'_> {
         address: &ProtocolAddress,
         record: &SessionRecord,
     ) -> Result<(), SignalProtocolError> {
-        self.0.insert(
-            address.name().to_owned(),
-            ByteBuf::from(record.serialize()?),
-        );
+        self.0
+            .insert(session_key(address), ByteBuf::from(record.serialize()?));
         Ok(())
     }
 }
@@ -828,7 +974,35 @@ pub struct Messaging {
     /// The secp256k1 secret the published card is signed with, so a newer
     /// card replaces the older one on the relays.
     card_key: zeroize::Zeroizing<[u8; 32]>,
+    /// This device's number.
+    device: u32,
     s: State,
+}
+
+fn secret32(b: &[u8]) -> Result<zeroize::Zeroizing<[u8; 32]>, MessagingError> {
+    let a: [u8; 32] = b.try_into().map_err(|_| MessagingError::Damaged)?;
+    Ok(zeroize::Zeroizing::new(a))
+}
+
+fn bundle_of(
+    identity: IdentityKey,
+    device: u32,
+    b: &DeviceBundle,
+) -> Result<PreKeyBundle, MessagingError> {
+    PreKeyBundle::new(
+        b.registration_id,
+        DeviceId::new(u8::try_from(device).map_err(|_| MessagingError::NotACard)?)
+            .map_err(|_| MessagingError::NotACard)?,
+        None,
+        SignedPreKeyId::from(b.signed_prekey_id),
+        PublicKey::deserialize(&b.signed_prekey).map_err(not_a_card)?,
+        b.signed_prekey_signature.to_vec(),
+        KyberPreKeyId::from(b.kyber_prekey_id),
+        kem::PublicKey::deserialize(&b.kyber_prekey).map_err(not_a_card)?,
+        b.kyber_prekey_signature.to_vec(),
+        identity,
+    )
+    .map_err(not_a_card)
 }
 
 impl Messaging {
@@ -839,14 +1013,26 @@ impl Messaging {
     }
 
     fn with_state(vault: &Vault, mut s: State) -> Result<Self, MessagingError> {
-        let me = Self::identity(vault)?;
         if s.id_salt.len() < 16 {
             s.id_salt = ByteBuf::from(random_bytes::<16>()?.to_vec());
         }
-        let fc_key =
-            seed(vault.master(), FIRST_CONTACT_INFO).map_err(|_| MessagingError::Crypto)?;
-        let card_key = seed(vault.master(), CARD_KEY_INFO).map_err(|_| MessagingError::Crypto)?;
+        // a linked device holds the phone's secrets; the phone derives them
+        let (me, fc_key, card_key) = match &s.linked {
+            Some(l) => (
+                IdentityKeyPair::try_from(l.identity.as_slice())
+                    .map_err(|_| MessagingError::Damaged)?,
+                secret32(&l.fc_key)?,
+                secret32(&l.card_key)?,
+            ),
+            None => (
+                Self::identity(vault)?,
+                seed(vault.master(), FIRST_CONTACT_INFO).map_err(|_| MessagingError::Crypto)?,
+                seed(vault.master(), CARD_KEY_INFO).map_err(|_| MessagingError::Crypto)?,
+            ),
+        };
+        let device = s.device_id.max(1);
         let mut m = Self {
+            device,
             my_address: address_name(me.identity_key()),
             my_words: String::new(),
             first_contact: String::new(),
@@ -894,6 +1080,11 @@ impl Messaging {
     /// New prekeys and no contacts, for a vault that has never messaged.
     pub fn create(vault: &Vault) -> Result<Self, MessagingError> {
         let me = Self::identity(vault)?;
+        Self::with_state(vault, Self::fresh_state(&me)?)
+    }
+
+    /// A new state with fresh prekeys signed by `me`.
+    fn fresh_state(me: &IdentityKeyPair) -> Result<State, MessagingError> {
         let mut rng = rng();
         let ec = KeyPair::generate(&mut rng);
         let ec_sig = me
@@ -909,24 +1100,325 @@ impl Messaging {
         )?;
         let mut reg = [0u8; 4];
         getrandom::fill(&mut reg).map_err(|_| MessagingError::Crypto)?;
-        Self::with_state(
-            vault,
-            State {
-                v: STATE_VERSION,
-                // the range Signal's clients use
-                registration_id: u32::from_le_bytes(reg) % 16380 + 1,
-                signed_prekey: ByteBuf::from(signed.serialize()?),
-                kyber_prekey: ByteBuf::from(kyber.serialize()?),
-                base_keys: Vec::new(),
-                identities: BTreeMap::new(),
-                sessions: BTreeMap::new(),
-                contacts: BTreeMap::new(),
-                id_salt: ByteBuf::from(random_bytes::<16>()?.to_vec()),
-                fc_counter: 0,
-                retired_fc: Vec::new(),
-                retired_words: Vec::new(),
+        Ok(State {
+            v: STATE_VERSION,
+            // the range Signal's clients use
+            registration_id: u32::from_le_bytes(reg) % 16380 + 1,
+            signed_prekey: ByteBuf::from(signed.serialize()?),
+            kyber_prekey: ByteBuf::from(kyber.serialize()?),
+            base_keys: Vec::new(),
+            identities: BTreeMap::new(),
+            sessions: BTreeMap::new(),
+            contacts: BTreeMap::new(),
+            id_salt: ByteBuf::from(random_bytes::<16>()?.to_vec()),
+            fc_counter: 0,
+            retired_fc: Vec::new(),
+            retired_words: Vec::new(),
+            device_id: 1,
+            linked: None,
+            own_devices: BTreeMap::new(),
+            devices_version: 0,
+        })
+    }
+
+    /// This device's number: 1 for the phone that made the ID.
+    pub fn device_id(&self) -> u32 {
+        self.device
+    }
+
+    /// The ID's other devices, by number.
+    pub fn own_devices(&self) -> Vec<u32> {
+        self.s
+            .own_devices
+            .keys()
+            .copied()
+            .filter(|d| *d != self.device)
+            .collect()
+    }
+
+    /// This device's bundle, for the phone to put on the card.
+    pub fn device_bundle(&self) -> Result<DeviceBundle, MessagingError> {
+        let signed = SignedPreKeyRecord::deserialize(&self.s.signed_prekey)?;
+        let kyber = KyberPreKeyRecord::deserialize(&self.s.kyber_prekey)?;
+        Ok(DeviceBundle {
+            registration_id: self.s.registration_id,
+            signed_prekey_id: signed.id()?.into(),
+            signed_prekey: ByteBuf::from(signed.public_key()?.serialize().to_vec()),
+            signed_prekey_signature: ByteBuf::from(signed.signature()?),
+            kyber_prekey_id: kyber.id()?.into(),
+            kyber_prekey: ByteBuf::from(kyber.public_key()?.serialize().to_vec()),
+            kyber_prekey_signature: ByteBuf::from(kyber.signature()?),
+        })
+    }
+
+    /// Starts a session with `device` of `name` from its bundle, in `s`.
+    /// The prekey signatures are checked against `identity`.
+    fn start_session(
+        &self,
+        s: &mut State,
+        name: &str,
+        device: u32,
+        identity: IdentityKey,
+        b: &DeviceBundle,
+        now: SystemTime,
+    ) -> Result<(), MessagingError> {
+        let bundle = bundle_of(identity, device, b)?;
+        run(process_prekey_bundle(
+            &device_address(name, device)?,
+            &device_address(&self.my_address, self.device)?,
+            &mut Sessions(&mut s.sessions),
+            &mut Identities {
+                me: &self.me,
+                registration_id: s.registration_id,
+                known: &mut s.identities,
             },
-        )
+            &bundle,
+            now,
+            &mut rng(),
+        ))
+        .map_err(|e| match e {
+            MessagingError::NotAMessage => MessagingError::NotACard,
+            e => e,
+        })
+    }
+
+    /// The phone, linking a new device: the package to hand it (sealed by
+    /// the caller to the key the new device showed), and its number.
+    pub fn link_package(&self) -> Result<(Vec<u8>, u32), MessagingError> {
+        if self.device != 1 {
+            return Err(MessagingError::Damaged);
+        }
+        let device = (2..=MAX_DEVICES)
+            .find(|d| !self.s.own_devices.contains_key(d))
+            .ok_or(MessagingError::TooLarge)?;
+        let p = LinkPackage {
+            v: LINK_VERSION,
+            device_id: device,
+            identity: ByteBuf::from(self.me.serialize().to_vec()),
+            fc_key: ByteBuf::from(self.fc_key.to_vec()),
+            card_key: ByteBuf::from(self.card_key.to_vec()),
+            id_salt: self.s.id_salt.clone(),
+            fc_counter: self.s.fc_counter,
+            card: ByteBuf::from(self.card("")?),
+            identities: self.s.identities.clone(),
+            contacts: self.s.contacts.clone(),
+        };
+        let mut b = Vec::new();
+        ciborium::into_writer(&p, &mut b).map_err(|_| MessagingError::Crypto)?;
+        Ok((b, device))
+    }
+
+    /// A device linked to a phone, from the package the phone sent: the
+    /// same ID, prekeys of its own, sessions with the phone and with every
+    /// contact whose bundle the phone knew.
+    pub fn create_linked(
+        vault: &Vault,
+        package: &[u8],
+        now: SystemTime,
+    ) -> Result<Self, MessagingError> {
+        let p: LinkPackage =
+            ciborium::from_reader(package).map_err(|_| MessagingError::NotAMessage)?;
+        if p.v != LINK_VERSION || !(2..=MAX_DEVICES).contains(&p.device_id) {
+            return Err(MessagingError::NotAMessage);
+        }
+        let me = IdentityKeyPair::try_from(p.identity.as_slice())
+            .map_err(|_| MessagingError::Damaged)?;
+        let card: Card = ciborium::from_reader(p.card.as_slice()).map_err(not_a_card)?;
+        if card.identity.as_slice() != &*me.identity_key().serialize() {
+            return Err(MessagingError::NotACard);
+        }
+        let mut s = Self::fresh_state(&me)?;
+        s.device_id = p.device_id;
+        s.linked = Some(Linked {
+            identity: p.identity,
+            fc_key: p.fc_key,
+            card_key: p.card_key,
+        });
+        s.id_salt = p.id_salt;
+        s.fc_counter = p.fc_counter;
+        s.identities = p.identities;
+        s.contacts = p.contacts;
+        let mut m = Self::with_state(vault, s)?;
+        m.take_own_card(&p.card, now)?;
+        let mut s = m.s.clone();
+        for (id, meta) in &m.s.contacts {
+            if meta.state == ContactState::Blocked {
+                continue;
+            }
+            let Some(identity) =
+                m.s.identities
+                    .get(id)
+                    .and_then(|k| IdentityKey::try_from(k.as_slice()).ok())
+            else {
+                continue;
+            };
+            if let Some(b) = &meta.bundle {
+                m.start_session(&mut s, id, 1, identity, b, now)?;
+            }
+            for (d, b) in &meta.devices {
+                m.start_session(&mut s, id, *d, identity, b, now)?;
+            }
+        }
+        m.s = s;
+        Ok(m)
+    }
+
+    /// The phone: adds a linked device's bundle to this ID, starts a
+    /// session with it and bumps the device list; the card shows it.
+    pub fn add_own_device(
+        &mut self,
+        device: u32,
+        b: &DeviceBundle,
+        now: SystemTime,
+    ) -> Result<(), MessagingError> {
+        if self.device != 1 || !(2..=MAX_DEVICES).contains(&device) {
+            return Err(MessagingError::Damaged);
+        }
+        let mut s = self.s.clone();
+        let identity = *self.me.identity_key();
+        let my = self.my_address.clone();
+        self.start_session(&mut s, &my, device, identity, b, now)?;
+        s.own_devices.insert(device, b.clone());
+        s.devices_version += 1;
+        self.s = s;
+        Ok(())
+    }
+
+    /// The phone: forgets a linked device. Its sessions go; the card no
+    /// longer shows it.
+    pub fn remove_own_device(&mut self, device: u32) -> Result<(), MessagingError> {
+        if self.device != 1 || self.s.own_devices.remove(&device).is_none() {
+            return Err(MessagingError::NoContact);
+        }
+        self.s
+            .sessions
+            .remove(&format!("{}.{device}", self.my_address));
+        self.s.devices_version += 1;
+        Ok(())
+    }
+
+    /// A linked device: takes this ID's card as the phone published it, so
+    /// it knows the other devices and has a session with each.
+    pub fn take_own_card(&mut self, card: &[u8], now: SystemTime) -> Result<(), MessagingError> {
+        let c: Card = ciborium::from_reader(card).map_err(not_a_card)?;
+        if c.v != CARD_VERSION || c.identity.as_slice() != &*self.me.identity_key().serialize() {
+            return Err(MessagingError::NotACard);
+        }
+        if c.devices_version < self.s.devices_version {
+            return Ok(());
+        }
+        let mut all = c.devices.clone();
+        all.insert(1, c.bundle());
+        all.retain(|d, _| (1..=MAX_DEVICES).contains(d));
+        let identity = *self.me.identity_key();
+        let my = self.my_address.clone();
+        let mut s = self.s.clone();
+        for (d, b) in &all {
+            if *d != self.device && s.own_devices.get(d) != Some(b) {
+                self.start_session(&mut s, &my, *d, identity, b, now)?;
+            }
+        }
+        all.remove(&self.device);
+        s.own_devices = all;
+        s.devices_version = c.devices_version;
+        self.s = s;
+        Ok(())
+    }
+
+    /// A contact's card that came in a message from them: their device list
+    /// changed. Sessions start with devices that are new.
+    pub fn take_contact_card(
+        &mut self,
+        contact: &str,
+        card: &[u8],
+        now: SystemTime,
+    ) -> Result<(), MessagingError> {
+        let c: Card = ciborium::from_reader(card).map_err(not_a_card)?;
+        let known = self
+            .s
+            .identities
+            .get(contact)
+            .ok_or(MessagingError::NoContact)?;
+        if c.v != CARD_VERSION || c.identity.as_slice() != known.as_slice() {
+            return Err(MessagingError::NotACard);
+        }
+        let identity = IdentityKey::try_from(c.identity.as_slice()).map_err(not_a_card)?;
+        let meta = self
+            .s
+            .contacts
+            .get(contact)
+            .ok_or(MessagingError::NoContact)?;
+        if c.devices_version <= meta.devices_version {
+            return Ok(());
+        }
+        let mut s = self.s.clone();
+        self.take_devices(&mut s, contact, identity, &c, now)?;
+        self.s = s;
+        Ok(())
+    }
+
+    fn take_devices(
+        &self,
+        s: &mut State,
+        id: &str,
+        identity: IdentityKey,
+        c: &Card,
+        now: SystemTime,
+    ) -> Result<(), MessagingError> {
+        let old = s
+            .contacts
+            .get(id)
+            .map(|m| m.devices.clone())
+            .unwrap_or_default();
+        let mut devices = c.devices.clone();
+        devices.retain(|d, _| (2..=MAX_DEVICES).contains(d));
+        for (d, b) in &devices {
+            if old.get(d) != Some(b) {
+                self.start_session(s, id, *d, identity, b, now)?;
+            }
+        }
+        for d in old.keys().filter(|d| !devices.contains_key(d)) {
+            s.sessions.remove(&format!("{id}.{d}"));
+        }
+        if let Some(meta) = s.contacts.get_mut(id) {
+            meta.devices = devices;
+            meta.devices_version = c.devices_version;
+            meta.bundle = Some(c.bundle());
+        }
+        Ok(())
+    }
+
+    /// The devices of `contact` there is a session with: 1 first.
+    pub fn devices_of(&self, contact: &str) -> Vec<u32> {
+        let mut v = vec![1];
+        if let Some(m) = self.s.contacts.get(contact) {
+            v.extend(
+                m.devices
+                    .keys()
+                    .copied()
+                    .filter(|d| self.s.sessions.contains_key(&format!("{contact}.{d}"))),
+            );
+        }
+        v
+    }
+
+    /// Contacts this device has no session with yet (a linked device, for
+    /// contacts whose bundle the phone did not have): their words and
+    /// address, to fetch their cards by.
+    pub fn without_session(&self) -> Vec<Invite> {
+        self.s
+            .contacts
+            .iter()
+            .filter(|(id, m)| {
+                m.state != ContactState::Blocked
+                    && !m.kilit_id.is_empty()
+                    && !self.s.sessions.contains_key(*id)
+            })
+            .map(|(id, m)| Invite {
+                id: m.kilit_id.clone(),
+                address: Some(id.clone()),
+            })
+            .collect()
     }
 
     /// Messaging state saved by [`Messaging::to_bytes`].
@@ -989,6 +1481,14 @@ impl Messaging {
             identity: ByteBuf::from(self.me.identity_key().serialize().to_vec()),
             first_contact: self.first_contact.clone(),
             id_salt: self.s.id_salt.clone(),
+            devices: self
+                .s
+                .own_devices
+                .iter()
+                .filter(|(d, _)| **d >= 2)
+                .map(|(d, b)| (*d, b.clone()))
+                .collect(),
+            devices_version: self.s.devices_version,
         };
         let mut b = Vec::new();
         ciborium::into_writer(&card, &mut b).map_err(|_| MessagingError::Crypto)?;
@@ -1064,38 +1564,11 @@ impl Messaging {
         if !self.s.contacts.contains_key(&id) && self.s.contacts.len() >= MAX_CONTACTS {
             return Err(MessagingError::TooLarge);
         }
-        let bundle = PreKeyBundle::new(
-            c.registration_id,
-            DeviceId::new(1).map_err(|_| MessagingError::Crypto)?,
-            None,
-            SignedPreKeyId::from(c.signed_prekey_id),
-            PublicKey::deserialize(&c.signed_prekey).map_err(not_a_card)?,
-            c.signed_prekey_signature.into_vec(),
-            KyberPreKeyId::from(c.kyber_prekey_id),
-            kem::PublicKey::deserialize(&c.kyber_prekey).map_err(not_a_card)?,
-            c.kyber_prekey_signature.into_vec(),
-            identity,
-        )
-        .map_err(not_a_card)?;
         let mut s = self.s.clone();
         // the signatures on both prekeys are checked here: a forged card fails
-        run(process_prekey_bundle(
-            &address(&id)?,
-            &address(&self.my_address)?,
-            &mut Sessions(&mut s.sessions),
-            &mut Identities {
-                me: &self.me,
-                registration_id: s.registration_id,
-                known: &mut s.identities,
-            },
-            &bundle,
-            now,
-            &mut rng(),
-        ))
-        .map_err(|e| match e {
-            MessagingError::NotAMessage => MessagingError::NotACard,
-            e => e,
-        })?;
+        self.start_session(&mut s, &id, 1, identity, &c.bundle(), now)?;
+        s.contacts.entry(id.clone()).or_default();
+        self.take_devices(&mut s, &id, identity, &c, now)?;
         let meta = s.contacts.entry(id.clone()).or_default();
         if meta.added == 0 {
             meta.added = unix_secs(now);
@@ -1105,7 +1578,7 @@ impl Messaging {
         if !c.first_contact.is_empty() {
             meta.first_contact = Some(c.first_contact);
         }
-        meta.id_salt = c.id_salt;
+        meta.id_salt = c.id_salt.clone();
         meta.kilit_id = words;
         let given = short(name.unwrap_or(&c.name));
         if !given.is_empty() {
@@ -1115,23 +1588,39 @@ impl Messaging {
         Ok(id)
     }
 
-    fn mailbox(&self, contact: &str, recipient: &str, day: i64) -> Result<String, MessagingError> {
-        let theirs = self
-            .s
-            .identities
-            .get(contact)
-            .ok_or(MessagingError::NoContact)?;
-        let theirs =
-            IdentityKey::try_from(theirs.as_slice()).map_err(|_| MessagingError::Damaged)?;
+    /// The mailbox `recipient`'s `device` reads on `day`, shared with
+    /// `contact` (who may be this ID itself, for its own devices).
+    fn mailbox(
+        &self,
+        contact: &str,
+        recipient: &str,
+        device: u32,
+        day: i64,
+    ) -> Result<String, MessagingError> {
+        let theirs = if contact == self.my_address {
+            *self.me.identity_key()
+        } else {
+            let k = self
+                .s
+                .identities
+                .get(contact)
+                .ok_or(MessagingError::NoContact)?;
+            IdentityKey::try_from(k.as_slice()).map_err(|_| MessagingError::Damaged)?
+        };
         let shared = self
             .me
             .private_key()
             .calculate_agreement(theirs.public_key())
             .map_err(|_| MessagingError::Crypto)?;
-        Ok(hex(&hmac(
-            &shared,
-            &[MAILBOX_LABEL, recipient.as_bytes(), &day.to_le_bytes()],
-        )?))
+        // device 1's mailboxes are as they were before devices existed
+        let d = [u8::try_from(device).map_err(|_| MessagingError::Damaged)?];
+        let day = day.to_le_bytes();
+        let parts: Vec<&[u8]> = if device <= 1 {
+            vec![MAILBOX_LABEL, recipient.as_bytes(), &day]
+        } else {
+            vec![MAILBOX_LABEL, recipient.as_bytes(), &d, &day]
+        };
+        Ok(hex(&hmac(&shared, &parts)?))
     }
 
     /// The tags to watch on the relays: this vault's first-contact tag and,
@@ -1139,20 +1628,29 @@ impl Messaging {
     /// either side (clocks differ).
     pub fn inbox_tags(&self, now: SystemTime) -> Result<Vec<String>, MessagingError> {
         let day = unix_secs(now).div_euclid(DAY_SECS);
-        let mut tags = vec![self.first_contact.clone()];
-        tags.extend(
-            self.s
-                .retired_fc
-                .iter()
-                .filter(|(_, until)| *until > unix_secs(now))
-                .map(|(t, _)| t.clone()),
-        );
+        let mut tags = Vec::new();
+        // strangers write to the phone only: its card is what they found
+        if self.device == 1 {
+            tags.push(self.first_contact.clone());
+            tags.extend(
+                self.s
+                    .retired_fc
+                    .iter()
+                    .filter(|(_, until)| *until > unix_secs(now))
+                    .map(|(t, _)| t.clone()),
+            );
+        }
         for (id, meta) in &self.s.contacts {
             if meta.state == ContactState::Blocked || !self.s.identities.contains_key(id) {
                 continue;
             }
             for d in day - 1..=day + 1 {
-                tags.push(self.mailbox(id, &self.my_address, d)?);
+                tags.push(self.mailbox(id, &self.my_address, self.device, d)?);
+            }
+        }
+        if !self.own_devices().is_empty() {
+            for d in day - 1..=day + 1 {
+                tags.push(self.mailbox(&self.my_address, &self.my_address, self.device, d)?);
             }
         }
         Ok(tags)
@@ -1186,24 +1684,66 @@ impl Messaging {
         content: &Content,
         now: SystemTime,
     ) -> Result<Outgoing, MessagingError> {
+        self.seal_to(contact, 1, content, now)
+    }
+
+    /// Seals a message for one device of a contact.
+    pub fn seal_to(
+        &mut self,
+        contact: &str,
+        device: u32,
+        content: &Content,
+        now: SystemTime,
+    ) -> Result<Outgoing, MessagingError> {
+        self.seal_device(contact, device, content, now)
+    }
+
+    /// Seals a copy for one of this ID's own other devices.
+    pub fn seal_own(
+        &mut self,
+        device: u32,
+        content: &Content,
+        now: SystemTime,
+    ) -> Result<Outgoing, MessagingError> {
+        if device == self.device || !self.s.own_devices.contains_key(&device) {
+            return Err(MessagingError::NoContact);
+        }
+        let my = self.my_address.clone();
+        self.seal_device(&my, device, content, now)
+    }
+
+    fn seal_device(
+        &mut self,
+        contact: &str,
+        device: u32,
+        content: &Content,
+        now: SystemTime,
+    ) -> Result<Outgoing, MessagingError> {
         if content.text.len() > MAX_TEXT
             || content.timer > MAX_TIMER
             || (!content.sticker.is_empty() && !sticker_name(&content.sticker))
         {
             return Err(MessagingError::TooLarge);
         }
-        let meta = self
-            .s
-            .contacts
-            .get(contact)
-            .ok_or(MessagingError::NoContact)?;
-        if meta.state == ContactState::Blocked {
-            return Err(MessagingError::Blocked);
-        }
-        let first = !meta.knows_us;
-        let tag = match (&meta.first_contact, first) {
-            (Some(fc), true) => fc.clone(),
-            _ => self.mailbox(contact, contact, unix_secs(now).div_euclid(DAY_SECS))?,
+        let day = unix_secs(now).div_euclid(DAY_SECS);
+        let (first, tag) = if contact == self.my_address {
+            (false, self.mailbox(contact, contact, device, day)?)
+        } else {
+            let meta = self
+                .s
+                .contacts
+                .get(contact)
+                .ok_or(MessagingError::NoContact)?;
+            if meta.state == ContactState::Blocked {
+                return Err(MessagingError::Blocked);
+            }
+            // until their phone has written back, it is reached through
+            // its first-contact tag; their other devices never are
+            let first = device == 1 && !meta.knows_us;
+            match (&meta.first_contact, first) {
+                (Some(fc), true) => (true, fc.clone()),
+                _ => (false, self.mailbox(contact, contact, device, day)?),
+            }
         };
         let mut id = [0u8; 16];
         let mut sent = unix_secs(now);
@@ -1232,6 +1772,8 @@ impl Messaging {
                 file: content.file.clone(),
                 group: content.group.clone(),
                 sticker: content.sticker.clone(),
+                sync_to: content.sync_to.clone(),
+                card: content.card.clone().map(ByteBuf::from),
             },
             &mut body,
         )
@@ -1239,8 +1781,8 @@ impl Messaging {
         let mut s = self.s.clone();
         let m = run(message_encrypt(
             &pad(body),
-            &address(contact)?,
-            &address(&self.my_address)?,
+            &device_address(contact, device)?,
+            &device_address(&self.my_address, self.device)?,
             &mut Sessions(&mut s.sessions),
             &mut Identities {
                 me: &self.me,
@@ -1250,7 +1792,7 @@ impl Messaging {
             now,
             &mut rng(),
         ))?;
-        let payload = envelope(m.message_type() as u8, m.serialize(), first)?;
+        let payload = envelope(m.message_type() as u8, m.serialize(), first, self.device)?;
         self.s = s;
         Ok(Outgoing {
             tag,
@@ -1263,21 +1805,26 @@ impl Messaging {
     /// has this vault's card makes them a request, if it carries the proof
     /// of work; a message from a blocked contact is dropped.
     pub fn decrypt(&mut self, payload: &[u8], now: SystemTime) -> Result<Received, MessagingError> {
-        let (inner, proven) = open_envelope(payload)?;
+        let (inner, proven, device) = open_envelope(payload)?;
         let (&kind, body) = inner.split_first().ok_or(MessagingError::NotAMessage)?;
-        let me = address(&self.my_address)?;
+        let me = device_address(&self.my_address, self.device)?;
+        let own_device = |d: u32| d != self.device && self.s.own_devices.contains_key(&d);
         let (contact, plain, s) = match kind {
             PREKEY_MESSAGE => {
                 let m = PreKeySignalMessage::try_from(body)?;
                 let id = address_name(m.identity_key());
-                if id == self.my_address {
+                // this ID's other device: only one this device knows
+                if id == self.my_address && !own_device(device) {
                     return Err(MessagingError::NotAMessage);
                 }
                 match self.s.contacts.get(&id) {
+                    _ if id == self.my_address => {}
                     Some(meta) if meta.state == ContactState::Blocked => {
                         return Err(MessagingError::Blocked);
                     }
                     Some(_) => {}
+                    // a stranger's first word comes from their phone
+                    None if device != 1 => return Err(MessagingError::NotAMessage),
                     None => {
                         // a stranger: they must have paid, and there must
                         // be room for one more request
@@ -1298,7 +1845,7 @@ impl Messaging {
                 let mut s = self.s.clone();
                 let plain = run(message_decrypt_prekey(
                     &m,
-                    &address(&id)?,
+                    &device_address(&id, device)?,
                     &me,
                     &mut Sessions(&mut s.sessions),
                     &mut Identities {
@@ -1319,15 +1866,27 @@ impl Messaging {
             SIGNAL_MESSAGE => {
                 let m = SignalMessage::try_from(body)?;
                 // the message does not say who sent it: try each session
+                // with that device number
                 let mut opened = None;
-                for (id, meta) in &self.s.contacts {
-                    if meta.state == ContactState::Blocked || !self.s.sessions.contains_key(id) {
+                let mut who: Vec<&String> = self
+                    .s
+                    .contacts
+                    .iter()
+                    .filter(|(_, meta)| meta.state != ContactState::Blocked)
+                    .map(|(id, _)| id)
+                    .collect();
+                if own_device(device) {
+                    who.push(&self.my_address);
+                }
+                for id in who {
+                    let from = device_address(id, device)?;
+                    if !self.s.sessions.contains_key(&session_key(&from)) {
                         continue;
                     }
                     let mut s = self.s.clone();
                     let r = run(message_decrypt_signal(
                         &m,
-                        &address(id)?,
+                        &from,
                         &me,
                         &mut Sessions(&mut s.sessions),
                         &mut Identities {
@@ -1357,14 +1916,41 @@ impl Messaging {
             return Err(MessagingError::NotAMessage);
         }
         let mut s = s;
+        let sticker = if sticker_name(&b.sticker) {
+            b.sticker.clone()
+        } else {
+            String::new()
+        };
+        if contact == self.my_address {
+            // a copy from an own device: no contact to keep, nothing to learn
+            self.s = s;
+            return Ok(Received {
+                contact,
+                new_contact: false,
+                id: b.id.into_vec(),
+                text: b.text,
+                sent: b.sent,
+                receipts: b.receipts.into_iter().map(ByteBuf::into_vec).collect(),
+                timer: b.timer,
+                file: b.file,
+                group: b.group,
+                sticker,
+                device,
+                own: true,
+                sync_to: b.sync_to,
+                card: b.card.map(ByteBuf::into_vec),
+            });
+        }
         let new_contact = !s.contacts.contains_key(&contact);
         let meta = s.contacts.entry(contact.clone()).or_insert_with(|| Meta {
             added: unix_secs(now),
             state: ContactState::Request,
             ..Meta::default()
         });
-        // they wrote: they have the session, the daily mailbox works now
-        meta.knows_us = true;
+        // their phone wrote: it has the session, the daily mailbox works now
+        if device == 1 {
+            meta.knows_us = true;
+        }
         if b.id_salt.len() >= 16 && b.id_salt != meta.id_salt {
             if let Some(k) = s
                 .identities
@@ -1393,11 +1979,11 @@ impl Messaging {
             timer: b.timer,
             file: b.file,
             group: b.group,
-            sticker: if sticker_name(&b.sticker) {
-                b.sticker
-            } else {
-                String::new()
-            },
+            sticker,
+            device,
+            own: false,
+            sync_to: String::new(),
+            card: b.card.map(ByteBuf::into_vec),
         })
     }
 
