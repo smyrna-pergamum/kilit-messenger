@@ -811,25 +811,27 @@ class LFa extends L {
 
   @override
   String get permIntro =>
-      'Kilit در حال حاضر از هیچ مجوز حساسی استفاده نمی‌کند.';
+      'Kilit فقط آنچه لازم دارد را می‌خواهد، و فقط وقتی لازم است.';
 
   @override
   String get permCamera => 'دوربین';
 
   @override
-  String get permCameraValue => 'استفاده نمی‌شود (دوربین در مرحله 2 می‌آید)';
+  String get permCameraValue =>
+      'برای عکس در گفتگوها. اولین بار که دوربین را باز می‌کنید پرسیده می‌شود؛ چیزی در گالری ذخیره نمی‌شود.';
 
   @override
   String get permNotifications => 'اعلان‌ها';
 
   @override
-  String get permNotificationsValue => 'استفاده نمی‌شود';
+  String get permNotificationsValue =>
+      'استفاده نمی‌شود: چیزی از پیام‌های شما بیرون از برنامه نشان داده نمی‌شود.';
 
   @override
   String get permInternet => 'اینترنت';
 
   @override
-  String get permInternetValue => 'هیچ: مرحله 1 آفلاین کار می‌کند';
+  String get permInternetValue => 'فقط برای Tor داخلی. هر اتصال از آن می‌گذرد.';
 
   @override
   String get permOpenSystem => 'باز کردن تنظیمات مجوزهای سیستم';
@@ -1005,4 +1007,13 @@ class LFa extends L {
   String groupNoticeRemovedYou(String who) {
     return '$who شما را حذف کرد';
   }
+
+  @override
+  String get emojiButton => 'ایموجی و استیکر';
+
+  @override
+  String get stickers => 'استیکرها';
+
+  @override
+  String get stickerLine => 'استیکر';
 }

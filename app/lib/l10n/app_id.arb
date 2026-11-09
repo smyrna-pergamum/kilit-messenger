@@ -243,13 +243,13 @@
   "clipboardCheck": "Tawarkan pesan Kilit di papan klip",
   "clipboardCheckHint": "Saat brankas dibuka, menawarkan untuk membuka pesan KLT1: di papan klip. Android menampilkan pemberitahuan bahwa papan klip telah dibaca.",
   "settingsPermissions": "Izin",
-  "permIntro": "Saat ini Kilit tidak memakai izin sensitif apa pun.",
+  "permIntro": "Kilit hanya meminta yang dibutuhkan, dan hanya saat dibutuhkan.",
   "permCamera": "Kamera",
-  "permCameraValue": "Tidak dipakai (kamera hadir di tahap 2)",
+  "permCameraValue": "Untuk foto di obrolan. Diminta saat kamera pertama kali dibuka; tidak ada yang masuk ke galeri.",
   "permNotifications": "Notifikasi",
-  "permNotificationsValue": "Tidak dipakai",
+  "permNotificationsValue": "Tidak dipakai: tidak ada isi pesan Anda yang tampil di luar aplikasi.",
   "permInternet": "Internet",
-  "permInternetValue": "Tidak ada: tahap 1 bekerja secara offline",
+  "permInternetValue": "Hanya untuk Tor bawaan. Setiap koneksi melewatinya.",
   "permOpenSystem": "Buka pengaturan izin sistem",
   "settingsAbout": "Tentang",
   "aboutVersion": "Versi",
@@ -297,5 +297,8 @@
   "groupNoticeLeft": "Keluar: {who}",
   "groupNoticeRenamed": "Nama baru grup “{name}” · {who}",
   "groupNoticeEnded": "Grup diakhiri oleh: {who}",
-  "groupNoticeRemovedYou": "{who} mengeluarkan Anda"
+  "groupNoticeRemovedYou": "{who} mengeluarkan Anda",
+  "emojiButton": "Emoji dan stiker",
+  "stickers": "Stiker",
+  "stickerLine": "Stiker"
 }

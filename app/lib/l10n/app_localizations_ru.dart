@@ -812,25 +812,28 @@ class LRu extends L {
 
   @override
   String get permIntro =>
-      'Сейчас Kilit не использует ни одного чувствительного разрешения.';
+      'Kilit запрашивает только то, что ему нужно, и только когда нужно.';
 
   @override
   String get permCamera => 'Камера';
 
   @override
-  String get permCameraValue => 'Не используется (камера появится на этапе 2)';
+  String get permCameraValue =>
+      'Для фото в чатах. Запрашивается при первом открытии камеры; ничего не сохраняется в галерею.';
 
   @override
   String get permNotifications => 'Уведомления';
 
   @override
-  String get permNotificationsValue => 'Не используются';
+  String get permNotificationsValue =>
+      'Не используется: ничего о ваших сообщениях не показывается вне приложения.';
 
   @override
   String get permInternet => 'Интернет';
 
   @override
-  String get permInternetValue => 'Нет: этап 1 работает офлайн';
+  String get permInternetValue =>
+      'Только для встроенного Tor. Все соединения идут через него.';
 
   @override
   String get permOpenSystem => 'Открыть системные настройки разрешений';
@@ -1006,4 +1009,13 @@ class LRu extends L {
   String groupNoticeRemovedYou(String who) {
     return '$who удалил(а) вас';
   }
+
+  @override
+  String get emojiButton => 'Эмодзи и стикеры';
+
+  @override
+  String get stickers => 'Стикеры';
+
+  @override
+  String get stickerLine => 'Стикер';
 }

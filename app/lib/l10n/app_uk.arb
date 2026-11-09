@@ -243,13 +243,13 @@
   "clipboardCheck": "Пропонувати повідомлення Kilit із буфера обміну",
   "clipboardCheckHint": "Коли сховище відкривається, пропонує відкрити повідомлення KLT1: з буфера обміну. Android показує сповіщення, що буфер обміну прочитано.",
   "settingsPermissions": "Дозволи",
-  "permIntro": "Зараз Kilit не використовує жодного чутливого дозволу.",
+  "permIntro": "Kilit запитує лише те, що потрібно, і лише тоді, коли потрібно.",
   "permCamera": "Камера",
-  "permCameraValue": "Не використовується (камера з'явиться на етапі 2)",
+  "permCameraValue": "Для фото в чатах. Запитується під час першого відкриття камери; нічого не зберігається в галерею.",
   "permNotifications": "Сповіщення",
-  "permNotificationsValue": "Не використовуються",
+  "permNotificationsValue": "Не використовується: нічого про ваші повідомлення не показується поза застосунком.",
   "permInternet": "Інтернет",
-  "permInternetValue": "Немає: етап 1 працює офлайн",
+  "permInternetValue": "Лише для вбудованого Tor. Усі з'єднання йдуть через нього.",
   "permOpenSystem": "Відкрити системні налаштування дозволів",
   "settingsAbout": "Про застосунок",
   "aboutVersion": "Версія",
@@ -297,5 +297,8 @@
   "groupNoticeLeft": "Вийшов(ла): {who}",
   "groupNoticeRenamed": "Нова назва групи «{name}» · {who}",
   "groupNoticeEnded": "Групу завершив(ла): {who}",
-  "groupNoticeRemovedYou": "{who} вилучив(ла) вас"
+  "groupNoticeRemovedYou": "{who} вилучив(ла) вас",
+  "emojiButton": "Емодзі та стікери",
+  "stickers": "Стікери",
+  "stickerLine": "Стікер"
 }

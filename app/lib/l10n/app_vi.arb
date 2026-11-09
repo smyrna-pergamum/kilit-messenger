@@ -243,13 +243,13 @@
   "clipboardCheck": "Gợi ý tin nhắn Kilit trong bộ nhớ tạm",
   "clipboardCheckHint": "Khi kho mở, đề nghị mở tin nhắn KLT1: trong bộ nhớ tạm. Android sẽ hiện thông báo rằng bộ nhớ tạm đã được đọc.",
   "settingsPermissions": "Quyền",
-  "permIntro": "Hiện tại Kilit không dùng quyền nhạy cảm nào.",
+  "permIntro": "Kilit chỉ xin những gì cần, và chỉ khi cần.",
   "permCamera": "Máy ảnh",
-  "permCameraValue": "Không dùng (máy ảnh sẽ có ở giai đoạn 2)",
+  "permCameraValue": "Để chụp ảnh trong trò chuyện. Được hỏi lần đầu bạn mở máy ảnh; không có gì vào thư viện ảnh.",
   "permNotifications": "Thông báo",
-  "permNotificationsValue": "Không dùng",
+  "permNotificationsValue": "Không dùng: không có gì về tin nhắn của bạn hiện ra ngoài ứng dụng.",
   "permInternet": "Internet",
-  "permInternetValue": "Không: giai đoạn 1 hoạt động ngoại tuyến",
+  "permInternetValue": "Chỉ cho Tor tích hợp. Mọi kết nối đều đi qua nó.",
   "permOpenSystem": "Mở cài đặt quyền của hệ thống",
   "settingsAbout": "Giới thiệu",
   "aboutVersion": "Phiên bản",
@@ -297,5 +297,8 @@
   "groupNoticeLeft": "Đã rời nhóm: {who}",
   "groupNoticeRenamed": "Tên nhóm mới “{name}” · {who}",
   "groupNoticeEnded": "Người kết thúc nhóm: {who}",
-  "groupNoticeRemovedYou": "{who} đã xóa bạn"
+  "groupNoticeRemovedYou": "{who} đã xóa bạn",
+  "emojiButton": "Biểu tượng cảm xúc và nhãn dán",
+  "stickers": "Nhãn dán",
+  "stickerLine": "Nhãn dán"
 }

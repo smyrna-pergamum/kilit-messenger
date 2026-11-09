@@ -62,6 +62,8 @@ Nostr relay'lerine çıkar.
 - 5 MB'a kadar fotoğraf ve dosya. Her dosya kendi anahtarıyla şifrelenir.
   Resimlerin üst verisi (konum, kamera bilgisi) gönderilmeden önce silinir.
   Kamera fotoğrafları bellekte çekilir, diske hiç yazılmaz.
+- Emoji ve 12 Kilit çıkartması. Çıkartma yalnızca adıyla, birkaç bayt
+  olarak gider; her telefon onu uygulamanın içinden çizer.
 - Süreli mesajlar, her sohbet için ayrı ayarlanır.
 - En fazla 20 kişilik gruplar. Her mesaj her üyeye ayrı ayrı şifrelenir; bu
   yüzden relay'de bir grup mesajı sıradan bir mesajdan ayırt edilemez.

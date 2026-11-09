@@ -809,25 +809,29 @@ class LId extends L {
   String get settingsPermissions => 'Izin';
 
   @override
-  String get permIntro => 'Saat ini Kilit tidak memakai izin sensitif apa pun.';
+  String get permIntro =>
+      'Kilit hanya meminta yang dibutuhkan, dan hanya saat dibutuhkan.';
 
   @override
   String get permCamera => 'Kamera';
 
   @override
-  String get permCameraValue => 'Tidak dipakai (kamera hadir di tahap 2)';
+  String get permCameraValue =>
+      'Untuk foto di obrolan. Diminta saat kamera pertama kali dibuka; tidak ada yang masuk ke galeri.';
 
   @override
   String get permNotifications => 'Notifikasi';
 
   @override
-  String get permNotificationsValue => 'Tidak dipakai';
+  String get permNotificationsValue =>
+      'Tidak dipakai: tidak ada isi pesan Anda yang tampil di luar aplikasi.';
 
   @override
   String get permInternet => 'Internet';
 
   @override
-  String get permInternetValue => 'Tidak ada: tahap 1 bekerja secara offline';
+  String get permInternetValue =>
+      'Hanya untuk Tor bawaan. Setiap koneksi melewatinya.';
 
   @override
   String get permOpenSystem => 'Buka pengaturan izin sistem';
@@ -1003,4 +1007,13 @@ class LId extends L {
   String groupNoticeRemovedYou(String who) {
     return '$who mengeluarkan Anda';
   }
+
+  @override
+  String get emojiButton => 'Emoji dan stiker';
+
+  @override
+  String get stickers => 'Stiker';
+
+  @override
+  String get stickerLine => 'Stiker';
 }

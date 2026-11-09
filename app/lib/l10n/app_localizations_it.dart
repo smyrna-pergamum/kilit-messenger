@@ -816,25 +816,28 @@ class LIt extends L {
 
   @override
   String get permIntro =>
-      'Al momento Kilit non usa alcuna autorizzazione sensibile.';
+      'Kilit chiede solo ciò che serve, e solo quando serve.';
 
   @override
   String get permCamera => 'Fotocamera';
 
   @override
-  String get permCameraValue => 'Non usata (la fotocamera arriva nella fase 2)';
+  String get permCameraValue =>
+      'Per le foto nelle chat. Richiesto la prima volta che apri la fotocamera; nulla finisce in galleria.';
 
   @override
   String get permNotifications => 'Notifiche';
 
   @override
-  String get permNotificationsValue => 'Non usate';
+  String get permNotificationsValue =>
+      'Non usato: nulla dei tuoi messaggi appare fuori dall\'app.';
 
   @override
   String get permInternet => 'Internet';
 
   @override
-  String get permInternetValue => 'Nessuno: la fase 1 funziona offline';
+  String get permInternetValue =>
+      'Solo per il Tor integrato. Ogni connessione passa da lì.';
 
   @override
   String get permOpenSystem =>
@@ -1010,4 +1013,13 @@ class LIt extends L {
   String groupNoticeRemovedYou(String who) {
     return '$who ti ha rimosso';
   }
+
+  @override
+  String get emojiButton => 'Emoji e sticker';
+
+  @override
+  String get stickers => 'Sticker';
+
+  @override
+  String get stickerLine => 'Sticker';
 }

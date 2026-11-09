@@ -414,6 +414,8 @@ pub struct ChatLine {
     pub file: Option<ChatFile>,
     /// In a group: who wrote it, or did what the notice says.
     pub from: String,
+    /// A sticker, by name; empty for none.
+    pub sticker: String,
     /// In a group: a change instead of a message; 0 for a message. 1 made,
     /// 2 you were added, 3 added, 4 removed, 5 left, 6 renamed (the text is
     /// the new name), 7 ended, 8 you were removed.
@@ -490,6 +492,7 @@ impl From<engine::Line> for ChatLine {
                 blob: f.blob,
             }),
             from: l.from,
+            sticker: l.sticker,
             notice: l.notice,
             about: l.about,
             delivered_to: l
@@ -1099,6 +1102,20 @@ impl KilitHandle {
     /// Sends text to a group.
     pub fn send_group_message(&self, id: String, text: String) -> Result<ChatLine, KilitError> {
         let (line, events) = self.engine()?.send_group_message(&id, &text)?;
+        self.publish_now(events)?;
+        Ok(line.into())
+    }
+
+    /// Sends a sticker, by name, to a contact.
+    pub fn send_sticker(&self, id: String, name: String) -> Result<ChatLine, KilitError> {
+        let (line, events) = self.engine()?.send_sticker(&id, &name)?;
+        self.publish_now(events)?;
+        Ok(line.into())
+    }
+
+    /// Sends a sticker, by name, to a group.
+    pub fn send_group_sticker(&self, id: String, name: String) -> Result<ChatLine, KilitError> {
+        let (line, events) = self.engine()?.send_group_sticker(&id, &name)?;
         self.publish_now(events)?;
         Ok(line.into())
     }

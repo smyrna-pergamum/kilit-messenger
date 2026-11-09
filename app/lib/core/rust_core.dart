@@ -267,6 +267,7 @@ class RustCore implements KilitCore {
   static ChatLine _line(rust.ChatLine l) => ChatLine(
     id: l.id,
     from: l.from,
+    sticker: l.sticker,
     notice: l.notice,
     about: l.about,
     deliveredTo: l.deliveredTo,
@@ -412,6 +413,14 @@ class RustCore implements KilitCore {
   @override
   Future<ChatLine> sendGroupMessage(String id, String text) async =>
       _line(await _h.sendGroupMessage(id: id, text: text));
+
+  @override
+  Future<ChatLine> sendGroupSticker(String id, String name) async =>
+      _line(await _h.sendGroupSticker(id: id, name: name));
+
+  @override
+  Future<ChatLine> sendSticker(String id, String name) async =>
+      _line(await _h.sendSticker(id: id, name: name));
 
   @override
   Future<ChatLine> sendGroupFile(

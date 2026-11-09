@@ -243,13 +243,13 @@
   "clipboardCheck": "クリップボードのKilitメッセージを提案",
   "clipboardCheckHint": "金庫を開いたとき、クリップボードにあるKLT1:メッセージを開くよう提案します。Androidではクリップボードが読み取られたことが通知されます。",
   "settingsPermissions": "権限",
-  "permIntro": "Kilitは現在、機密性の高い権限を使用していません。",
+  "permIntro": "Kilit は必要なものだけを、必要なときにだけ求めます。",
   "permCamera": "カメラ",
-  "permCameraValue": "未使用（カメラはステージ2で提供）",
+  "permCameraValue": "チャットの写真用。初めてカメラを開くときに確認します。ギャラリーには何も保存されません。",
   "permNotifications": "通知",
-  "permNotificationsValue": "未使用",
+  "permNotificationsValue": "使用しません：メッセージの内容がアプリの外に表示されることはありません。",
   "permInternet": "インターネット",
-  "permInternetValue": "なし：ステージ1はオフラインで動作します",
+  "permInternetValue": "内蔵 Tor のためだけに使います。すべての接続は Tor を経由します。",
   "permOpenSystem": "システムの権限設定を開く",
   "settingsAbout": "このアプリについて",
   "aboutVersion": "バージョン",
@@ -297,5 +297,8 @@
   "groupNoticeLeft": "退出：{who}",
   "groupNoticeRenamed": "新しいグループ名「{name}」（{who}）",
   "groupNoticeEnded": "グループ終了：{who}",
-  "groupNoticeRemovedYou": "{who} があなたを外しました"
+  "groupNoticeRemovedYou": "{who} があなたを外しました",
+  "emojiButton": "絵文字とステッカー",
+  "stickers": "ステッカー",
+  "stickerLine": "ステッカー"
 }

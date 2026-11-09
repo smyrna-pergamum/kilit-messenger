@@ -243,13 +243,13 @@
   "clipboardCheck": "Proposer le message Kilit du presse-papiers",
   "clipboardCheckHint": "À l'ouverture du coffre, propose d'ouvrir un message KLT1: présent dans le presse-papiers. Android affiche un avis indiquant que le presse-papiers a été lu.",
   "settingsPermissions": "Autorisations",
-  "permIntro": "Kilit n'utilise actuellement aucune autorisation sensible.",
+  "permIntro": "Kilit ne demande que ce dont il a besoin, et seulement quand il en a besoin.",
   "permCamera": "Caméra",
-  "permCameraValue": "Non utilisée (la caméra arrive à l'étape 2)",
+  "permCameraValue": "Pour les photos dans les discussions. Demandé à la première ouverture de l'appareil photo ; rien ne va dans la galerie.",
   "permNotifications": "Notifications",
-  "permNotificationsValue": "Non utilisées",
+  "permNotificationsValue": "Non utilisé : rien de vos messages n'apparaît hors de l'app.",
   "permInternet": "Internet",
-  "permInternetValue": "Aucun : l'étape 1 fonctionne hors ligne",
+  "permInternetValue": "Uniquement pour le Tor intégré. Chaque connexion passe par lui.",
   "permOpenSystem": "Ouvrir les autorisations du système",
   "settingsAbout": "À propos",
   "aboutVersion": "Version",
@@ -297,5 +297,8 @@
   "groupNoticeLeft": "A quitté : {who}",
   "groupNoticeRenamed": "Nouveau nom du groupe « {name} » · {who}",
   "groupNoticeEnded": "Groupe terminé par : {who}",
-  "groupNoticeRemovedYou": "{who} vous a retiré"
+  "groupNoticeRemovedYou": "{who} vous a retiré",
+  "emojiButton": "Emoji et stickers",
+  "stickers": "Stickers",
+  "stickerLine": "Sticker"
 }

@@ -815,25 +815,29 @@ class LDe extends L {
   String get settingsPermissions => 'Berechtigungen';
 
   @override
-  String get permIntro => 'Kilit nutzt derzeit keine sensible Berechtigung.';
+  String get permIntro =>
+      'Kilit fragt nur nach dem, was es braucht, und erst, wenn es das braucht.';
 
   @override
   String get permCamera => 'Kamera';
 
   @override
-  String get permCameraValue => 'Nicht genutzt (Kamera kommt in Phase 2)';
+  String get permCameraValue =>
+      'Für Fotos in Chats. Wird beim ersten Öffnen der Kamera erfragt; nichts landet in der Galerie.';
 
   @override
   String get permNotifications => 'Benachrichtigungen';
 
   @override
-  String get permNotificationsValue => 'Nicht genutzt';
+  String get permNotificationsValue =>
+      'Nicht genutzt: Nichts über deine Nachrichten erscheint außerhalb der App.';
 
   @override
   String get permInternet => 'Internet';
 
   @override
-  String get permInternetValue => 'Keine: Phase 1 funktioniert offline';
+  String get permInternetValue =>
+      'Nur für das eingebaute Tor. Jede Verbindung läuft darüber.';
 
   @override
   String get permOpenSystem => 'Berechtigungseinstellungen des Systems öffnen';
@@ -1009,4 +1013,13 @@ class LDe extends L {
   String groupNoticeRemovedYou(String who) {
     return '$who hat dich entfernt';
   }
+
+  @override
+  String get emojiButton => 'Emoji und Sticker';
+
+  @override
+  String get stickers => 'Sticker';
+
+  @override
+  String get stickerLine => 'Sticker';
 }

@@ -417,7 +417,19 @@ impl Engine {
         id: &str,
         text: &str,
     ) -> Result<(Line, Vec<Event>), EngineError> {
-        self.send_group(id, text, None, Vec::new(), None)
+        self.send_group(id, text, None, Vec::new(), None, "")
+    }
+
+    /// Sends a sticker, by name, to a group.
+    pub fn send_group_sticker(
+        &mut self,
+        id: &str,
+        name: &str,
+    ) -> Result<(Line, Vec<Event>), EngineError> {
+        if !sticker_name(name) {
+            return Err(EngineError::Rejected("not a sticker".into()));
+        }
+        self.send_group(id, "", None, Vec::new(), None, name)
     }
 
     /// Sends a file to a group: its pieces once, the message to each member.
@@ -430,13 +442,14 @@ impl Engine {
         text: &str,
     ) -> Result<(Line, Vec<Event>), EngineError> {
         let (file, pieces, shown) = self.prepare_file(name, mime, data)?;
-        self.send_group(id, text, Some(file), pieces, Some(shown))
+        self.send_group(id, text, Some(file), pieces, Some(shown), "")
     }
 
     fn group_content(&self, g: &Group, me: &str, line: &Line) -> Result<Content, EngineError> {
         Ok(Content {
             text: line.text.clone(),
             file: line.file_ref.clone(),
+            sticker: line.sticker.clone(),
             again: Some((line.id.to_vec(), line.sent)),
             group: Some(GroupWire {
                 id: ByteBuf::from(unhex(&g.id)?),
@@ -455,6 +468,7 @@ impl Engine {
         file: Option<FileRef>,
         mut pieces: Vec<Event>,
         shown: Option<LineFile>,
+        sticker: &str,
     ) -> Result<(Line, Vec<Event>), EngineError> {
         let g = self.group(id)?;
         if g.closed() {
@@ -474,6 +488,7 @@ impl Engine {
             id: ByteBuf::from(random::<16>()?.to_vec()),
             file: shown,
             file_ref: file,
+            sticker: sticker.to_owned(),
             ..Line::default()
         };
         let content = self.group_content(&g, &me, &line)?;
@@ -870,7 +885,10 @@ impl Engine {
             return Ok(told);
         }
 
-        if (r.text.is_empty() && r.file.is_none()) || g.roster.ended || r.id.len() != 16 {
+        if (r.text.is_empty() && r.file.is_none() && r.sticker.is_empty())
+            || g.roster.ended
+            || r.id.len() != 16
+        {
             return Ok(told);
         }
         // every member answers with a receipt, whoever the sender is to us
@@ -916,6 +934,7 @@ impl Engine {
             id: ByteBuf::from(r.id.clone()),
             file,
             from: r.contact.clone(),
+            sticker: r.sticker.clone(),
             ..Line::default()
         });
         self.save_group_chat(&gid, lines)?;

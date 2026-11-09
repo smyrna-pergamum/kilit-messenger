@@ -810,25 +810,29 @@ class LEn extends L {
   String get settingsPermissions => 'Permissions';
 
   @override
-  String get permIntro => 'Kilit uses no sensitive permission right now.';
+  String get permIntro =>
+      'Kilit asks only for what it needs, and only when it needs it.';
 
   @override
   String get permCamera => 'Camera';
 
   @override
-  String get permCameraValue => 'Not used (camera arrives in stage 2)';
+  String get permCameraValue =>
+      'For photos in chats. Asked the first time you open the camera; nothing goes to the gallery.';
 
   @override
   String get permNotifications => 'Notifications';
 
   @override
-  String get permNotificationsValue => 'Not used';
+  String get permNotificationsValue =>
+      'Not used: nothing about your messages shows outside the app.';
 
   @override
   String get permInternet => 'Internet';
 
   @override
-  String get permInternetValue => 'None: stage 1 works offline';
+  String get permInternetValue =>
+      'Only for the built-in Tor. Every connection goes through it.';
 
   @override
   String get permOpenSystem => 'Open system permission settings';
@@ -1004,4 +1008,13 @@ class LEn extends L {
   String groupNoticeRemovedYou(String who) {
     return '$who removed you';
   }
+
+  @override
+  String get emojiButton => 'Emoji and stickers';
+
+  @override
+  String get stickers => 'Stickers';
+
+  @override
+  String get stickerLine => 'Sticker';
 }

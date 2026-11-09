@@ -814,25 +814,29 @@ class LEs extends L {
   String get settingsPermissions => 'Permisos';
 
   @override
-  String get permIntro => 'Kilit no usa ningún permiso sensible por ahora.';
+  String get permIntro =>
+      'Kilit solo pide lo que necesita, y solo cuando lo necesita.';
 
   @override
   String get permCamera => 'Cámara';
 
   @override
-  String get permCameraValue => 'Sin usar (la cámara llega en la fase 2)';
+  String get permCameraValue =>
+      'Para fotos en los chats. Se pide al abrir la cámara por primera vez; nada va a la galería.';
 
   @override
   String get permNotifications => 'Notificaciones';
 
   @override
-  String get permNotificationsValue => 'Sin usar';
+  String get permNotificationsValue =>
+      'No se usa: nada de tus mensajes aparece fuera de la app.';
 
   @override
   String get permInternet => 'Internet';
 
   @override
-  String get permInternetValue => 'Ninguno: la fase 1 funciona sin conexión';
+  String get permInternetValue =>
+      'Solo para el Tor integrado. Toda conexión pasa por él.';
 
   @override
   String get permOpenSystem => 'Abrir los ajustes de permisos del sistema';
@@ -1008,4 +1012,13 @@ class LEs extends L {
   String groupNoticeRemovedYou(String who) {
     return '$who te quitó';
   }
+
+  @override
+  String get emojiButton => 'Emoji y stickers';
+
+  @override
+  String get stickers => 'Stickers';
+
+  @override
+  String get stickerLine => 'Sticker';
 }

@@ -243,13 +243,13 @@
   "clipboardCheck": "Kilit-Nachricht aus der Zwischenablage anbieten",
   "clipboardCheckHint": "Beim Öffnen des Tresors wird angeboten, eine KLT1:-Nachricht aus der Zwischenablage zu öffnen. Android zeigt einen Hinweis, dass die Zwischenablage gelesen wurde.",
   "settingsPermissions": "Berechtigungen",
-  "permIntro": "Kilit nutzt derzeit keine sensible Berechtigung.",
+  "permIntro": "Kilit fragt nur nach dem, was es braucht, und erst, wenn es das braucht.",
   "permCamera": "Kamera",
-  "permCameraValue": "Nicht genutzt (Kamera kommt in Phase 2)",
+  "permCameraValue": "Für Fotos in Chats. Wird beim ersten Öffnen der Kamera erfragt; nichts landet in der Galerie.",
   "permNotifications": "Benachrichtigungen",
-  "permNotificationsValue": "Nicht genutzt",
+  "permNotificationsValue": "Nicht genutzt: Nichts über deine Nachrichten erscheint außerhalb der App.",
   "permInternet": "Internet",
-  "permInternetValue": "Keine: Phase 1 funktioniert offline",
+  "permInternetValue": "Nur für das eingebaute Tor. Jede Verbindung läuft darüber.",
   "permOpenSystem": "Berechtigungseinstellungen des Systems öffnen",
   "settingsAbout": "Über",
   "aboutVersion": "Version",
@@ -297,5 +297,8 @@
   "groupNoticeLeft": "Hat die Gruppe verlassen: {who}",
   "groupNoticeRenamed": "Neuer Gruppenname „{name}“ · {who}",
   "groupNoticeEnded": "Gruppe beendet von: {who}",
-  "groupNoticeRemovedYou": "{who} hat dich entfernt"
+  "groupNoticeRemovedYou": "{who} hat dich entfernt",
+  "emojiButton": "Emoji und Sticker",
+  "stickers": "Sticker",
+  "stickerLine": "Sticker"
 }

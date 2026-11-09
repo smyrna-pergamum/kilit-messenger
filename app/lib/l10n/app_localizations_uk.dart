@@ -812,26 +812,28 @@ class LUk extends L {
 
   @override
   String get permIntro =>
-      'Зараз Kilit не використовує жодного чутливого дозволу.';
+      'Kilit запитує лише те, що потрібно, і лише тоді, коли потрібно.';
 
   @override
   String get permCamera => 'Камера';
 
   @override
   String get permCameraValue =>
-      'Не використовується (камера з\'явиться на етапі 2)';
+      'Для фото в чатах. Запитується під час першого відкриття камери; нічого не зберігається в галерею.';
 
   @override
   String get permNotifications => 'Сповіщення';
 
   @override
-  String get permNotificationsValue => 'Не використовуються';
+  String get permNotificationsValue =>
+      'Не використовується: нічого про ваші повідомлення не показується поза застосунком.';
 
   @override
   String get permInternet => 'Інтернет';
 
   @override
-  String get permInternetValue => 'Немає: етап 1 працює офлайн';
+  String get permInternetValue =>
+      'Лише для вбудованого Tor. Усі з\'єднання йдуть через нього.';
 
   @override
   String get permOpenSystem => 'Відкрити системні налаштування дозволів';
@@ -1007,4 +1009,13 @@ class LUk extends L {
   String groupNoticeRemovedYou(String who) {
     return '$who вилучив(ла) вас';
   }
+
+  @override
+  String get emojiButton => 'Емодзі та стікери';
+
+  @override
+  String get stickers => 'Стікери';
+
+  @override
+  String get stickerLine => 'Стікер';
 }

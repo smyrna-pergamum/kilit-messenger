@@ -813,26 +813,28 @@ class LPt extends L {
   String get settingsPermissions => 'Permissões';
 
   @override
-  String get permIntro =>
-      'No momento, o Kilit não usa nenhuma permissão sensível.';
+  String get permIntro => 'O Kilit só pede o que precisa, e só quando precisa.';
 
   @override
   String get permCamera => 'Câmera';
 
   @override
-  String get permCameraValue => 'Não usada (a câmera chega na etapa 2)';
+  String get permCameraValue =>
+      'Para fotos nos chats. Pedido ao abrir a câmera pela primeira vez; nada vai para a galeria.';
 
   @override
   String get permNotifications => 'Notificações';
 
   @override
-  String get permNotificationsValue => 'Não usadas';
+  String get permNotificationsValue =>
+      'Não usado: nada das suas mensagens aparece fora do app.';
 
   @override
   String get permInternet => 'Internet';
 
   @override
-  String get permInternetValue => 'Nenhuma: a etapa 1 funciona offline';
+  String get permInternetValue =>
+      'Só para o Tor embutido. Toda conexão passa por ele.';
 
   @override
   String get permOpenSystem => 'Abrir as permissões do sistema';
@@ -1008,4 +1010,13 @@ class LPt extends L {
   String groupNoticeRemovedYou(String who) {
     return '$who removeu você';
   }
+
+  @override
+  String get emojiButton => 'Emoji e figurinhas';
+
+  @override
+  String get stickers => 'Figurinhas';
+
+  @override
+  String get stickerLine => 'Figurinha';
 }

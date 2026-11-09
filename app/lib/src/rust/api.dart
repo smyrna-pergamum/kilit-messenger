@@ -271,9 +271,15 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// Sends text to a group.
   Future<ChatLine> sendGroupMessage({required String id, required String text});
 
+  /// Sends a sticker, by name, to a group.
+  Future<ChatLine> sendGroupSticker({required String id, required String name});
+
   /// Seals a message for a contact and sends it; without the network it
   /// waits in the outbox.
   Future<ChatLine> sendMessage({required String id, required String text});
+
+  /// Sends a sticker, by name, to a contact.
+  Future<ChatLine> sendSticker({required String id, required String name});
 
   /// Sets the four-digit panic code of a software-key vault.
   Future<void> setPanic({required String code});
@@ -359,6 +365,9 @@ class ChatLine {
   /// In a group: who wrote it, or did what the notice says.
   final String from;
 
+  /// A sticker, by name; empty for none.
+  final String sticker;
+
   /// In a group: a change instead of a message; 0 for a message. 1 made,
   /// 2 you were added, 3 added, 4 removed, 5 left, 6 renamed (the text is
   /// the new name), 7 ended, 8 you were removed.
@@ -369,6 +378,8 @@ class ChatLine {
 
   /// An outgoing group message: how many members have it, of how many.
   final int deliveredTo;
+
+  /// An outgoing group message: how many members it went to.
   final int recipients;
 
   const ChatLine({
@@ -382,6 +393,7 @@ class ChatLine {
     required this.expiresUnix,
     this.file,
     required this.from,
+    required this.sticker,
     required this.notice,
     required this.about,
     required this.deliveredTo,
@@ -400,6 +412,7 @@ class ChatLine {
       expiresUnix.hashCode ^
       file.hashCode ^
       from.hashCode ^
+      sticker.hashCode ^
       notice.hashCode ^
       about.hashCode ^
       deliveredTo.hashCode ^
@@ -420,6 +433,7 @@ class ChatLine {
           expiresUnix == other.expiresUnix &&
           file == other.file &&
           from == other.from &&
+          sticker == other.sticker &&
           notice == other.notice &&
           about == other.about &&
           deliveredTo == other.deliveredTo &&
@@ -600,6 +614,8 @@ class FoundPacket {
 class GroupItem {
   /// 32 hex digits.
   final String id;
+
+  /// Its name.
   final String name;
 
   /// The admin's address.
@@ -607,6 +623,8 @@ class GroupItem {
 
   /// This vault is the admin.
   final bool admin;
+
+  /// Everyone in it, this vault included.
   final List<GroupMemberItem> members;
 
   /// The admin ended it.
@@ -614,7 +632,11 @@ class GroupItem {
 
   /// This vault left or was taken out.
   final bool gone;
+
+  /// When this vault joined, Unix seconds.
   final PlatformInt64 addedUnix;
+
+  /// The newest line, if any.
   final ChatLine? last;
 
   const GroupItem({

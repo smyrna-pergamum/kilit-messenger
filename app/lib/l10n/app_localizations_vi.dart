@@ -809,25 +809,28 @@ class LVi extends L {
   String get settingsPermissions => 'Quyền';
 
   @override
-  String get permIntro => 'Hiện tại Kilit không dùng quyền nhạy cảm nào.';
+  String get permIntro => 'Kilit chỉ xin những gì cần, và chỉ khi cần.';
 
   @override
   String get permCamera => 'Máy ảnh';
 
   @override
-  String get permCameraValue => 'Không dùng (máy ảnh sẽ có ở giai đoạn 2)';
+  String get permCameraValue =>
+      'Để chụp ảnh trong trò chuyện. Được hỏi lần đầu bạn mở máy ảnh; không có gì vào thư viện ảnh.';
 
   @override
   String get permNotifications => 'Thông báo';
 
   @override
-  String get permNotificationsValue => 'Không dùng';
+  String get permNotificationsValue =>
+      'Không dùng: không có gì về tin nhắn của bạn hiện ra ngoài ứng dụng.';
 
   @override
   String get permInternet => 'Internet';
 
   @override
-  String get permInternetValue => 'Không: giai đoạn 1 hoạt động ngoại tuyến';
+  String get permInternetValue =>
+      'Chỉ cho Tor tích hợp. Mọi kết nối đều đi qua nó.';
 
   @override
   String get permOpenSystem => 'Mở cài đặt quyền của hệ thống';
@@ -1002,4 +1005,13 @@ class LVi extends L {
   String groupNoticeRemovedYou(String who) {
     return '$who đã xóa bạn';
   }
+
+  @override
+  String get emojiButton => 'Biểu tượng cảm xúc và nhãn dán';
+
+  @override
+  String get stickers => 'Nhãn dán';
+
+  @override
+  String get stickerLine => 'Nhãn dán';
 }

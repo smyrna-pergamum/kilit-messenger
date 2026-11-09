@@ -515,6 +515,20 @@ pub struct Content {
     pub again: Option<(Vec<u8>, i64)>,
     /// A group message, or a change to a group.
     pub group: Option<GroupWire>,
+    /// A sticker, by name; the app draws it. Empty for none.
+    pub sticker: String,
+}
+
+/// Longest sticker name. A name is lowercase letters, digits and `-`.
+pub const MAX_STICKER: usize = 32;
+
+/// Whether `name` can be a sticker's name.
+pub fn sticker_name(name: &str) -> bool {
+    !name.is_empty()
+        && name.len() <= MAX_STICKER
+        && name
+            .bytes()
+            .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
 }
 
 #[derive(Serialize, Deserialize)]
@@ -537,6 +551,8 @@ struct Body {
     file: Option<FileRef>,
     #[serde(default)]
     group: Option<GroupWire>,
+    #[serde(default)]
+    sticker: String,
 }
 
 /// A contact as the list shows it.
@@ -577,6 +593,8 @@ pub struct Received {
     pub file: Option<FileRef>,
     /// Set when it belongs to a group.
     pub group: Option<GroupWire>,
+    /// A sticker's name; empty for none, and for a name that is not one.
+    pub sticker: String,
 }
 
 fn pad(mut b: Vec<u8>) -> Vec<u8> {
@@ -1168,7 +1186,10 @@ impl Messaging {
         content: &Content,
         now: SystemTime,
     ) -> Result<Outgoing, MessagingError> {
-        if content.text.len() > MAX_TEXT || content.timer > MAX_TIMER {
+        if content.text.len() > MAX_TEXT
+            || content.timer > MAX_TIMER
+            || (!content.sticker.is_empty() && !sticker_name(&content.sticker))
+        {
             return Err(MessagingError::TooLarge);
         }
         let meta = self
@@ -1210,6 +1231,7 @@ impl Messaging {
                 timer: content.timer,
                 file: content.file.clone(),
                 group: content.group.clone(),
+                sticker: content.sticker.clone(),
             },
             &mut body,
         )
@@ -1355,7 +1377,8 @@ impl Messaging {
         }
         // a receipt says nothing of the timer, nor does a group message;
         // anything else sets it
-        let only_receipts = b.text.is_empty() && b.file.is_none() && !b.receipts.is_empty();
+        let only_receipts =
+            b.text.is_empty() && b.file.is_none() && b.sticker.is_empty() && !b.receipts.is_empty();
         if !only_receipts && b.group.is_none() && b.timer <= MAX_TIMER {
             meta.timer = b.timer;
         }
@@ -1370,6 +1393,11 @@ impl Messaging {
             timer: b.timer,
             file: b.file,
             group: b.group,
+            sticker: if sticker_name(&b.sticker) {
+                b.sticker
+            } else {
+                String::new()
+            },
         })
     }
 

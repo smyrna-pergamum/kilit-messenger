@@ -243,13 +243,13 @@
   "clipboardCheck": "اقتراح رسالة Kilit الموجودة في الحافظة",
   "clipboardCheckHint": "عند فتح الخزنة، يقترح فتح رسالة KLT1: الموجودة في الحافظة. يعرض Android إشعارًا بأن الحافظة قُرئت.",
   "settingsPermissions": "الأذونات",
-  "permIntro": "لا يستخدم Kilit أي إذن حساس حاليًا.",
+  "permIntro": "لا يطلب Kilit إلا ما يحتاجه، وعند الحاجة فقط.",
   "permCamera": "الكاميرا",
-  "permCameraValue": "غير مستخدم (الكاميرا تأتي في المرحلة 2)",
+  "permCameraValue": "لصور المحادثات. يُطلب عند فتح الكاميرا أول مرة؛ لا يُحفظ شيء في المعرض.",
   "permNotifications": "الإشعارات",
-  "permNotificationsValue": "غير مستخدم",
+  "permNotificationsValue": "غير مستخدم: لا يظهر شيء عن رسائلك خارج التطبيق.",
   "permInternet": "الإنترنت",
-  "permInternetValue": "لا يوجد: تعمل المرحلة 1 دون اتصال",
+  "permInternetValue": "لـ Tor المدمج فقط. كل اتصال يمر عبره.",
   "permOpenSystem": "فتح إعدادات أذونات النظام",
   "settingsAbout": "حول",
   "aboutVersion": "الإصدار",
@@ -297,5 +297,8 @@
   "groupNoticeLeft": "غادر: {who}",
   "groupNoticeRenamed": "الاسم الجديد للمجموعة «{name}» · {who}",
   "groupNoticeEnded": "أنهى المجموعة: {who}",
-  "groupNoticeRemovedYou": "أزالك {who}"
+  "groupNoticeRemovedYou": "أزالك {who}",
+  "emojiButton": "الرموز التعبيرية والملصقات",
+  "stickers": "الملصقات",
+  "stickerLine": "ملصق"
 }

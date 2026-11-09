@@ -807,25 +807,29 @@ class LTr extends L {
   String get settingsPermissions => 'İzinler';
 
   @override
-  String get permIntro => 'Kilit şu an hiçbir hassas izin kullanmıyor.';
+  String get permIntro =>
+      'Kilit yalnızca gerekeni, yalnızca gerektiğinde ister.';
 
   @override
   String get permCamera => 'Kamera';
 
   @override
-  String get permCameraValue => 'Kullanılmıyor (kamera Aşama 2\'de)';
+  String get permCameraValue =>
+      'Sohbetlerdeki fotoğraflar için. Kamerayı ilk açtığınızda sorulur; galeriye hiçbir şey kaydedilmez.';
 
   @override
   String get permNotifications => 'Bildirimler';
 
   @override
-  String get permNotificationsValue => 'Kullanılmıyor';
+  String get permNotificationsValue =>
+      'Kullanılmıyor: mesajlarınızla ilgili hiçbir şey uygulamanın dışında görünmez.';
 
   @override
   String get permInternet => 'İnternet';
 
   @override
-  String get permInternetValue => 'Yok: Aşama 1 çevrimdışı çalışır';
+  String get permInternetValue =>
+      'Yalnızca yerleşik Tor için. Her bağlantı onun üzerinden geçer.';
 
   @override
   String get permOpenSystem => 'Sistem izin ayarlarını aç';
@@ -1000,4 +1004,13 @@ class LTr extends L {
   String groupNoticeRemovedYou(String who) {
     return '$who sizi gruptan çıkardı';
   }
+
+  @override
+  String get emojiButton => 'Emoji ve çıkartmalar';
+
+  @override
+  String get stickers => 'Çıkartmalar';
+
+  @override
+  String get stickerLine => 'Çıkartma';
 }

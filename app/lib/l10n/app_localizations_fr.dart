@@ -815,25 +815,28 @@ class LFr extends L {
 
   @override
   String get permIntro =>
-      'Kilit n\'utilise actuellement aucune autorisation sensible.';
+      'Kilit ne demande que ce dont il a besoin, et seulement quand il en a besoin.';
 
   @override
   String get permCamera => 'Caméra';
 
   @override
-  String get permCameraValue => 'Non utilisée (la caméra arrive à l\'étape 2)';
+  String get permCameraValue =>
+      'Pour les photos dans les discussions. Demandé à la première ouverture de l\'appareil photo ; rien ne va dans la galerie.';
 
   @override
   String get permNotifications => 'Notifications';
 
   @override
-  String get permNotificationsValue => 'Non utilisées';
+  String get permNotificationsValue =>
+      'Non utilisé : rien de vos messages n\'apparaît hors de l\'app.';
 
   @override
   String get permInternet => 'Internet';
 
   @override
-  String get permInternetValue => 'Aucun : l\'étape 1 fonctionne hors ligne';
+  String get permInternetValue =>
+      'Uniquement pour le Tor intégré. Chaque connexion passe par lui.';
 
   @override
   String get permOpenSystem => 'Ouvrir les autorisations du système';
@@ -1009,4 +1012,13 @@ class LFr extends L {
   String groupNoticeRemovedYou(String who) {
     return '$who vous a retiré';
   }
+
+  @override
+  String get emojiButton => 'Emoji et stickers';
+
+  @override
+  String get stickers => 'Stickers';
+
+  @override
+  String get stickerLine => 'Sticker';
 }

@@ -39,6 +39,13 @@ Future<void> _font(String family, List<String> files) async {
 
 Future<void> _shot(WidgetTester tester, String name) async {
   await tester.pumpAndSettle();
+  // pictures (stickers) decode off the test's fake clock: wait for them
+  await tester.runAsync(() async {
+    for (final e in find.byType(Image).evaluate()) {
+      await precacheImage((e.widget as Image).image, e);
+    }
+  });
+  await tester.pumpAndSettle();
   await expectLater(
     find.byType(KilitApp),
     matchesGoldenFile('../../../docs/screenshots/$name.png'),
@@ -104,6 +111,7 @@ void main() {
     core.deliver(ayseWords, 'Got them, thank you.');
     now = DateTime(2026, 10, 30, 9, 21);
     await core.sendMessage(ayse, 'See you there.');
+    await core.sendSticker(ayse, 'kilit-hello');
 
     now = DateTime(2026, 10, 30, 9, 30);
     final family = await core.createGroup('Family', [ayse, bora]);

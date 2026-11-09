@@ -787,25 +787,25 @@ class LJa extends L {
   String get settingsPermissions => '権限';
 
   @override
-  String get permIntro => 'Kilitは現在、機密性の高い権限を使用していません。';
+  String get permIntro => 'Kilit は必要なものだけを、必要なときにだけ求めます。';
 
   @override
   String get permCamera => 'カメラ';
 
   @override
-  String get permCameraValue => '未使用（カメラはステージ2で提供）';
+  String get permCameraValue => 'チャットの写真用。初めてカメラを開くときに確認します。ギャラリーには何も保存されません。';
 
   @override
   String get permNotifications => '通知';
 
   @override
-  String get permNotificationsValue => '未使用';
+  String get permNotificationsValue => '使用しません：メッセージの内容がアプリの外に表示されることはありません。';
 
   @override
   String get permInternet => 'インターネット';
 
   @override
-  String get permInternetValue => 'なし：ステージ1はオフラインで動作します';
+  String get permInternetValue => '内蔵 Tor のためだけに使います。すべての接続は Tor を経由します。';
 
   @override
   String get permOpenSystem => 'システムの権限設定を開く';
@@ -975,4 +975,13 @@ class LJa extends L {
   String groupNoticeRemovedYou(String who) {
     return '$who があなたを外しました';
   }
+
+  @override
+  String get emojiButton => '絵文字とステッカー';
+
+  @override
+  String get stickers => 'ステッカー';
+
+  @override
+  String get stickerLine => 'ステッカー';
 }

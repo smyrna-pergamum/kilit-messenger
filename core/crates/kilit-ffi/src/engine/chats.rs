@@ -30,7 +30,7 @@ use kilit_net::{Event, Filter};
 use kilit_vault::messaging::{
     ContactInfo, ContactState, Content, FileRef, GroupWire, Invite, MAX_GROUP, MAX_GROUP_NAME,
     MAX_TEXT, Messaging, MessagingError, Received, Roster, RosterMember, card_matches, card_tag,
-    parse_invite,
+    parse_invite, sticker_name,
 };
 use serde::{Deserialize, Serialize};
 use serde_bytes::ByteBuf;
@@ -203,6 +203,9 @@ pub struct Line {
     /// Who a notice is about.
     #[serde(default)]
     pub about: Vec<String>,
+    /// A sticker, by name; empty for none.
+    #[serde(default)]
+    pub sticker: String,
 }
 
 /// A contact with the newest line of the conversation, for the list.
@@ -635,7 +638,19 @@ impl Engine {
         id: &str,
         text: &str,
     ) -> Result<(Line, Vec<Event>), EngineError> {
-        self.send(id, text, None, Vec::new(), None)
+        self.send(id, text, None, Vec::new(), None, "")
+    }
+
+    /// Sends a sticker, by name; the app draws it.
+    pub fn send_sticker(
+        &mut self,
+        id: &str,
+        name: &str,
+    ) -> Result<(Line, Vec<Event>), EngineError> {
+        if !sticker_name(name) {
+            return Err(EngineError::Rejected("not a sticker".into()));
+        }
+        self.send(id, "", None, Vec::new(), None, name)
     }
 
     /// Sends a file (at most [`MAX_FILE`]), with `text` beside it. Pictures
@@ -649,7 +664,7 @@ impl Engine {
         text: &str,
     ) -> Result<(Line, Vec<Event>), EngineError> {
         let (file, pieces, shown) = self.prepare_file(name, mime, data)?;
-        self.send(id, text, Some(file), pieces, Some(shown))
+        self.send(id, text, Some(file), pieces, Some(shown), "")
     }
 
     /// Cleans a file, seals it into pieces and keeps a copy here.
@@ -721,6 +736,7 @@ impl Engine {
         file: Option<FileRef>,
         mut pieces: Vec<Event>,
         shown: Option<LineFile>,
+        sticker: &str,
     ) -> Result<(Line, Vec<Event>), EngineError> {
         let mut m = self.messaging()?;
         let timer = m.timer(id).map_err(messaging_err)?;
@@ -732,6 +748,7 @@ impl Engine {
                     text: text.to_owned(),
                     timer,
                     file: file.clone(),
+                    sticker: sticker.to_owned(),
                     ..Content::default()
                 },
                 self.system_now(),
@@ -755,6 +772,7 @@ impl Engine {
             expires: self.expires(timer),
             file: shown,
             file_ref: file,
+            sticker: sticker.to_owned(),
             ..Line::default()
         };
         let mut lines = self.load_chat(id)?;
@@ -785,6 +803,7 @@ impl Engine {
                     text: line.text.clone(),
                     timer,
                     file: line.file_ref.clone(),
+                    sticker: line.sticker.clone(),
                     again: Some((line.id.to_vec(), line.sent)),
                     ..Content::default()
                 },
@@ -922,7 +941,7 @@ impl Engine {
                 opened.extend(told);
                 continue;
             }
-            if r.text.is_empty() && r.file.is_none() {
+            if r.text.is_empty() && r.file.is_none() && r.sticker.is_empty() {
                 continue;
             }
             // a group member writing one to one is a request like anyone
@@ -996,6 +1015,7 @@ impl Engine {
                 id: ByteBuf::from(r.id.clone()),
                 expires: self.expires(r.timer),
                 file,
+                sticker: r.sticker.clone(),
                 ..Line::default()
             });
             self.save_chat(&r.contact, lines)?;
@@ -1507,6 +1527,34 @@ mod tests {
             .step_by(2)
             .map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap())
             .collect()
+    }
+
+    #[test]
+    fn a_sticker_travels_as_its_name() {
+        let (da, db) = (tempfile::tempdir().unwrap(), tempfile::tempdir().unwrap());
+        let mut ayse = ready(&da, "482916");
+        let mut bora = ready(&db, "739204");
+        let mut relays = Relays::default();
+        let (ayse_id, bora_id) = meet(&mut ayse, &mut bora, &mut relays);
+        assert!(ayse.send_sticker(&bora_id, "Not A Name").is_err());
+        assert!(ayse.send_sticker(&bora_id, &"x".repeat(40)).is_err());
+        let (line, _) = ayse.send_sticker(&bora_id, "kilit-love").unwrap();
+        assert_eq!(
+            (line.text.as_str(), line.sticker.as_str()),
+            ("", "kilit-love")
+        );
+        relays.take_outbox(&mut ayse);
+        let got = relays.deliver(&mut bora);
+        assert_eq!(got.len(), 1);
+        let l = bora.chat(&ayse_id).unwrap().pop().unwrap();
+        assert_eq!(l.sticker, "kilit-love");
+        // and it is answered like any message
+        relays.take_outbox(&mut bora);
+        relays.deliver(&mut ayse);
+        assert_eq!(
+            ayse.chat(&bora_id).unwrap().pop().unwrap().state,
+            LineState::Delivered
+        );
     }
 
     #[test]

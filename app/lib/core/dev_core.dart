@@ -515,7 +515,12 @@ class DevCore implements KilitCore {
     return _withLastGroup(g);
   }
 
-  ChatLine _groupLine(String id, String text, ChatFile? file) {
+  ChatLine _groupLine(
+    String id,
+    String text,
+    ChatFile? file, [
+    String sticker = '',
+  ]) {
     final g = _groups[id];
     if (g == null || g.closed) throw StateError('closed');
     final now = _clock();
@@ -528,6 +533,7 @@ class DevCore implements KilitCore {
       onRelay: _online,
       recipients: g.members.length - 1,
       file: file,
+      sticker: sticker,
     );
     (_groupChats[id] ??= []).add(line);
     return line;
@@ -537,6 +543,12 @@ class DevCore implements KilitCore {
   Future<ChatLine> sendGroupMessage(String id, String text) async {
     _requireOpen();
     return _groupLine(id, text, null);
+  }
+
+  @override
+  Future<ChatLine> sendGroupSticker(String id, String name) async {
+    _requireOpen();
+    return _groupLine(id, '', null, name);
   }
 
   @override
@@ -710,7 +722,12 @@ class DevCore implements KilitCore {
       List.of(_chats[id] ?? const []);
 
   @override
-  Future<ChatLine> sendMessage(String id, String text) async {
+  Future<ChatLine> sendMessage(String id, String text) => _send(id, text, '');
+
+  @override
+  Future<ChatLine> sendSticker(String id, String name) => _send(id, '', name);
+
+  Future<ChatLine> _send(String id, String text, String sticker) async {
     _requireOpen();
     final now = _clock();
     final c = _contacts[id];
@@ -718,6 +735,7 @@ class DevCore implements KilitCore {
       id: _lineId(),
       outgoing: true,
       text: text,
+      sticker: sticker,
       at: now,
       sent: now,
       onRelay: _online,

@@ -643,6 +643,42 @@ void main() {
     tor.stop();
   });
 
+  testWidgets('emoji go into the message, a sticker goes at once', (
+    tester,
+  ) async {
+    final tor = readyTor();
+    addTearDown(tor.dispose);
+    final (core, _) = await startApp(tester, tor: tor);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    await letTorUp(tester);
+    await addSomeone(tester, boraLink);
+    await tester.enterText(find.byKey(const ValueKey('chat-input')), 'hi ');
+    await tester.tap(find.byKey(const ValueKey('chat-emoji')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('emoji-panel')), findsOneWidget);
+    // the first tab is the stickers; the next ones the emoji
+    await tester.tap(find.byType(Tab).at(1));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('😀'));
+    await tester.pump();
+    final field = tester.widget<TextField>(
+      find.byKey(const ValueKey('chat-input')),
+    );
+    expect(field.controller!.text, 'hi 😀');
+
+    await tester.tap(find.byType(Tab).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('pick-sticker-kilit-love')));
+    await tester.pumpAndSettle();
+    final line = (await core.chat(DevCore.addressOf(boraWords))).single;
+    expect((line.sticker, line.text), ('kilit-love', ''));
+    expect(find.byKey(const ValueKey('sticker-kilit-love')), findsWidgets);
+    // the text being written stays
+    expect(field.controller!.text, 'hi 😀');
+    tor.stop();
+  });
+
   testWidgets('a group is made from contacts and talks', (tester) async {
     final tor = readyTor();
     addTearDown(tor.dispose);
@@ -1305,8 +1341,11 @@ void main() {
         await tester.tap(header);
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull, reason: 'opening $id in $lang');
+        // checked while it is on screen: the list drops what scrolls away
+        if (id == 'fingerprint') {
+          expect(find.byKey(const ValueKey('fingerprint')), findsOneWidget);
+        }
       }
-      expect(find.byKey(const ValueKey('fingerprint')), findsOneWidget);
       await tester.tap(find.byIcon(Icons.chat_bubble_outline));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('chats-empty')), findsOneWidget);

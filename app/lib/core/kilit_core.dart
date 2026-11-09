@@ -117,6 +117,10 @@ abstract interface class KilitCore {
   /// waits in the outbox and goes when Tor is back.
   Future<ChatLine> sendMessage(String id, String text);
 
+  /// Sends a sticker (one of `stickers` in `widgets/emoji_panel.dart`), by
+  /// name; their phone draws it.
+  Future<ChatLine> sendSticker(String id, String name);
+
   /// Sends a file (at most [maxChatFileBytes]) with [text] beside it, sealed
   /// with a key of its own; pictures lose their metadata first.
   Future<ChatLine> sendFile(
@@ -153,6 +157,7 @@ abstract interface class KilitCore {
   /// [maxGroup] - 1); this vault is its admin.
   Future<Group> createGroup(String name, List<String> members);
   Future<ChatLine> sendGroupMessage(String id, String text);
+  Future<ChatLine> sendGroupSticker(String id, String name);
   Future<ChatLine> sendGroupFile(
     String id,
     String name,
@@ -312,6 +317,7 @@ class ChatLine {
     this.about = const [],
     this.deliveredTo = 0,
     this.recipients = 0,
+    this.sticker = '',
     required this.outgoing,
     required this.text,
     required this.at,
@@ -327,6 +333,9 @@ class ChatLine {
 
   /// In a group: who wrote it, or did what the notice says.
   final String from;
+
+  /// A sticker, by name; empty for none.
+  final String sticker;
 
   /// In a group: a [GroupNotice] instead of a message; 0 for a message.
   final int notice;

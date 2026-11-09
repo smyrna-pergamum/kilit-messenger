@@ -14,11 +14,20 @@ import '../state/chat_service.dart';
 import '../state/session.dart';
 import '../theme/theme.dart';
 import '../theme/tokens.dart';
+import '../widgets/emoji_panel.dart';
 import '../widgets/lock_button.dart';
 import 'camera_screen.dart';
 import 'vault_screen.dart' show formatDate;
 
 part 'group_screen.dart';
+
+/// What a line says in one short line: its text, or that it is a sticker
+/// or a file.
+String lineSummary(L l, ChatLine line) => line.text.isNotEmpty
+    ? line.text
+    : line.sticker.isNotEmpty
+    ? l.stickerLine
+    : line.file?.name ?? '';
 
 /// A contact's name, or their Kilit ID until they get one.
 String contactLabel(Contact c) => c.name.isNotEmpty ? c.name : '@${c.kilitId}';
@@ -436,7 +445,8 @@ class _ContactTile extends StatelessWidget {
       subtitle: Text(
         last == null
             ? '@${c.kilitId}'
-            : '${last.outgoing ? '${L.of(context).groupYou}: ' : ''}${last.text}',
+            : '${last.outgoing ? '${L.of(context).groupYou}: ' : ''}'
+                  '${lineSummary(L.of(context), last)}',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(color: t.textMuted),
@@ -1080,6 +1090,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   late Contact _contact = widget.contact;
+  bool _panel = false;
   late Future<List<ChatLine>> _lines = widget.core.chat(_contact.id);
   final _input = TextEditingController();
   int _seen = -1;
@@ -1146,6 +1157,18 @@ class _ChatScreenState extends State<ChatScreen> {
     await widget.core.sendMessage(_contact.id, text);
     widget.chats.touched();
     if (mounted) _reload();
+  }
+
+  Future<void> _sticker(String name) async {
+    await widget.core.sendSticker(_contact.id, name);
+    widget.chats.touched();
+    if (mounted) _reload();
+  }
+
+  void _togglePanel() {
+    // the panel takes the keyboard's place
+    FocusScope.of(context).unfocus();
+    setState(() => _panel = !_panel);
   }
 
   Future<void> _sendFile(String name, String mime, Uint8List bytes) async {
@@ -1468,6 +1491,16 @@ class _ChatScreenState extends State<ChatScreen> {
                     icon: const Icon(Icons.add_circle_outline),
                     onPressed: _sending ? null : _attach,
                   ),
+                  IconButton(
+                    key: const ValueKey('chat-emoji'),
+                    tooltip: l.emojiButton,
+                    icon: Icon(
+                      _panel
+                          ? Icons.keyboard_outlined
+                          : Icons.emoji_emotions_outlined,
+                    ),
+                    onPressed: _togglePanel,
+                  ),
                   Expanded(
                     child: TextField(
                       key: const ValueKey('chat-input'),
@@ -1476,6 +1509,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       maxLines: 5,
                       enableIMEPersonalizedLearning: false,
                       decoration: InputDecoration(hintText: l.chatInput),
+                      onTap: () {
+                        if (_panel) setState(() => _panel = false);
+                      },
                     ),
                   ),
                   IconButton(
@@ -1487,6 +1523,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 ],
               ),
             ),
+            if (_panel)
+              EmojiPanel(
+                onEmoji: (e) => insertAtCursor(_input, e),
+                onSticker: _sticker,
+              ),
           ],
         ),
       ),
@@ -1539,10 +1580,15 @@ class _Bubble extends StatelessWidget {
         ),
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: mine ? t.accent.withValues(alpha: 0.16) : t.surfaceRaised,
-          borderRadius: BorderRadius.circular(14),
-        ),
+        // a sticker stands on its own, without a bubble
+        decoration: line.sticker.isNotEmpty
+            ? null
+            : BoxDecoration(
+                color: mine
+                    ? t.accent.withValues(alpha: 0.16)
+                    : t.surfaceRaised,
+                borderRadius: BorderRadius.circular(14),
+              ),
         child: Column(
           // theirs from the start edge, ours from the end
           crossAxisAlignment: mine
@@ -1560,6 +1606,7 @@ class _Bubble extends StatelessWidget {
                 ),
               ),
             if (file != null) _FileView(file: file, core: core, files: files),
+            if (line.sticker.isNotEmpty) StickerImage(line.sticker),
             if (line.text.isNotEmpty)
               SelectableText(line.text, style: TextStyle(color: t.text)),
             const SizedBox(height: 2),

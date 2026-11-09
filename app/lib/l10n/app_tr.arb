@@ -243,13 +243,13 @@
   "clipboardCheck": "Panodaki Kilit mesajını öner",
   "clipboardCheckHint": "Kasa açılınca panoda bir KLT1: mesajı varsa açmayı önerir. Android panonun okunduğunu bir bildirimle gösterir.",
   "settingsPermissions": "İzinler",
-  "permIntro": "Kilit şu an hiçbir hassas izin kullanmıyor.",
+  "permIntro": "Kilit yalnızca gerekeni, yalnızca gerektiğinde ister.",
   "permCamera": "Kamera",
-  "permCameraValue": "Kullanılmıyor (kamera Aşama 2'de)",
+  "permCameraValue": "Sohbetlerdeki fotoğraflar için. Kamerayı ilk açtığınızda sorulur; galeriye hiçbir şey kaydedilmez.",
   "permNotifications": "Bildirimler",
-  "permNotificationsValue": "Kullanılmıyor",
+  "permNotificationsValue": "Kullanılmıyor: mesajlarınızla ilgili hiçbir şey uygulamanın dışında görünmez.",
   "permInternet": "İnternet",
-  "permInternetValue": "Yok: Aşama 1 çevrimdışı çalışır",
+  "permInternetValue": "Yalnızca yerleşik Tor için. Her bağlantı onun üzerinden geçer.",
   "permOpenSystem": "Sistem izin ayarlarını aç",
   "settingsAbout": "Hakkında",
   "aboutVersion": "Sürüm",
@@ -297,5 +297,8 @@
   "groupNoticeLeft": "Gruptan ayrıldı: {who}",
   "groupNoticeRenamed": "Grubun yeni adı “{name}” · {who}",
   "groupNoticeEnded": "Grubu bitiren: {who}",
-  "groupNoticeRemovedYou": "{who} sizi gruptan çıkardı"
+  "groupNoticeRemovedYou": "{who} sizi gruptan çıkardı",
+  "emojiButton": "Emoji ve çıkartmalar",
+  "stickers": "Çıkartmalar",
+  "stickerLine": "Çıkartma"
 }

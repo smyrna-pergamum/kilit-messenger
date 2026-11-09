@@ -243,13 +243,13 @@
   "clipboardCheck": "Oferecer a mensagem do Kilit da área de transferência",
   "clipboardCheckHint": "Quando o cofre abre, oferece abrir uma mensagem KLT1: da área de transferência. O Android mostra um aviso de que a área de transferência foi lida.",
   "settingsPermissions": "Permissões",
-  "permIntro": "No momento, o Kilit não usa nenhuma permissão sensível.",
+  "permIntro": "O Kilit só pede o que precisa, e só quando precisa.",
   "permCamera": "Câmera",
-  "permCameraValue": "Não usada (a câmera chega na etapa 2)",
+  "permCameraValue": "Para fotos nos chats. Pedido ao abrir a câmera pela primeira vez; nada vai para a galeria.",
   "permNotifications": "Notificações",
-  "permNotificationsValue": "Não usadas",
+  "permNotificationsValue": "Não usado: nada das suas mensagens aparece fora do app.",
   "permInternet": "Internet",
-  "permInternetValue": "Nenhuma: a etapa 1 funciona offline",
+  "permInternetValue": "Só para o Tor embutido. Toda conexão passa por ele.",
   "permOpenSystem": "Abrir as permissões do sistema",
   "settingsAbout": "Sobre",
   "aboutVersion": "Versão",
@@ -297,5 +297,8 @@
   "groupNoticeLeft": "Saiu: {who}",
   "groupNoticeRenamed": "Novo nome do grupo “{name}” · {who}",
   "groupNoticeEnded": "Encerrou o grupo: {who}",
-  "groupNoticeRemovedYou": "{who} removeu você"
+  "groupNoticeRemovedYou": "{who} removeu você",
+  "emojiButton": "Emoji e figurinhas",
+  "stickers": "Figurinhas",
+  "stickerLine": "Figurinha"
 }

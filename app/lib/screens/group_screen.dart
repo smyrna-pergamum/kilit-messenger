@@ -68,7 +68,8 @@ class _GroupTile extends StatelessWidget {
             ? l.groupMembers(g.members.length)
             : last.notice != 0
             ? names.noticeText(last)
-            : '${last.outgoing ? l.groupYou : names.of(last.from)}: ${last.text}',
+            : '${last.outgoing ? l.groupYou : names.of(last.from)}: '
+                  '${lineSummary(l, last)}',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(color: t.textMuted),
@@ -269,6 +270,7 @@ class _GroupScreenState extends State<GroupScreen> {
   final _input = TextEditingController();
   int _seen = -1;
   bool _sending = false;
+  bool _panel = false;
 
   @override
   void initState() {
@@ -314,6 +316,17 @@ class _GroupScreenState extends State<GroupScreen> {
     await widget.core.sendGroupMessage(_group.id, text);
     widget.chats.touched();
     if (mounted) _reload();
+  }
+
+  Future<void> _sticker(String name) async {
+    await widget.core.sendGroupSticker(_group.id, name);
+    widget.chats.touched();
+    if (mounted) _reload();
+  }
+
+  void _togglePanel() {
+    FocusScope.of(context).unfocus();
+    setState(() => _panel = !_panel);
   }
 
   Future<void> _sendFile(String name, String mime, Uint8List bytes) async {
@@ -527,6 +540,16 @@ class _GroupScreenState extends State<GroupScreen> {
                       icon: const Icon(Icons.add_circle_outline),
                       onPressed: _sending ? null : _attach,
                     ),
+                    IconButton(
+                      key: const ValueKey('chat-emoji'),
+                      tooltip: l.emojiButton,
+                      icon: Icon(
+                        _panel
+                            ? Icons.keyboard_outlined
+                            : Icons.emoji_emotions_outlined,
+                      ),
+                      onPressed: _togglePanel,
+                    ),
                     Expanded(
                       child: TextField(
                         key: const ValueKey('chat-input'),
@@ -535,6 +558,9 @@ class _GroupScreenState extends State<GroupScreen> {
                         maxLines: 5,
                         enableIMEPersonalizedLearning: false,
                         decoration: InputDecoration(hintText: l.chatInput),
+                        onTap: () {
+                          if (_panel) setState(() => _panel = false);
+                        },
                       ),
                     ),
                     IconButton(
@@ -545,6 +571,11 @@ class _GroupScreenState extends State<GroupScreen> {
                     ),
                   ],
                 ),
+              ),
+            if (_panel && !_group.closed)
+              EmojiPanel(
+                onEmoji: (e) => insertAtCursor(_input, e),
+                onSticker: _sticker,
               ),
           ],
         ),

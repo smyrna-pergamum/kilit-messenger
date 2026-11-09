@@ -367,13 +367,13 @@
   "clipboardCheck": "Offer the Kilit message on the clipboard",
   "clipboardCheckHint": "When the vault opens, offers to open a KLT1: message on the clipboard. Android shows a notice that the clipboard was read.",
   "settingsPermissions": "Permissions",
-  "permIntro": "Kilit uses no sensitive permission right now.",
+  "permIntro": "Kilit asks only for what it needs, and only when it needs it.",
   "permCamera": "Camera",
-  "permCameraValue": "Not used (camera arrives in stage 2)",
+  "permCameraValue": "For photos in chats. Asked the first time you open the camera; nothing goes to the gallery.",
   "permNotifications": "Notifications",
-  "permNotificationsValue": "Not used",
+  "permNotificationsValue": "Not used: nothing about your messages shows outside the app.",
   "permInternet": "Internet",
-  "permInternetValue": "None: stage 1 works offline",
+  "permInternetValue": "Only for the built-in Tor. Every connection goes through it.",
   "permOpenSystem": "Open system permission settings",
   "settingsAbout": "About",
   "aboutVersion": "Version",
@@ -396,10 +396,22 @@
   "newGroup": "New group",
   "groupName": "Group name",
   "groupPick": "Choose up to {count} people",
-  "@groupPick": {"placeholders": {"count": {"type": "int"}}},
+  "@groupPick": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "groupCreate": "Create",
   "groupMembers": "{count} people",
-  "@groupMembers": {"placeholders": {"count": {"type": "int"}}},
+  "@groupMembers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "groupInfo": "Group info",
   "groupAdmin": "admin",
   "groupYou": "You",
@@ -414,24 +426,99 @@
   "groupEnded": "This group has ended.",
   "groupGone": "You are no longer in this group.",
   "groupDeliveredTo": "Delivered to {n} of {total}",
-  "@groupDeliveredTo": {"placeholders": {"n": {"type": "int"}, "total": {"type": "int"}}},
+  "@groupDeliveredTo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "groupNoContacts": "Add contacts first: a group is made of people you added.",
   "groupFull": "A group holds up to {max} people.",
-  "@groupFull": {"placeholders": {"max": {"type": "int"}}},
+  "@groupFull": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "groupNoticeCreated": "{who} created the group",
-  "@groupNoticeCreated": {"placeholders": {"who": {"type": "String"}}},
+  "@groupNoticeCreated": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
   "groupNoticeJoined": "{who} added you",
-  "@groupNoticeJoined": {"placeholders": {"who": {"type": "String"}}},
+  "@groupNoticeJoined": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
   "groupNoticeAdded": "{who} added {whom}",
-  "@groupNoticeAdded": {"placeholders": {"who": {"type": "String"}, "whom": {"type": "String"}}},
+  "@groupNoticeAdded": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      },
+      "whom": {
+        "type": "String"
+      }
+    }
+  },
   "groupNoticeRemoved": "{who} removed {whom}",
-  "@groupNoticeRemoved": {"placeholders": {"who": {"type": "String"}, "whom": {"type": "String"}}},
+  "@groupNoticeRemoved": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      },
+      "whom": {
+        "type": "String"
+      }
+    }
+  },
   "groupNoticeLeft": "{who} left",
-  "@groupNoticeLeft": {"placeholders": {"who": {"type": "String"}}},
+  "@groupNoticeLeft": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
   "groupNoticeRenamed": "{who} named the group “{name}”",
-  "@groupNoticeRenamed": {"placeholders": {"who": {"type": "String"}, "name": {"type": "String"}}},
+  "@groupNoticeRenamed": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "groupNoticeEnded": "{who} ended the group",
-  "@groupNoticeEnded": {"placeholders": {"who": {"type": "String"}}},
+  "@groupNoticeEnded": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
   "groupNoticeRemovedYou": "{who} removed you",
-  "@groupNoticeRemovedYou": {"placeholders": {"who": {"type": "String"}}}
+  "@groupNoticeRemovedYou": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "emojiButton": "Emoji and stickers",
+  "stickers": "Stickers",
+  "stickerLine": "Sticker"
 }

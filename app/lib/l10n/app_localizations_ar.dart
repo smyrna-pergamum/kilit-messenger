@@ -806,25 +806,27 @@ class LAr extends L {
   String get settingsPermissions => 'الأذونات';
 
   @override
-  String get permIntro => 'لا يستخدم Kilit أي إذن حساس حاليًا.';
+  String get permIntro => 'لا يطلب Kilit إلا ما يحتاجه، وعند الحاجة فقط.';
 
   @override
   String get permCamera => 'الكاميرا';
 
   @override
-  String get permCameraValue => 'غير مستخدم (الكاميرا تأتي في المرحلة 2)';
+  String get permCameraValue =>
+      'لصور المحادثات. يُطلب عند فتح الكاميرا أول مرة؛ لا يُحفظ شيء في المعرض.';
 
   @override
   String get permNotifications => 'الإشعارات';
 
   @override
-  String get permNotificationsValue => 'غير مستخدم';
+  String get permNotificationsValue =>
+      'غير مستخدم: لا يظهر شيء عن رسائلك خارج التطبيق.';
 
   @override
   String get permInternet => 'الإنترنت';
 
   @override
-  String get permInternetValue => 'لا يوجد: تعمل المرحلة 1 دون اتصال';
+  String get permInternetValue => 'لـ Tor المدمج فقط. كل اتصال يمر عبره.';
 
   @override
   String get permOpenSystem => 'فتح إعدادات أذونات النظام';
@@ -999,4 +1001,13 @@ class LAr extends L {
   String groupNoticeRemovedYou(String who) {
     return 'أزالك $who';
   }
+
+  @override
+  String get emojiButton => 'الرموز التعبيرية والملصقات';
+
+  @override
+  String get stickers => 'الملصقات';
+
+  @override
+  String get stickerLine => 'ملصق';
 }

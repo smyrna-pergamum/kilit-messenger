@@ -243,13 +243,13 @@
   "clipboardCheck": "提示剪贴板中的 Kilit 消息",
   "clipboardCheckHint": "保险库打开时，提示打开剪贴板中的 KLT1: 消息。Android 会显示剪贴板已被读取的通知。",
   "settingsPermissions": "权限",
-  "permIntro": "Kilit 目前未使用任何敏感权限。",
+  "permIntro": "Kilit 只请求所需的权限，并且只在需要时请求。",
   "permCamera": "相机",
-  "permCameraValue": "未使用（相机将在第 2 阶段推出）",
+  "permCameraValue": "用于聊天中的照片。首次打开相机时询问；不会存入相册。",
   "permNotifications": "通知",
-  "permNotificationsValue": "未使用",
+  "permNotificationsValue": "未使用：你的消息内容不会显示在应用之外。",
   "permInternet": "网络",
-  "permInternetValue": "无：第 1 阶段离线运行",
+  "permInternetValue": "仅用于内置的 Tor。所有连接都经过它。",
   "permOpenSystem": "打开系统权限设置",
   "settingsAbout": "关于",
   "aboutVersion": "版本",
@@ -297,5 +297,8 @@
   "groupNoticeLeft": "已退出：{who}",
   "groupNoticeRenamed": "群组新名称“{name}”（{who}）",
   "groupNoticeEnded": "结束者：{who}",
-  "groupNoticeRemovedYou": "{who} 把你移出了群组"
+  "groupNoticeRemovedYou": "{who} 把你移出了群组",
+  "emojiButton": "表情和贴纸",
+  "stickers": "贴纸",
+  "stickerLine": "贴纸"
 }

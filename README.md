@@ -60,6 +60,8 @@ Nostr relays.
 - Photos and files up to 5 MB. Each file is encrypted with a key of its own,
   and pictures lose their metadata (location, camera) before they are sent.
   Camera photos are taken in memory and never written to disk.
+- Emoji, and 12 Kilit stickers. A sticker travels as its name only, a few
+  bytes, and each phone draws it from the app.
 - Disappearing messages, set per chat.
 - Groups of up to 20 people. Each message is encrypted separately for every
   member, so on the relays a group message looks like any other message. The

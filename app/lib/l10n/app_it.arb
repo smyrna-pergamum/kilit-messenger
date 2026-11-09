@@ -243,13 +243,13 @@
   "clipboardCheck": "Proponi il messaggio Kilit negli appunti",
   "clipboardCheckHint": "All'apertura della cassaforte, propone di aprire un messaggio KLT1: presente negli appunti. Android mostra un avviso che gli appunti sono stati letti.",
   "settingsPermissions": "Autorizzazioni",
-  "permIntro": "Al momento Kilit non usa alcuna autorizzazione sensibile.",
+  "permIntro": "Kilit chiede solo ciò che serve, e solo quando serve.",
   "permCamera": "Fotocamera",
-  "permCameraValue": "Non usata (la fotocamera arriva nella fase 2)",
+  "permCameraValue": "Per le foto nelle chat. Richiesto la prima volta che apri la fotocamera; nulla finisce in galleria.",
   "permNotifications": "Notifiche",
-  "permNotificationsValue": "Non usate",
+  "permNotificationsValue": "Non usato: nulla dei tuoi messaggi appare fuori dall'app.",
   "permInternet": "Internet",
-  "permInternetValue": "Nessuno: la fase 1 funziona offline",
+  "permInternetValue": "Solo per il Tor integrato. Ogni connessione passa da lì.",
   "permOpenSystem": "Apri le impostazioni delle autorizzazioni di sistema",
   "settingsAbout": "Informazioni",
   "aboutVersion": "Versione",
@@ -297,5 +297,8 @@
   "groupNoticeLeft": "È uscito: {who}",
   "groupNoticeRenamed": "Nuovo nome del gruppo «{name}» · {who}",
   "groupNoticeEnded": "Gruppo chiuso da: {who}",
-  "groupNoticeRemovedYou": "{who} ti ha rimosso"
+  "groupNoticeRemovedYou": "{who} ti ha rimosso",
+  "emojiButton": "Emoji e sticker",
+  "stickers": "Sticker",
+  "stickerLine": "Sticker"
 }

@@ -774,25 +774,25 @@ class LZh extends L {
   String get settingsPermissions => '权限';
 
   @override
-  String get permIntro => 'Kilit 目前未使用任何敏感权限。';
+  String get permIntro => 'Kilit 只请求所需的权限，并且只在需要时请求。';
 
   @override
   String get permCamera => '相机';
 
   @override
-  String get permCameraValue => '未使用（相机将在第 2 阶段推出）';
+  String get permCameraValue => '用于聊天中的照片。首次打开相机时询问；不会存入相册。';
 
   @override
   String get permNotifications => '通知';
 
   @override
-  String get permNotificationsValue => '未使用';
+  String get permNotificationsValue => '未使用：你的消息内容不会显示在应用之外。';
 
   @override
   String get permInternet => '网络';
 
   @override
-  String get permInternetValue => '无：第 1 阶段离线运行';
+  String get permInternetValue => '仅用于内置的 Tor。所有连接都经过它。';
 
   @override
   String get permOpenSystem => '打开系统权限设置';
@@ -961,4 +961,13 @@ class LZh extends L {
   String groupNoticeRemovedYou(String who) {
     return '$who 把你移出了群组';
   }
+
+  @override
+  String get emojiButton => '表情和贴纸';
+
+  @override
+  String get stickers => '贴纸';
+
+  @override
+  String get stickerLine => '贴纸';
 }

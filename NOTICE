@@ -52,6 +52,8 @@ kcp-go, smux    MIT             https://github.com/xtaci
 klauspost/compress, reedsolomon   BSD-3-Clause / MIT
 anet            BSD-3-Clause    https://github.com/wlynxg/anet (patched at build)
 Built-in bridges   engine-tor/builtin.json, Tor Browser's list as Kryfo carries it
+App icon and stickers   own work for Kilit (scripts/icon.py,
+                scripts/stickers.py), under the project's licence
 BIP-39 words    MIT             core/crates/kilit-vault/src/bip39-english.txt
 k256            Apache-2.0 OR MIT   https://github.com/RustCrypto/elliptic-curves
 tokio, tungstenite, rustls, webpki-roots   MIT / Apache-2.0 / ISC / MPL-2.0

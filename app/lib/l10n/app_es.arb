@@ -243,13 +243,13 @@
   "clipboardCheck": "Ofrecer el mensaje de Kilit del portapapeles",
   "clipboardCheckHint": "Al abrir la bóveda, ofrece abrir un mensaje KLT1: del portapapeles. Android muestra un aviso de que se leyó el portapapeles.",
   "settingsPermissions": "Permisos",
-  "permIntro": "Kilit no usa ningún permiso sensible por ahora.",
+  "permIntro": "Kilit solo pide lo que necesita, y solo cuando lo necesita.",
   "permCamera": "Cámara",
-  "permCameraValue": "Sin usar (la cámara llega en la fase 2)",
+  "permCameraValue": "Para fotos en los chats. Se pide al abrir la cámara por primera vez; nada va a la galería.",
   "permNotifications": "Notificaciones",
-  "permNotificationsValue": "Sin usar",
+  "permNotificationsValue": "No se usa: nada de tus mensajes aparece fuera de la app.",
   "permInternet": "Internet",
-  "permInternetValue": "Ninguno: la fase 1 funciona sin conexión",
+  "permInternetValue": "Solo para el Tor integrado. Toda conexión pasa por él.",
   "permOpenSystem": "Abrir los ajustes de permisos del sistema",
   "settingsAbout": "Acerca de",
   "aboutVersion": "Versión",
@@ -297,5 +297,8 @@
   "groupNoticeLeft": "Salió: {who}",
   "groupNoticeRenamed": "Nuevo nombre del grupo «{name}» · {who}",
   "groupNoticeEnded": "Terminó el grupo: {who}",
-  "groupNoticeRemovedYou": "{who} te quitó"
+  "groupNoticeRemovedYou": "{who} te quitó",
+  "emojiButton": "Emoji y stickers",
+  "stickers": "Stickers",
+  "stickerLine": "Sticker"
 }

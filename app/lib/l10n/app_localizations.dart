@@ -1584,7 +1584,7 @@ abstract class L {
   /// No description provided for @permIntro.
   ///
   /// In en, this message translates to:
-  /// **'Kilit uses no sensitive permission right now.'**
+  /// **'Kilit asks only for what it needs, and only when it needs it.'**
   String get permIntro;
 
   /// No description provided for @permCamera.
@@ -1596,7 +1596,7 @@ abstract class L {
   /// No description provided for @permCameraValue.
   ///
   /// In en, this message translates to:
-  /// **'Not used (camera arrives in stage 2)'**
+  /// **'For photos in chats. Asked the first time you open the camera; nothing goes to the gallery.'**
   String get permCameraValue;
 
   /// No description provided for @permNotifications.
@@ -1608,7 +1608,7 @@ abstract class L {
   /// No description provided for @permNotificationsValue.
   ///
   /// In en, this message translates to:
-  /// **'Not used'**
+  /// **'Not used: nothing about your messages shows outside the app.'**
   String get permNotificationsValue;
 
   /// No description provided for @permInternet.
@@ -1620,7 +1620,7 @@ abstract class L {
   /// No description provided for @permInternetValue.
   ///
   /// In en, this message translates to:
-  /// **'None: stage 1 works offline'**
+  /// **'Only for the built-in Tor. Every connection goes through it.'**
   String get permInternetValue;
 
   /// No description provided for @permOpenSystem.
@@ -1910,6 +1910,24 @@ abstract class L {
   /// In en, this message translates to:
   /// **'{who} removed you'**
   String groupNoticeRemovedYou(String who);
+
+  /// No description provided for @emojiButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Emoji and stickers'**
+  String get emojiButton;
+
+  /// No description provided for @stickers.
+  ///
+  /// In en, this message translates to:
+  /// **'Stickers'**
+  String get stickers;
+
+  /// No description provided for @stickerLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Sticker'**
+  String get stickerLine;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

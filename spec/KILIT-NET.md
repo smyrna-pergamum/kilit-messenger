@@ -75,8 +75,12 @@ en az 20 sıfır bitle başlamalıdır. Tanınmayan birinin ilk mesajı iş kan�
 taşımazsa sessizce düşürülür. Bekleyen istek sayısı da sınırlıdır.
 
 Düz metin 256 baytın katlarına doldurulur. Mesaj gövdesi (CBOR): kimlik,
-metin, gönderilme zamanı, gönderenin kimlik tuzu, alındı bildirimleri, süre ve
-dosya bilgisi.
+metin, gönderilme zamanı, gönderenin kimlik tuzu, alındı bildirimleri, süre,
+dosya bilgisi, grup bilgisi ve çıkartma.
+
+**Çıkartma:** Yalnızca adıyla gider (`kilit-love` gibi; en fazla 32 karakter,
+küçük harf, rakam ve `-`). Görseli her uygulamanın içindedir, ağdan bir şey
+indirilmez. Uygulamanın tanımadığı bir ad, adıyla gösterilir.
 
 ## Alındı bildirimi (çift tik)
 

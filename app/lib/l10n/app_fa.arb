@@ -243,13 +243,13 @@
   "clipboardCheck": "پیشنهاد پیام Kilit موجود در کلیپ‌بورد",
   "clipboardCheckHint": "هنگام باز شدن گاوصندوق، باز کردن پیام KLT1: موجود در کلیپ‌بورد را پیشنهاد می‌دهد. Android اعلانی نشان می‌دهد که کلیپ‌بورد خوانده شده است.",
   "settingsPermissions": "مجوزها",
-  "permIntro": "Kilit در حال حاضر از هیچ مجوز حساسی استفاده نمی‌کند.",
+  "permIntro": "Kilit فقط آنچه لازم دارد را می‌خواهد، و فقط وقتی لازم است.",
   "permCamera": "دوربین",
-  "permCameraValue": "استفاده نمی‌شود (دوربین در مرحله 2 می‌آید)",
+  "permCameraValue": "برای عکس در گفتگوها. اولین بار که دوربین را باز می‌کنید پرسیده می‌شود؛ چیزی در گالری ذخیره نمی‌شود.",
   "permNotifications": "اعلان‌ها",
-  "permNotificationsValue": "استفاده نمی‌شود",
+  "permNotificationsValue": "استفاده نمی‌شود: چیزی از پیام‌های شما بیرون از برنامه نشان داده نمی‌شود.",
   "permInternet": "اینترنت",
-  "permInternetValue": "هیچ: مرحله 1 آفلاین کار می‌کند",
+  "permInternetValue": "فقط برای Tor داخلی. هر اتصال از آن می‌گذرد.",
   "permOpenSystem": "باز کردن تنظیمات مجوزهای سیستم",
   "settingsAbout": "درباره",
   "aboutVersion": "نسخه",
@@ -297,5 +297,8 @@
   "groupNoticeLeft": "ترک کرد: {who}",
   "groupNoticeRenamed": "نام جدید گروه «{name}» · {who}",
   "groupNoticeEnded": "پایان‌دهنده گروه: {who}",
-  "groupNoticeRemovedYou": "{who} شما را حذف کرد"
+  "groupNoticeRemovedYou": "{who} شما را حذف کرد",
+  "emojiButton": "ایموجی و استیکر",
+  "stickers": "استیکرها",
+  "stickerLine": "استیکر"
 }
