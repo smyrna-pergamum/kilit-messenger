@@ -1,6 +1,6 @@
-# Kilit: bağlı cihazlar (tasarım taslağı)
+# Kilit: bağlı cihazlar
 
-Durum: taslak, henüz uygulanmadı. Bu belge, bir bilgisayarın (Windows) ya da
+Durum: 0.1.4 ile uygulandı ve bir telefon ile bir Windows bilgisayarda denendi. Bu belge, bir bilgisayarın (Windows) ya da
 ikinci bir telefonun aynı Kilit kimliğine **ayrı bir cihaz** olarak
 katılmasını tanımlar. Bağlanmayan bir bilgisayar, telefondaki gibi kendi
 kimliğiyle bağımsız çalışır; bunun için protokolde değişiklik gerekmez.
