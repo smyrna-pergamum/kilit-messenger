@@ -48,3 +48,29 @@ yüzden ortamı yalnızca geliştirme için kullanın.
 
 Bir sürüm güncellenirken bu tabloyla birlikte `repro/Dockerfile` dosyası da
 aynı commit'te güncellenir.
+
+## Windows
+
+Windows uygulaması Docker'da değil, doğrudan Windows'ta derlenir. Gerekenler:
+
+| Araç | Nasıl |
+| --- | --- |
+| Flutter 3.47.7 | flutter.dev'deki zip; `releases_windows.json`'daki özetle denetlenir (commit `abaf9c5`) |
+| Visual Studio 2022 Build Tools | `winget install Microsoft.VisualStudio.2022.BuildTools`, "Desktop development with C++" iş yüküyle |
+| Rust | `winget install Rustlang.Rustup`; araç zinciri `core/rust-toolchain.toml`'dan gelir |
+| protoc | `winget install Google.Protobuf`, ardından `PROTOC` ortam değişkeni `protoc.exe`'yi göstermeli (libsignal'a gerekir) |
+| Geliştirici modu | Ayarlar → Sistem → Geliştiriciler için. Flutter sembolik bağlantılar için ister. |
+
+Windows'taki Tor, Tor Expert Bundle'dır. Betik arşivi, o Tor Browser
+sürümünün imzalı özet listesinden alınmış SHA-256 ile denetler:
+
+    powershell -ExecutionPolicy Bypass -File scripts\fetch-tor-windows.ps1
+
+Sonra:
+
+    cd app
+    flutter build windows --release
+
+`build\windows\x64\runner\Release\` içinde `kilit.exe` ve yanında `tor\`
+bulunur. `flutter test tool/windows_tor`, bu Tor'u gerçekten başlatır:
+önce doğrudan, sonra obfs4 üzerinden.

@@ -8,6 +8,7 @@ import 'package:kilit/core/dev_core.dart';
 import 'package:kilit/core/kilit_core.dart';
 import 'package:kilit/platform/files.dart';
 import 'package:kilit/platform/tor.dart';
+import 'package:kilit/platform/windows_tor.dart';
 import 'package:kilit/state/prefs.dart';
 import 'package:kilit/widgets/pin_pad.dart';
 
@@ -1266,6 +1267,16 @@ void main() {
       find.byKey(const ValueKey('paste-input')),
     );
     expect(field.controller!.text, contains('KLT1:abc.'));
+  });
+
+  test('pasted bridge lines are cleaned or refused', () {
+    const fp = '0123456789ABCDEF0123456789ABCDEF01234567';
+    expect(
+      cleanBridgeLine('  Bridge obfs4  192.0.2.1:443 $fp cert=x iat-mode=0 '),
+      'obfs4 192.0.2.1:443 $fp cert=x iat-mode=0',
+    );
+    expect(cleanBridgeLine('meek_lite 192.0.2.3:80 url=https://x'), isNull);
+    expect(cleanBridgeLine('not a bridge'), isNull);
   });
 
   test('the PIN pad shuffles all ten digits', () {

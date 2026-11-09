@@ -75,6 +75,16 @@ set(INSTALL_BUNDLE_LIB_DIR "${CMAKE_INSTALL_PREFIX}")
 install(TARGETS ${BINARY_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
   COMPONENT Runtime)
 
+# Tor, from the Tor Expert Bundle (scripts/fetch-tor-windows.ps1), runs as
+# its own process next to the app
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tor/tor/tor.exe")
+  install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tor/"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/tor"
+    COMPONENT Runtime)
+else()
+  message(WARNING "No Tor for Windows: run scripts/fetch-tor-windows.ps1")
+endif()
+
 install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   COMPONENT Runtime)
 
