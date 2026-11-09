@@ -14,10 +14,11 @@
   <a href="https://github.com/smyrna-pergamum/kilit-messenger/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/smyrna-pergamum/kilit-messenger/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-blue"></a>
   <img alt="Android 7.0+" src="https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white">
+  <img alt="Windows 10+" src="https://img.shields.io/badge/Windows-10%2B-0078D4">
 </p>
 
 <p align="center">
-  <a href="https://github.com/smyrna-pergamum/kilit-messenger/releases"><b>Download the APK</b></a>
+  <a href="https://github.com/smyrna-pergamum/kilit-messenger/releases"><b>Download for Android or Windows</b></a>
   ·
   <a href="README.tr.md">Türkçe</a>
 </p>
@@ -25,7 +26,8 @@
 A messenger and encrypted file vault with no account, no phone number and no
 server of its own. Messages are end-to-end encrypted with the Signal protocol
 in its post-quantum form, and they leave the phone only through Tor, to public
-Nostr relays.
+Nostr relays. It runs on Android phones and on Windows computers, on its
+own or linked to your phone.
 
 <p align="center">
   <img src="docs/screenshots/01-chats.png" width="24%" alt="Chats: contacts, a group and a request">
@@ -69,6 +71,16 @@ Nostr relays.
 - You can renew your ID: you get new words, and the old ID and link stop
   working while your contacts stay.
 
+**Phone and computer**
+- Kilit runs on Windows too, with its own Tor. A computer can have a Kilit
+  ID of its own, or join your phone's as a **linked device**: scan the code
+  it shows from the phone (Settings, Linked devices), and compare a 6-digit
+  code on both screens.
+- A linked device has its own keys. Your contacts' messages reach every
+  device, and what you send from one shows on the others. Your Kilit ID can
+  be on up to 5 devices. Message history stays where it was; a newly linked
+  device shows what comes after.
+
 **Network**
 - Kilit has an embedded Tor and no server of its own. Messages wait on
   public Nostr relays, under mailbox tags that change every day.
@@ -90,10 +102,11 @@ Nostr relays.
 
 ## Install
 
-Download the APK from [Releases](https://github.com/smyrna-pergamum/kilit-messenger/releases).
-It runs on Android 7.0 or later. Kilit asks for two permissions: the network,
-which only its embedded Tor uses, and the camera, for photos you take in a
-chat.
+Everything is on [Releases](https://github.com/smyrna-pergamum/kilit-messenger/releases).
+
+**Android** (7.0 or later): `Kilit-<version>.apk`. Kilit asks for two
+permissions: the network, which only its embedded Tor uses, and the camera,
+for photos you take in a chat.
 
 Before installing, check two things:
 
@@ -106,13 +119,19 @@ Before installing, check two things:
 
    You can see it with `apksigner verify --print-certs Kilit-*.apk`.
 
-There is no Windows build yet.
+**Windows** (10 or later, 64-bit): `Kilit-<version>-windows-setup.exe`. It
+installs for your user only and needs no administrator rights. The
+installer is not code-signed yet, so Windows SmartScreen warns about it:
+check the file's SHA-256 against the release notes, then choose "More info"
+and "Run anyway". Uninstalling leaves your vault in place; the panic code is
+the way to wipe it.
 
 ## How it works
 
 | Document | Contents |
 | --- | --- |
 | [spec/KILIT-NET.md](spec/KILIT-NET.md) | Network protocol: IDs, cards, mailboxes, receipts, files, groups (Turkish) |
+| [spec/MULTI-DEVICE.md](spec/MULTI-DEVICE.md) | Linked devices: one Kilit ID on a phone and computers (Turkish) |
 | [spec/KLT1.md](spec/KLT1.md) | The `.klt` vault and carrier format |
 | [THREAT_MODEL.md](THREAT_MODEL.md) | What Kilit protects against and what it does not |
 | [PRIVACY.md](PRIVACY.md) | What is collected (nothing) and what relays can see |
@@ -123,8 +142,8 @@ There is no Windows build yet.
 | Folder | Contents |
 | --- | --- |
 | `core/` | Rust core: vault, messaging, network, file parsing; one crate per compartment |
-| `app/` | Flutter app (Android; Windows later) |
-| `engine-tor/` | Embedded Tor and pluggable transports for Android (Go) |
+| `app/` | Flutter app for Android and Windows; `app/windows/installer` makes the Windows installer |
+| `engine-tor/` | Embedded Tor and pluggable transports for Android (Go); Windows runs the Tor Expert Bundle |
 | `spec/` | Protocol and file format specifications |
 | `repro/` | Pinned, reproducible build containers |
 | `docs/` | Building, relay list |

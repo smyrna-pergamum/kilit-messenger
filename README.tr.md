@@ -14,10 +14,11 @@
   <a href="https://github.com/smyrna-pergamum/kilit-messenger/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/smyrna-pergamum/kilit-messenger/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-blue"></a>
   <img alt="Android 7.0+" src="https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white">
+  <img alt="Windows 10+" src="https://img.shields.io/badge/Windows-10%2B-0078D4">
 </p>
 
 <p align="center">
-  <a href="https://github.com/smyrna-pergamum/kilit-messenger/releases"><b>APK'yı indir</b></a>
+  <a href="https://github.com/smyrna-pergamum/kilit-messenger/releases"><b>Android veya Windows için indir</b></a>
   ·
   <a href="README.md">English</a>
 </p>
@@ -25,7 +26,8 @@
 Hesap, telefon numarası ve kendi sunucusu olmayan bir mesajlaşma uygulaması
 ve şifreli dosya kasası. Mesajlar Signal protokolünün kuantum sonrası
 sürümüyle uçtan uca şifrelenir ve telefondan yalnızca Tor üzerinden, açık
-Nostr relay'lerine çıkar.
+Nostr relay'lerine çıkar. Android telefonlarda ve Windows bilgisayarlarda
+çalışır; bilgisayarda tek başına ya da telefonunuza bağlı olarak.
 
 <p align="center">
   <img src="docs/screenshots/01-chats.png" width="24%" alt="Sohbetler: kişiler, bir grup ve bir istek">
@@ -71,6 +73,16 @@ Nostr relay'lerine çıkar.
 - Kimliğinizi yenileyebilirsiniz: yeni kelimeler alırsınız, eski kimlik ve
   bağlantı çalışmaz olur, kişileriniz ise kalır.
 
+**Telefon ve bilgisayar**
+- Kilit Windows'ta da kendi Tor'uyla çalışır. Bir bilgisayarın kendi Kilit
+  kimliği olabilir ya da telefonunuzun kimliğine **bağlı cihaz** olarak
+  katılabilir: bilgisayarın gösterdiği kodu telefondan okutun (Ayarlar,
+  Bağlı cihazlar) ve iki ekranda 6 haneli kodu karşılaştırın.
+- Bağlı cihazın kendi anahtarları vardır. Kişilerinizin mesajları her
+  cihaza ulaşır; birinden gönderdiğiniz öbürlerinde de görünür. Kilit
+  kimliğiniz en fazla 5 cihazda olabilir. Mesaj geçmişi olduğu yerde kalır;
+  yeni bağlanan cihaz bundan sonrasını görür.
+
 **Ağ**
 - Kilit'in içinde Tor gömülüdür ve kendi sunucusu yoktur. Mesajlar açık
   Nostr relay'lerinde, her gün değişen posta kutusu etiketleri altında
@@ -111,13 +123,19 @@ Kurmadan önce iki şeyi denetleyin:
    Sertifikayı `apksigner verify --print-certs Kilit-*.apk` komutuyla
    görebilirsiniz.
 
-Windows sürümü henüz yok.
+**Windows** (10 ve sonrası, 64 bit): `Kilit-<sürüm>-windows-setup.exe`.
+Yalnızca sizin kullanıcınız için kurulur, yönetici izni istemez. Kurulum
+dosyası henüz kod imzalı değil, bu yüzden Windows SmartScreen uyarı verir:
+dosyanın SHA-256 özetini sürüm notlarıyla karşılaştırın, sonra "Ek bilgi" ve
+"Yine de çalıştır"ı seçin. Kaldırma işlemi kasanızı silmez; silmenin yolu
+panik kodudur.
 
 ## Nasıl çalışır
 
 | Belge | İçerik |
 | --- | --- |
 | [spec/KILIT-NET.md](spec/KILIT-NET.md) | Ağ protokolü: kimlikler, kartlar, posta kutuları, alındı bildirimleri, dosyalar, gruplar |
+| [spec/MULTI-DEVICE.md](spec/MULTI-DEVICE.md) | Bağlı cihazlar: bir Kilit kimliği telefonda ve bilgisayarlarda |
 | [spec/KLT1.md](spec/KLT1.md) | `.klt` kasa ve taşıyıcı biçimi |
 | [THREAT_MODEL.md](THREAT_MODEL.md) | Kilit neye karşı korur, neye karşı korumaz |
 | [PRIVACY.md](PRIVACY.md) | Ne toplanır (hiçbir şey) ve relay'ler ne görür |
@@ -128,8 +146,8 @@ Windows sürümü henüz yok.
 | Klasör | İçerik |
 | --- | --- |
 | `core/` | Rust çekirdeği: kasa, mesajlaşma, ağ, dosya ayrıştırma; her bölme ayrı bir crate |
-| `app/` | Flutter uygulaması (Android; Windows sonra) |
-| `engine-tor/` | Android için gömülü Tor ve köprü taşıyıcıları (Go) |
+| `app/` | Android ve Windows için Flutter uygulaması; `app/windows/installer` Windows kurulum dosyasını yapar |
+| `engine-tor/` | Android için gömülü Tor ve köprü taşıyıcıları (Go); Windows'ta Tor Expert Bundle çalışır |
 | `spec/` | Protokol ve dosya biçimi tanımları |
 | `repro/` | Sürümleri sabitlenmiş, tekrarlanabilir derleme konteynerleri |
 | `docs/` | Derleme, relay listesi |

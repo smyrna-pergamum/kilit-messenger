@@ -74,3 +74,13 @@ Sonra:
 `build\windows\x64\runner\Release\` içinde `kilit.exe` ve yanında `tor\`
 bulunur. `flutter test tool/windows_tor`, bu Tor'u gerçekten başlatır:
 önce doğrudan, sonra obfs4 üzerinden.
+
+Kurulum dosyası Inno Setup 6 ile yapılır (`winget install JRSoftware.InnoSetup`):
+
+    cd app\windows\installer
+    "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DAppVersion=0.1.4-alpha kilit.iss
+
+Çıktı `app\build\installer\Kilit-<sürüm>-windows-setup.exe` dosyasıdır.
+Kurulum yönetici izni istemez, Kilit'i `%LOCALAPPDATA%\Programs\Kilit`
+klasörüne kurar. Kaldırıldığında kasa (`%APPDATA%\app.kilit`) yerinde kalır.
+Uygulamanın ve kurulumun simgesi `scripts/icon.py` ile üretilir.

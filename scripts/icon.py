@@ -136,4 +136,8 @@ open(os.path.join(res, 'values', 'ic_launcher_background.xml'), 'w', encoding='u
 docs = os.path.join(repo, 'docs/assets')
 os.makedirs(docs, exist_ok=True)
 full(512).save(os.path.join(docs, 'icon.png'))
+
+# Windows: the app's own icon, and the installer's, every size in one file
+ico = os.path.join(repo, 'app/windows/runner/resources/app_icon.ico')
+full(256).save(ico, sizes=[(s, s) for s in (16, 24, 32, 48, 64, 128, 256)])
 print('ok')
