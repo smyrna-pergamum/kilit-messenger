@@ -316,5 +316,7 @@
   "linkCompare": "تحقق من أن الشاشة الأخرى تعرض الرمز نفسه:",
   "linkDone": "تم الربط. تصل الرسائل الآن إلى الجهازين.",
   "linkNotCode": "هذا ليس رمز ربط Kilit.",
-  "linkedToPhone": "هذا الجهاز مرتبط بهوية Kilit على هاتفك."
+  "linkedToPhone": "هذا الجهاز مرتبط بهوية Kilit على هاتفك.",
+  "torChipFailed": "خطأ Tor",
+  "protScreenshotsOffHint": "متوقف: يمكن التقاط صور الشاشة وتسجيلها لـ Kilit، ويظهر في التطبيقات الأخيرة."
 }

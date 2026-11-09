@@ -201,6 +201,11 @@ class TorController extends ChangeNotifier {
 
   TorState get state => _state;
   bool get available => _backend.available;
+
+  /// Why the last way out failed, even after automatic mode moved on to
+  /// the next one: "obfs4: ...". Empty when nothing failed.
+  String get lastError => _lastError;
+  String _lastError = '';
   bool get running => _poll != null;
   TorRoute get route => _route;
 
@@ -260,9 +265,15 @@ class TorController extends ChangeNotifier {
 
   void _tick() {
     final s = _backend.state();
+    if (s.phase == TorPhase.failed && s.error.isNotEmpty) {
+      _lastError = s.mode.isEmpty ? s.error : '${s.mode}: ${s.error}';
+    }
     if (s.phase == TorPhase.ready) {
       _waited = 0;
-    } else if (_route == TorRoute.auto && ++_waited >= autoRoutes[_try].$2) {
+      _lastError = '';
+    } else if (_route == TorRoute.auto &&
+        (s.phase == TorPhase.failed || ++_waited >= autoRoutes[_try].$2)) {
+      // a way out that failed is left at once, not after its full wait
       _try = (_try + 1) % autoRoutes.length;
       _waited = 0;
       if (!_apply()) return;

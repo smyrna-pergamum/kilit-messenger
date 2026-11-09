@@ -1074,4 +1074,11 @@ class LUk extends L {
   @override
   String get linkedToPhone =>
       'Цей пристрій пов\'язаний з Kilit ID вашого телефона.';
+
+  @override
+  String get torChipFailed => 'Помилка Tor';
+
+  @override
+  String get protScreenshotsOffHint =>
+      'Вимк.: знімки та запис екрана Kilit можливі, і він видно в недавніх застосунках.';
 }

@@ -316,5 +316,7 @@
   "linkCompare": "Periksa bahwa layar lain menampilkan kode yang sama:",
   "linkDone": "Tertaut. Pesan kini sampai ke kedua perangkat.",
   "linkNotCode": "Itu bukan kode penautan Kilit.",
-  "linkedToPhone": "Perangkat ini tertaut ke ID Kilit ponsel Anda."
+  "linkedToPhone": "Perangkat ini tertaut ke ID Kilit ponsel Anda.",
+  "torChipFailed": "Galat Tor",
+  "protScreenshotsOffHint": "Mati: tangkapan dan rekaman layar Kilit bisa dibuat, dan Kilit tampil di aplikasi terbaru."
 }

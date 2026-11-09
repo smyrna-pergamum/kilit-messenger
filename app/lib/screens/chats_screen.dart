@@ -501,6 +501,7 @@ class _TorChip extends StatelessWidget {
         final (text, color) = switch (s.phase) {
           TorPhase.ready => ('${l.torChipReady}$relays', t.safe),
           TorPhase.starting => (l.torChipStarting(s.progress), t.accent),
+          TorPhase.failed => (l.torChipFailed, t.danger),
           _ => (l.torChipOff, t.textMuted),
         };
         return Row(

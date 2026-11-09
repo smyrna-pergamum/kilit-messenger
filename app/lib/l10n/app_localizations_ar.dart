@@ -1063,4 +1063,11 @@ class LAr extends L {
 
   @override
   String get linkedToPhone => 'هذا الجهاز مرتبط بهوية Kilit على هاتفك.';
+
+  @override
+  String get torChipFailed => 'خطأ Tor';
+
+  @override
+  String get protScreenshotsOffHint =>
+      'متوقف: يمكن التقاط صور الشاشة وتسجيلها لـ Kilit، ويظهر في التطبيقات الأخيرة.';
 }

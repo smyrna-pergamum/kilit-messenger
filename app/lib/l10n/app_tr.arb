@@ -316,5 +316,7 @@
   "linkCompare": "Öbür ekranda aynı kodun göründüğünü denetleyin:",
   "linkDone": "Bağlandı. Mesajlar artık iki cihaza da ulaşıyor.",
   "linkNotCode": "Bu bir Kilit bağlama kodu değil.",
-  "linkedToPhone": "Bu cihaz, telefonunuzdaki Kilit kimliğine bağlı."
+  "linkedToPhone": "Bu cihaz, telefonunuzdaki Kilit kimliğine bağlı.",
+  "torChipFailed": "Tor hatası",
+  "protScreenshotsOffHint": "Kapalı: Kilit'in ekran görüntüsü ve ekran kaydı alınabilir, son uygulamalarda görünür."
 }

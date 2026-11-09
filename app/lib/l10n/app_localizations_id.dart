@@ -1071,4 +1071,11 @@ class LId extends L {
 
   @override
   String get linkedToPhone => 'Perangkat ini tertaut ke ID Kilit ponsel Anda.';
+
+  @override
+  String get torChipFailed => 'Galat Tor';
+
+  @override
+  String get protScreenshotsOffHint =>
+      'Mati: tangkapan dan rekaman layar Kilit bisa dibuat, dan Kilit tampil di aplikasi terbaru.';
 }

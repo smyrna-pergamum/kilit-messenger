@@ -543,5 +543,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "torChipFailed": "Tor error",
+  "protScreenshotsOffHint": "Off: screenshots and screen recording of Kilit work, and it shows in recent apps."
 }

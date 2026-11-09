@@ -111,6 +111,17 @@ class FakeTor implements TorBackend {
   }
 }
 
+/// A Tor whose direct way out fails, like a network that drops it.
+class _FailingTor extends FakeTor {
+  @override
+  TorState state() {
+    final last = configs.isEmpty ? '' : configs.last;
+    return last.contains('direct')
+        ? const TorState(TorPhase.failed, error: 'direct broke', mode: 'direct')
+        : const TorState(TorPhase.starting, progress: 5);
+  }
+}
+
 /// A core that finds every picture damaged.
 class DamagedPictures extends DevCore {
   @override
@@ -1056,6 +1067,21 @@ void main() {
     tor.stop();
   });
 
+  testWidgets('a failed way out is left at once, and shows as a failure', (
+    tester,
+  ) async {
+    final backend = _FailingTor();
+    final tor = TorController(backend, '/data');
+    addTearDown(tor.dispose);
+    tor.start();
+    expect(tor.state.phase, TorPhase.failed);
+    // not 45 seconds later: on the next tick, and the reason is kept
+    await tester.pump(const Duration(seconds: 1));
+    expect(backend.configs, contains('{"mode":"obfs4"}'));
+    expect(tor.lastError, 'direct: direct broke');
+    tor.stop();
+  });
+
   testWidgets('a Tor that comes up stays on its way out', (tester) async {
     final backend = FakeTor();
     final tor = TorController(backend, '/data');
@@ -1371,6 +1397,29 @@ void main() {
     expect(guessMime('A.JPG'), 'image/jpeg');
     expect(guessMime('x.klt'), 'application/x-kilit');
     expect(guessMime('noext'), 'application/octet-stream');
+  });
+
+  testWidgets('screenshot blocking is on until the user turns it off', (
+    tester,
+  ) async {
+    final (_, prefs) = await startApp(tester);
+    await setUpVault(tester);
+    expect(prefs.blockScreenshots, isTrue);
+    await openSettingsSection(tester, 'protections');
+    // the section is open by default: the tap above closed it
+    if (find.byKey(const ValueKey('screenshots-switch')).evaluate().isEmpty) {
+      await tester.tap(find.byKey(const ValueKey('section-protections')));
+      await tester.pumpAndSettle();
+    }
+    await tester.tap(find.byKey(const ValueKey('screenshots-switch')));
+    await tester.pumpAndSettle();
+    expect(prefs.blockScreenshots, isFalse);
+    expect(
+      find.textContaining('screen recording of Kilit work'),
+      findsOneWidget,
+    );
+    await prefs.resetAfterPanic();
+    expect(prefs.blockScreenshots, isTrue);
   });
 
   test('preferences survive a reload and "system" is remembered', () async {

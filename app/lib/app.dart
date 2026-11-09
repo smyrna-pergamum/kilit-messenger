@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'core/kilit_core.dart';
 import 'l10n/app_localizations.dart';
 import 'platform/files.dart';
+import 'platform/screen.dart';
 import 'platform/tor.dart';
 import 'screens/lock_screen.dart';
 import 'screens/shell.dart';
@@ -54,6 +55,8 @@ class _KilitAppState extends State<KilitApp> {
   @override
   void initState() {
     super.initState();
+    // on from the first frame; only the user's choice turns it off
+    if (!widget.prefs.blockScreenshots) ScreenGuard.set(false);
     if (widget.prefs.tor) {
       _tor.start(route: widget.prefs.torRoute, bridges: widget.prefs.bridges);
     }

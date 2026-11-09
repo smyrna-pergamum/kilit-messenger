@@ -1069,4 +1069,11 @@ class LVi extends L {
   @override
   String get linkedToPhone =>
       'Thiết bị này đã liên kết với ID Kilit trên điện thoại của bạn.';
+
+  @override
+  String get torChipFailed => 'Lỗi Tor';
+
+  @override
+  String get protScreenshotsOffHint =>
+      'Tắt: có thể chụp và quay màn hình Kilit, và nó hiện trong ứng dụng gần đây.';
 }

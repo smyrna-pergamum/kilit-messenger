@@ -316,5 +316,7 @@
   "linkCompare": "Prüfe, dass der andere Bildschirm denselben Code zeigt:",
   "linkDone": "Verknüpft. Nachrichten erreichen jetzt beide Geräte.",
   "linkNotCode": "Das ist kein Kilit-Verknüpfungscode.",
-  "linkedToPhone": "Dieses Gerät ist mit der Kilit-ID deines Telefons verknüpft."
+  "linkedToPhone": "Dieses Gerät ist mit der Kilit-ID deines Telefons verknüpft.",
+  "torChipFailed": "Tor-Fehler",
+  "protScreenshotsOffHint": "Aus: Screenshots und Bildschirmaufnahmen von Kilit sind möglich, und es erscheint in den letzten Apps."
 }

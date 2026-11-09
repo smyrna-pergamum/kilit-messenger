@@ -7,9 +7,17 @@
 #define WDA_EXCLUDEFROMCAPTURE 0x00000011
 #endif
 
+#include <flutter/method_channel.h>
+#include <flutter/standard_method_codec.h>
+
 #include "flutter/generated_plugin_registrant.h"
 #include "files_channel.h"
 #include "hardware_key.h"
+
+namespace {
+// screenshot blocking, which the user can turn off in Settings
+std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> screen_channel;
+}  // namespace
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -38,6 +46,21 @@ bool FlutterWindow::OnCreate() {
   RegisterPlugins(flutter_controller_->engine());
   RegisterHardwareKeyChannel(flutter_controller_->engine()->messenger());
   RegisterFilesChannel(flutter_controller_->engine()->messenger());
+  HWND window = GetHandle();
+  screen_channel = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+      flutter_controller_->engine()->messenger(), "app.kilit.messenger/screen",
+      &flutter::StandardMethodCodec::GetInstance());
+  screen_channel->SetMethodCallHandler(
+      [window](const flutter::MethodCall<flutter::EncodableValue>& call,
+               std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        if (call.method_name() != "setSecure") {
+          result->NotImplemented();
+          return;
+        }
+        const auto* on = std::get_if<bool>(call.arguments());
+        SetWindowDisplayAffinity(window, (on == nullptr || *on) ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
+        result->Success();
+      });
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
   flutter_controller_->engine()->SetNextFrameCallback([&]() {

@@ -1074,4 +1074,11 @@ class LRu extends L {
   @override
   String get linkedToPhone =>
       'Это устройство связано с Kilit ID вашего телефона.';
+
+  @override
+  String get torChipFailed => 'Ошибка Tor';
+
+  @override
+  String get protScreenshotsOffHint =>
+      'Выкл.: снимки и запись экрана Kilit возможны, и он виден в недавних приложениях.';
 }

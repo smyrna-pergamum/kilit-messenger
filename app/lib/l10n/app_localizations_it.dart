@@ -1080,4 +1080,11 @@ class LIt extends L {
   @override
   String get linkedToPhone =>
       'Questo dispositivo è collegato all\'ID Kilit del tuo telefono.';
+
+  @override
+  String get torChipFailed => 'Errore Tor';
+
+  @override
+  String get protScreenshotsOffHint =>
+      'Disattivato: screenshot e registrazioni dello schermo di Kilit sono possibili, e appare nelle app recenti.';
 }

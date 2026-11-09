@@ -1037,4 +1037,11 @@ class LJa extends L {
 
   @override
   String get linkedToPhone => 'このデバイスはスマートフォンの Kilit ID にリンクされています。';
+
+  @override
+  String get torChipFailed => 'Tor エラー';
+
+  @override
+  String get protScreenshotsOffHint =>
+      'オフ：Kilit のスクリーンショットや画面録画ができ、最近使ったアプリにも表示されます。';
 }

@@ -79,6 +79,7 @@ class Prefs extends ChangeNotifier {
     this._tor,
     this._torRoute,
     this._bridges,
+    this._blockScreenshots,
   );
 
   static Future<Prefs> load(PrefsStore store) async {
@@ -101,6 +102,8 @@ class Prefs extends ChangeNotifier {
         for (final b in v['bridges'] is List ? v['bridges'] as List : const [])
           if (b is String) b,
       ],
+      // absent: on
+      v['blockScreenshots'] != false,
     );
   }
 
@@ -111,6 +114,11 @@ class Prefs extends ChangeNotifier {
   bool _tor;
   TorRoute _torRoute;
   List<String> _bridges;
+  bool _blockScreenshots;
+
+  /// Whether Kilit keeps itself out of screenshots, screen recording and
+  /// the recent-apps picture. On unless the user turns it off.
+  bool get blockScreenshots => _blockScreenshots;
 
   ThemeMode get themeMode => _theme;
 
@@ -144,6 +152,7 @@ class Prefs extends ChangeNotifier {
       'tor': _tor,
       'torRoute': _torRoute.name,
       'bridges': _bridges,
+      'blockScreenshots': _blockScreenshots,
     });
   }
 
@@ -167,6 +176,11 @@ class Prefs extends ChangeNotifier {
     return _save();
   }
 
+  Future<void> setBlockScreenshots(bool on) {
+    _blockScreenshots = on;
+    return _save();
+  }
+
   Future<void> setTorRoute(TorRoute r, [List<String>? bridges]) {
     _torRoute = r;
     if (bridges != null) _bridges = bridges;
@@ -181,6 +195,7 @@ class Prefs extends ChangeNotifier {
     _tor = true;
     _torRoute = TorRoute.auto;
     _bridges = const [];
+    _blockScreenshots = true;
     openSections
       ..clear()
       ..add('protections');

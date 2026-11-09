@@ -316,5 +316,7 @@
   "linkCompare": "Kiểm tra màn hình kia hiện cùng mã:",
   "linkDone": "Đã liên kết. Tin nhắn giờ đến cả hai thiết bị.",
   "linkNotCode": "Đó không phải mã liên kết Kilit.",
-  "linkedToPhone": "Thiết bị này đã liên kết với ID Kilit trên điện thoại của bạn."
+  "linkedToPhone": "Thiết bị này đã liên kết với ID Kilit trên điện thoại của bạn.",
+  "torChipFailed": "Lỗi Tor",
+  "protScreenshotsOffHint": "Tắt: có thể chụp và quay màn hình Kilit, và nó hiện trong ứng dụng gần đây."
 }

@@ -2024,6 +2024,18 @@ abstract class L {
   /// In en, this message translates to:
   /// **'This device is linked to your phone\'s Kilit ID.'**
   String get linkedToPhone;
+
+  /// No description provided for @torChipFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Tor error'**
+  String get torChipFailed;
+
+  /// No description provided for @protScreenshotsOffHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Off: screenshots and screen recording of Kilit work, and it shows in recent apps.'**
+  String get protScreenshotsOffHint;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

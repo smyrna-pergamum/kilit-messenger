@@ -1072,4 +1072,11 @@ class LEn extends L {
   @override
   String get linkedToPhone =>
       'This device is linked to your phone\'s Kilit ID.';
+
+  @override
+  String get torChipFailed => 'Tor error';
+
+  @override
+  String get protScreenshotsOffHint =>
+      'Off: screenshots and screen recording of Kilit work, and it shows in recent apps.';
 }

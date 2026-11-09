@@ -1069,4 +1069,11 @@ class LTr extends L {
   @override
   String get linkedToPhone =>
       'Bu cihaz, telefonunuzdaki Kilit kimliğine bağlı.';
+
+  @override
+  String get torChipFailed => 'Tor hatası';
+
+  @override
+  String get protScreenshotsOffHint =>
+      'Kapalı: Kilit\'in ekran görüntüsü ve ekran kaydı alınabilir, son uygulamalarda görünür.';
 }

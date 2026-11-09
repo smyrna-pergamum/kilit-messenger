@@ -1079,4 +1079,11 @@ class LEs extends L {
   @override
   String get linkedToPhone =>
       'Este dispositivo está vinculado a la ID de Kilit de tu teléfono.';
+
+  @override
+  String get torChipFailed => 'Error de Tor';
+
+  @override
+  String get protScreenshotsOffHint =>
+      'Desactivado: se pueden hacer capturas y grabaciones de pantalla de Kilit, y aparece en apps recientes.';
 }

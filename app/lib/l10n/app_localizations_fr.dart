@@ -1079,4 +1079,11 @@ class LFr extends L {
   @override
   String get linkedToPhone =>
       'Cet appareil est associé à l\'ID Kilit de votre téléphone.';
+
+  @override
+  String get torChipFailed => 'Erreur Tor';
+
+  @override
+  String get protScreenshotsOffHint =>
+      'Désactivé : les captures et enregistrements d\'écran de Kilit sont possibles, et il apparaît dans les apps récentes.';
 }

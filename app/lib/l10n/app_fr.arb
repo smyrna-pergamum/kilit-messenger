@@ -316,5 +316,7 @@
   "linkCompare": "Vérifiez que l'autre écran affiche le même code :",
   "linkDone": "Associé. Les messages atteignent maintenant les deux appareils.",
   "linkNotCode": "Ce n'est pas un code d'association Kilit.",
-  "linkedToPhone": "Cet appareil est associé à l'ID Kilit de votre téléphone."
+  "linkedToPhone": "Cet appareil est associé à l'ID Kilit de votre téléphone.",
+  "torChipFailed": "Erreur Tor",
+  "protScreenshotsOffHint": "Désactivé : les captures et enregistrements d'écran de Kilit sont possibles, et il apparaît dans les apps récentes."
 }

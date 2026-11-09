@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/kilit_core.dart';
 import '../l10n/app_localizations.dart';
 import '../platform/files.dart';
+import '../platform/screen.dart';
 import '../platform/tor.dart';
 import '../state/prefs.dart';
 import '../state/session.dart';
@@ -86,10 +87,19 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              _Status(
-                ok: true,
-                title: l.protScreenshots,
-                value: l.protScreenshotsValue,
+              SwitchListTile(
+                key: const ValueKey('screenshots-switch'),
+                value: prefs.blockScreenshots,
+                onChanged: (on) async {
+                  await prefs.setBlockScreenshots(on);
+                  await ScreenGuard.set(on);
+                },
+                title: Text(l.protScreenshots),
+                subtitle: Text(
+                  prefs.blockScreenshots
+                      ? l.protScreenshotsValue
+                      : l.protScreenshotsOffHint,
+                ),
               ),
               _Status(
                 ok: true,
@@ -108,9 +118,18 @@ class SettingsScreen extends StatelessWidget {
                       _ => null,
                     },
                     title: l.protNetwork,
+                    // the error says why, in Tor's own words
+                    detail: s.phase == TorPhase.failed && s.error.isNotEmpty
+                        ? s.error
+                        : s.phase != TorPhase.ready && tor.lastError.isNotEmpty
+                        ? tor.lastError
+                        : null,
                     value: switch (s.phase) {
                       TorPhase.off => l.torOff,
-                      TorPhase.starting => l.torStarting(s.progress),
+                      TorPhase.starting =>
+                        s.mode.isEmpty || s.mode == 'direct'
+                            ? l.torStarting(s.progress)
+                            : '${l.torStarting(s.progress)} (${s.mode})',
                       TorPhase.ready =>
                         s.mode.isEmpty || s.mode == 'direct'
                             ? l.torReady

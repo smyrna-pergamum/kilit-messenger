@@ -1078,4 +1078,11 @@ class LDe extends L {
   @override
   String get linkedToPhone =>
       'Dieses Gerät ist mit der Kilit-ID deines Telefons verknüpft.';
+
+  @override
+  String get torChipFailed => 'Tor-Fehler';
+
+  @override
+  String get protScreenshotsOffHint =>
+      'Aus: Screenshots und Bildschirmaufnahmen von Kilit sind möglich, und es erscheint in den letzten Apps.';
 }

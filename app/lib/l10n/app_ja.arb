@@ -316,5 +316,7 @@
   "linkCompare": "もう一方の画面に同じコードが表示されていることを確認してください：",
   "linkDone": "リンクしました。メッセージは両方のデバイスに届きます。",
   "linkNotCode": "これは Kilit のリンクコードではありません。",
-  "linkedToPhone": "このデバイスはスマートフォンの Kilit ID にリンクされています。"
+  "linkedToPhone": "このデバイスはスマートフォンの Kilit ID にリンクされています。",
+  "torChipFailed": "Tor エラー",
+  "protScreenshotsOffHint": "オフ：Kilit のスクリーンショットや画面録画ができ、最近使ったアプリにも表示されます。"
 }

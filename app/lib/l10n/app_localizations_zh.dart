@@ -1022,4 +1022,10 @@ class LZh extends L {
 
   @override
   String get linkedToPhone => '此设备已关联到你手机上的 Kilit ID。';
+
+  @override
+  String get torChipFailed => 'Tor 错误';
+
+  @override
+  String get protScreenshotsOffHint => '关闭：可以对 Kilit 截屏和录屏，并会显示在最近使用的应用中。';
 }

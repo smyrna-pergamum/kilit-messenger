@@ -1076,4 +1076,11 @@ class LPt extends L {
   @override
   String get linkedToPhone =>
       'Este dispositivo está vinculado à ID Kilit do seu telefone.';
+
+  @override
+  String get torChipFailed => 'Erro do Tor';
+
+  @override
+  String get protScreenshotsOffHint =>
+      'Desligado: capturas e gravações de tela do Kilit funcionam, e ele aparece nos apps recentes.';
 }

@@ -1071,4 +1071,11 @@ class LFa extends L {
   @override
   String get linkedToPhone =>
       'این دستگاه به شناسه Kilit گوشی شما پیوند خورده است.';
+
+  @override
+  String get torChipFailed => 'خطای Tor';
+
+  @override
+  String get protScreenshotsOffHint =>
+      'خاموش: می‌توان از Kilit اسکرین‌شات و فیلم صفحه گرفت و در برنامه‌های اخیر دیده می‌شود.';
 }
