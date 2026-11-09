@@ -14,7 +14,7 @@ import 'change_pin_dialog.dart';
 import 'devices_screen.dart';
 
 /// Shown in "About"; kept in step with pubspec.yaml's version.
-const appVersion = '0.1.4-alpha';
+const appVersion = '0.1.5-alpha';
 
 String pinProtectionName(L l, PinProtection p) => switch (p) {
   PinProtection.strongbox => l.hwStrongbox,
