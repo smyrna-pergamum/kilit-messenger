@@ -1596,6 +1596,32 @@ void main() {
     expect(guessMime('noext'), 'application/octet-stream');
   });
 
+  testWidgets('the PIN can be typed on a keyboard', (tester) async {
+    await startApp(tester);
+    Future<void> press(LogicalKeyboardKey k) async {
+      await tester.sendKeyEvent(k);
+      await tester.pump();
+    }
+
+    Future<void> type(String pin) async {
+      for (final c in pin.split('')) {
+        await press(
+          LogicalKeyboardKey(LogicalKeyboardKey.digit0.keyId + int.parse(c)),
+        );
+      }
+      // a slip, taken back, and the last digit from the number pad
+      await press(LogicalKeyboardKey.backspace);
+      await press(LogicalKeyboardKey.numpad6);
+      await press(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+    }
+
+    await type('4829160');
+    expect(find.text('Enter the PIN again'), findsOneWidget);
+    await type('4829160');
+    expect(find.byKey(const ValueKey('lock-title')), findsNothing);
+  });
+
   testWidgets('screenshot blocking is on until the user turns it off', (
     tester,
   ) async {

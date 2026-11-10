@@ -9,6 +9,8 @@
   Hesap, telefon numarası ve sunucu yok. Kuantum sonrası Signal protokolü, yalnızca Tor üzerinden.
 </p>
 
+<p align="center"><a href="https://smyrna-pergamum.github.io/kilit-messenger/"><b>Web sitesi: smyrna-pergamum.github.io/kilit-messenger</b></a></p>
+
 <p align="center">
   <a href="https://github.com/smyrna-pergamum/kilit-messenger/releases"><img alt="Release" src="https://img.shields.io/github/v/release/smyrna-pergamum/kilit-messenger?include_prereleases&label=release&color=E0A84A"></a>
   <a href="https://github.com/smyrna-pergamum/kilit-messenger/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/smyrna-pergamum/kilit-messenger/actions/workflows/ci.yml/badge.svg"></a>

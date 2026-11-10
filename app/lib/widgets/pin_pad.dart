@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../l10n/app_localizations.dart';
 import '../theme/tokens.dart';
@@ -11,7 +12,40 @@ import '../theme/tokens.dart';
 List<int> shuffledDigits([Random? random]) =>
     List<int>.generate(10, (i) => i)..shuffle(random ?? Random.secure());
 
+/// The digit a key stands for: the number row or the number pad.
+int? _digitOf(LogicalKeyboardKey k) {
+  const rows = [
+    LogicalKeyboardKey.digit0,
+    LogicalKeyboardKey.digit1,
+    LogicalKeyboardKey.digit2,
+    LogicalKeyboardKey.digit3,
+    LogicalKeyboardKey.digit4,
+    LogicalKeyboardKey.digit5,
+    LogicalKeyboardKey.digit6,
+    LogicalKeyboardKey.digit7,
+    LogicalKeyboardKey.digit8,
+    LogicalKeyboardKey.digit9,
+  ];
+  const pad = [
+    LogicalKeyboardKey.numpad0,
+    LogicalKeyboardKey.numpad1,
+    LogicalKeyboardKey.numpad2,
+    LogicalKeyboardKey.numpad3,
+    LogicalKeyboardKey.numpad4,
+    LogicalKeyboardKey.numpad5,
+    LogicalKeyboardKey.numpad6,
+    LogicalKeyboardKey.numpad7,
+    LogicalKeyboardKey.numpad8,
+    LogicalKeyboardKey.numpad9,
+  ];
+  final i = rows.indexOf(k);
+  if (i >= 0) return i;
+  final j = pad.indexOf(k);
+  return j >= 0 ? j : null;
+}
+
 /// A 4×3 keypad: nine digits, then backspace, the tenth digit, and OK.
+/// On a computer the keyboard works too: digits, Backspace, Enter.
 class PinPad extends StatelessWidget {
   const PinPad({
     super.key,
@@ -29,6 +63,26 @@ class PinPad extends StatelessWidget {
   final VoidCallback onSubmit;
   final bool canSubmit;
   final bool enabled;
+
+  KeyEventResult _onKey(FocusNode _, KeyEvent e) {
+    if (e is KeyUpEvent || !enabled) return KeyEventResult.ignored;
+    final d = _digitOf(e.logicalKey);
+    if (d != null) {
+      onDigit(d);
+      return KeyEventResult.handled;
+    }
+    if (e.logicalKey == LogicalKeyboardKey.backspace ||
+        e.logicalKey == LogicalKeyboardKey.delete) {
+      onBackspace();
+      return KeyEventResult.handled;
+    }
+    if (e.logicalKey == LogicalKeyboardKey.enter ||
+        e.logicalKey == LogicalKeyboardKey.numpadEnter) {
+      if (canSubmit) onSubmit();
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,9 +157,13 @@ class PinPad extends StatelessWidget {
         ],
       ),
     ];
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 360),
-      child: Column(mainAxisSize: MainAxisSize.min, children: rows),
+    return Focus(
+      autofocus: true,
+      onKeyEvent: _onKey,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 360),
+        child: Column(mainAxisSize: MainAxisSize.min, children: rows),
+      ),
     );
   }
 }

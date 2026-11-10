@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kilit Messenger · Private messenger and encrypted vault</title>
+<meta name="description" content="Kilit is a messenger and encrypted vault with no account, no phone number and no server of its own. Post-quantum Signal protocol, over Tor only. Alpha, not audited.">
+<link rel="icon" type="image/png" href="assets/icon-96.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: postmodern cyber brutalism on night graphite. An asymmetric 12-column grid drawn with thin technical rules,
+   crosshair marks at the corners of panels, mono coordinates and labels. Big tight grotesk headlines, one brass/amber
+   light. The signature is a 3D padlock that the reader closes by scrolling. Colours are the app's own tokens. Dark only,
+   like the app's default theme. */
+:root{
+  color-scheme:dark;
+  --bg:#0d1117; --surface:#161c26; --raised:#1e2633; --line:#2d3644; --line-2:#3a4556;
+  --text:#e8eaed; --muted:#9aa3ae; --dim:#6e7783;
+  --amber:#e0a84a; --amber-2:#f0c06a; --on-amber:#1a1305;
+  --safe:#3fb68b; --danger:#e5534b;
+  --f-head:"Space Grotesk","Manrope",system-ui,sans-serif;
+  --f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --gl:max(16px,env(safe-area-inset-left,0px)); --gr:max(16px,env(safe-area-inset-right,0px));
+}
+*{box-sizing:border-box}
+html{overflow-x:clip;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.6 var(--f-body);-webkit-font-smoothing:antialiased;overflow-x:clip}
+h1,h2,h3,p{margin:0}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+.wrap{width:100%;max-width:1280px;margin:0 auto;padding-left:var(--gl);padding-right:var(--gr)}
+.mono{font-family:var(--f-mono)}
+.tag{font:500 12px/1.4 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tag b{color:var(--amber);font-weight:500}
+.h2{font:600 clamp(34px,4.8vw,64px)/1 var(--f-head);letter-spacing:-.035em;text-wrap:balance}
+.lead{color:var(--muted);font-size:clamp(16px,1.25vw,18px);max-width:58ch}
+
+/* technical frame: hairline panels with crosshair corners */
+.panel{position:relative;border:1px solid var(--line);background:var(--surface)}
+.panel::before,.panel::after{content:"";position:absolute;width:11px;height:11px;pointer-events:none;
+  background:linear-gradient(var(--amber),var(--amber)) center/100% 1px no-repeat,linear-gradient(var(--amber),var(--amber)) center/1px 100% no-repeat}
+.panel::before{top:-6px;left:-6px}
+.panel::after{bottom:-6px;right:-6px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:12px 22px;border-radius:999px;font:600 15px/1 var(--f-body);text-decoration:none;border:1px solid transparent;transition:background .2s,border-color .2s,color .2s,transform .15s}
+.btn svg{width:18px;height:18px;flex:none}
+.btn.primary{background:var(--amber);color:var(--on-amber)}
+.btn.primary:hover{background:var(--amber-2)}
+.btn.ghost{border-color:var(--line-2);color:var(--text)}
+.btn.ghost:hover{border-color:var(--amber);color:var(--amber)}
+.btn:active{transform:translateY(1px)}
+.ico{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- header ---------- */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:rgba(13,17,23,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:51;background:var(--bg)}
+.bar{display:flex;align-items:center;gap:28px;height:68px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:600 19px/1 var(--f-head);letter-spacing:-.02em;white-space:nowrap}
+.brand svg{width:26px;height:26px}
+.brand span{color:var(--amber)}
+nav.main{display:flex;gap:26px;margin-inline:auto}
+nav.main a{font:500 14px/1 var(--f-body);color:var(--muted);text-decoration:none;padding:8px 0;border-bottom:1px solid transparent}
+nav.main a:hover,nav.main a[aria-current="true"]{color:var(--text);border-bottom-color:var(--amber)}
+.right{display:flex;align-items:center;gap:12px}
+.lang{display:flex;border:1px solid var(--line-2);border-radius:999px;overflow:hidden}
+.lang button{background:none;border:0;min-width:44px;min-height:36px;font:500 12px var(--f-mono);color:var(--muted)}
+.lang button[aria-pressed="true"]{background:var(--raised);color:var(--amber)}
+.right .btn{min-height:40px;padding:9px 16px;font-size:14px}
+.menu-btn{display:none;width:44px;height:44px;border:1px solid var(--line-2);border-radius:12px;background:none;place-items:center}
+.menu-btn svg{width:20px;height:20px}
+.drawer{display:none}
+
+/* ---------- lock sequence: hero + scroll to lock ---------- */
+#seq{position:relative;height:calc(100vh + 140vh);margin-top:-68px}
+.stick{position:sticky;top:0;height:100vh;overflow:hidden}
+#lockCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.fallback{position:absolute;left:50%;top:50%;width:min(300px,50vw);transform:translate(-50%,-50%);display:none}
+.no-gl .fallback{display:block}
+.grid-bg{position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:80px 80px;opacity:.22;-webkit-mask-image:radial-gradient(70% 60% at 50% 55%,#000 20%,transparent 75%);mask-image:radial-gradient(70% 60% at 50% 55%,#000 20%,transparent 75%)}
+.hero{position:absolute;inset:0;padding-top:68px;display:flex;align-items:center;pointer-events:none}
+.hero .wrap{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px;align-items:center}
+.hero-copy{grid-column:1 / span 6;display:grid;gap:26px;pointer-events:auto;opacity:calc(1 - var(--p,0) * 4);transform:translateY(calc(var(--p,0) * -160px))}
+.chip{justify-self:start;display:flex;align-items:center;gap:10px;padding:8px 14px;border:1px solid var(--line-2);border-radius:999px;font:500 12px/1 var(--f-mono);color:var(--amber);background:rgba(22,28,38,.7)}
+.chip i{width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber)}
+h1{font:600 clamp(42px,5.2vw,80px)/.95 var(--f-head);letter-spacing:-.045em}
+h1 em{font-style:italic;color:var(--amber);font-weight:700}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font:400 12px/1.4 var(--f-mono);color:var(--dim)}
+.meta span::before{content:"/ ";color:var(--line-2)}
+.phone{grid-column:10 / span 3;justify-self:end;width:min(250px,100%);aspect-ratio:540/1170;border-radius:34px;padding:9px;background:#05070a;border:1px solid var(--line-2);
+  box-shadow:0 40px 80px -30px #000,0 0 0 1px rgba(224,168,74,.08);pointer-events:auto;
+  transform:perspective(1200px) rotateY(-14deg) rotateX(4deg) translateY(calc(var(--p,0) * -220px));opacity:calc(1 - var(--p,0) * 3.5)}
+.phone img{width:100%;height:100%;border-radius:26px;display:block;object-fit:cover}
+.hint{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);display:grid;justify-items:center;gap:8px;font:500 12px var(--f-mono);color:var(--amber);opacity:calc(1 - var(--p,0) * 6)}
+.hint .mouse{width:22px;height:34px;border:1.5px solid var(--amber);border-radius:12px;position:relative}
+.hint .mouse::after{content:"";position:absolute;left:50%;top:7px;width:2px;height:7px;margin-left:-1px;background:var(--amber);border-radius:2px;animation:wheel 1.6s ease-in-out infinite}
+@keyframes wheel{50%{transform:translateY(8px);opacity:.3}}
+.sealed{position:absolute;left:0;right:0;bottom:12vh;text-align:center;display:grid;gap:12px;justify-items:center;pointer-events:none;
+  opacity:var(--seal,0);transform:translateY(calc((1 - var(--seal,0)) * 24px))}
+.sealed .big{font:700 clamp(30px,5vw,68px)/1 var(--f-head);letter-spacing:-.03em}
+.sealed .big span{color:var(--amber);display:inline-block}
+.readout{position:absolute;right:var(--gr);top:96px;display:grid;gap:4px;text-align:right;font:400 11px/1.5 var(--f-mono);color:var(--dim)}
+.readout b{color:var(--amber);font-weight:500}
+.readout .st{color:var(--danger)}
+.readout .st.ok{color:var(--safe)}
+
+/* ---------- sections ---------- */
+section.s{padding-block:clamp(80px,10vw,140px);border-top:1px solid var(--line)}
+.s-head{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px;margin-bottom:clamp(40px,5vw,64px);align-items:end}
+.s-head .tag{grid-column:1 / span 3;align-self:start;padding-top:10px}
+.s-head h2{grid-column:4 / span 6}
+.s-head .lead{grid-column:4 / span 6}
+.s-head > div{grid-column:4 / span 8;display:grid;gap:20px}
+
+/* values */
+.values{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--line)}
+.value{padding:30px 26px 34px;display:grid;gap:14px;align-content:start;border-right:1px solid var(--line);background:var(--surface);min-width:0}
+.value:last-child{border-right:0}
+.value svg{width:30px;height:30px;color:var(--amber)}
+.value h3{font:600 20px/1.2 var(--f-head);letter-spacing:-.015em}
+.value p{color:var(--muted);font-size:15px}
+.value .src{font:400 11px var(--f-mono);color:var(--dim);margin-top:4px}
+
+/* features: dense brutalist index */
+.feat{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px}
+.feat .intro{grid-column:1 / span 4;display:grid;gap:20px;align-content:start;position:sticky;top:100px}
+.feat ul{grid-column:6 / span 7;list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.feat li{display:grid;grid-template-columns:56px minmax(0,1fr);gap:16px;padding:22px 0;border-bottom:1px solid var(--line)}
+.feat li .n{font:500 12px var(--f-mono);color:var(--amber);padding-top:4px}
+.feat li h3{font:600 19px/1.25 var(--f-head);margin-bottom:6px}
+.feat li p{color:var(--muted);font-size:15px}
+.feat code,.kbd{font:500 .9em var(--f-mono);color:var(--amber-2)}
+
+/* how it works */
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;position:relative}
+.flow::before{content:"";position:absolute;left:12%;right:12%;top:46px;height:1px;background:repeating-linear-gradient(90deg,var(--amber) 0 8px,transparent 8px 16px);opacity:.6}
+.step{display:grid;gap:16px;align-content:start;min-width:0}
+.node{width:92px;height:92px;display:grid;place-items:center;background:var(--bg);border:1px solid var(--line-2);border-radius:50%;position:relative;z-index:1}
+.node svg{width:34px;height:34px;color:var(--amber)}
+.step.on .node{border-color:var(--amber);box-shadow:0 0 0 6px rgba(224,168,74,.08),0 0 30px rgba(224,168,74,.25)}
+.step .k{font:500 12px var(--f-mono);color:var(--amber)}
+.step h3{font:600 21px/1.2 var(--f-head)}
+.step p{color:var(--muted);font-size:15px}
+.packet{margin-top:44px;padding:18px 20px;font:400 13px/1.7 var(--f-mono);color:var(--muted);overflow-x:auto;white-space:pre}
+.packet b{color:var(--amber);font-weight:500}
+
+/* security */
+.sec{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px}
+.warn{grid-column:1 / -1;display:flex;gap:16px;align-items:flex-start;padding:18px 22px;border:1px solid rgba(229,83,75,.5);background:rgba(229,83,75,.08);color:var(--text)}
+.warn svg{width:22px;height:22px;color:var(--danger);flex:none;margin-top:2px}
+.warn b{color:var(--danger)}
+.col{grid-column:span 6;padding:28px;display:grid;gap:18px;align-content:start}
+.col h3{display:flex;align-items:center;gap:10px;font:600 22px/1.2 var(--f-head)}
+.col h3 i{width:10px;height:10px;border-radius:2px}
+.col.yes h3 i{background:var(--safe)}
+.col.no h3 i{background:var(--danger)}
+.col dl{margin:0;display:grid;gap:16px}
+.col dt{font:600 15px/1.3 var(--f-body)}
+.col dd{margin:4px 0 0;color:var(--muted);font-size:14.5px}
+.spec{grid-column:1 / span 7;overflow-x:auto}
+.spec table{width:100%;border-collapse:collapse;font:400 13.5px/1.5 var(--f-mono);min-width:520px}
+.spec th,.spec td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+.spec th{color:var(--muted);font-weight:400;width:36%}
+.spec td{color:var(--text)}
+.badges{grid-column:8 / span 5;display:grid;gap:10px;align-content:start}
+.badge{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--line);background:var(--surface);font:400 13px var(--f-mono)}
+.badge span:first-child{color:var(--muted)}
+.badge .v{display:flex;align-items:center;gap:8px;text-align:right}
+.badge .v::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.badge .v.ok::before{background:var(--safe)}
+.badge .v.bad::before{background:var(--danger)}
+
+/* preview */
+.preview{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px;align-items:center}
+.tabs{grid-column:1 / span 5;display:grid;border-top:1px solid var(--line)}
+.tabs button{display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:18px 4px;color:var(--muted);min-height:44px}
+.tabs button .n{font:500 12px var(--f-mono);padding-top:3px}
+.tabs button b{display:block;font:600 18px/1.25 var(--f-head);color:var(--text);margin-bottom:4px}
+.tabs button span span{font-size:14.5px}
+.tabs button[aria-selected="true"]{color:var(--text)}
+.tabs button[aria-selected="true"] .n{color:var(--amber)}
+.tabs button[aria-selected="true"] b{color:var(--amber)}
+.screen-wrap{grid-column:7 / span 6;display:grid;place-items:center;position:relative;min-height:560px}
+.screen-wrap .phone{grid-column:auto;justify-self:center;transform:none;opacity:1;width:min(290px,72vw)}
+.screen-wrap .ring{position:absolute;width:min(480px,100%);aspect-ratio:1;border:1px solid var(--line);border-radius:50%}
+.screen-wrap .ring.r2{width:min(360px,80%);border-style:dashed;border-color:var(--line-2)}
+.shot-note{grid-column:1 / -1;font:400 12px var(--f-mono);color:var(--dim)}
+
+/* download */
+.dl{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px}
+.plat{grid-column:span 4;padding:28px;display:grid;gap:16px;align-content:start}
+.plat h3{font:600 24px/1.1 var(--f-head)}
+.plat p{color:var(--muted);font-size:15px}
+.plat .btn{justify-self:start}
+.plat .files{font:400 12.5px/1.8 var(--f-mono);color:var(--dim)}
+.term{grid-column:1 / -1;background:#080b10;border:1px solid var(--line);min-width:0}
+.term-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);font:400 12px var(--f-mono);color:var(--dim)}
+.term-head .dots{display:flex;gap:6px}
+.term-head .dots i{width:9px;height:9px;border-radius:50%;background:var(--line-2)}
+.copy{background:none;border:1px solid var(--line-2);border-radius:8px;padding:6px 10px;min-height:32px;font:500 12px var(--f-mono);color:var(--muted)}
+.copy:hover{color:var(--amber);border-color:var(--amber)}
+.term pre{margin:0;padding:18px 18px 22px;overflow-x:auto;font:400 13px/1.75 var(--f-mono);color:var(--text)}
+.term pre .c{color:var(--dim)}
+.term pre .p{color:var(--amber)}
+.term pre .h{color:var(--safe)}
+
+/* docs / faq */
+.docs{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px}
+.doclinks{grid-column:1 / span 4;display:grid;gap:0;align-content:start;border-top:1px solid var(--line)}
+.doclinks a{display:flex;justify-content:space-between;gap:12px;padding:16px 2px;border-bottom:1px solid var(--line);text-decoration:none;font:500 15px/1.3 var(--f-body)}
+.doclinks a small{display:block;font:400 12px var(--f-mono);color:var(--dim);margin-top:4px}
+.doclinks a:hover{color:var(--amber)}
+.faq{grid-column:6 / span 7;border-top:1px solid var(--line)}
+.faq details{border-bottom:1px solid var(--line)}
+.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:16px;align-items:center;padding:20px 2px;font:600 17px/1.35 var(--f-head);min-height:44px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font:400 22px var(--f-mono);color:var(--amber);flex:none}
+.faq details[open] summary::after{content:"−"}
+.faq p{padding:0 2px 22px;color:var(--muted);max-width:64ch;font-size:15px}
+
+/* open source */
+.oss{position:relative;overflow:hidden;padding:clamp(32px,5vw,64px);display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px;align-items:end}
+.oss .big{grid-column:1 / span 8;font:700 clamp(40px,6.4vw,96px)/.92 var(--f-head);letter-spacing:-.045em}
+.oss .big em{font-style:italic;color:var(--amber)}
+.oss .side{grid-column:9 / span 4;display:grid;gap:14px}
+.oss .side .btn{justify-content:space-between}
+.oss .lic{grid-column:1 / -1;font:400 12.5px/1.7 var(--f-mono);color:var(--dim);border-top:1px solid var(--line);padding-top:18px}
+
+footer{border-top:1px solid var(--line);padding-block:48px 56px}
+.foot{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px}
+.foot .about{grid-column:1 / span 4;display:grid;gap:14px;align-content:start;color:var(--muted);font-size:14px}
+.foot .colf{grid-column:span 2;display:grid;gap:10px;align-content:start;font-size:14px}
+.foot .colf h4{margin:0 0 4px;font:500 12px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.foot .colf a{color:var(--muted);text-decoration:none}
+.foot .colf a:hover{color:var(--amber)}
+.foot .end{grid-column:1 / -1;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding-top:20px;font:400 12px var(--f-mono);color:var(--dim)}
+
+/* ---------- responsive ---------- */
+@media (max-width:1199px){
+  nav.main{gap:18px}
+  .hero-copy{grid-column:1 / span 7}
+  .phone.hero-phone{grid-column:10 / span 3}
+  .values{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .value:nth-child(2){border-right:0}
+  .value:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .plat{grid-column:span 6}
+}
+@media (max-width:980px){
+  nav.main,.right .gh{display:none}
+  .menu-btn{display:grid}
+  .drawer{position:fixed;inset:68px 0 auto;z-index:49;background:var(--bg);border-bottom:1px solid var(--line);padding:12px var(--gr) 24px var(--gl);display:grid;gap:4px}
+  .drawer[hidden]{display:none}
+  .drawer a{padding:14px 2px;border-bottom:1px solid var(--line);text-decoration:none;font:500 17px var(--f-head);min-height:44px}
+  .drawer .btn{margin-top:14px}
+  .s-head .tag,.s-head h2,.s-head .lead,.s-head > div{grid-column:1 / -1}
+  .feat .intro,.feat ul,.tabs,.screen-wrap,.doclinks,.faq,.spec,.badges,.oss .big,.oss .side{grid-column:1 / -1}
+  .feat .intro{position:static}
+  .col{grid-column:1 / -1}
+  .flow{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .flow::before{display:none}
+  .screen-wrap{min-height:520px}
+}
+@media (max-width:767px){
+  #seq{height:calc(100vh + 80vh)}
+  .hero{align-items:flex-start;padding-top:96px}
+  .hero-copy{grid-column:1 / -1;gap:20px}
+  .hero-phone,.readout{display:none}
+  .values{grid-template-columns:1fr}
+  .value{border-right:0;border-bottom:1px solid var(--line)}
+  .value:last-child{border-bottom:0}
+  .flow{grid-template-columns:1fr}
+  .plat{grid-column:1 / -1}
+  .foot .about{grid-column:1 / -1}
+  .foot .colf{grid-column:span 6}
+  .right .btn.gh{display:none}
+  .sealed{bottom:9vh}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  #seq{height:auto}
+  .stick{position:relative;height:100vh}
+  .hint{display:none}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 018 0v3"/><path d="M12 14.5v2.5"/></symbol>
+  <symbol id="i-gh" viewBox="0 0 24 24"><path d="M9 19c-4 1.3-4-2-6-2.5m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 00-1.3-3.2 4.2 4.2 0 00-.1-3.2s-1-.3-3.4 1.3a11.6 11.6 0 00-6 0C6.8 2.3 5.8 2.6 5.8 2.6a4.2 4.2 0 00-.1 3.2A4.6 4.6 0 004.4 9c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></symbol>
+  <symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6z"/><path d="M8.8 12.2l2.2 2.2 4.3-4.6"/></symbol>
+  <symbol id="i-user-x" viewBox="0 0 24 24"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.8-3.6 3.4-5.5 6.5-5.5 1.4 0 2.6.4 3.6 1M16.5 15.5l4 4M20.5 15.5l-4 4"/></symbol>
+  <symbol id="i-onion" viewBox="0 0 24 24"><path d="M12 3c0 2.5-6 5.5-6 11a6 6 0 0012 0c0-5.5-6-8.5-6-11z"/><path d="M12 9c0 1.7-3 3.4-3 6a3 3 0 006 0c0-2.6-3-4.3-3-6z"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="M8.5 7L3.5 12l5 5M15.5 7l5 5-5 5M13.5 4.5l-3 15"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></symbol>
+  <symbol id="i-relay" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="6" rx="1.5"/><rect x="3.5" y="13.5" width="17" height="6" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.5h.01"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap bar">
+    <a class="brand" href="#top" aria-label="Kilit Messenger home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="brass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0c06a"/><stop offset="1" stop-color="#b07a1e"/></linearGradient></defs>
+        <path d="M10 14V10a6 6 0 0112 0v4" fill="none" stroke="#b07a1e" stroke-width="3.2"/><rect x="6" y="13" width="20" height="16" rx="4" fill="url(#brass)"/><circle cx="16" cy="19.5" r="2.2" fill="#0d1117"/><path d="M15 21h2l.6 4h-3.2z" fill="#0d1117"/></svg>
+      Kilit <span>Messenger</span>
+    </a>
+    <nav class="main" aria-label="Main">
+      <a href="#features" data-k="navFeatures">Features</a>
+      <a href="#security" data-k="navSecurity">Security</a>
+      <a href="#download" data-k="navDownload">Download</a>
+      <a href="#docs" data-k="navDocs">Docs</a>
+      <a href="#community" data-k="navCommunity">Community</a>
+    </nav>
+    <div class="right">
+      <div class="lang" role="group" aria-label="Language"><button id="lang-en" aria-pressed="true">EN</button><button id="lang-tr" aria-pressed="false">TR</button></div>
+      <a class="btn ghost gh" href="https://github.com/smyrna-pergamum/kilit-messenger"><svg class="ico" aria-hidden="true"><use href="#i-gh"/></svg><span data-k="viewGh">View on GitHub</span></a>
+      <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="drawer" aria-label="Menu"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></button>
+    </div>
+  </div>
+  <div class="drawer" id="drawer" hidden>
+    <a href="#features" data-k="navFeatures">Features</a>
+    <a href="#security" data-k="navSecurity">Security</a>
+    <a href="#download" data-k="navDownload">Download</a>
+    <a href="#docs" data-k="navDocs">Docs</a>
+    <a href="#community" data-k="navCommunity">Community</a>
+    <a class="btn ghost" href="https://github.com/smyrna-pergamum/kilit-messenger"><svg class="ico" aria-hidden="true"><use href="#i-gh"/></svg><span data-k="viewGh">View on GitHub</span></a>
+  </div>
+</header>
+
+<main id="top">
+<!-- 02 hero + 03 scroll to lock share one sticky stage -->
+<div id="seq">
+  <div class="stick" id="stick">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <canvas id="lockCanvas" aria-hidden="true"></canvas>
+    <svg class="fallback" viewBox="0 0 200 220" aria-hidden="true">
+      <defs><linearGradient id="fb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a3240"/><stop offset="1" stop-color="#0f141c"/></linearGradient></defs>
+      <path d="M60 100V68a40 40 0 0180 0v32" fill="none" stroke="#3a4556" stroke-width="16" stroke-linecap="round"/>
+      <rect x="30" y="96" width="140" height="110" rx="22" fill="url(#fb)" stroke="#e0a84a" stroke-opacity=".5"/>
+      <circle cx="100" cy="140" r="12" fill="none" stroke="#e0a84a" stroke-width="4"/><path d="M94 150h12l4 28h-20z" fill="none" stroke="#e0a84a" stroke-width="4" stroke-linejoin="round"/>
+    </svg>
+    <div class="readout" aria-hidden="true">
+      <span>KLT-LOCK / <b id="roP">000</b>%</span>
+      <span>pqxdh · kyber1024 · spqr</span>
+      <span class="st" id="roS">state: open</span>
+    </div>
+    <div class="hero">
+      <div class="wrap">
+        <div class="hero-copy">
+          <span class="chip"><i></i><span data-k="chip">Post-quantum · No account · Tor only</span></span>
+          <h1 data-k="h1" data-html>Your messages.<br>Your keys.<br><em>Your control.</em></h1>
+          <p class="lead" data-k="heroP">Kilit is a messenger and encrypted vault with no account, no phone number and no server of its own. Messages are encrypted on your device and leave it only through Tor.</p>
+          <div class="actions">
+            <a class="btn primary" href="#download"><svg class="ico" aria-hidden="true"><use href="#i-dl"/></svg><span data-k="ctaDl">Download</span></a>
+            <a class="btn ghost" href="https://github.com/smyrna-pergamum/kilit-messenger"><svg class="ico" aria-hidden="true"><use href="#i-gh"/></svg><span data-k="viewGh">View on GitHub</span></a>
+          </div>
+          <div class="meta"><span>v0.1.6-alpha</span><span>Android 7.0+</span><span>Windows 10+</span><span>GPL-3.0-or-later</span></div>
+        </div>
+        <div class="phone hero-phone"><img src="assets/01-chats.webp" width="540" height="1170" alt="Kilit's chat list: a group, two contacts and one request, with Tor ready" data-k-alt="altChats"></div>
+      </div>
+    </div>
+    <div class="hint" aria-hidden="true"><span class="mouse"></span><span data-k="hint">scroll to lock</span></div>
+    <div class="sealed" aria-live="polite">
+      <span class="tag"><b data-k="sealTag">sealed on your device</b></span>
+      <p class="big" data-k="seal" data-html>YOUR PRIVACY. <span>YOUR CONTROL.</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- 04 values -->
+<section class="s" id="values">
+  <div class="wrap">
+    <div class="s-head">
+      <span class="tag"><b>04</b> / <span data-k="valTag">what it is</span></span>
+      <div>
+        <h2 class="h2" data-k="valH">Four things Kilit does, and nothing it can't back up</h2>
+      </div>
+    </div>
+    <div class="values">
+      <article class="value"><svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg><h3 data-k="v1h">Post-quantum Signal protocol</h3><p data-k="v1p">Messages use libsignal: PQXDH with Kyber1024 for the first contact, then the post-quantum ratchet (SPQR).</p><span class="src">README · THREAT_MODEL</span></article>
+      <article class="value"><svg class="ico" aria-hidden="true"><use href="#i-user-x"/></svg><h3 data-k="v2h">No account, no tracking</h3><p data-k="v2p">No sign-up, phone number or email. No analytics, no crash reports, no ads. Your ID is four words.</p><span class="src">PRIVACY.md</span></article>
+      <article class="value"><svg class="ico" aria-hidden="true"><use href="#i-onion"/></svg><h3 data-k="v3h">Tor only, no server</h3><p data-k="v3p">An embedded Tor carries every message to public Nostr relays. Kilit runs no server of its own.</p><span class="src">README · RELAYS.md</span></article>
+      <article class="value"><svg class="ico" aria-hidden="true"><use href="#i-code"/></svg><h3 data-k="v4h">Open source</h3><p data-k="v4p">GPL-3.0-or-later, built inside pinned Docker images. Read it, build it, report what you find.</p><span class="src">LICENSE · repro/</span></article>
+    </div>
+  </div>
+</section>
+
+<!-- features -->
+<section class="s" id="features">
+  <div class="wrap feat">
+    <div class="intro">
+      <span class="tag"><b>04.1</b> / <span data-k="featTag">features</span></span>
+      <h2 class="h2" data-k="featH">Built for chats you'd rather keep</h2>
+      <p class="lead" data-k="featP">Everything below is in the current alpha for Android and Windows.</p>
+    </div>
+    <ul>
+      <li><span class="n">01</span><div><h3 data-k="f1h">A Kilit ID instead of a number</h3><p data-k="f1p" data-html>Four words, like <code>@abandon-ability-able-about</code>. Share it as a QR code or a <code>kilit://add</code> link. You can renew it; your contacts stay.</p></div></li>
+      <li><span class="n">02</span><div><h3 data-k="f2h">Requests for strangers</h3><p data-k="f2p">People who write first land in Requests and must pay a small proof of work. They get no read receipt until you accept.</p></div></li>
+      <li><span class="n">03</span><div><h3 data-k="f3h">Files, photos and stickers</h3><p data-k="f3p">Files up to 5 MB, each with its own key. Photos lose their metadata before sending; camera photos never touch the disk.</p></div></li>
+      <li><span class="n">04</span><div><h3 data-k="f4h">Groups of up to 20</h3><p data-k="f4p">Each message is encrypted separately for every member, so on the relays a group message looks like any other.</p></div></li>
+      <li><span class="n">05</span><div><h3 data-k="f5h">Disappearing messages</h3><p data-k="f5p">Set per chat. Delivery ticks show when a relay holds a message and when their phone opened it.</p></div></li>
+      <li><span class="n">06</span><div><h3 data-k="f6h">Phone and computer</h3><p data-k="f6p">Kilit runs on Windows with its own Tor. Link up to 5 devices to one ID; each has its own keys.</p></div></li>
+      <li><span class="n">07</span><div><h3 data-k="f7h">Encrypted vault and carrier mode</h3><p data-k="f7p" data-html>Notes to self and files in the <code>.klt</code> format (age with post-quantum X-Wing keys). Seal a message as <code>KLT1:</code> text and send it through any other app.</p></div></li>
+      <li><span class="n">08</span><div><h3 data-k="f8h">Hardware-bound PIN and panic code</h3><p data-k="f8p">The PIN is bound to the phone's hardware key. A separate 4-digit panic code wipes everything.</p></div></li>
+      <li><span class="n">09</span><div><h3 data-k="f9h">Works where Tor is blocked</h3><p data-k="f9p">Built-in obfs4 and Snowflake bridges, or your own bridge lines; Kilit offers them when Tor seems blocked. 15 languages.</p></div></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 05 how it works -->
+<section class="s" id="how">
+  <div class="wrap">
+    <div class="s-head">
+      <span class="tag"><b>05</b> / <span data-k="howTag">how it works</span></span>
+      <div>
+        <h2 class="h2" data-k="howH">From your keyboard to their screen</h2>
+        <p class="lead" data-k="howP">The message is sealed before it leaves your device and opened only on theirs. In between it is ciphertext on a relay.</p>
+      </div>
+    </div>
+    <div class="flow" id="flow">
+      <div class="step"><div class="node"><svg class="ico" aria-hidden="true"><use href="#i-phone"/></svg></div><span class="k">01 / <span data-k="s1k">add</span></span><h3 data-k="s1h">Share your code</h3><p data-k="s1p">Scan their QR code or open their kilit:// link. The first message sets up keys with PQXDH and Kyber1024.</p></div>
+      <div class="step"><div class="node"><svg class="ico" aria-hidden="true"><use href="#i-lock"/></svg></div><span class="k">02 / <span data-k="s2k">seal</span></span><h3 data-k="s2h">Encrypt on device</h3><p data-k="s2p">Signal's post-quantum ratchet encrypts the message, then NIP-44/59 wraps it again for the relay.</p></div>
+      <div class="step"><div class="node"><svg class="ico" aria-hidden="true"><use href="#i-onion"/></svg></div><span class="k">03 / <span data-k="s3k">carry</span></span><h3 data-k="s3h">Over Tor to a relay</h3><p data-k="s3p">The embedded Tor delivers it to public Nostr relays, under a mailbox tag that changes every day.</p></div>
+      <div class="step"><div class="node"><svg class="ico" aria-hidden="true"><use href="#i-relay"/></svg></div><span class="k">04 / <span data-k="s4k">open</span></span><h3 data-k="s4h">Fetched and opened</h3><p data-k="s4p">Their Kilit picks it up over Tor and decrypts it. Two ticks: their phone opened it.</p></div>
+    </div>
+    <pre class="packet panel" aria-label="What a relay stores"><span data-k="pk1">what the relay sees</span>
+<b>mailbox</b>  9f3c…e21a   <span class="c" data-k="pk2">changes every 24 h</span>
+<b>time</b>     2026-11-09T21:04Z
+<b>size</b>     class M
+<b>content</b>  ciphertext (Signal SPQR → NIP-44/59)
+<b>ip</b>       <span data-k="pk3">a Tor exit, never yours</span></pre>
+  </div>
+</section>
+
+<!-- 06 security -->
+<section class="s" id="security">
+  <div class="wrap">
+    <div class="s-head">
+      <span class="tag"><b>06</b> / <span data-k="secTag">security</span></span>
+      <div>
+        <h2 class="h2" data-k="secH">What Kilit protects, and what it doesn't</h2>
+        <p class="lead" data-k="secP">From the project's threat model. It is a draft and will be updated as Kilit grows.</p>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="warn" role="note"><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg><p data-k="warn" data-html><b>Alpha. Not audited.</b> Kilit has had no independent security review. Do not rely on it where your life or freedom depends on it.</p></div>
+      <div class="col yes panel">
+        <h3><i></i><span data-k="yesH">Protects against</span></h3>
+        <dl>
+          <div><dt data-k="y1t">Network observers</dt><dd data-k="y1d">Traffic goes through Tor. Your internet provider does not see who you talk to.</dd></div>
+          <div><dt data-k="y2t">The relays</dt><dd data-k="y2d">Messages are encrypted twice, with Signal (PQXDH and Triple Ratchet) and NIP-44/59. Relays cannot read them.</dd></div>
+          <div><dt data-k="y3t">Future quantum computers</dt><dd data-k="y3d">Key exchanges are hybrid: X25519 and ML-KEM.</dd></div>
+          <div><dt data-k="y4t">Malicious files</dt><dd data-k="y4d">Files are opened in a single-use compartment that is destroyed after each job.</dd></div>
+          <div><dt data-k="y5t">Copied vault files</dt><dd data-k="y5d">The PIN is MAC'd with the device's hardware key (StrongBox or TEE, TPM 2.0 on Windows), then Argon2id. A copy cannot be tried on another device.</dd></div>
+        </dl>
+      </div>
+      <div class="col no panel">
+        <h3><i></i><span data-k="noH">Does not protect against</span></h3>
+        <dl>
+          <div><dt data-k="n1t">Metadata on public relays</dt><dd data-k="n1d">Someone who knows a mailbox address can see when and how many messages arrive. Addresses change every 24 hours.</dd></div>
+          <div><dt data-k="n2t">PIN guessing on a rooted phone</dt><dd data-k="n2d">Argon2id slows each try (about 0.3 s), but a 6-digit PIN can still be found in days. Use a longer PIN.</dd></div>
+          <div><dt data-k="n3t">Losing the hardware key</dt><dd data-k="n3d">If app data is wiped or the device reset, the vault cannot be opened again. Encrypted backup is planned.</dd></div>
+          <div><dt data-k="n4t">A compromised device or the other person</dt><dd data-k="n4d">An unlocked phone or kernel malware is out of scope. The person you talk to can still screenshot or forward.</dd></div>
+          <div><dt data-k="n5t">Global traffic analysis</dt><dd data-k="n5d">There is no cover traffic, so a watcher of much of the network may try to correlate timing.</dd></div>
+        </dl>
+      </div>
+      <div class="spec panel">
+        <table>
+          <caption class="tag" style="text-align:left;padding:16px 16px 4px" data-k="specCap">cryptography in use</caption>
+          <tr><th data-k="t1">First contact</th><td>PQXDH · Kyber1024</td></tr>
+          <tr><th data-k="t2">Ongoing messages</th><td>Signal post-quantum ratchet (SPQR)</td></tr>
+          <tr><th data-k="t3">Relay wrapping</th><td>Nostr NIP-44 / NIP-59</td></tr>
+          <tr><th data-k="t4">Vault and carrier</th><td>.klt · age + X-Wing (KLT1)</td></tr>
+          <tr><th data-k="t5">PIN</th><td>HW key MAC → Argon2id</td></tr>
+          <tr><th data-k="t6">Network</th><td>Embedded Tor · obfs4 · Snowflake</td></tr>
+        </table>
+      </div>
+      <div class="badges">
+        <div class="badge"><span data-k="b1">independent audit</span><span class="v bad" data-k="b1v">none yet</span></div>
+        <div class="badge"><span data-k="b2">analytics / crash reports</span><span class="v ok" data-k="b2v">none</span></div>
+        <div class="badge"><span data-k="b3">own server</span><span class="v ok" data-k="b3v">none</span></div>
+        <div class="badge"><span data-k="b4">builds</span><span class="v ok" data-k="b4v">pinned Docker images</span></div>
+        <div class="badge"><span data-k="b5">windows installer</span><span class="v bad" data-k="b5v">not code-signed yet</span></div>
+        <div class="badge"><span data-k="b6">vulnerability reports</span><span class="v ok" data-k="b6v">private, 90 days</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 app preview -->
+<section class="s" id="preview">
+  <div class="wrap">
+    <div class="s-head">
+      <span class="tag"><b>07</b> / <span data-k="prevTag">app preview</span></span>
+      <div><h2 class="h2" data-k="prevH">The real screens</h2></div>
+    </div>
+    <div class="preview">
+      <div class="tabs" role="tablist" aria-label="App screens" id="tabs"></div>
+      <div class="screen-wrap" aria-live="polite">
+        <span class="ring" aria-hidden="true"></span><span class="ring r2" aria-hidden="true"></span>
+        <div class="phone"><img id="shot" src="assets/01-chats.webp" width="540" height="1170" alt=""></div>
+      </div>
+      <p class="shot-note" data-k="shotNote">The people and messages are made up. Kilit blocks screenshots by default, so these are drawn from the real screens by app/tool/screenshots.</p>
+    </div>
+  </div>
+</section>
+
+<!-- download -->
+<section class="s" id="download">
+  <div class="wrap">
+    <div class="s-head">
+      <span class="tag"><b>08</b> / <span data-k="dlTag">download</span></span>
+      <div>
+        <h2 class="h2" data-k="dlH">Get Kilit, then check it</h2>
+        <p class="lead" data-k="dlP">Every build is on GitHub Releases. Before installing, compare the SHA-256 and, on Android, the signing certificate.</p>
+      </div>
+    </div>
+    <div class="dl">
+      <div class="plat panel">
+        <span class="tag">android 7.0+</span>
+        <h3>Android</h3>
+        <p data-k="andP">Two permissions: the network, used only by the embedded Tor, and the camera, for photos you take in a chat.</p>
+        <a class="btn primary" href="https://github.com/smyrna-pergamum/kilit-messenger/releases/download/v0.1.6-alpha/Kilit-0.1.6-alpha.apk"><svg class="ico" aria-hidden="true"><use href="#i-dl"/></svg><span data-k="dlApk">Download APK</span></a>
+        <span class="files">Kilit-0.1.6-alpha.apk · 150 MB</span>
+      </div>
+      <div class="plat panel">
+        <span class="tag">windows 10+ · 64-bit</span>
+        <h3>Windows</h3>
+        <p data-k="winP">Installs for your user only, no administrator rights. Not code-signed yet, so SmartScreen warns: check the SHA-256, then More info, Run anyway.</p>
+        <a class="btn ghost" href="https://github.com/smyrna-pergamum/kilit-messenger/releases/download/v0.1.6-alpha/Kilit-0.1.6-alpha-windows-setup.exe"><svg class="ico" aria-hidden="true"><use href="#i-dl"/></svg><span data-k="dlWin">Installer (.exe)</span></a>
+        <span class="files">windows-setup.exe · 36 MB<br>windows-x64.zip · 51 MB (<a href="https://github.com/smyrna-pergamum/kilit-messenger/releases/download/v0.1.6-alpha/Kilit-0.1.6-alpha-windows-x64.zip" data-k="portable">portable</a>)</span>
+      </div>
+      <div class="plat panel">
+        <span class="tag" data-k="relTag">release notes</span>
+        <h3>0.1.6-alpha</h3>
+        <p data-k="relP">Reconnect Tor from Settings, see the route your messages take, get offered a bridge when Tor is blocked, keep encrypted notes to self, and type the PIN on a keyboard on Windows.</p>
+        <a class="btn ghost" href="https://github.com/smyrna-pergamum/kilit-messenger/releases"><span data-k="allRel">All releases</span><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      </div>
+      <div class="term" id="term">
+        <div class="term-head"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span>verify · v0.1.6-alpha</span><button class="copy" id="copyBtn" data-k="copy">copy</button></div>
+<pre id="termText"><span class="c"># 1. checksum must match the release notes</span>
+<span class="p">$</span> sha256sum Kilit-0.1.6-alpha.apk
+<span class="h">63855b0e50c3b6a5bfc43b38eadb279cef8d83de4ee27833c0fef25d7afd3a51</span>
+
+<span class="c"># 2. the signing certificate must be Kilit's</span>
+<span class="p">$</span> apksigner verify --print-certs Kilit-0.1.6-alpha.apk
+<span class="h">SHA-256: DE:B8:42:2C:53:F6:FB:C3:34:7C:5C:0B:84:31:61:17:
+         D2:C9:4A:53:CD:70:FA:6A:B4:E9:50:16:DA:9D:B1:E1</span>
+
+<span class="c"># windows (PowerShell)</span>
+<span class="p">&gt;</span> Get-FileHash Kilit-0.1.6-alpha-windows-setup.exe
+<span class="h">108b934e08df07fff05e806c5a6e49910427cb30be5b9f7ada22bea61c9e6439</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- docs -->
+<section class="s" id="docs">
+  <div class="wrap">
+    <div class="s-head">
+      <span class="tag"><b>08.1</b> / <span data-k="docTag">documentation</span></span>
+      <div><h2 class="h2" data-k="docH">Read how it works</h2></div>
+    </div>
+    <div class="docs">
+      <div class="doclinks">
+        <a href="https://github.com/smyrna-pergamum/kilit-messenger/blob/main/spec/KILIT-NET.md"><span>KILIT-NET<small data-k="d1">network protocol (Turkish)</small></span><svg class="ico" width="18" height="18" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a href="https://github.com/smyrna-pergamum/kilit-messenger/blob/main/spec/MULTI-DEVICE.md"><span>MULTI-DEVICE<small data-k="d2">linked devices (Turkish)</small></span><svg class="ico" width="18" height="18" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a href="https://github.com/smyrna-pergamum/kilit-messenger/blob/main/spec/KLT1.md"><span>KLT1<small data-k="d3">vault and carrier format</small></span><svg class="ico" width="18" height="18" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a href="https://github.com/smyrna-pergamum/kilit-messenger/blob/main/THREAT_MODEL.md"><span>THREAT_MODEL<small data-k="d4">what it protects, what it doesn't</small></span><svg class="ico" width="18" height="18" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a href="https://github.com/smyrna-pergamum/kilit-messenger/blob/main/PRIVACY.md"><span>PRIVACY<small data-k="d5">what relays can see</small></span><svg class="ico" width="18" height="18" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a href="https://github.com/smyrna-pergamum/kilit-messenger/blob/main/docs/BUILDING.md"><span>BUILDING<small data-k="d6">build it yourself (Turkish)</small></span><svg class="ico" width="18" height="18" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      </div>
+      <div class="faq">
+        <details><summary data-k="q1">Does Kilit need a phone number or an account?</summary><p data-k="a1">No. You get a Kilit ID of four words and share it as a QR code or link. No phone number, email or contact upload.</p></details>
+        <details><summary data-k="q2">What can the relays see?</summary><p data-k="a2">Mailbox addresses, message times and a size class. Not the content, and not your IP address, because Kilit connects through Tor.</p></details>
+        <details><summary data-k="q3">Tor is blocked where I live. Will it work?</summary><p data-k="a3">Kilit can use bridges: built-in obfs4 or Snowflake, or bridge lines you add yourself. Automatic mode tries direct, then obfs4, then Snowflake.</p></details>
+        <details><summary data-k="q4">What happens if I lose my phone?</summary><p data-k="a4">The vault is bound to that phone's hardware key and cannot be opened elsewhere. Encrypted backup is planned for a later stage.</p></details>
+        <details><summary data-k="q5">Why does Windows warn about the installer?</summary><p data-k="a5">The installer is not code-signed yet. Check its SHA-256 against the release notes, then choose More info and Run anyway. The portable zip is the same app.</p></details>
+        <details><summary data-k="q6">Has Kilit been audited?</summary><p data-k="a6">No. Kilit is alpha and has had no independent security review. Do not rely on it where your life or freedom depends on it.</p></details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 open source CTA -->
+<section class="s" id="community">
+  <div class="wrap">
+    <div class="oss panel">
+      <p class="big" data-k="ossH" data-html>Read the code.<br><em>Then trust it.</em></p>
+      <div class="side">
+        <a class="btn primary" href="https://github.com/smyrna-pergamum/kilit-messenger"><span data-k="ossRepo">Repository</span><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a class="btn ghost" href="https://github.com/smyrna-pergamum/kilit-messenger/issues"><span data-k="ossIssues">Issues and ideas</span><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a class="btn ghost" href="https://github.com/smyrna-pergamum/kilit-messenger/security/advisories/new"><span data-k="ossVuln">Report a vulnerability privately</span><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      </div>
+      <p class="lic" data-k="lic">GPL-3.0-or-later. Derived in part from Kryfo (GPL-3.0-or-later) and linked with libsignal (AGPL-3.0), so the combined program carries the AGPL-3.0 network-interaction terms. Kilit is not Kryfo and is not endorsed by its authors.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div class="about">
+      <a class="brand" href="#top"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M10 14V10a6 6 0 0112 0v4" fill="none" stroke="#b07a1e" stroke-width="3.2"/><rect x="6" y="13" width="20" height="16" rx="4" fill="url(#brass)"/><circle cx="16" cy="19.5" r="2.2" fill="#0d1117"/><path d="M15 21h2l.6 4h-3.2z" fill="#0d1117"/></svg>Kilit <span>Messenger</span></a>
+      <p data-k="footP">A private messenger and encrypted vault. No account, no phone number, no server.</p>
+    </div>
+    <div class="colf"><h4 data-k="fProduct">product</h4><a href="#features" data-k="navFeatures">Features</a><a href="#security" data-k="navSecurity">Security</a><a href="#download" data-k="navDownload">Download</a></div>
+    <div class="colf"><h4 data-k="fDocs">docs</h4><a href="https://github.com/smyrna-pergamum/kilit-messenger/blob/main/THREAT_MODEL.md" data-k="fThreat">Threat model</a><a href="https://github.com/smyrna-pergamum/kilit-messenger/blob/main/PRIVACY.md" data-k="fPrivacy">Privacy</a><a href="https://github.com/smyrna-pergamum/kilit-messenger/blob/main/docs/RELAYS.md" data-k="fRelays">Relays</a></div>
+    <div class="colf"><h4 data-k="fProject">project</h4><a href="https://github.com/smyrna-pergamum/kilit-messenger">GitHub</a><a href="https://github.com/smyrna-pergamum/kilit-messenger/blob/main/SECURITY.md" data-k="fSecurity">Security policy</a><a href="https://github.com/smyrna-pergamum/kilit-messenger/blob/main/LICENSE" data-k="fLicense">License</a></div>
+    <div class="colf"><h4 data-k="fContact">contact</h4><a href="https://github.com/smyrna-pergamum/kilit-messenger/issues" data-k="fIssues">GitHub issues</a><a href="https://github.com/smyrna-pergamum/kilit-messenger/security/advisories/new" data-k="fReport">Private report</a></div>
+    <div class="end"><span>© Kilit contributors · GPL-3.0-or-later</span><span data-k="noTrack">This site uses no cookies and no analytics.</span></div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const I18N={
+en:{navFeatures:"Features",navSecurity:"Security",navDownload:"Download",navDocs:"Docs",navCommunity:"Community",viewGh:"View on GitHub",
+chip:"Post-quantum · No account · Tor only",h1:"Your messages.<br>Your keys.<br><em>Your control.</em>",heroP:"Kilit is a messenger and encrypted vault with no account, no phone number and no server of its own. Messages are encrypted on your device and leave it only through Tor.",ctaDl:"Download",hint:"scroll to lock",sealTag:"sealed on your device",seal:"YOUR PRIVACY. <span>YOUR CONTROL.</span>",
+valTag:"what it is",valH:"Four things Kilit does, and nothing it can't back up",v1h:"Post-quantum Signal protocol",v1p:"Messages use libsignal: PQXDH with Kyber1024 for the first contact, then the post-quantum ratchet (SPQR).",v2h:"No account, no tracking",v2p:"No sign-up, phone number or email. No analytics, no crash reports, no ads. Your ID is four words.",v3h:"Tor only, no server",v3p:"An embedded Tor carries every message to public Nostr relays. Kilit runs no server of its own.",v4h:"Open source",v4p:"GPL-3.0-or-later, built inside pinned Docker images. Read it, build it, report what you find.",
+featTag:"features",featH:"Built for chats you'd rather keep",featP:"Everything below is in the current alpha for Android and Windows.",
+f1h:"A Kilit ID instead of a number",f1p:"Four words, like <code>@abandon-ability-able-about</code>. Share it as a QR code or a <code>kilit://add</code> link. You can renew it; your contacts stay.",f2h:"Requests for strangers",f2p:"People who write first land in Requests and must pay a small proof of work. They get no read receipt until you accept.",f3h:"Files, photos and stickers",f3p:"Files up to 5 MB, each with its own key. Photos lose their metadata before sending; camera photos never touch the disk.",f4h:"Groups of up to 20",f4p:"Each message is encrypted separately for every member, so on the relays a group message looks like any other.",f5h:"Disappearing messages",f5p:"Set per chat. Delivery ticks show when a relay holds a message and when their phone opened it.",f6h:"Phone and computer",f6p:"Kilit runs on Windows with its own Tor. Link up to 5 devices to one ID; each has its own keys.",f7h:"Encrypted vault and carrier mode",f7p:"Notes to self and files in the <code>.klt</code> format (age with post-quantum X-Wing keys). Seal a message as <code>KLT1:</code> text and send it through any other app.",f8h:"Hardware-bound PIN and panic code",f8p:"The PIN is bound to the phone's hardware key. A separate 4-digit panic code wipes everything.",f9h:"Works where Tor is blocked",f9p:"Built-in obfs4 and Snowflake bridges, or your own bridge lines; Kilit offers them when Tor seems blocked. 15 languages.",
+howTag:"how it works",howH:"From your keyboard to their screen",howP:"The message is sealed before it leaves your device and opened only on theirs. In between it is ciphertext on a relay.",s1k:"add",s1h:"Share your code",s1p:"Scan their QR code or open their kilit:// link. The first message sets up keys with PQXDH and Kyber1024.",s2k:"seal",s2h:"Encrypt on device",s2p:"Signal's post-quantum ratchet encrypts the message, then NIP-44/59 wraps it again for the relay.",s3k:"carry",s3h:"Over Tor to a relay",s3p:"The embedded Tor delivers it to public Nostr relays, under a mailbox tag that changes every day.",s4k:"open",s4h:"Fetched and opened",s4p:"Their Kilit picks it up over Tor and decrypts it. Two ticks: their phone opened it.",pk1:"what the relay sees",pk2:"changes every 24 h",pk3:"a Tor exit, never yours",
+secTag:"security",secH:"What Kilit protects, and what it doesn't",secP:"From the project's threat model. It is a draft and will be updated as Kilit grows.",warn:"<b>Alpha. Not audited.</b> Kilit has had no independent security review. Do not rely on it where your life or freedom depends on it.",
+yesH:"Protects against",y1t:"Network observers",y1d:"Traffic goes through Tor. Your internet provider does not see who you talk to.",y2t:"The relays",y2d:"Messages are encrypted twice, with Signal (PQXDH and Triple Ratchet) and NIP-44/59. Relays cannot read them.",y3t:"Future quantum computers",y3d:"Key exchanges are hybrid: X25519 and ML-KEM.",y4t:"Malicious files",y4d:"Files are opened in a single-use compartment that is destroyed after each job.",y5t:"Copied vault files",y5d:"The PIN is MAC'd with the device's hardware key (StrongBox or TEE, TPM 2.0 on Windows), then Argon2id. A copy cannot be tried on another device.",
+noH:"Does not protect against",n1t:"Metadata on public relays",n1d:"Someone who knows a mailbox address can see when and how many messages arrive. Addresses change every 24 hours.",n2t:"PIN guessing on a rooted phone",n2d:"Argon2id slows each try (about 0.3 s), but a 6-digit PIN can still be found in days. Use a longer PIN.",n3t:"Losing the hardware key",n3d:"If app data is wiped or the device reset, the vault cannot be opened again. Encrypted backup is planned.",n4t:"A compromised device or the other person",n4d:"An unlocked phone or kernel malware is out of scope. The person you talk to can still screenshot or forward.",n5t:"Global traffic analysis",n5d:"There is no cover traffic, so a watcher of much of the network may try to correlate timing.",
+specCap:"cryptography in use",t1:"First contact",t2:"Ongoing messages",t3:"Relay wrapping",t4:"Vault and carrier",t5:"PIN",t6:"Network",
+b1:"independent audit",b1v:"none yet",b2:"analytics / crash reports",b2v:"none",b3:"own server",b3v:"none",b4:"builds",b4v:"pinned Docker images",b5:"windows installer",b5v:"not code-signed yet",b6:"vulnerability reports",b6v:"private, 90 days",
+prevTag:"app preview",prevH:"The real screens",shotNote:"The people and messages are made up. Kilit blocks screenshots by default, so these are drawn from the real screens by app/tool/screenshots.",
+dlTag:"download",dlH:"Get Kilit, then check it",dlP:"Every build is on GitHub Releases. Before installing, compare the SHA-256 and, on Android, the signing certificate.",andP:"Two permissions: the network, used only by the embedded Tor, and the camera, for photos you take in a chat.",dlApk:"Download APK",winP:"Installs for your user only, no administrator rights. Not code-signed yet, so SmartScreen warns: check the SHA-256, then More info, Run anyway.",dlWin:"Installer (.exe)",portable:"portable",relTag:"release notes",relP:"Reconnect Tor from Settings, see the route your messages take, get offered a bridge when Tor is blocked, keep encrypted notes to self, and type the PIN on a keyboard on Windows.",allRel:"All releases",copy:"copy",copied:"copied",copyFail:"select and copy",
+docTag:"documentation",docH:"Read how it works",d1:"network protocol (Turkish)",d2:"linked devices (Turkish)",d3:"vault and carrier format",d4:"what it protects, what it doesn't",d5:"what relays can see",d6:"build it yourself (Turkish)",
+q1:"Does Kilit need a phone number or an account?",a1:"No. You get a Kilit ID of four words and share it as a QR code or link. No phone number, email or contact upload.",q2:"What can the relays see?",a2:"Mailbox addresses, message times and a size class. Not the content, and not your IP address, because Kilit connects through Tor.",q3:"Tor is blocked where I live. Will it work?",a3:"Kilit can use bridges: built-in obfs4 or Snowflake, or bridge lines you add yourself. Automatic mode tries direct, then obfs4, then Snowflake.",q4:"What happens if I lose my phone?",a4:"The vault is bound to that phone's hardware key and cannot be opened elsewhere. Encrypted backup is planned for a later stage.",q5:"Why does Windows warn about the installer?",a5:"The installer is not code-signed yet. Check its SHA-256 against the release notes, then choose More info and Run anyway. The portable zip is the same app.",q6:"Has Kilit been audited?",a6:"No. Kilit is alpha and has had no independent security review. Do not rely on it where your life or freedom depends on it.",
+ossH:"Read the code.<br><em>Then trust it.</em>",ossRepo:"Repository",ossIssues:"Issues and ideas",ossVuln:"Report a vulnerability privately",lic:"GPL-3.0-or-later. Derived in part from Kryfo (GPL-3.0-or-later) and linked with libsignal (AGPL-3.0), so the combined program carries the AGPL-3.0 network-interaction terms. Kilit is not Kryfo and is not endorsed by its authors.",
+footP:"A private messenger and encrypted vault. No account, no phone number, no server.",fProduct:"product",fDocs:"docs",fThreat:"Threat model",fPrivacy:"Privacy",fRelays:"Relays",fProject:"project",fSecurity:"Security policy",fLicense:"License",fContact:"contact",fIssues:"GitHub issues",fReport:"Private report",noTrack:"This site uses no cookies and no analytics.",
+altChats:"Kilit's chat list: a group, two contacts and one request, with Tor ready",stOpen:"state: open",stLocked:"state: locked",
+shots:[["Chats","Contacts, a group and a request, with Tor status at the top.","Kilit's chat list with Tor ready"],["Conversation","Delivery ticks, a file and a sticker.","A conversation with delivery ticks and a file"],["Group","Up to 20 people, each message encrypted per member.","A group chat with three people"],["My code","Your QR code, link and four-word @ID.","My code: a QR code, a link and the four-word ID"],["Tor connection","Automatic, obfs4, Snowflake or your own bridges.","Tor connection settings with bridge options"],["Lock screen","The digits are shuffled every time.","The lock screen with a shuffled keypad"]]},
+tr:{navFeatures:"Özellikler",navSecurity:"Güvenlik",navDownload:"İndir",navDocs:"Belgeler",navCommunity:"Topluluk",viewGh:"GitHub'da gör",
+chip:"Kuantum sonrası · Hesap yok · Yalnızca Tor",h1:"Mesajların.<br>Anahtarların.<br><em>Kontrol sende.</em>",heroP:"Kilit; hesap, telefon numarası ve kendi sunucusu olmayan bir mesajlaşma uygulaması ve şifreli kasa. Mesajlar cihazında şifrelenir ve cihazdan yalnızca Tor üzerinden çıkar.",ctaDl:"İndir",hint:"kilitlemek için kaydır",sealTag:"cihazında mühürlendi",seal:"GİZLİLİĞİN. <span>KONTROLÜN.</span>",
+valTag:"nedir",valH:"Kilit'in yaptığı dört şey, kanıtlayamadığı hiçbir şey",v1h:"Kuantum sonrası Signal protokolü",v1p:"Mesajlar libsignal kullanır: ilk temasta Kyber1024 ile PQXDH, ardından kuantum sonrası ratchet (SPQR).",v2h:"Hesap yok, takip yok",v2p:"Kayıt, telefon numarası veya e-posta yok. Analitik, çökme raporu ve reklam yok. Kimliğin dört kelime.",v3h:"Yalnızca Tor, sunucu yok",v3p:"Gömülü Tor her mesajı açık Nostr relay'lerine taşır. Kilit'in kendi sunucusu yoktur.",v4h:"Açık kaynak",v4p:"GPL-3.0-or-later, sabitlenmiş Docker imajlarında derlenir. Oku, derle, bulduğunu bildir.",
+featTag:"özellikler",featH:"Saklamak istediğin sohbetler için",featP:"Aşağıdakilerin hepsi Android ve Windows için güncel alfa sürümünde var.",
+f1h:"Numara yerine Kilit kimliği",f1p:"<code>@abandon-ability-able-about</code> gibi dört kelime. QR kod ya da <code>kilit://add</code> bağlantısı olarak paylaş. Yenileyebilirsin; kişilerin kalır.",f2h:"Yabancılar için İstekler",f2p:"İlk yazan kişiler İstekler'e düşer ve küçük bir iş kanıtı ödemek zorundadır. Sen kabul edene kadar okundu bilgisi almazlar.",f3h:"Dosya, fotoğraf ve çıkartma",f3p:"Her biri kendi anahtarıyla 5 MB'a kadar dosya. Fotoğrafların meta verisi gönderilmeden silinir; kamera fotoğrafları diske hiç yazılmaz.",f4h:"20 kişiye kadar gruplar",f4p:"Her mesaj her üye için ayrı şifrelenir; relay'lerde bir grup mesajı diğerlerinden farksız görünür.",f5h:"Kaybolan mesajlar",f5p:"Sohbet başına ayarlanır. Teslim işaretleri, mesajın relay'de olduğunu ve karşı telefonun açtığını gösterir.",f6h:"Telefon ve bilgisayar",f6p:"Kilit, Windows'ta kendi Tor'uyla çalışır. Bir kimliğe 5 cihaza kadar bağla; her birinin kendi anahtarları olur.",f7h:"Şifreli kasa ve taşıyıcı mod",f7p:"Kendine notlar ve dosyalar <code>.klt</code> biçiminde (kuantum sonrası X-Wing anahtarlı age). Bir mesajı <code>KLT1:</code> metni olarak mühürle ve başka bir uygulamayla gönder.",f8h:"Donanıma bağlı PIN ve panik kodu",f8p:"PIN, telefonun donanım anahtarına bağlıdır. Ayrı bir 4 haneli panik kodu her şeyi siler.",f9h:"Tor'un engellendiği yerlerde de",f9p:"Yerleşik obfs4 ve Snowflake köprüleri ya da kendi köprü satırların; Tor engellenince Kilit bunları önerir. 15 dil.",
+howTag:"nasıl çalışır",howH:"Klavyenden onun ekranına",howP:"Mesaj cihazından çıkmadan mühürlenir ve yalnızca karşı cihazda açılır. Arada relay'de yalnızca şifreli metindir.",s1k:"ekle",s1h:"Kodunu paylaş",s1p:"QR kodunu tara ya da kilit:// bağlantısını aç. İlk mesaj, PQXDH ve Kyber1024 ile anahtarları kurar.",s2k:"mühürle",s2h:"Cihazda şifrele",s2p:"Signal'ın kuantum sonrası ratchet'ı mesajı şifreler, ardından NIP-44/59 relay için ikinci kez sarar.",s3k:"taşı",s3h:"Tor ile relay'e",s3p:"Gömülü Tor, mesajı her gün değişen bir posta kutusu etiketiyle açık Nostr relay'lerine bırakır.",s4k:"aç",s4h:"Alınır ve açılır",s4p:"Karşı taraftaki Kilit onu Tor üzerinden alır ve çözer. İki işaret: telefonu açtı.",pk1:"relay'in gördüğü",pk2:"24 saatte bir değişir",pk3:"bir Tor çıkışı, asla seninki değil",
+secTag:"güvenlik",secH:"Kilit neye karşı korur, neye karşı korumaz",secP:"Projenin tehdit modelinden. Taslaktır ve Kilit geliştikçe güncellenecek.",warn:"<b>Alfa. Denetlenmedi.</b> Kilit bağımsız bir güvenlik incelemesinden geçmedi. Hayatının ya da özgürlüğünün bağlı olduğu durumlarda kullanma.",
+yesH:"Korur",y1t:"Ağ gözlemcileri",y1d:"Trafik Tor üzerinden gider. İnternet sağlayıcın kiminle konuştuğunu görmez.",y2t:"Relay'ler",y2d:"Mesajlar Signal (PQXDH ve Triple Ratchet) ve NIP-44/59 ile çift şifrelidir. Relay içeriği okuyamaz.",y3t:"Gelecekteki kuantum bilgisayarlar",y3d:"Anahtar alışverişleri hibrittir: X25519 ve ML-KEM.",y4t:"Kötü amaçlı dosyalar",y4d:"Dosyalar, her işten sonra yok edilen tek kullanımlık bir bölmede açılır.",y5t:"Kopyalanan kasa dosyaları",y5d:"PIN, cihazın donanım anahtarıyla (StrongBox ya da TEE, Windows'ta TPM 2.0) MAC'lenir, ardından Argon2id'den geçer. Kopya başka cihazda denenemez.",
+noH:"Korumaz",n1t:"Açık relay'lerdeki meta veri",n1d:"Bir posta kutusu adresini bilen, o adrese gelen mesajların zamanını ve sayısını görebilir. Adresler 24 saatte bir değişir.",n2t:"Root'lu telefonda PIN denemek",n2d:"Argon2id her denemeyi yavaşlatır (yaklaşık 0,3 sn), ama 6 haneli bir PIN yine de birkaç günde bulunabilir. Daha uzun bir PIN kullan.",n3t:"Donanım anahtarının kaybı",n3d:"Uygulama verisi silinir ya da cihaz sıfırlanırsa kasa bir daha açılamaz. Şifreli yedekleme planlanıyor.",n4t:"Ele geçirilmiş cihaz ya da karşı taraf",n4d:"Kilidi açık telefon ya da çekirdek düzeyinde zararlı yazılım kapsam dışıdır. Konuştuğun kişi ekran görüntüsü alabilir ya da iletebilir.",n5t:"Küresel trafik analizi",n5d:"Örtü trafiği yoktur; ağın büyük kısmını izleyen biri zamanlama ilişkisi kurmayı deneyebilir.",
+specCap:"kullanılan kriptografi",t1:"İlk temas",t2:"Süren mesajlar",t3:"Relay sarmalama",t4:"Kasa ve taşıyıcı",t5:"PIN",t6:"Ağ",
+b1:"bağımsız denetim",b1v:"henüz yok",b2:"analitik / çökme raporu",b2v:"yok",b3:"kendi sunucusu",b3v:"yok",b4:"derleme",b4v:"sabit Docker imajları",b5:"windows kurulumu",b5v:"henüz kod imzalı değil",b6:"açık bildirimi",b6v:"özel, 90 gün",
+prevTag:"uygulama önizlemesi",prevH:"Gerçek ekranlar",shotNote:"Kişiler ve mesajlar uydurmadır. Kilit varsayılan olarak ekran görüntüsünü engeller; bu görüntüler gerçek ekranlardan app/tool/screenshots ile çizildi.",
+dlTag:"indir",dlH:"Kilit'i indir, sonra doğrula",dlP:"Tüm sürümler GitHub Releases'te. Kurmadan önce SHA-256'yı ve Android'de imza sertifikasını karşılaştır.",andP:"İki izin: yalnızca gömülü Tor'un kullandığı ağ ve sohbette çektiğin fotoğraflar için kamera.",dlApk:"APK'yı indir",winP:"Yalnızca senin kullanıcın için kurulur, yönetici izni gerekmez. Henüz kod imzalı değil, bu yüzden SmartScreen uyarır: SHA-256'yı denetle, sonra Ek bilgi, Yine de çalıştır.",dlWin:"Kurulum (.exe)",portable:"taşınabilir",relTag:"sürüm notları",relP:"Tor'u Ayarlar'dan yeniden bağla, mesajlarının izlediği yolu gör, Tor engellenince köprü önerisi al, kendine şifreli notlar tut ve Windows'ta PIN'i klavyeyle gir.",allRel:"Tüm sürümler",copy:"kopyala",copied:"kopyalandı",copyFail:"seç ve kopyala",
+docTag:"belgeler",docH:"Nasıl çalıştığını oku",d1:"ağ protokolü",d2:"bağlı cihazlar",d3:"kasa ve taşıyıcı biçimi",d4:"neye karşı korur, neye karşı korumaz",d5:"relay'lerin neyi görebildiği",d6:"kendin derle",
+q1:"Kilit telefon numarası ya da hesap istiyor mu?",a1:"Hayır. Dört kelimelik bir Kilit kimliği alırsın ve QR kod ya da bağlantı olarak paylaşırsın. Telefon numarası, e-posta ya da rehber yüklemesi yok.",q2:"Relay'ler neyi görebilir?",a2:"Posta kutusu adreslerini, mesaj zamanlarını ve boyut sınıfını. İçeriği görmez; Kilit Tor üzerinden bağlandığı için IP adresini de görmez.",q3:"Yaşadığım yerde Tor engelli. Çalışır mı?",a3:"Kilit köprü kullanabilir: yerleşik obfs4 ya da Snowflake, veya kendi eklediğin köprü satırları. Otomatik mod önce doğrudan, sonra obfs4, sonra Snowflake dener.",q4:"Telefonumu kaybedersem ne olur?",a4:"Kasa o telefonun donanım anahtarına bağlıdır, başka yerde açılamaz. Şifreli yedekleme sonraki bir aşamada gelecek.",q5:"Windows kurulum dosyası için neden uyarıyor?",a5:"Kurulum dosyası henüz kod imzalı değil. SHA-256'yı sürüm notlarıyla karşılaştır, sonra Ek bilgi ve Yine de çalıştır'ı seç. Taşınabilir zip aynı uygulamadır.",q6:"Kilit denetlendi mi?",a6:"Hayır. Kilit alfa aşamasında ve bağımsız bir güvenlik incelemesinden geçmedi. Hayatının ya da özgürlüğünün bağlı olduğu durumlarda kullanma.",
+ossH:"Kodu oku.<br><em>Sonra güven.</em>",ossRepo:"Depo",ossIssues:"Issue'lar ve fikirler",ossVuln:"Açığı özel olarak bildir",lic:"GPL-3.0-or-later. Kısmen Kryfo'dan (GPL-3.0-or-later) türetildi ve libsignal'e (AGPL-3.0) bağlanır; bu yüzden birleşik program AGPL-3.0 ağ etkileşimi koşullarını taşır. Kilit, Kryfo değildir ve yazarlarınca onaylanmamıştır.",
+footP:"Özel bir mesajlaşma uygulaması ve şifreli kasa. Hesap yok, telefon numarası yok, sunucu yok.",fProduct:"ürün",fDocs:"belgeler",fThreat:"Tehdit modeli",fPrivacy:"Gizlilik",fRelays:"Relay'ler",fProject:"proje",fSecurity:"Güvenlik politikası",fLicense:"Lisans",fContact:"iletişim",fIssues:"GitHub issue'ları",fReport:"Özel bildirim",noTrack:"Bu site çerez ve analitik kullanmaz.",
+altChats:"Kilit sohbet listesi: bir grup, iki kişi ve bir istek; Tor hazır",stOpen:"durum: açık",stLocked:"durum: kilitli",
+shots:[["Sohbetler","Kişiler, bir grup ve bir istek; üstte Tor durumu.","Tor hazır durumdaki Kilit sohbet listesi"],["Konuşma","Teslim işaretleri, bir dosya ve bir çıkartma.","Teslim işaretleri ve dosya içeren bir konuşma"],["Grup","20 kişiye kadar; her mesaj üye başına şifrelenir.","Üç kişilik bir grup sohbeti"],["Kodum","QR kodun, bağlantın ve dört kelimelik @kimliğin.","Kodum: QR kod, bağlantı ve dört kelimelik kimlik"],["Tor bağlantısı","Otomatik, obfs4, Snowflake ya da kendi köprülerin.","Köprü seçenekli Tor bağlantı ayarları"],["Kilit ekranı","Rakamlar her seferinde karıştırılır.","Karışık tuş takımlı kilit ekranı"]]}
+};
+const SHOTS=['01-chats','02-chat','03-group','04-my-kilit','05-bridges','06-lock'];
+const root=document.documentElement;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let lang='en',shotIdx=0,locked=false;
+
+/* ---------- app preview tabs ---------- */
+const tabs=document.getElementById('tabs'),shot=document.getElementById('shot');
+function buildTabs(){
+  const s=I18N[lang].shots;
+  tabs.innerHTML=s.map((x,i)=>'<button role="tab" id="tab'+i+'" aria-selected="'+(i===shotIdx)+'" tabindex="'+(i===shotIdx?0:-1)+'"><span class="n">0'+(i+1)+'</span><span><b>'+x[0]+'</b><span>'+x[1]+'</span></span></button>').join('');
+  showShot(shotIdx,false);
+}
+function showShot(i,focus){
+  shotIdx=i;shot.src='assets/'+SHOTS[i]+'.webp';shot.alt=I18N[lang].shots[i][2];
+  [...tabs.children].forEach((b,j)=>{b.setAttribute('aria-selected',j===i);b.tabIndex=j===i?0:-1});
+  if(focus)tabs.children[i].focus();
+}
+tabs.addEventListener('click',e=>{const b=e.target.closest('[role=tab]');if(b)showShot([...tabs.children].indexOf(b),false)});
+tabs.addEventListener('keydown',e=>{const n=SHOTS.length;
+  if(e.key==='ArrowDown'||e.key==='ArrowRight'){showShot((shotIdx+1)%n,true);e.preventDefault()}
+  if(e.key==='ArrowUp'||e.key==='ArrowLeft'){showShot((shotIdx+n-1)%n,true);e.preventDefault()}});
+SHOTS.forEach(s=>{const im=new Image();im.src='assets/'+s+'.webp'});
+
+/* ---------- language ---------- */
+function setLang(l){
+  lang=l;root.lang=l;const d=I18N[l];
+  document.querySelectorAll('[data-k]').forEach(n=>{const v=d[n.dataset.k];if(v==null)return;if(n.hasAttribute('data-html'))n.innerHTML=v;else n.textContent=v});
+  document.querySelectorAll('[data-k-alt]').forEach(n=>n.alt=d[n.dataset.kAlt]);
+  document.getElementById('lang-en').setAttribute('aria-pressed',l==='en');
+  document.getElementById('lang-tr').setAttribute('aria-pressed',l==='tr');
+  document.getElementById('roS').textContent=locked?d.stLocked:d.stOpen;
+  buildTabs();
+  try{localStorage.setItem('kilit-site-lang',l)}catch(e){}
+}
+document.getElementById('lang-en').onclick=()=>setLang('en');
+document.getElementById('lang-tr').onclick=()=>setLang('tr');
+
+/* ---------- mobile drawer ---------- */
+const menuBtn=document.getElementById('menuBtn'),drawer=document.getElementById('drawer');
+menuBtn.onclick=()=>{const open=drawer.hidden;drawer.hidden=!open;menuBtn.setAttribute('aria-expanded',open)};
+drawer.addEventListener('click',e=>{if(e.target.closest('a')){drawer.hidden=true;menuBtn.setAttribute('aria-expanded','false')}});
+
+/* ---------- copy verify commands ---------- */
+document.getElementById('copyBtn').onclick=async e=>{
+  const b=e.currentTarget,t=document.getElementById('termText').innerText;
+  try{await navigator.clipboard.writeText(t);b.textContent=I18N[lang].copied}
+  catch(err){const r=document.createRange();r.selectNodeContents(document.getElementById('termText'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent=I18N[lang].copyFail}
+  setTimeout(()=>b.textContent=I18N[lang].copy,2000);
+};
+
+/* ---------- active nav + flow steps ---------- */
+const navLinks=[...document.querySelectorAll('nav.main a')];
+(function(){const io=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting)navLinks.forEach(a=>a.setAttribute('aria-current',a.getAttribute('href')==='#'+en.target.id))}),{rootMargin:'-45% 0px -50% 0px'});
+  ['features','security','download','docs','community'].forEach(id=>io.observe(document.getElementById(id)))})();
+const steps=[...document.querySelectorAll('#flow .step')];
+function flowProgress(){const r=document.getElementById('flow').getBoundingClientRect();const p=Math.min(1,Math.max(0,(innerHeight*.8-r.top)/(r.height+innerHeight*.3)));
+  steps.forEach((s,i)=>s.classList.toggle('on',reduce||p>i/steps.length))}
+
+/* ---------- scroll to lock ---------- */
+const seq=document.getElementById('seq'),stick=document.getElementById('stick'),canvas=document.getElementById('lockCanvas');
+const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+function seqProgress(){if(reduce)return 1;const r=seq.getBoundingClientRect();const total=seq.offsetHeight-innerHeight;return clamp(-r.top/total)}
+
+let three=null;
+function initThree(){
+  if(!window.THREE)throw new Error('no three');
+  const mobile=innerWidth<768;
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:!mobile,alpha:true,powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,mobile?1.5:1.75));
+  renderer.outputEncoding=THREE.sRGBEncoding;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(34,1,.1,100);camera.position.set(0,.35,9);
+
+  const AMBER=new THREE.Color('#e0a84a');
+  // materials: graphite gunmetal body, brushed steel shackle, glowing brass keyhole
+  const bodyMat=new THREE.MeshStandardMaterial({color:'#1c222c',metalness:.85,roughness:.32});
+  const rimMat=new THREE.MeshStandardMaterial({color:'#b07a1e',metalness:1,roughness:.28,emissive:AMBER,emissiveIntensity:.08});
+  const shackleMat=new THREE.MeshStandardMaterial({color:'#5b6575',metalness:1,roughness:.22});
+  const keyMat=new THREE.MeshBasicMaterial({color:AMBER,toneMapped:false});
+
+  const lock=new THREE.Group();scene.add(lock);
+  // body: rounded rectangle extruded with bevel
+  const W=2.4,H=2.0,R=.38;
+  const sh=new THREE.Shape();
+  sh.moveTo(-W/2+R,-H/2);sh.lineTo(W/2-R,-H/2);sh.quadraticCurveTo(W/2,-H/2,W/2,-H/2+R);sh.lineTo(W/2,H/2-R);sh.quadraticCurveTo(W/2,H/2,W/2-R,H/2);
+  sh.lineTo(-W/2+R,H/2);sh.quadraticCurveTo(-W/2,H/2,-W/2,H/2-R);sh.lineTo(-W/2,-H/2+R);sh.quadraticCurveTo(-W/2,-H/2,-W/2+R,-H/2);
+  const bodyGeo=new THREE.ExtrudeGeometry(sh,{depth:.9,bevelEnabled:true,bevelThickness:.12,bevelSize:.1,bevelSegments:mobile?3:6,curveSegments:mobile?8:18});
+  bodyGeo.translate(0,0,-.45);
+  const body=new THREE.Mesh(bodyGeo,bodyMat);lock.add(body);
+  // brass band around the top of the body
+  const band=new THREE.Mesh(new THREE.BoxGeometry(W+.16,.07,1.16),rimMat);band.position.y=H/2-.32;lock.add(band);
+  // keyhole: circle + tapered slot, glowing
+  const kh=new THREE.Shape();kh.absarc(0,.12,.2,0,Math.PI*2,false);
+  const slot=new THREE.Shape();slot.moveTo(-.08,.02);slot.lineTo(.08,.02);slot.lineTo(.14,-.5);slot.lineTo(-.14,-.5);slot.lineTo(-.08,.02);
+  const keyGroup=new THREE.Group();
+  [kh,slot].forEach(s=>{const m=new THREE.Mesh(new THREE.ShapeGeometry(s,24),keyMat);m.position.z=.58;keyGroup.add(m)});
+  keyGroup.position.y=-.1;lock.add(keyGroup);
+  // shackle: two legs + half torus; pivots around the long (right) leg
+  const legR=.15,span=1.5,legH=1.0;
+  const shackle=new THREE.Group();
+  const top=new THREE.Mesh(new THREE.TorusGeometry(span/2,legR,mobile?12:20,mobile?24:48,Math.PI),shackleMat);top.position.y=legH;shackle.add(top);
+  const legL=new THREE.Mesh(new THREE.CylinderGeometry(legR,legR,legH,mobile?12:24),shackleMat);legL.position.set(-span/2,legH/2,0);shackle.add(legL);
+  const legRm=new THREE.Mesh(new THREE.CylinderGeometry(legR,legR,legH+.5,mobile?12:24),shackleMat);legRm.position.set(span/2,legH/2-.25,0);shackle.add(legRm);
+  const pivot=new THREE.Group();pivot.position.set(span/2,H/2-.35,0);shackle.position.x=-span/2;pivot.add(shackle);lock.add(pivot);
+
+  // floor: concentric glow rings + the pulse ring
+  const floor=new THREE.Group();floor.position.y=-2.05;floor.rotation.x=-Math.PI/2;scene.add(floor);
+  const ringMats=[];
+  [[1.1,1.16,.55],[1.6,1.63,.35],[2.3,2.32,.22],[3.2,3.215,.14]].forEach(([a,b,o])=>{
+    const m=new THREE.MeshBasicMaterial({color:AMBER,transparent:true,opacity:o,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide,toneMapped:false});
+    ringMats.push([m,o]);floor.add(new THREE.Mesh(new THREE.RingGeometry(a,b,96),m))});
+  const disc=new THREE.Mesh(new THREE.CircleGeometry(1.05,64),new THREE.MeshBasicMaterial({color:AMBER,transparent:true,opacity:.08,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false}));floor.add(disc);
+  const pulseMat=new THREE.MeshBasicMaterial({color:AMBER,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide,toneMapped:false});
+  const pulse=new THREE.Mesh(new THREE.RingGeometry(.96,1,128),pulseMat);floor.add(pulse);
+  // light shaft above the lock
+  const shaft=new THREE.Mesh(new THREE.PlaneGeometry(1.3,9),new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
+    uniforms:{c:{value:AMBER},a:{value:.35}},
+    vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+    fragmentShader:'uniform vec3 c;uniform float a;varying vec2 v;void main(){float x=1.-abs(v.x-.5)*2.;float y=smoothstep(0.,.7,v.y)*(1.-smoothstep(.75,1.,v.y));gl_FragColor=vec4(c,pow(x,3.)*y*a);}'}));
+  shaft.position.set(0,3.2,-1.2);scene.add(shaft);
+  // dust
+  const N=mobile?60:140,pos=new Float32Array(N*3);for(let i=0;i<N;i++){pos[i*3]=(Math.random()-.5)*9;pos[i*3+1]=(Math.random()-.4)*6;pos[i*3+2]=(Math.random()-.5)*4}
+  const dg=new THREE.BufferGeometry();dg.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  const dust=new THREE.Points(dg,new THREE.PointsMaterial({color:AMBER,size:.035,transparent:true,opacity:.7,depthWrite:false,blending:THREE.AdditiveBlending}));scene.add(dust);
+
+  // lights
+  scene.add(new THREE.AmbientLight('#8090a8',.25));
+  const key=new THREE.DirectionalLight('#dfe6f2',1.3);key.position.set(-4,5,6);scene.add(key);
+  const rimL=new THREE.PointLight(AMBER,2,14,2);rimL.position.set(3.5,1.5,-2.5);scene.add(rimL);
+  const rimR=new THREE.PointLight(AMBER,1.2,14,2);rimR.position.set(-3.5,.5,-2);scene.add(rimR);
+  const under=new THREE.PointLight(AMBER,.8,7,2);under.position.set(0,-1.6,1.4);scene.add(under);
+
+  function resize(){const w=stick.clientWidth,h=stick.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+  resize();addEventListener('resize',resize);
+
+  let t0=performance.now(),visible=true,raf=0,lastSeal=false,recoilAt=-1;
+  new IntersectionObserver(es=>{visible=es[0].isIntersecting;if(visible&&!raf)raf=requestAnimationFrame(frame)}).observe(stick);
+  function frame(now){
+    raf=0;if(!visible)return;
+    const t=(now-t0)/1000,p=seqProgress(),w=innerWidth;
+    // phases: approach 0→.55, close .55→.68, confirm .68→1
+    // reduced motion: the lock stays in its start place, already closed, no pulse
+    const a=reduce?0:ease(clamp(p/.55)),c=reduce?1:ease(clamp((p-.55)/.13)),f=reduce?1:clamp((p-.68)/.32);
+    const desk=w>=768;
+    const startX=desk?(w>=1200?.6:1.4):0,startY=desk?.55:-1.75,startS=desk?.62:.4;
+    lock.position.x=startX*(1-a);
+    lock.position.y=startY*(1-a)+(desk?.32:.25)*a+(reduce?0:Math.sin(t*1.2)*.06*(1-c));
+    lock.position.z=-1.2*(1-a);
+    const endS=desk?.8:.66;const s=startS+(endS-startS)*a;lock.scale.setScalar(s);
+    lock.rotation.y=(reduce?0:Math.sin(t*.5)*.18*(1-a))+(-.55*(1-a));
+    lock.rotation.x=.08*(1-a);
+    // shackle: open = lifted and swung around the long leg
+    pivot.position.y=(H/2-.35)+.55*(1-c);
+    pivot.rotation.y=-1.0*(1-c);
+    // recoil the moment it closes
+    if(c>=1&&recoilAt<0)recoilAt=t;if(c<1)recoilAt=-1;
+    const rk=recoilAt<0?0:Math.exp(-(t-recoilAt)*9)*Math.sin((t-recoilAt)*38)*.05;
+    lock.position.y-=rk;
+    // light: keyhole + rings brighten, pulse ring expands once closed
+    keyMat.color.copy(AMBER).multiplyScalar(.35+.85*Math.max(a*.5,c));
+    rimMat.emissiveIntensity=.06+.5*c;
+    ringMats.forEach(([m,o])=>m.opacity=o*(.45+.55*a));
+    disc.material.opacity=.05+.14*c;
+    pulse.scale.setScalar(1+f*3.6);pulseMat.opacity=c>=1?(1-f)*.85:0;
+    shaft.material.uniforms.a.value=.18+.4*a;
+    under.intensity=.6+2.2*c;rimL.intensity=1.4+1.6*a;
+    dust.rotation.y=t*.02;
+    renderer.render(scene,camera);
+    // dom
+    stick.style.setProperty('--p',reduce?0:p.toFixed(4));
+    const seal=reduce?0:clamp((p-.66)/.12);stick.style.setProperty('--seal',seal.toFixed(3));
+    document.getElementById('roP').textContent=String(Math.round(p*100)).padStart(3,'0');
+    const isLocked=c>=1;if(isLocked!==lastSeal){lastSeal=isLocked;locked=isLocked;const st=document.getElementById('roS');st.textContent=isLocked?I18N[lang].stLocked:I18N[lang].stOpen;st.classList.toggle('ok',isLocked)}
+    if(!reduce)raf=requestAnimationFrame(frame);
+  }
+  raf=requestAnimationFrame(frame);
+  return {frame};
+}
+try{three=initThree()}catch(e){document.body.classList.add('no-gl');three=null}
+
+function onScroll(){
+  flowProgress();
+  if(!three){const p=reduce?0:seqProgress();stick.style.setProperty('--p',p);stick.style.setProperty('--seal',reduce?0:clamp((p-.66)/.12))}
+  else if(reduce)three.frame(performance.now());
+}
+addEventListener('scroll',onScroll,{passive:true});
+
+/* ---------- boot ---------- */
+let saved=null;try{saved=localStorage.getItem('kilit-site-lang')}catch(e){}
+setLang(saved==='tr'?'tr':(saved==='en'?'en':(navigator.language||'').toLowerCase().startsWith('tr')?'tr':'en'));
+onScroll();
+</script>
+</body>
+</html>
