@@ -12,6 +12,7 @@
 <p align="center"><a href="https://smyrna-pergamum.github.io/kilit-messenger/"><b>Web sitesi: smyrna-pergamum.github.io/kilit-messenger</b></a></p>
 
 <p align="center">
+  <a href="https://smyrna-pergamum.github.io/kilit-messenger/"><img alt="Website" src="https://img.shields.io/badge/website-kilit--messenger-E0A84A"></a>
   <a href="https://github.com/smyrna-pergamum/kilit-messenger/releases"><img alt="Release" src="https://img.shields.io/github/v/release/smyrna-pergamum/kilit-messenger?include_prereleases&label=release&color=E0A84A"></a>
   <a href="https://github.com/smyrna-pergamum/kilit-messenger/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/smyrna-pergamum/kilit-messenger/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-blue"></a>
@@ -21,6 +22,8 @@
 
 <p align="center">
   <a href="https://github.com/smyrna-pergamum/kilit-messenger/releases"><b>Android veya Windows için indir</b></a>
+  ·
+  <a href="https://smyrna-pergamum.github.io/kilit-messenger/"><b>Web sitesi</b></a>
   ·
   <a href="README.md">English</a>
 </p>
@@ -109,7 +112,8 @@ Nostr relay'lerine çıkar. Android telefonlarda ve Windows bilgisayarlarda
 ## Kurulum
 
 APK'yı [Releases](https://github.com/smyrna-pergamum/kilit-messenger/releases)
-sayfasından indirin. Android 7.0 ve sonrasında çalışır. Kilit iki izin
+sayfasından indirin. [Web sitesinde](https://smyrna-pergamum.github.io/kilit-messenger/) indirme bağlantıları, SHA-256
+özetleri ve doğrulama adımları da var. Android 7.0 ve sonrasında çalışır. Kilit iki izin
 ister: yalnızca gömülü Tor'un kullandığı ağ izni ve sohbette çektiğiniz
 fotoğraflar için kamera.
 

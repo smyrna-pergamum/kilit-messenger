@@ -12,6 +12,7 @@
 <p align="center"><a href="https://smyrna-pergamum.github.io/kilit-messenger/"><b>Website: smyrna-pergamum.github.io/kilit-messenger</b></a></p>
 
 <p align="center">
+  <a href="https://smyrna-pergamum.github.io/kilit-messenger/"><img alt="Website" src="https://img.shields.io/badge/website-kilit--messenger-E0A84A"></a>
   <a href="https://github.com/smyrna-pergamum/kilit-messenger/releases"><img alt="Release" src="https://img.shields.io/github/v/release/smyrna-pergamum/kilit-messenger?include_prereleases&label=release&color=E0A84A"></a>
   <a href="https://github.com/smyrna-pergamum/kilit-messenger/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/smyrna-pergamum/kilit-messenger/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-blue"></a>
@@ -21,6 +22,8 @@
 
 <p align="center">
   <a href="https://github.com/smyrna-pergamum/kilit-messenger/releases"><b>Download for Android or Windows</b></a>
+  ·
+  <a href="https://smyrna-pergamum.github.io/kilit-messenger/"><b>Website</b></a>
   ·
   <a href="README.tr.md">Türkçe</a>
 </p>
@@ -104,7 +107,9 @@ own or linked to your phone.
 
 ## Install
 
-Everything is on [Releases](https://github.com/smyrna-pergamum/kilit-messenger/releases).
+Everything is on [Releases](https://github.com/smyrna-pergamum/kilit-messenger/releases),
+and the [website](https://smyrna-pergamum.github.io/kilit-messenger/) has the download links, checksums and how to verify
+them.
 
 **Android** (7.0 or later): `Kilit-<version>.apk`. Kilit asks for two
 permissions: the network, which only its embedded Tor uses, and the camera,
