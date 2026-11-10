@@ -6,10 +6,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kilit/app.dart';
 import 'package:kilit/core/dev_core.dart';
 import 'package:kilit/core/kilit_core.dart';
+import 'package:kilit/l10n/app_localizations.dart';
 import 'package:kilit/platform/files.dart';
 import 'package:kilit/platform/tor.dart';
 import 'package:kilit/platform/windows_tor.dart';
+import 'package:kilit/screens/self_notes_screen.dart';
+import 'package:kilit/screens/tor_screen.dart';
 import 'package:kilit/state/prefs.dart';
+import 'package:kilit/theme/theme.dart';
 import 'package:kilit/widgets/pin_pad.dart';
 
 Future<void> enterPin(WidgetTester tester, String pin) async {
@@ -109,6 +113,33 @@ class FakeTor implements TorBackend {
     progress = -1;
     stops++;
   }
+
+  int reconnects = 0;
+
+  @override
+  String log() => 'Bootstrapped 100% (done): Done';
+
+  @override
+  List<List<String>> circuits() => const [
+    ['GuardOne', 'MiddleTwo', 'ExitThree'],
+  ];
+
+  @override
+  String? reconnect() {
+    reconnects++;
+    progress = 0;
+    return null;
+  }
+}
+
+/// A Tor that stopped inside the process: only a restart helps.
+class _DeadTor extends FakeTor {
+  @override
+  TorState state() => const TorState(
+    TorPhase.failed,
+    error: 'tor stopped: restart Kilit',
+    mode: 'direct',
+  );
 }
 
 /// A Tor whose direct way out fails, like a network that drops it.
@@ -1080,6 +1111,172 @@ void main() {
     expect(backend.configs, contains('{"mode":"obfs4"}'));
     expect(tor.lastError, 'direct: direct broke');
     tor.stop();
+  });
+
+  testWidgets('every way out failing offers bridges once', (tester) async {
+    final backend = FakeTor(stuck: true);
+    final tor = TorController(backend, '/data');
+    addTearDown(tor.dispose);
+    final (_, prefs) = await startApp(tester, tor: tor);
+    await setUpVault(tester);
+    tor.start();
+    await tester.pump(const Duration(seconds: 46));
+    await tester.pump(const Duration(seconds: 91));
+    expect(tor.blocked, isFalse);
+    expect(find.byKey(const ValueKey('tor-bridges-dialog')), findsNothing);
+    await tester.pump(const Duration(seconds: 121));
+    expect(tor.blocked, isTrue);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(const ValueKey('tor-bridges-dialog')), findsOneWidget);
+    expect(find.textContaining('bridges@torproject.org'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('bridges-snowflake')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(prefs.torRoute, TorRoute.snowflake);
+    expect(backend.configs.last, '{"mode":"snowflake"}');
+    expect(find.byKey(const ValueKey('tor-bridges-dialog')), findsNothing);
+    // the user's own way does not come up either: not offered again
+    await tester.pump(const Duration(seconds: blockedAfter + 1));
+    await tester.pump();
+    expect(tor.blocked, isTrue);
+    expect(find.byKey(const ValueKey('tor-bridges-dialog')), findsNothing);
+    tor.stop();
+  });
+
+  testWidgets('reconnect asks Tor for new circuits', (tester) async {
+    final backend = FakeTor();
+    final tor = TorController(backend, '/data');
+    addTearDown(tor.dispose);
+    tor.start();
+    await tester.pump(const Duration(seconds: 3));
+    expect(tor.state.phase, TorPhase.ready);
+    tor.reconnect();
+    expect(backend.reconnects, 1);
+    await tester.pump(const Duration(seconds: 3));
+    expect(tor.state.phase, TorPhase.ready);
+    // a Tor that is not running starts instead
+    tor.stop();
+    tor.reconnect();
+    expect(tor.running, isTrue);
+    expect(backend.configs.length, 2);
+    tor.stop();
+  });
+
+  testWidgets('a Tor that stopped for good asks for a restart', (tester) async {
+    final backend = _DeadTor();
+    final tor = TorController(backend, '/data');
+    addTearDown(tor.dispose);
+    tor.start();
+    await tester.pump(const Duration(seconds: 1));
+    expect(tor.needsRestart, isTrue);
+    // no way out is tried: none would help
+    await tester.pump(const Duration(seconds: 60));
+    expect(backend.configs, ['{"mode":"direct"}']);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: kilitTheme(Brightness.light),
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        home: Scaffold(body: TorReconnectTile(tor: tor)),
+      ),
+    );
+    expect(find.byKey(const ValueKey('tor-restart')), findsOneWidget);
+    expect(find.text('Restart Kilit'), findsOneWidget);
+    tor.stop();
+  });
+
+  testWidgets('the Tor chip opens the route and the anonymity note', (
+    tester,
+  ) async {
+    final backend = FakeTor();
+    final tor = TorController(backend, '/data');
+    addTearDown(tor.dispose);
+    await startApp(tester, tor: tor);
+    await setUpVault(tester);
+    tor.start();
+    await tester.pump(const Duration(seconds: 3));
+    await tester.tap(find.byIcon(Icons.chat_bubble_outline).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('tor-chip-open')));
+    await tester.pumpAndSettle();
+    expect(find.text('Your IP address is hidden'), findsOneWidget);
+    expect(
+      find.textContaining('only people who know your Kilit ID can reach you'),
+      findsOneWidget,
+    );
+    expect(find.text('GuardOne'), findsOneWidget);
+    expect(find.text('MiddleTwo'), findsOneWidget);
+    expect(find.text('ExitThree'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('tor-reconnect')),
+      200,
+    );
+    await tester.tap(find.byKey(const ValueKey('tor-reconnect')));
+    await tester.pump();
+    expect(backend.reconnects, 1);
+
+    await tester.scrollUntilVisible(find.byKey(const ValueKey('tor-log')), 200);
+    await tester.tap(find.byKey(const ValueKey('tor-log')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Bootstrapped 100%'), findsOneWidget);
+    tor.stop();
+    await tester.pump(const Duration(seconds: 1));
+  });
+
+  testWidgets('notes to self are sealed, changed and deleted apart', (
+    tester,
+  ) async {
+    final (core, _) = await startApp(tester);
+    await setUpVault(tester);
+    await tester.tap(find.byKey(const ValueKey('self-notes')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('self-notes-empty')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('self-note-new')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('self-note-text')),
+      'Buy bread\nand milk',
+    );
+    await tester.tap(find.byKey(const ValueKey('self-note-save')));
+    await tester.pumpAndSettle();
+    // no title: the first line is
+    expect(find.text('Buy bread'), findsOneWidget);
+    final first = (await core.items()).single;
+    expect(isSelfNote(first), isTrue);
+
+    await tester.tap(find.text('Buy bread'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('self-note-title')),
+      'Shopping',
+    );
+    await tester.tap(find.byKey(const ValueKey('self-note-save')));
+    await tester.pumpAndSettle();
+    expect(find.text('Shopping'), findsOneWidget);
+    expect(find.text('Buy bread'), findsNothing);
+    final changed = (await core.items()).single;
+    expect(changed.id, isNot(first.id));
+    expect(await core.readText(changed.id), 'Buy bread\nand milk');
+
+    // the vault's own list leaves them out, and counts them
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Notes: 1'), findsOneWidget);
+    expect(find.byKey(const ValueKey('vault-empty')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('self-notes')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Shopping'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('self-note-delete')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('self-note-delete-confirm')));
+    await tester.pumpAndSettle();
+    expect(await core.items(), isEmpty);
+    expect(find.byKey(const ValueKey('self-notes-empty')), findsOneWidget);
   });
 
   testWidgets('a Tor that comes up stays on its way out', (tester) async {

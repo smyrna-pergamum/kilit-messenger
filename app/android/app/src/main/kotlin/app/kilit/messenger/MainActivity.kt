@@ -12,6 +12,12 @@ import io.flutter.plugin.common.MethodChannel
 /** Screenshot blocking, which the user can turn off in Settings. */
 private const val SCREEN_CHANNEL = "app.kilit.messenger/screen"
 
+/**
+ * Restarting Kilit: the embedded Tor runs once per process, so a Tor that
+ * stopped comes back only in a new one.
+ */
+private const val APP_CHANNEL = "app.kilit.messenger/app"
+
 class MainActivity : FlutterActivity() {
     private val main = Handler(Looper.getMainLooper())
     private var files: FilesChannel? = null
@@ -46,6 +52,23 @@ class MainActivity : FlutterActivity() {
                     }
                 }
                 result.success(null)
+            } else {
+                result.notImplemented()
+            }
+        }
+        MethodChannel(messenger, APP_CHANNEL).setMethodCallHandler { call, result ->
+            if (call.method == "restart") {
+                val launch = packageManager.getLaunchIntentForPackage(packageName)
+                val component = launch?.component
+                if (component == null) {
+                    result.success(false)
+                } else {
+                    result.success(true)
+                    main.post {
+                        startActivity(Intent.makeRestartActivityTask(component))
+                        Runtime.getRuntime().exit(0)
+                    }
+                }
             } else {
                 result.notImplemented()
             }

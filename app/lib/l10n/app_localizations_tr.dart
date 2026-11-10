@@ -1076,4 +1076,142 @@ class LTr extends L {
   @override
   String get protScreenshotsOffHint =>
       'Kapalı: Kilit\'in ekran görüntüsü ve ekran kaydı alınabilir, son uygulamalarda görünür.';
+
+  @override
+  String get torReconnect => 'Tor bağlantısını yenile';
+
+  @override
+  String get torReconnectHint => 'Yeni devreler kurar ve Tor\'u yeniden bağlar';
+
+  @override
+  String get torReconnecting => 'Tor yeniden bağlanıyor…';
+
+  @override
+  String get torRestartApp => 'Kilit\'i yeniden başlat';
+
+  @override
+  String get torRestartHint =>
+      'Tor, Kilit içinde durdu. Yalnızca yeniden başlatma onu geri getirir; kilidi yeniden açacaksın.';
+
+  @override
+  String get torDetailsTitle => 'Tor bağlantısı';
+
+  @override
+  String get torAnonTitle => 'IP adresin gizli';
+
+  @override
+  String get torAnonBody =>
+      'Kilit ağa yalnızca Tor üzerinden çıkar. IP adresini kimse görmez; sana yalnızca Kilit ID\'ni bilenler ulaşabilir.';
+
+  @override
+  String get torRouteTitle => 'Mesajlarının izlediği yol';
+
+  @override
+  String get torRouteYou => 'Sen';
+
+  @override
+  String get torRouteYouHint => 'IP adresin burada kalır';
+
+  @override
+  String get torHopGuard =>
+      'Giriş rölesi: IP\'ni görür, ne gönderdiğini görmez';
+
+  @override
+  String get torHopMiddle => 'Orta röle: ikisini de görmez';
+
+  @override
+  String get torHopExit =>
+      'Çıkış rölesi: Kilit aktarıcısını görür, seni asla görmez';
+
+  @override
+  String get torHopUnknown => 'bir Tor rölesi';
+
+  @override
+  String get torRouteRelays => 'Kilit aktarıcıları';
+
+  @override
+  String get torRouteRelaysHint =>
+      'Kişin alana kadar şifreli mesajları tutar; seni değil Tor\'u görür';
+
+  @override
+  String get torRouteLayers => 'üç kat şifreleme';
+
+  @override
+  String get torNotReadyDiagram =>
+      'Tor\'un kullandığı röleler, Tor hazır olunca görünür.';
+
+  @override
+  String get torLog => 'Tor günlüğü';
+
+  @override
+  String get torLogEmpty => 'Henüz kayıt yok.';
+
+  @override
+  String get torLogRefresh => 'Yenile';
+
+  @override
+  String get torLogCopied => 'Tor günlüğü kopyalandı';
+
+  @override
+  String get torBlockedTitle => 'Tor bu ağda engelleniyor olabilir';
+
+  @override
+  String get torBlockedBody =>
+      'Kilit Tor ağına ulaşamadı. Köprü, Tor kullandığını gizler. Bir yol seç:';
+
+  @override
+  String get torBlockedOwn => 'Kendi köprülerimi yapıştır';
+
+  @override
+  String get torBlockedOwnHint =>
+      'bridges.torproject.org adresinden ya da bridges@torproject.org adresine e-posta göndererek alabilirsin.';
+
+  @override
+  String get torBlockedLater => 'Şimdi değil';
+
+  @override
+  String get selfNotes => 'Kendime notlar';
+
+  @override
+  String get selfNotesHint => 'Kasada şifreli, yalnızca bu cihazda';
+
+  @override
+  String selfNotesCount(int count) {
+    return 'Not sayısı: $count';
+  }
+
+  @override
+  String get selfNoteNew => 'Yeni not';
+
+  @override
+  String get selfNotesEmpty =>
+      'Henüz not yok. Buraya yazdıkların kasada şifrelenir; yalnızca kilit açılınca okunur.';
+
+  @override
+  String get selfNoteDelete => 'Notu sil';
+
+  @override
+  String get selfNoteDeleteConfirm => 'Bu not silinsin mi? Geri getirilemez.';
+
+  @override
+  String get selfNoteSaved => 'Not şifrelendi';
+
+  @override
+  String get selfNoteUnsaved => 'Değişiklikleri kaydetmeden çıkılsın mı?';
+
+  @override
+  String get selfNoteDiscard => 'Kaydetme';
+
+  @override
+  String get linkTorWait =>
+      'Tor henüz bağlı değil, bu yüzden bağlama bekliyor. İki cihazda da Tor gerekli.';
+
+  @override
+  String linkFailed(String error) {
+    return 'Bağlama başlamadı: $error';
+  }
+
+  @override
+  String get linkScanInDevices =>
+      'Bu bir bilgisayar bağlama kodu. Bu telefonda Ayarlar → Bağlı cihazlar → Bilgisayar bağla\'yı açıp orada okut.';
 }

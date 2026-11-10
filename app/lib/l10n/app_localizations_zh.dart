@@ -1028,4 +1028,134 @@ class LZh extends L {
 
   @override
   String get protScreenshotsOffHint => '关闭：可以对 Kilit 截屏和录屏，并会显示在最近使用的应用中。';
+
+  @override
+  String get torReconnect => '重新连接 Tor';
+
+  @override
+  String get torReconnectHint => '新的线路，Tor 重新连接';
+
+  @override
+  String get torReconnecting => '正在重新连接 Tor…';
+
+  @override
+  String get torRestartApp => '重启 Kilit';
+
+  @override
+  String get torRestartHint => 'Tor 在 Kilit 内部停止了。只有重启才能恢复；之后需要重新解锁。';
+
+  @override
+  String get torDetailsTitle => 'Tor 连接';
+
+  @override
+  String get torAnonTitle => '你的 IP 地址已隐藏';
+
+  @override
+  String get torAnonBody =>
+      'Kilit 只通过 Tor 连接网络。没有人能看到你的 IP 地址，只有知道你 Kilit ID 的人才能联系到你。';
+
+  @override
+  String get torRouteTitle => '你的消息经过的路径';
+
+  @override
+  String get torRouteYou => '你';
+
+  @override
+  String get torRouteYouHint => '你的 IP 地址只留在这里';
+
+  @override
+  String get torHopGuard => '入口节点：能看到 IP，看不到内容';
+
+  @override
+  String get torHopMiddle => '中间节点：两者都看不到';
+
+  @override
+  String get torHopExit => '出口节点：能看到 Kilit 中继，看不到你';
+
+  @override
+  String get torHopUnknown => '一个 Tor 中继';
+
+  @override
+  String get torRouteRelays => 'Kilit 中继';
+
+  @override
+  String get torRouteRelaysHint => '保存加密封装的消息直到联系人取走；它们只看到 Tor，看不到你';
+
+  @override
+  String get torRouteLayers => '三层加密';
+
+  @override
+  String get torNotReadyDiagram => 'Tor 就绪后会显示它使用的中继。';
+
+  @override
+  String get torLog => 'Tor 日志';
+
+  @override
+  String get torLogEmpty => '暂无日志。';
+
+  @override
+  String get torLogRefresh => '刷新';
+
+  @override
+  String get torLogCopied => '已复制 Tor 日志';
+
+  @override
+  String get torBlockedTitle => '这里可能屏蔽了 Tor';
+
+  @override
+  String get torBlockedBody => 'Kilit 无法连接到 Tor 网络。网桥可以隐藏你在使用 Tor。请选择方式：';
+
+  @override
+  String get torBlockedOwn => '粘贴我自己的网桥';
+
+  @override
+  String get torBlockedOwnHint =>
+      '可在 bridges.torproject.org 获取，或发邮件到 bridges@torproject.org。';
+
+  @override
+  String get torBlockedLater => '以后再说';
+
+  @override
+  String get selfNotes => '给自己的笔记';
+
+  @override
+  String get selfNotesHint => '在保险库中加密，仅保存在此设备';
+
+  @override
+  String selfNotesCount(int count) {
+    return '笔记：$count';
+  }
+
+  @override
+  String get selfNoteNew => '新笔记';
+
+  @override
+  String get selfNotesEmpty => '还没有笔记。你在这里写的内容会封存在保险库中，只有解锁后才能读取。';
+
+  @override
+  String get selfNoteDelete => '删除笔记';
+
+  @override
+  String get selfNoteDeleteConfirm => '删除这条笔记？删除后无法恢复。';
+
+  @override
+  String get selfNoteSaved => '笔记已加密保存';
+
+  @override
+  String get selfNoteUnsaved => '不保存更改就离开？';
+
+  @override
+  String get selfNoteDiscard => '放弃';
+
+  @override
+  String get linkTorWait => 'Tor 尚未连接，因此关联正在等待。两台设备都需要 Tor。';
+
+  @override
+  String linkFailed(String error) {
+    return '关联未能开始：$error';
+  }
+
+  @override
+  String get linkScanInDevices =>
+      '这是用于关联电脑的代码。请在这部手机上打开 设置 → 已关联设备 → 关联电脑，并在那里扫描。';
 }

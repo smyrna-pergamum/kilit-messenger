@@ -145,7 +145,7 @@ func Start(dataDir string, cfg Config) error {
 		t, err := tor.Start(context.Background(), &tor.StartConf{
 			ProcessCreator: libtorCreator{},
 			DataDir:        dir,
-			ExtraArgs:      args(),
+			ExtraArgs:      append(args(), logArgs(dir)...),
 		})
 		if err != nil {
 			fail(fmt.Errorf("tor start: %w", err))
@@ -153,6 +153,9 @@ func Start(dataDir string, cfg Config) error {
 		}
 		node = t
 		go watch(context.Background(), t)
+	} else if err := alive(); err != nil {
+		fail(err)
+		return err
 	}
 	mu.Lock()
 	enabled, fresh, dipped = true, time.Now(), false
@@ -250,6 +253,8 @@ func parseSocks(v string) int {
 // still there. Polling, not events, keeps it simple; twice a second costs
 // nothing next to tor itself.
 func watch(ctx context.Context, t *tor.Tor) {
+	c := t.Control
+	watching.Store(c)
 	tick := time.NewTicker(500 * time.Millisecond)
 	defer tick.Stop()
 	for {
@@ -259,12 +264,13 @@ func watch(ctx context.Context, t *tor.Tor) {
 		case <-tick.C:
 		}
 		socks := 0
-		if vals, err := t.Control.GetInfo("net/listeners/socks"); err == nil && len(vals) > 0 {
+		if vals, err := c.GetInfo("net/listeners/socks"); err == nil && len(vals) > 0 {
 			socks = parseSocks(vals[0].Val)
 		}
-		vals, err := t.Control.GetInfo("status/bootstrap-phase")
+		vals, err := c.GetInfo("status/bootstrap-phase")
 		if err != nil {
-			if ctx.Err() == nil {
+			// a newer connection took over: not a failure
+			if ctx.Err() == nil && watching.Load() == c {
 				fail(fmt.Errorf("control port: %w", err))
 			}
 			return

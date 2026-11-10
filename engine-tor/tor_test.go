@@ -174,3 +174,52 @@ func TestATransportWantsTheToken(t *testing.T) {
 		t.Fatalf("answered without the token: %v", rest)
 	}
 }
+
+// TestOpenedAgain is the app closed and opened again while its process
+// lives on: Start a second time on a running tor. It must come back, show
+// its circuits and log, and reconnect. Needs KILIT_TOR_LIVE=1.
+func TestOpenedAgain(t *testing.T) {
+	if os.Getenv("KILIT_TOR_LIVE") != "1" {
+		t.Skip("set KILIT_TOR_LIVE=1 to reach the Tor network")
+	}
+	dir := t.TempDir()
+	ready := func(what string) {
+		deadline := time.Now().Add(4 * time.Minute)
+		for Snapshot().Phase != Ready {
+			if time.Now().After(deadline) {
+				t.Fatalf("%s: %+v\n%s", what, Snapshot(), LogTail(30))
+			}
+			time.Sleep(time.Second)
+		}
+		t.Logf("%s: ready", what)
+	}
+	if err := Start(dir, Config{}); err != nil {
+		t.Fatal(err)
+	}
+	defer Stop()
+	ready("first start")
+	if err := Start(dir, Config{}); err != nil {
+		t.Fatal(err)
+	}
+	ready("opened again")
+	c, err := Circuits()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("circuits: %+v", c)
+	if !strings.Contains(LogTail(50), "Bootstrapped") {
+		t.Fatalf("no log: %q", LogTail(50))
+	}
+	if err := Reconnect(); err != nil {
+		t.Fatal(err)
+	}
+	ready("reconnected")
+	// the control connection breaks, tor lives on: opening the app again
+	// dials it again
+	_ = node.Control.Close()
+	time.Sleep(2 * time.Second)
+	if err := Start(dir, Config{}); err != nil {
+		t.Fatal(err)
+	}
+	ready("control dialed again")
+}

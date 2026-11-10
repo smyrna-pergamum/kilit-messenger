@@ -12,9 +12,10 @@ import '../theme/tokens.dart';
 import '../widgets/panic_code.dart';
 import 'change_pin_dialog.dart';
 import 'devices_screen.dart';
+import 'tor_screen.dart';
 
 /// Shown in "About"; kept in step with pubspec.yaml's version.
-const appVersion = '0.1.5-alpha';
+const appVersion = '0.1.6-alpha';
 
 String pinProtectionName(L l, PinProtection p) => switch (p) {
   PinProtection.strongbox => l.hwStrongbox,
@@ -33,12 +34,16 @@ class SettingsScreen extends StatelessWidget {
     required this.prefs,
     required this.files,
     required this.tor,
+    this.onOwnBridges,
   });
 
   final Session session;
   final Prefs prefs;
   final FileAccess files;
   final TorController tor;
+
+  /// Opens the bridges section to paste bridge lines.
+  final VoidCallback? onOwnBridges;
 
   @override
   Widget build(BuildContext context) {
@@ -112,6 +117,15 @@ class SettingsScreen extends StatelessWidget {
                   final s = tor.state;
                   return _Status(
                     key: const ValueKey('status-tor'),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => TorScreen(
+                          tor: tor,
+                          prefs: prefs,
+                          onOwnBridges: onOwnBridges ?? () {},
+                        ),
+                      ),
+                    ),
                     ok: switch (s.phase) {
                       TorPhase.ready => true,
                       TorPhase.failed => false,
@@ -151,6 +165,7 @@ class SettingsScreen extends StatelessWidget {
                   title: Text(l.torSwitch),
                   subtitle: Text(l.torSwitchHint),
                 ),
+              if (tor.available && prefs.tor) TorReconnectTile(tor: tor),
             ],
           ),
           if (tor.available)
@@ -166,7 +181,7 @@ class SettingsScreen extends StatelessWidget {
             id: 'devices',
             icon: Icons.devices_outlined,
             title: l.devicesTitle,
-            children: [DevicesSection(core: core)],
+            children: [DevicesSection(core: core, tor: tor)],
           ),
           _Section(
             open: prefs.openSections,
@@ -578,6 +593,7 @@ class _Section extends StatelessWidget {
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
         child: ExpansionTile(
+          key: ValueKey('expansion-$id-${open.contains(id)}'),
           initiallyExpanded: open.contains(id),
           onExpansionChanged: (isOpen) =>
               isOpen ? open.add(id) : open.remove(id),
@@ -609,12 +625,14 @@ class _Status extends StatelessWidget {
     required this.title,
     required this.value,
     this.detail,
+    this.onTap,
   });
 
   final bool? ok;
   final String title;
   final String value;
   final String? detail;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -625,6 +643,10 @@ class _Status extends StatelessWidget {
       null => t.textMuted,
     };
     return ListTile(
+      onTap: onTap,
+      trailing: onTap == null
+          ? null
+          : Icon(Icons.chevron_right_rounded, color: t.textMuted),
       leading: Icon(Icons.circle, size: 12, color: color),
       title: Text(title),
       subtitle: Text(

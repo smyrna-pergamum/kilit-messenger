@@ -70,7 +70,22 @@ abstract interface class TorBackend {
   String? start(String dir, String config);
   TorState state();
   void stop();
+
+  /// The last lines Tor logged, to see why it does not connect.
+  String log();
+
+  /// The circuits Tor has built: each its relays' nicknames, guard first.
+  /// Empty when Tor cannot tell.
+  List<List<String>> circuits();
+
+  /// New circuits on a running Tor, which goes out again. Returns an
+  /// error, or null.
+  String? reconnect();
 }
+
+/// The marker in an error that only restarting Kilit cures: Tor runs once
+/// per process on Android.
+const torNeedsRestart = 'restart Kilit';
 
 /// engine-tor's libkilittor.so, through Dart's FFI. Every call returns at
 /// once: Tor bootstraps on its own threads.
@@ -88,6 +103,18 @@ class NativeTor implements TorBackend {
       _stop = lib.lookupFunction<Void Function(), void Function()>(
         'KilitTorStop',
       ),
+      _log = lib
+          .lookupFunction<Pointer<Utf8> Function(), Pointer<Utf8> Function()>(
+            'KilitTorLog',
+          ),
+      _circuits = lib
+          .lookupFunction<Pointer<Utf8> Function(), Pointer<Utf8> Function()>(
+            'KilitTorCircuits',
+          ),
+      _reconnect = lib
+          .lookupFunction<Pointer<Utf8> Function(), Pointer<Utf8> Function()>(
+            'KilitTorReconnect',
+          ),
       _free = lib
           .lookupFunction<
             Void Function(Pointer<Utf8>),
@@ -108,6 +135,9 @@ class NativeTor implements TorBackend {
   final Pointer<Utf8> Function(Pointer<Utf8>, Pointer<Utf8>) _start;
   final Pointer<Utf8> Function() _state;
   final void Function() _stop;
+  final Pointer<Utf8> Function() _log;
+  final Pointer<Utf8> Function() _circuits;
+  final Pointer<Utf8> Function() _reconnect;
   final void Function(Pointer<Utf8>) _free;
 
   String _take(Pointer<Utf8> p) {
@@ -139,6 +169,36 @@ class NativeTor implements TorBackend {
 
   @override
   void stop() => _stop();
+
+  @override
+  String log() => _take(_log());
+
+  @override
+  List<List<String>> circuits() => parseCircuits(_take(_circuits()));
+
+  @override
+  String? reconnect() {
+    final err = _take(_reconnect());
+    return err.isEmpty ? null : err;
+  }
+}
+
+/// engine-tor's circuits JSON: `[{"hops":[{"nickname":"..."}]}]`.
+List<List<String>> parseCircuits(String json) {
+  try {
+    final list = jsonDecode(json);
+    if (list is! List) return const [];
+    return [
+      for (final c in list)
+        if (c is Map && c['hops'] is List)
+          [
+            for (final h in c['hops'] as List)
+              if (h is Map) '${h['nickname'] ?? ''}',
+          ],
+    ];
+  } on FormatException {
+    return const [];
+  }
 }
 
 /// A platform without Tor.
@@ -156,6 +216,15 @@ class NoTor implements TorBackend {
 
   @override
   void stop() {}
+
+  @override
+  String log() => '';
+
+  @override
+  List<List<String>> circuits() => const [];
+
+  @override
+  String? reconnect() => 'unavailable';
 }
 
 /// How Tor reaches the network. Bridges are for where the Tor network is
@@ -180,6 +249,9 @@ const autoRoutes = [
   (TorRoute.obfs4, 90),
   (TorRoute.snowflake, 120),
 ];
+
+/// How many seconds a way the user chose gets before Kilit offers bridges.
+const blockedAfter = 120;
 
 /// Runs Tor while the user wants it, and tells the UI where it is.
 class TorController extends ChangeNotifier {
@@ -208,6 +280,24 @@ class TorController extends ChangeNotifier {
   String _lastError = '';
   bool get running => _poll != null;
   TorRoute get route => _route;
+
+  /// Tor did not come up any way it tried: every way of automatic mode,
+  /// or the one way the user chose. The app then offers bridges.
+  bool get blocked => _blocked;
+  bool _blocked = false;
+
+  /// Tor has stopped inside Kilit and only a restart of Kilit brings it
+  /// back.
+  bool get needsRestart =>
+      _state.error.contains(torNeedsRestart) ||
+      _lastError.contains(torNeedsRestart);
+
+  /// Tor's last log lines.
+  String log() => _backend.log();
+
+  /// The circuits Tor uses, when it is ready.
+  List<List<String>> circuits() =>
+      _state.phase == TorPhase.ready ? _backend.circuits() : const [];
 
   void _update(TorState s) {
     if (s.phase == _state.phase &&
@@ -248,6 +338,7 @@ class TorController extends ChangeNotifier {
     _bridges = bridges;
     _try = 0;
     _waited = 0;
+    _blocked = false;
     _poll ??= Timer.periodic(const Duration(seconds: 1), (_) => _tick());
     if (_apply()) _update(_backend.state());
   }
@@ -263,20 +354,59 @@ class TorController extends ChangeNotifier {
     }
   }
 
+  /// New circuits, and Tor goes out again the way it is set to; a Tor
+  /// that is not running starts.
+  void reconnect() {
+    if (!_backend.available) return;
+    if (!running) {
+      start(route: _route, bridges: _bridges);
+      return;
+    }
+    _waited = 0;
+    _blocked = false;
+    _lastError = '';
+    final err = _backend.reconnect();
+    if (err != null) {
+      if (err.contains(torNeedsRestart)) {
+        _lastError = err;
+        _update(TorState(TorPhase.failed, error: err, mode: _now.name));
+        return;
+      }
+      // not started in this process yet: start it the usual way
+      if (!_apply()) return;
+    }
+    _update(_backend.state());
+  }
+
   void _tick() {
     final s = _backend.state();
     if (s.phase == TorPhase.failed && s.error.isNotEmpty) {
       _lastError = s.mode.isEmpty ? s.error : '${s.mode}: ${s.error}';
     }
+    if (s.phase == TorPhase.failed && s.error.contains(torNeedsRestart)) {
+      // no way out helps: only a restart of Kilit
+      _update(s);
+      return;
+    }
     if (s.phase == TorPhase.ready) {
       _waited = 0;
       _lastError = '';
+      _blocked = false;
     } else if (_route == TorRoute.auto &&
         (s.phase == TorPhase.failed || ++_waited >= autoRoutes[_try].$2)) {
       // a way out that failed is left at once, not after its full wait
+      if (_try == autoRoutes.length - 1 && !_blocked) {
+        _blocked = true;
+        notifyListeners();
+      }
       _try = (_try + 1) % autoRoutes.length;
       _waited = 0;
       if (!_apply()) return;
+    } else if (_route != TorRoute.auto &&
+        !_blocked &&
+        (s.phase == TorPhase.failed || ++_waited >= blockedAfter)) {
+      _blocked = true;
+      notifyListeners();
     } else if (_state.phase == TorPhase.failed && s.phase == TorPhase.off) {
       return; // keep showing why it did not start
     }
@@ -286,6 +416,7 @@ class TorController extends ChangeNotifier {
   void stop() {
     _poll?.cancel();
     _poll = null;
+    _blocked = false;
     _backend.stop();
     _update(
       _backend.available

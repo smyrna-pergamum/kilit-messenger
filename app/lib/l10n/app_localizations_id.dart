@@ -1078,4 +1078,141 @@ class LId extends L {
   @override
   String get protScreenshotsOffHint =>
       'Mati: tangkapan dan rekaman layar Kilit bisa dibuat, dan Kilit tampil di aplikasi terbaru.';
+
+  @override
+  String get torReconnect => 'Sambungkan ulang Tor';
+
+  @override
+  String get torReconnectHint => 'Sirkuit baru, dan Tor tersambung lagi';
+
+  @override
+  String get torReconnecting => 'Menyambungkan ulang Tor…';
+
+  @override
+  String get torRestartApp => 'Mulai ulang Kilit';
+
+  @override
+  String get torRestartHint =>
+      'Tor berhenti di dalam Kilit. Hanya mulai ulang yang memulihkannya; kamu perlu membuka kunci lagi.';
+
+  @override
+  String get torDetailsTitle => 'Koneksi Tor';
+
+  @override
+  String get torAnonTitle => 'Alamat IP kamu tersembunyi';
+
+  @override
+  String get torAnonBody =>
+      'Kilit hanya terhubung ke jaringan lewat Tor. Tak ada yang melihat alamat IP kamu, dan hanya orang yang tahu ID Kilit kamu yang bisa menghubungimu.';
+
+  @override
+  String get torRouteTitle => 'Jalur pesanmu';
+
+  @override
+  String get torRouteYou => 'Kamu';
+
+  @override
+  String get torRouteYouHint => 'Alamat IP kamu tetap di sini';
+
+  @override
+  String get torHopGuard => 'Penjaga: melihat IP-mu, bukan isi kirimanmu';
+
+  @override
+  String get torHopMiddle => 'Relay tengah: tidak melihat keduanya';
+
+  @override
+  String get torHopExit => 'Keluar: melihat relay Kilit, tak pernah kamu';
+
+  @override
+  String get torHopUnknown => 'sebuah relay Tor';
+
+  @override
+  String get torRouteRelays => 'Relay Kilit';
+
+  @override
+  String get torRouteRelaysHint =>
+      'Menyimpan pesan tersegel sampai kontakmu mengambilnya; melihat Tor, bukan kamu';
+
+  @override
+  String get torRouteLayers => 'tiga lapis enkripsi';
+
+  @override
+  String get torNotReadyDiagram =>
+      'Relay yang dipakai Tor muncul setelah Tor siap.';
+
+  @override
+  String get torLog => 'Log Tor';
+
+  @override
+  String get torLogEmpty => 'Belum ada catatan.';
+
+  @override
+  String get torLogRefresh => 'Muat ulang';
+
+  @override
+  String get torLogCopied => 'Log Tor disalin';
+
+  @override
+  String get torBlockedTitle => 'Tor mungkin diblokir di sini';
+
+  @override
+  String get torBlockedBody =>
+      'Kilit tidak bisa menjangkau jaringan Tor. Bridge menyembunyikan bahwa kamu memakai Tor. Pilih cara:';
+
+  @override
+  String get torBlockedOwn => 'Tempel bridge milikku';
+
+  @override
+  String get torBlockedOwnHint =>
+      'Dapatkan di bridges.torproject.org, atau lewat email dari bridges@torproject.org.';
+
+  @override
+  String get torBlockedLater => 'Nanti saja';
+
+  @override
+  String get selfNotes => 'Catatan untuk diri sendiri';
+
+  @override
+  String get selfNotesHint => 'Terenkripsi di brankas, hanya di perangkat ini';
+
+  @override
+  String selfNotesCount(int count) {
+    return 'Catatan: $count';
+  }
+
+  @override
+  String get selfNoteNew => 'Catatan baru';
+
+  @override
+  String get selfNotesEmpty =>
+      'Belum ada catatan. Yang kamu tulis di sini disegel di brankas dan hanya terbaca setelah kunci dibuka.';
+
+  @override
+  String get selfNoteDelete => 'Hapus catatan';
+
+  @override
+  String get selfNoteDeleteConfirm =>
+      'Hapus catatan ini? Tidak bisa dikembalikan.';
+
+  @override
+  String get selfNoteSaved => 'Catatan disegel';
+
+  @override
+  String get selfNoteUnsaved => 'Keluar tanpa menyimpan perubahan?';
+
+  @override
+  String get selfNoteDiscard => 'Buang';
+
+  @override
+  String get linkTorWait =>
+      'Tor belum tersambung, jadi penautan menunggu. Kedua perangkat perlu Tor.';
+
+  @override
+  String linkFailed(String error) {
+    return 'Penautan tidak dimulai: $error';
+  }
+
+  @override
+  String get linkScanInDevices =>
+      'Ini kode untuk menautkan komputer. Di ponsel ini buka Pengaturan, Perangkat tertaut, Tautkan komputer, lalu pindai di sana.';
 }

@@ -1078,4 +1078,141 @@ class LFa extends L {
   @override
   String get protScreenshotsOffHint =>
       'خاموش: می‌توان از Kilit اسکرین‌شات و فیلم صفحه گرفت و در برنامه‌های اخیر دیده می‌شود.';
+
+  @override
+  String get torReconnect => 'اتصال دوباره Tor';
+
+  @override
+  String get torReconnectHint => 'مدارهای تازه، و Tor دوباره وصل می‌شود';
+
+  @override
+  String get torReconnecting => 'Tor دوباره وصل می‌شود…';
+
+  @override
+  String get torRestartApp => 'راه‌اندازی دوباره Kilit';
+
+  @override
+  String get torRestartHint =>
+      'Tor درون Kilit متوقف شد. فقط راه‌اندازی دوباره آن را برمی‌گرداند؛ باید دوباره قفل را باز کنی.';
+
+  @override
+  String get torDetailsTitle => 'اتصال Tor';
+
+  @override
+  String get torAnonTitle => 'نشانی IP تو پنهان است';
+
+  @override
+  String get torAnonBody =>
+      'Kilit فقط از راه Tor به شبکه وصل می‌شود. هیچ‌کس نشانی IP تو را نمی‌بیند و فقط کسانی که شناسهٔ Kilit تو را می‌دانند می‌توانند به تو برسند.';
+
+  @override
+  String get torRouteTitle => 'مسیری که پیام‌هایت می‌روند';
+
+  @override
+  String get torRouteYou => 'تو';
+
+  @override
+  String get torRouteYouHint => 'نشانی IP تو همین‌جا می‌ماند';
+
+  @override
+  String get torHopGuard => 'نگهبان: IP تو را می‌بیند، نه آنچه می‌فرستی';
+
+  @override
+  String get torHopMiddle => 'رلهٔ میانی: هیچ‌کدام را نمی‌بیند';
+
+  @override
+  String get torHopExit => 'خروجی: رلهٔ Kilit را می‌بیند، هرگز تو را نه';
+
+  @override
+  String get torHopUnknown => 'یک رلهٔ Tor';
+
+  @override
+  String get torRouteRelays => 'رله‌های Kilit';
+
+  @override
+  String get torRouteRelaysHint =>
+      'پیام‌های مهروموم‌شده را نگه می‌دارند تا مخاطبت بردارد؛ Tor را می‌بینند، نه تو را';
+
+  @override
+  String get torRouteLayers => 'سه لایه رمزگذاری';
+
+  @override
+  String get torNotReadyDiagram =>
+      'رله‌هایی که Tor به کار می‌برد، وقتی آماده شد نشان داده می‌شوند.';
+
+  @override
+  String get torLog => 'گزارش Tor';
+
+  @override
+  String get torLogEmpty => 'هنوز چیزی ثبت نشده.';
+
+  @override
+  String get torLogRefresh => 'تازه‌سازی';
+
+  @override
+  String get torLogCopied => 'گزارش Tor کپی شد';
+
+  @override
+  String get torBlockedTitle => 'شاید Tor این‌جا مسدود باشد';
+
+  @override
+  String get torBlockedBody =>
+      'Kilit به شبکهٔ Tor نرسید. پل پنهان می‌کند که از Tor استفاده می‌کنی. راهی را برگزین:';
+
+  @override
+  String get torBlockedOwn => 'پل‌های خودم را بچسبان';
+
+  @override
+  String get torBlockedOwnHint =>
+      'از bridges.torproject.org یا با ایمیل از bridges@torproject.org بگیر.';
+
+  @override
+  String get torBlockedLater => 'الان نه';
+
+  @override
+  String get selfNotes => 'یادداشت‌هایی برای خودم';
+
+  @override
+  String get selfNotesHint => 'رمزگذاری‌شده در گاوصندوق، فقط روی همین دستگاه';
+
+  @override
+  String selfNotesCount(int count) {
+    return 'یادداشت‌ها: $count';
+  }
+
+  @override
+  String get selfNoteNew => 'یادداشت تازه';
+
+  @override
+  String get selfNotesEmpty =>
+      'هنوز یادداشتی نیست. هرچه این‌جا بنویسی در گاوصندوق مهروموم می‌شود و فقط پس از باز کردن قفل خوانده می‌شود.';
+
+  @override
+  String get selfNoteDelete => 'حذف یادداشت';
+
+  @override
+  String get selfNoteDeleteConfirm =>
+      'این یادداشت حذف شود؟ برگرداندنش ممکن نیست.';
+
+  @override
+  String get selfNoteSaved => 'یادداشت مهروموم شد';
+
+  @override
+  String get selfNoteUnsaved => 'بدون ذخیرهٔ تغییرات بیرون برویم؟';
+
+  @override
+  String get selfNoteDiscard => 'دور بریز';
+
+  @override
+  String get linkTorWait =>
+      'Tor هنوز وصل نیست، پس پیوند منتظر می‌ماند. هر دو دستگاه به Tor نیاز دارند.';
+
+  @override
+  String linkFailed(String error) {
+    return 'پیوند آغاز نشد: $error';
+  }
+
+  @override
+  String get linkScanInDevices =>
+      'این کدی برای پیوند یک رایانه است. در همین گوشی تنظیمات، دستگاه‌های پیوندی، پیوند رایانه را باز کن و آن‌جا اسکن کن.';
 }

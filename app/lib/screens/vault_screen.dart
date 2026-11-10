@@ -9,6 +9,7 @@ import '../platform/files.dart';
 import '../state/prefs.dart';
 import '../theme/theme.dart';
 import '../theme/tokens.dart';
+import 'self_notes_screen.dart';
 
 String formatBytes(int n) {
   if (n < 1024) return '$n B';
@@ -323,29 +324,64 @@ class _VaultScreenState extends State<VaultScreen> {
           child: FutureBuilder<List<VaultItem>>(
             future: _items,
             builder: (context, snap) {
-              final items = snap.data;
-              if (items == null) {
+              final all = snap.data;
+              if (all == null) {
                 return const Center(child: CircularProgressIndicator());
               }
-              if (items.isEmpty) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Text(
-                      l.vaultEmpty,
-                      key: const ValueKey('vault-empty'),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: t.textMuted),
-                    ),
+              // notes to self have their own place
+              final notes = all.where(isSelfNote).length;
+              final items = all.where((i) => !isSelfNote(i)).toList();
+              final selfNotes = Card(
+                margin: EdgeInsets.zero,
+                child: ListTile(
+                  key: const ValueKey('self-notes'),
+                  leading: Icon(Icons.sticky_note_2_outlined, color: t.accent),
+                  title: Text(l.selfNotes),
+                  subtitle: Text(
+                    notes == 0 ? l.selfNotesHint : l.selfNotesCount(notes),
+                    style: TextStyle(color: t.textMuted),
                   ),
+                  trailing: Icon(
+                    Icons.chevron_right_rounded,
+                    color: t.textMuted,
+                  ),
+                  onTap: () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => SelfNotesScreen(core: widget.core),
+                      ),
+                    );
+                    _reload();
+                  },
+                ),
+              );
+              if (items.isEmpty) {
+                return ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  children: [
+                    selfNotes,
+                    Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Text(
+                        l.vaultEmpty,
+                        key: const ValueKey('vault-empty'),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: t.textMuted),
+                      ),
+                    ),
+                  ],
                 );
               }
               return ListView.separated(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                itemCount: items.length,
+                itemCount: items.length + 1,
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
-                itemBuilder: (context, i) =>
-                    _ItemTile(item: items[i], onTap: () => _details(items[i])),
+                itemBuilder: (context, i) => i == 0
+                    ? selfNotes
+                    : _ItemTile(
+                        item: items[i - 1],
+                        onTap: () => _details(items[i - 1]),
+                      ),
               );
             },
           ),

@@ -41,6 +41,41 @@ func KilitTorState() *C.char {
 	return C.CString(string(b))
 }
 
+// KilitTorLog returns the last lines tor logged.
+//
+//export KilitTorLog
+func KilitTorLog() *C.char {
+	return C.CString(LogTail(200))
+}
+
+// KilitTorCircuits returns up to three built circuits as JSON: a list of
+// {"hops":[{"nickname","country"}]}, guard first.
+//
+//export KilitTorCircuits
+func KilitTorCircuits() *C.char {
+	c, err := Circuits()
+	if err != nil || c == nil {
+		return C.CString("[]")
+	}
+	b, err := json.Marshal(c)
+	if err != nil {
+		return C.CString("[]")
+	}
+	return C.CString(string(b))
+}
+
+// KilitTorReconnect asks for new circuits and goes on the network again.
+// Returns "" or an error; an error means tor has stopped for good in this
+// process.
+//
+//export KilitTorReconnect
+func KilitTorReconnect() *C.char {
+	if err := Reconnect(); err != nil {
+		return C.CString(err.Error())
+	}
+	return C.CString("")
+}
+
 // KilitTorStop stops tor.
 //
 //export KilitTorStop

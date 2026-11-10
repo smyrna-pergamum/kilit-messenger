@@ -6,9 +6,11 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../core/kilit_core.dart';
 import '../l10n/app_localizations.dart';
+import '../platform/tor.dart';
 import '../theme/theme.dart';
 import '../theme/tokens.dart';
 import 'chats_screen.dart' show ScanScreen;
+import 'tor_screen.dart';
 
 /// The name this device gives itself when it links another.
 String _deviceKind() => Platform.isAndroid
@@ -22,9 +24,12 @@ const _linkPrefix = 'kilit://link?';
 /// Settings, Linked devices: this ID's devices; on the phone, linking a
 /// computer and taking one off; on a new Kilit, linking it to a phone.
 class DevicesSection extends StatefulWidget {
-  const DevicesSection({super.key, required this.core});
+  const DevicesSection({super.key, required this.core, this.tor});
 
   final KilitCore core;
+
+  /// Linking travels over Tor: shown while it is not ready.
+  final TorController? tor;
 
   @override
   State<DevicesSection> createState() => _DevicesSectionState();
@@ -71,14 +76,16 @@ class _DevicesSectionState extends State<DevicesSection> {
     final String code;
     try {
       code = await widget.core.linkAccept(text, _deviceKind());
-    } on Object {
-      if (mounted) _say(l.linkNotCode);
+    } on Object catch (e) {
+      // why, not just "not a code": a full device list, or no messaging yet
+      if (mounted) _say(l.linkFailed('$e'));
       return;
     }
     if (!mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => LinkProgressScreen(core: widget.core, code: code),
+        builder: (_) =>
+            LinkProgressScreen(core: widget.core, code: code, tor: widget.tor),
       ),
     );
     await _load();
@@ -87,7 +94,7 @@ class _DevicesSectionState extends State<DevicesSection> {
   Future<void> _linkToPhone() async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => LinkOfferScreen(core: widget.core),
+        builder: (_) => LinkOfferScreen(core: widget.core, tor: widget.tor),
       ),
     );
     await _load();
@@ -217,9 +224,10 @@ mixin _LinkPoll<T extends StatefulWidget> on State<T> {
 
 /// A new device: the QR code the phone scans, then the code to compare.
 class LinkOfferScreen extends StatefulWidget {
-  const LinkOfferScreen({super.key, required this.core});
+  const LinkOfferScreen({super.key, required this.core, this.tor});
 
   final KilitCore core;
+  final TorController? tor;
 
   @override
   State<LinkOfferScreen> createState() => _LinkOfferScreenState();
@@ -303,6 +311,7 @@ class _LinkOfferScreenState extends State<LinkOfferScreen>
                   ),
                 ],
               ),
+              _TorWait(tor: widget.tor),
             ],
           ],
         ),
@@ -314,10 +323,16 @@ class _LinkOfferScreenState extends State<LinkOfferScreen>
 /// The phone, after scanning: the code to compare, until the new device
 /// has answered.
 class LinkProgressScreen extends StatefulWidget {
-  const LinkProgressScreen({super.key, required this.core, required this.code});
+  const LinkProgressScreen({
+    super.key,
+    required this.core,
+    required this.code,
+    this.tor,
+  });
 
   final KilitCore core;
   final String code;
+  final TorController? tor;
 
   @override
   State<LinkProgressScreen> createState() => _LinkProgressScreenState();
@@ -370,6 +385,7 @@ class _LinkProgressScreenState extends State<LinkProgressScreen>
                   ),
                 ],
               ),
+              _TorWait(tor: widget.tor),
               const SizedBox(height: 24),
               TextButton(
                 key: const ValueKey('link-cancel'),
@@ -383,6 +399,45 @@ class _LinkProgressScreenState extends State<LinkProgressScreen>
           ],
         ),
       ),
+    );
+  }
+}
+
+/// While Tor is not ready, linking cannot travel: says so, with a way to
+/// reconnect.
+class _TorWait extends StatelessWidget {
+  const _TorWait({required this.tor});
+
+  final TorController? tor;
+
+  @override
+  Widget build(BuildContext context) {
+    final tor = this.tor;
+    if (tor == null || !tor.available) return const SizedBox.shrink();
+    final t = context.tokens;
+    final l = L.of(context);
+    return ListenableBuilder(
+      listenable: tor,
+      builder: (context, _) {
+        if (tor.state.phase == TorPhase.ready) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Card(
+            key: const ValueKey('link-tor-wait'),
+            margin: EdgeInsets.zero,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ListTile(
+                  leading: Icon(Icons.wifi_off_rounded, color: t.danger),
+                  title: Text(l.linkTorWait),
+                ),
+                TorReconnectTile(tor: tor),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -1086,4 +1086,142 @@ class LFr extends L {
   @override
   String get protScreenshotsOffHint =>
       'Désactivé : les captures et enregistrements d\'écran de Kilit sont possibles, et il apparaît dans les apps récentes.';
+
+  @override
+  String get torReconnect => 'Reconnecter Tor';
+
+  @override
+  String get torReconnectHint => 'Nouveaux circuits, et Tor ressort';
+
+  @override
+  String get torReconnecting => 'Reconnexion de Tor…';
+
+  @override
+  String get torRestartApp => 'Redémarrer Kilit';
+
+  @override
+  String get torRestartHint =>
+      'Tor s\'est arrêté dans Kilit. Seul un redémarrage le relance ; vous déverrouillerez à nouveau.';
+
+  @override
+  String get torDetailsTitle => 'Connexion Tor';
+
+  @override
+  String get torAnonTitle => 'Votre adresse IP est cachée';
+
+  @override
+  String get torAnonBody =>
+      'Kilit ne sort sur le réseau que par Tor. Personne ne voit votre adresse IP, et seules les personnes qui connaissent votre ID Kilit peuvent vous joindre.';
+
+  @override
+  String get torRouteTitle => 'Le chemin de vos messages';
+
+  @override
+  String get torRouteYou => 'Vous';
+
+  @override
+  String get torRouteYouHint => 'Votre adresse IP reste ici';
+
+  @override
+  String get torHopGuard => 'Garde : voit votre IP, pas ce que vous envoyez';
+
+  @override
+  String get torHopMiddle => 'Relais du milieu : ne voit ni l\'un ni l\'autre';
+
+  @override
+  String get torHopExit => 'Sortie : voit le relais Kilit, jamais vous';
+
+  @override
+  String get torHopUnknown => 'un relais Tor';
+
+  @override
+  String get torRouteRelays => 'Relais Kilit';
+
+  @override
+  String get torRouteRelaysHint =>
+      'Ils gardent les messages scellés jusqu\'à ce que votre contact les récupère ; ils voient Tor, pas vous';
+
+  @override
+  String get torRouteLayers => 'trois couches de chiffrement';
+
+  @override
+  String get torNotReadyDiagram =>
+      'Les relais utilisés par Tor s\'affichent une fois qu\'il est prêt.';
+
+  @override
+  String get torLog => 'Journal de Tor';
+
+  @override
+  String get torLogEmpty => 'Rien dans le journal pour l\'instant.';
+
+  @override
+  String get torLogRefresh => 'Actualiser';
+
+  @override
+  String get torLogCopied => 'Journal de Tor copié';
+
+  @override
+  String get torBlockedTitle => 'Tor est peut-être bloqué ici';
+
+  @override
+  String get torBlockedBody =>
+      'Kilit n\'a pas pu atteindre le réseau Tor. Un pont cache que vous utilisez Tor. Choisissez :';
+
+  @override
+  String get torBlockedOwn => 'Coller mes propres ponts';
+
+  @override
+  String get torBlockedOwnHint =>
+      'Obtenez-les sur bridges.torproject.org ou par e-mail via bridges@torproject.org.';
+
+  @override
+  String get torBlockedLater => 'Pas maintenant';
+
+  @override
+  String get selfNotes => 'Notes pour moi';
+
+  @override
+  String get selfNotesHint =>
+      'Chiffrées dans le coffre, sur cet appareil seulement';
+
+  @override
+  String selfNotesCount(int count) {
+    return 'Notes : $count';
+  }
+
+  @override
+  String get selfNoteNew => 'Nouvelle note';
+
+  @override
+  String get selfNotesEmpty =>
+      'Pas encore de notes. Ce que vous écrivez ici est scellé dans le coffre, lisible seulement après déverrouillage.';
+
+  @override
+  String get selfNoteDelete => 'Supprimer la note';
+
+  @override
+  String get selfNoteDeleteConfirm =>
+      'Supprimer cette note ? Elle ne pourra pas être récupérée.';
+
+  @override
+  String get selfNoteSaved => 'Note scellée';
+
+  @override
+  String get selfNoteUnsaved => 'Quitter sans enregistrer les modifications ?';
+
+  @override
+  String get selfNoteDiscard => 'Abandonner';
+
+  @override
+  String get linkTorWait =>
+      'Tor n\'est pas encore connecté, la liaison attend donc. Les deux appareils ont besoin de Tor.';
+
+  @override
+  String linkFailed(String error) {
+    return 'La liaison n\'a pas démarré : $error';
+  }
+
+  @override
+  String get linkScanInDevices =>
+      'C\'est un code pour lier un ordinateur. Sur ce téléphone, ouvrez Réglages, Appareils liés, Lier un ordinateur, et scannez-le là.';
 }

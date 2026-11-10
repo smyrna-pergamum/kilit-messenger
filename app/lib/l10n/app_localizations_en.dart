@@ -1079,4 +1079,140 @@ class LEn extends L {
   @override
   String get protScreenshotsOffHint =>
       'Off: screenshots and screen recording of Kilit work, and it shows in recent apps.';
+
+  @override
+  String get torReconnect => 'Reconnect Tor';
+
+  @override
+  String get torReconnectHint => 'New circuits, and Tor goes out again';
+
+  @override
+  String get torReconnecting => 'Reconnecting Tor…';
+
+  @override
+  String get torRestartApp => 'Restart Kilit';
+
+  @override
+  String get torRestartHint =>
+      'Tor stopped inside Kilit. Only a restart brings it back; you will unlock again.';
+
+  @override
+  String get torDetailsTitle => 'Tor connection';
+
+  @override
+  String get torAnonTitle => 'Your IP address is hidden';
+
+  @override
+  String get torAnonBody =>
+      'Kilit reaches the network only through Tor. No one sees your IP address, and only people who know your Kilit ID can reach you.';
+
+  @override
+  String get torRouteTitle => 'The way your messages go';
+
+  @override
+  String get torRouteYou => 'You';
+
+  @override
+  String get torRouteYouHint => 'Your IP address stays here';
+
+  @override
+  String get torHopGuard => 'Guard: sees your IP, not what you send';
+
+  @override
+  String get torHopMiddle => 'Middle relay: sees neither';
+
+  @override
+  String get torHopExit => 'Exit: sees the Kilit relay, never you';
+
+  @override
+  String get torHopUnknown => 'a Tor relay';
+
+  @override
+  String get torRouteRelays => 'Kilit relays';
+
+  @override
+  String get torRouteRelaysHint =>
+      'They hold sealed messages until your contact fetches them; they see Tor, not you';
+
+  @override
+  String get torRouteLayers => 'three layers of encryption';
+
+  @override
+  String get torNotReadyDiagram => 'The relays Tor uses show once it is ready.';
+
+  @override
+  String get torLog => 'Tor log';
+
+  @override
+  String get torLogEmpty => 'Nothing logged yet.';
+
+  @override
+  String get torLogRefresh => 'Refresh';
+
+  @override
+  String get torLogCopied => 'Tor log copied';
+
+  @override
+  String get torBlockedTitle => 'Tor may be blocked here';
+
+  @override
+  String get torBlockedBody =>
+      'Kilit could not reach the Tor network. A bridge hides that you use Tor. Choose a way:';
+
+  @override
+  String get torBlockedOwn => 'Paste my own bridges';
+
+  @override
+  String get torBlockedOwnHint =>
+      'Get them at bridges.torproject.org, or by email from bridges@torproject.org.';
+
+  @override
+  String get torBlockedLater => 'Not now';
+
+  @override
+  String get selfNotes => 'Notes to self';
+
+  @override
+  String get selfNotesHint => 'Encrypted in the vault, only on this device';
+
+  @override
+  String selfNotesCount(int count) {
+    return 'Notes: $count';
+  }
+
+  @override
+  String get selfNoteNew => 'New note';
+
+  @override
+  String get selfNotesEmpty =>
+      'No notes yet. What you write here is sealed in the vault, readable only after unlocking.';
+
+  @override
+  String get selfNoteDelete => 'Delete note';
+
+  @override
+  String get selfNoteDeleteConfirm =>
+      'Delete this note? It cannot be brought back.';
+
+  @override
+  String get selfNoteSaved => 'Note sealed';
+
+  @override
+  String get selfNoteUnsaved => 'Leave without saving your changes?';
+
+  @override
+  String get selfNoteDiscard => 'Discard';
+
+  @override
+  String get linkTorWait =>
+      'Tor is not connected yet, so linking waits. Both devices need Tor.';
+
+  @override
+  String linkFailed(String error) {
+    return 'Linking did not start: $error';
+  }
+
+  @override
+  String get linkScanInDevices =>
+      'This is a code for linking a computer. On this phone open Settings, Linked devices, Link a computer, and scan it there.';
 }

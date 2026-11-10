@@ -12,6 +12,7 @@ import '../l10n/app_localizations.dart';
 import '../platform/files.dart';
 import '../platform/tor.dart';
 import '../state/chat_service.dart';
+import '../state/prefs.dart';
 import '../state/session.dart';
 import '../theme/theme.dart';
 import '../theme/tokens.dart';
@@ -19,6 +20,7 @@ import '../widgets/emoji_panel.dart';
 import '../widgets/lock_button.dart';
 import 'camera_screen.dart';
 import 'devices_screen.dart' show LinkOfferScreen;
+import 'tor_screen.dart';
 import 'vault_screen.dart' show formatDate;
 
 part 'group_screen.dart';
@@ -54,6 +56,8 @@ class ChatsScreen extends StatefulWidget {
     required this.files,
     required this.chats,
     required this.tor,
+    required this.prefs,
+    required this.onOwnBridges,
     this.link,
   });
 
@@ -61,6 +65,10 @@ class ChatsScreen extends StatefulWidget {
   final FileAccess files;
   final ChatService chats;
   final TorController tor;
+  final Prefs prefs;
+
+  /// Opens Settings at the bridges, to paste bridge lines.
+  final VoidCallback onOwnBridges;
 
   /// A kilit:// link opened from another app, waiting to be added.
   final ValueNotifier<String?>? link;
@@ -287,9 +295,25 @@ class _ChatsScreenState extends State<ChatsScreen> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(right: 12),
-                            child: _TorChip(
-                              tor: widget.tor,
-                              chats: widget.chats,
+                            child: InkWell(
+                              key: const ValueKey('tor-chip-open'),
+                              borderRadius: BorderRadius.circular(8),
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => TorScreen(
+                                    tor: widget.tor,
+                                    prefs: widget.prefs,
+                                    onOwnBridges: widget.onOwnBridges,
+                                  ),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(4),
+                                child: _TorChip(
+                                  tor: widget.tor,
+                                  chats: widget.chats,
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -402,7 +426,10 @@ class _ChatsScreenState extends State<ChatsScreen> {
                               onPressed: () async {
                                 await Navigator.of(context).push(
                                   MaterialPageRoute<void>(
-                                    builder: (_) => LinkOfferScreen(core: core),
+                                    builder: (_) => LinkOfferScreen(
+                                      core: core,
+                                      tor: widget.tor,
+                                    ),
                                   ),
                                 );
                                 _reload();
@@ -601,6 +628,10 @@ class _AddSheetState extends State<AddSheet> {
 
   Future<void> _go([String? scanned]) async {
     final text = scanned ?? _text.text;
+    if (text.contains('kilit://link?')) {
+      setState(() => _error = (l) => l.linkScanInDevices);
+      return;
+    }
     if (!widget.core.isInvite(text)) {
       setState(() => _error = (l) => l.addNotInvite);
       return;

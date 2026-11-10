@@ -32,6 +32,11 @@ class WindowsTor implements TorBackend {
   Process? _tor;
   TorState _state = const TorState(TorPhase.off);
   String _mode = '';
+  String? _dir;
+  String? _config;
+
+  // the last lines tor printed
+  final _log = <String>[];
 
   /// Bumped on every start; a process from an earlier start no longer
   /// reports.
@@ -62,6 +67,8 @@ class WindowsTor implements TorBackend {
     } on StateError catch (e) {
       return e.message;
     }
+    _dir = dir;
+    _config = config;
     final data = '$dir\\tor';
     Directory(data).createSync(recursive: true);
     File('$data\\torrc').writeAsStringSync(_torrc(data, bridges));
@@ -106,6 +113,8 @@ class WindowsTor implements TorBackend {
       p.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((
         line,
       ) {
+        _log.add(line);
+        if (_log.length > 200) _log.removeAt(0);
         final boot = _bootstrapped.firstMatch(line);
         if (boot != null) {
           progress = int.parse(boot[1]!);
@@ -127,6 +136,22 @@ class WindowsTor implements TorBackend {
         _set(TorState(TorPhase.failed, error: e.message, mode: _mode));
       }
     }
+  }
+
+  @override
+  String log() => _log.join('\n');
+
+  /// tor.exe runs without a control port: no circuits to show.
+  @override
+  List<List<String>> circuits() => const [];
+
+  /// tor.exe is its own process: a fresh one is the cleanest reconnect.
+  @override
+  String? reconnect() {
+    final dir = _dir;
+    final config = _config;
+    if (dir == null || config == null) return 'not started';
+    return start(dir, config);
   }
 
   @override

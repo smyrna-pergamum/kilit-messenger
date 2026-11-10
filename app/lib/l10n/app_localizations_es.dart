@@ -1086,4 +1086,141 @@ class LEs extends L {
   @override
   String get protScreenshotsOffHint =>
       'Desactivado: se pueden hacer capturas y grabaciones de pantalla de Kilit, y aparece en apps recientes.';
+
+  @override
+  String get torReconnect => 'Reconectar Tor';
+
+  @override
+  String get torReconnectHint => 'Circuitos nuevos y Tor vuelve a salir';
+
+  @override
+  String get torReconnecting => 'Reconectando Tor…';
+
+  @override
+  String get torRestartApp => 'Reiniciar Kilit';
+
+  @override
+  String get torRestartHint =>
+      'Tor se detuvo dentro de Kilit. Solo un reinicio lo recupera; tendrás que desbloquear de nuevo.';
+
+  @override
+  String get torDetailsTitle => 'Conexión Tor';
+
+  @override
+  String get torAnonTitle => 'Tu dirección IP está oculta';
+
+  @override
+  String get torAnonBody =>
+      'Kilit sale a la red solo a través de Tor. Nadie ve tu dirección IP, y solo quien conoce tu ID de Kilit puede contactarte.';
+
+  @override
+  String get torRouteTitle => 'El camino de tus mensajes';
+
+  @override
+  String get torRouteYou => 'Tú';
+
+  @override
+  String get torRouteYouHint => 'Tu dirección IP se queda aquí';
+
+  @override
+  String get torHopGuard => 'Guardián: ve tu IP, no lo que envías';
+
+  @override
+  String get torHopMiddle => 'Relé intermedio: no ve ninguno';
+
+  @override
+  String get torHopExit => 'Salida: ve el relé de Kilit, nunca a ti';
+
+  @override
+  String get torHopUnknown => 'un relé de Tor';
+
+  @override
+  String get torRouteRelays => 'Relés de Kilit';
+
+  @override
+  String get torRouteRelaysHint =>
+      'Guardan los mensajes sellados hasta que tu contacto los recoge; ven Tor, no a ti';
+
+  @override
+  String get torRouteLayers => 'tres capas de cifrado';
+
+  @override
+  String get torNotReadyDiagram =>
+      'Los relés que usa Tor aparecen cuando está listo.';
+
+  @override
+  String get torLog => 'Registro de Tor';
+
+  @override
+  String get torLogEmpty => 'Aún no hay registros.';
+
+  @override
+  String get torLogRefresh => 'Actualizar';
+
+  @override
+  String get torLogCopied => 'Registro de Tor copiado';
+
+  @override
+  String get torBlockedTitle => 'Puede que Tor esté bloqueado aquí';
+
+  @override
+  String get torBlockedBody =>
+      'Kilit no pudo llegar a la red Tor. Un puente oculta que usas Tor. Elige una forma:';
+
+  @override
+  String get torBlockedOwn => 'Pegar mis propios puentes';
+
+  @override
+  String get torBlockedOwnHint =>
+      'Consíguelos en bridges.torproject.org o por correo de bridges@torproject.org.';
+
+  @override
+  String get torBlockedLater => 'Ahora no';
+
+  @override
+  String get selfNotes => 'Notas para mí';
+
+  @override
+  String get selfNotesHint => 'Cifradas en la bóveda, solo en este dispositivo';
+
+  @override
+  String selfNotesCount(int count) {
+    return 'Notas: $count';
+  }
+
+  @override
+  String get selfNoteNew => 'Nota nueva';
+
+  @override
+  String get selfNotesEmpty =>
+      'Aún no hay notas. Lo que escribas aquí se sella en la bóveda y solo se lee tras desbloquear.';
+
+  @override
+  String get selfNoteDelete => 'Eliminar nota';
+
+  @override
+  String get selfNoteDeleteConfirm =>
+      '¿Eliminar esta nota? No se puede recuperar.';
+
+  @override
+  String get selfNoteSaved => 'Nota sellada';
+
+  @override
+  String get selfNoteUnsaved => '¿Salir sin guardar los cambios?';
+
+  @override
+  String get selfNoteDiscard => 'Descartar';
+
+  @override
+  String get linkTorWait =>
+      'Tor aún no está conectado, así que la vinculación espera. Ambos dispositivos necesitan Tor.';
+
+  @override
+  String linkFailed(String error) {
+    return 'La vinculación no empezó: $error';
+  }
+
+  @override
+  String get linkScanInDevices =>
+      'Este es un código para vincular un ordenador. En este teléfono abre Ajustes, Dispositivos vinculados, Vincular un ordenador, y escanéalo allí.';
 }

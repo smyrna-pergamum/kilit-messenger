@@ -1081,4 +1081,142 @@ class LUk extends L {
   @override
   String get protScreenshotsOffHint =>
       'Вимк.: знімки та запис екрана Kilit можливі, і він видно в недавніх застосунках.';
+
+  @override
+  String get torReconnect => 'Перепідключити Tor';
+
+  @override
+  String get torReconnectHint => 'Нові ланцюжки, Tor знову виходить у мережу';
+
+  @override
+  String get torReconnecting => 'Перепідключення Tor…';
+
+  @override
+  String get torRestartApp => 'Перезапустити Kilit';
+
+  @override
+  String get torRestartHint =>
+      'Tor зупинився всередині Kilit. Повернути його може лише перезапуск; розблокувати доведеться знову.';
+
+  @override
+  String get torDetailsTitle => 'Підключення Tor';
+
+  @override
+  String get torAnonTitle => 'Ваша IP-адреса прихована';
+
+  @override
+  String get torAnonBody =>
+      'Kilit виходить у мережу лише через Tor. Ніхто не бачить вашу IP-адресу, і зв’язатися з вами можуть лише ті, хто знає ваш Kilit ID.';
+
+  @override
+  String get torRouteTitle => 'Шлях ваших повідомлень';
+
+  @override
+  String get torRouteYou => 'Ви';
+
+  @override
+  String get torRouteYouHint => 'Ваша IP-адреса лишається тут';
+
+  @override
+  String get torHopGuard =>
+      'Вартовий вузол: бачить ваш IP, але не те, що ви шлете';
+
+  @override
+  String get torHopMiddle => 'Середній вузол: не бачить ні того, ні іншого';
+
+  @override
+  String get torHopExit => 'Вихід: бачить реле Kilit, але не вас';
+
+  @override
+  String get torHopUnknown => 'вузол Tor';
+
+  @override
+  String get torRouteRelays => 'Реле Kilit';
+
+  @override
+  String get torRouteRelaysHint =>
+      'Зберігають запечатані повідомлення, доки контакт їх не забере; бачать Tor, а не вас';
+
+  @override
+  String get torRouteLayers => 'три шари шифрування';
+
+  @override
+  String get torNotReadyDiagram =>
+      'Вузли, які використовує Tor, з’являться, коли він буде готовий.';
+
+  @override
+  String get torLog => 'Журнал Tor';
+
+  @override
+  String get torLogEmpty => 'Поки порожньо.';
+
+  @override
+  String get torLogRefresh => 'Оновити';
+
+  @override
+  String get torLogCopied => 'Журнал Tor скопійовано';
+
+  @override
+  String get torBlockedTitle => 'Можливо, Tor тут заблоковано';
+
+  @override
+  String get torBlockedBody =>
+      'Kilit не зміг підключитися до мережі Tor. Міст приховує, що ви користуєтеся Tor. Виберіть спосіб:';
+
+  @override
+  String get torBlockedOwn => 'Вставити власні мости';
+
+  @override
+  String get torBlockedOwnHint =>
+      'Отримайте їх на bridges.torproject.org або поштою від bridges@torproject.org.';
+
+  @override
+  String get torBlockedLater => 'Не зараз';
+
+  @override
+  String get selfNotes => 'Нотатки для себе';
+
+  @override
+  String get selfNotesHint => 'Зашифровані в сейфі, лише на цьому пристрої';
+
+  @override
+  String selfNotesCount(int count) {
+    return 'Нотаток: $count';
+  }
+
+  @override
+  String get selfNoteNew => 'Нова нотатка';
+
+  @override
+  String get selfNotesEmpty =>
+      'Нотаток поки немає. Усе, що ви пишете тут, запечатується в сейфі й читається лише після розблокування.';
+
+  @override
+  String get selfNoteDelete => 'Видалити нотатку';
+
+  @override
+  String get selfNoteDeleteConfirm =>
+      'Видалити нотатку? Повернути її буде неможливо.';
+
+  @override
+  String get selfNoteSaved => 'Нотатку запечатано';
+
+  @override
+  String get selfNoteUnsaved => 'Вийти, не зберігши зміни?';
+
+  @override
+  String get selfNoteDiscard => 'Не зберігати';
+
+  @override
+  String get linkTorWait =>
+      'Tor ще не підключено, тому прив’язка чекає. Tor потрібен на обох пристроях.';
+
+  @override
+  String linkFailed(String error) {
+    return 'Прив’язка не почалася: $error';
+  }
+
+  @override
+  String get linkScanInDevices =>
+      'Це код для прив’язки комп’ютера. На цьому телефоні відкрийте Налаштування → Пов’язані пристрої → Прив’язати комп’ютер і відскануйте його там.';
 }

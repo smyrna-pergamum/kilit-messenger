@@ -1076,4 +1076,140 @@ class LVi extends L {
   @override
   String get protScreenshotsOffHint =>
       'Tắt: có thể chụp và quay màn hình Kilit, và nó hiện trong ứng dụng gần đây.';
+
+  @override
+  String get torReconnect => 'Kết nối lại Tor';
+
+  @override
+  String get torReconnectHint => 'Mạch mới, và Tor kết nối lại';
+
+  @override
+  String get torReconnecting => 'Đang kết nối lại Tor…';
+
+  @override
+  String get torRestartApp => 'Khởi động lại Kilit';
+
+  @override
+  String get torRestartHint =>
+      'Tor đã dừng bên trong Kilit. Chỉ khởi động lại mới đưa nó trở lại; bạn sẽ mở khóa lại.';
+
+  @override
+  String get torDetailsTitle => 'Kết nối Tor';
+
+  @override
+  String get torAnonTitle => 'Địa chỉ IP của bạn được ẩn';
+
+  @override
+  String get torAnonBody =>
+      'Kilit chỉ ra mạng qua Tor. Không ai thấy địa chỉ IP của bạn, và chỉ người biết Kilit ID của bạn mới liên lạc được với bạn.';
+
+  @override
+  String get torRouteTitle => 'Đường đi của tin nhắn';
+
+  @override
+  String get torRouteYou => 'Bạn';
+
+  @override
+  String get torRouteYouHint => 'Địa chỉ IP của bạn ở lại đây';
+
+  @override
+  String get torHopGuard => 'Cổng vào: thấy IP, không thấy nội dung';
+
+  @override
+  String get torHopMiddle => 'Rơ-le giữa: không thấy cả hai';
+
+  @override
+  String get torHopExit => 'Lối ra: thấy rơ-le Kilit, không bao giờ thấy bạn';
+
+  @override
+  String get torHopUnknown => 'một rơ-le Tor';
+
+  @override
+  String get torRouteRelays => 'Rơ-le Kilit';
+
+  @override
+  String get torRouteRelaysHint =>
+      'Giữ tin nhắn đã niêm phong đến khi người nhận lấy; thấy Tor, không thấy bạn';
+
+  @override
+  String get torRouteLayers => 'ba lớp mã hóa';
+
+  @override
+  String get torNotReadyDiagram =>
+      'Các rơ-le Tor dùng sẽ hiện khi Tor sẵn sàng.';
+
+  @override
+  String get torLog => 'Nhật ký Tor';
+
+  @override
+  String get torLogEmpty => 'Chưa có gì.';
+
+  @override
+  String get torLogRefresh => 'Làm mới';
+
+  @override
+  String get torLogCopied => 'Đã sao chép nhật ký Tor';
+
+  @override
+  String get torBlockedTitle => 'Tor có thể bị chặn ở đây';
+
+  @override
+  String get torBlockedBody =>
+      'Kilit không vào được mạng Tor. Cầu nối giấu việc bạn dùng Tor. Chọn một cách:';
+
+  @override
+  String get torBlockedOwn => 'Dán cầu nối của tôi';
+
+  @override
+  String get torBlockedOwnHint =>
+      'Lấy tại bridges.torproject.org, hoặc qua email từ bridges@torproject.org.';
+
+  @override
+  String get torBlockedLater => 'Để sau';
+
+  @override
+  String get selfNotes => 'Ghi chú cho bản thân';
+
+  @override
+  String get selfNotesHint => 'Mã hóa trong két, chỉ trên thiết bị này';
+
+  @override
+  String selfNotesCount(int count) {
+    return 'Ghi chú: $count';
+  }
+
+  @override
+  String get selfNoteNew => 'Ghi chú mới';
+
+  @override
+  String get selfNotesEmpty =>
+      'Chưa có ghi chú. Những gì bạn viết ở đây được niêm phong trong két, chỉ đọc được sau khi mở khóa.';
+
+  @override
+  String get selfNoteDelete => 'Xóa ghi chú';
+
+  @override
+  String get selfNoteDeleteConfirm => 'Xóa ghi chú này? Không thể khôi phục.';
+
+  @override
+  String get selfNoteSaved => 'Đã niêm phong ghi chú';
+
+  @override
+  String get selfNoteUnsaved => 'Thoát mà không lưu thay đổi?';
+
+  @override
+  String get selfNoteDiscard => 'Bỏ';
+
+  @override
+  String get linkTorWait =>
+      'Tor chưa kết nối nên việc liên kết đang chờ. Cả hai thiết bị đều cần Tor.';
+
+  @override
+  String linkFailed(String error) {
+    return 'Không bắt đầu liên kết được: $error';
+  }
+
+  @override
+  String get linkScanInDevices =>
+      'Đây là mã để liên kết máy tính. Trên điện thoại này mở Cài đặt, Thiết bị đã liên kết, Liên kết máy tính, rồi quét ở đó.';
 }

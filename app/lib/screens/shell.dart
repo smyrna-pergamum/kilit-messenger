@@ -14,6 +14,7 @@ import '../widgets/lock_button.dart';
 import 'camera_screen.dart';
 import 'chats_screen.dart';
 import 'settings_screen.dart';
+import 'tor_screen.dart';
 import 'vault_screen.dart';
 
 /// The Kilit invite in [text]: the whole text, or a kilit:// link inside it
@@ -81,6 +82,7 @@ class _ShellState extends State<Shell> {
   @override
   void initState() {
     super.initState();
+    widget.tor.addListener(_torChanged);
     // things shared or opened into Kilit wait until the vault is open
     _incoming = widget.files.incomingReady.listen((_) => _take());
     WidgetsBinding.instance.addPostFrameCallback((_) => _take());
@@ -88,6 +90,7 @@ class _ShellState extends State<Shell> {
 
   @override
   void dispose() {
+    widget.tor.removeListener(_torChanged);
     _incoming?.cancel();
     _link.dispose();
     _forVault.dispose();
@@ -113,6 +116,8 @@ class _ShellState extends State<Shell> {
       files: widget.files,
       chats: _chats,
       tor: widget.tor,
+      prefs: widget.prefs,
+      onOwnBridges: _ownBridges,
       link: _link,
     ),
     1 => VaultScreen(
@@ -131,8 +136,30 @@ class _ShellState extends State<Shell> {
       prefs: widget.prefs,
       files: widget.files,
       tor: widget.tor,
+      onOwnBridges: _ownBridges,
     ),
   };
+
+  /// Settings, at the bridges, to paste bridge lines.
+  void _ownBridges() {
+    widget.prefs.openSections.add('bridges');
+    setState(() => _index = 3);
+  }
+
+  // bridges are offered once a session, the first time Tor seems blocked
+  bool _offeredBridges = false;
+
+  void _torChanged() {
+    if (!widget.tor.blocked || _offeredBridges || !mounted) return;
+    _offeredBridges = true;
+    showTorBridges(
+      context,
+      prefs: widget.prefs,
+      tor: widget.tor,
+      onOwnBridges: _ownBridges,
+      blocked: true,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

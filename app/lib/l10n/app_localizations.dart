@@ -2036,6 +2036,252 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Off: screenshots and screen recording of Kilit work, and it shows in recent apps.'**
   String get protScreenshotsOffHint;
+
+  /// No description provided for @torReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnect Tor'**
+  String get torReconnect;
+
+  /// No description provided for @torReconnectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'New circuits, and Tor goes out again'**
+  String get torReconnectHint;
+
+  /// No description provided for @torReconnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnecting Tor…'**
+  String get torReconnecting;
+
+  /// No description provided for @torRestartApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart Kilit'**
+  String get torRestartApp;
+
+  /// No description provided for @torRestartHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tor stopped inside Kilit. Only a restart brings it back; you will unlock again.'**
+  String get torRestartHint;
+
+  /// No description provided for @torDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tor connection'**
+  String get torDetailsTitle;
+
+  /// No description provided for @torAnonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your IP address is hidden'**
+  String get torAnonTitle;
+
+  /// No description provided for @torAnonBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Kilit reaches the network only through Tor. No one sees your IP address, and only people who know your Kilit ID can reach you.'**
+  String get torAnonBody;
+
+  /// No description provided for @torRouteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The way your messages go'**
+  String get torRouteTitle;
+
+  /// No description provided for @torRouteYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get torRouteYou;
+
+  /// No description provided for @torRouteYouHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your IP address stays here'**
+  String get torRouteYouHint;
+
+  /// No description provided for @torHopGuard.
+  ///
+  /// In en, this message translates to:
+  /// **'Guard: sees your IP, not what you send'**
+  String get torHopGuard;
+
+  /// No description provided for @torHopMiddle.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle relay: sees neither'**
+  String get torHopMiddle;
+
+  /// No description provided for @torHopExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit: sees the Kilit relay, never you'**
+  String get torHopExit;
+
+  /// No description provided for @torHopUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'a Tor relay'**
+  String get torHopUnknown;
+
+  /// No description provided for @torRouteRelays.
+  ///
+  /// In en, this message translates to:
+  /// **'Kilit relays'**
+  String get torRouteRelays;
+
+  /// No description provided for @torRouteRelaysHint.
+  ///
+  /// In en, this message translates to:
+  /// **'They hold sealed messages until your contact fetches them; they see Tor, not you'**
+  String get torRouteRelaysHint;
+
+  /// No description provided for @torRouteLayers.
+  ///
+  /// In en, this message translates to:
+  /// **'three layers of encryption'**
+  String get torRouteLayers;
+
+  /// No description provided for @torNotReadyDiagram.
+  ///
+  /// In en, this message translates to:
+  /// **'The relays Tor uses show once it is ready.'**
+  String get torNotReadyDiagram;
+
+  /// No description provided for @torLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Tor log'**
+  String get torLog;
+
+  /// No description provided for @torLogEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing logged yet.'**
+  String get torLogEmpty;
+
+  /// No description provided for @torLogRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get torLogRefresh;
+
+  /// No description provided for @torLogCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Tor log copied'**
+  String get torLogCopied;
+
+  /// No description provided for @torBlockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tor may be blocked here'**
+  String get torBlockedTitle;
+
+  /// No description provided for @torBlockedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Kilit could not reach the Tor network. A bridge hides that you use Tor. Choose a way:'**
+  String get torBlockedBody;
+
+  /// No description provided for @torBlockedOwn.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste my own bridges'**
+  String get torBlockedOwn;
+
+  /// No description provided for @torBlockedOwnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Get them at bridges.torproject.org, or by email from bridges@torproject.org.'**
+  String get torBlockedOwnHint;
+
+  /// No description provided for @torBlockedLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get torBlockedLater;
+
+  /// No description provided for @selfNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes to self'**
+  String get selfNotes;
+
+  /// No description provided for @selfNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted in the vault, only on this device'**
+  String get selfNotesHint;
+
+  /// No description provided for @selfNotesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes: {count}'**
+  String selfNotesCount(int count);
+
+  /// No description provided for @selfNoteNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New note'**
+  String get selfNoteNew;
+
+  /// No description provided for @selfNotesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No notes yet. What you write here is sealed in the vault, readable only after unlocking.'**
+  String get selfNotesEmpty;
+
+  /// No description provided for @selfNoteDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete note'**
+  String get selfNoteDelete;
+
+  /// No description provided for @selfNoteDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this note? It cannot be brought back.'**
+  String get selfNoteDeleteConfirm;
+
+  /// No description provided for @selfNoteSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Note sealed'**
+  String get selfNoteSaved;
+
+  /// No description provided for @selfNoteUnsaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave without saving your changes?'**
+  String get selfNoteUnsaved;
+
+  /// No description provided for @selfNoteDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get selfNoteDiscard;
+
+  /// No description provided for @linkTorWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Tor is not connected yet, so linking waits. Both devices need Tor.'**
+  String get linkTorWait;
+
+  /// No description provided for @linkFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Linking did not start: {error}'**
+  String linkFailed(String error);
+
+  /// No description provided for @linkScanInDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a code for linking a computer. On this phone open Settings, Linked devices, Link a computer, and scan it there.'**
+  String get linkScanInDevices;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

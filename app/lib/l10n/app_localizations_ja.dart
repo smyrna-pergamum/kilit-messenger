@@ -1044,4 +1044,137 @@ class LJa extends L {
   @override
   String get protScreenshotsOffHint =>
       'オフ：Kilit のスクリーンショットや画面録画ができ、最近使ったアプリにも表示されます。';
+
+  @override
+  String get torReconnect => 'Tor に再接続';
+
+  @override
+  String get torReconnectHint => '新しい回線を作り、Tor をつなぎ直します';
+
+  @override
+  String get torReconnecting => 'Tor に再接続中…';
+
+  @override
+  String get torRestartApp => 'Kilit を再起動';
+
+  @override
+  String get torRestartHint =>
+      'Kilit の中で Tor が止まりました。再起動しないと戻りません。再起動後はもう一度ロックを解除します。';
+
+  @override
+  String get torDetailsTitle => 'Tor 接続';
+
+  @override
+  String get torAnonTitle => 'あなたの IP アドレスは隠れています';
+
+  @override
+  String get torAnonBody =>
+      'Kilit は Tor を通してだけネットワークに出ます。誰もあなたの IP アドレスを見られず、あなたの Kilit ID を知っている人だけがあなたに連絡できます。';
+
+  @override
+  String get torRouteTitle => 'メッセージが通る道';
+
+  @override
+  String get torRouteYou => 'あなた';
+
+  @override
+  String get torRouteYouHint => 'IP アドレスはここから出ません';
+
+  @override
+  String get torHopGuard => 'ガード: IP は見えるが、送る内容は見えない';
+
+  @override
+  String get torHopMiddle => '中継: どちらも見えない';
+
+  @override
+  String get torHopExit => '出口: Kilit リレーは見えるが、あなたは見えない';
+
+  @override
+  String get torHopUnknown => 'Tor リレー';
+
+  @override
+  String get torRouteRelays => 'Kilit リレー';
+
+  @override
+  String get torRouteRelaysHint =>
+      '相手が受け取るまで封をしたメッセージを預かります。見えるのは Tor で、あなたではありません';
+
+  @override
+  String get torRouteLayers => '3 層の暗号化';
+
+  @override
+  String get torNotReadyDiagram => 'Tor の準備ができると、使っているリレーが表示されます。';
+
+  @override
+  String get torLog => 'Tor のログ';
+
+  @override
+  String get torLogEmpty => 'まだログはありません。';
+
+  @override
+  String get torLogRefresh => '更新';
+
+  @override
+  String get torLogCopied => 'Tor のログをコピーしました';
+
+  @override
+  String get torBlockedTitle => 'ここでは Tor がブロックされているかもしれません';
+
+  @override
+  String get torBlockedBody =>
+      'Kilit は Tor ネットワークに届きませんでした。ブリッジを使うと Tor の利用を隠せます。方法を選んでください:';
+
+  @override
+  String get torBlockedOwn => '自分のブリッジを貼り付ける';
+
+  @override
+  String get torBlockedOwnHint =>
+      'bridges.torproject.org か、bridges@torproject.org へのメールで入手できます。';
+
+  @override
+  String get torBlockedLater => '今はしない';
+
+  @override
+  String get selfNotes => '自分用メモ';
+
+  @override
+  String get selfNotesHint => '金庫の中で暗号化、この端末だけに保存';
+
+  @override
+  String selfNotesCount(int count) {
+    return 'メモ: $count';
+  }
+
+  @override
+  String get selfNoteNew => '新しいメモ';
+
+  @override
+  String get selfNotesEmpty => 'まだメモはありません。ここに書いた内容は金庫に封印され、ロック解除後にだけ読めます。';
+
+  @override
+  String get selfNoteDelete => 'メモを削除';
+
+  @override
+  String get selfNoteDeleteConfirm => 'このメモを削除しますか？元に戻せません。';
+
+  @override
+  String get selfNoteSaved => 'メモを封印しました';
+
+  @override
+  String get selfNoteUnsaved => '変更を保存せずに戻りますか？';
+
+  @override
+  String get selfNoteDiscard => '破棄';
+
+  @override
+  String get linkTorWait => 'Tor がまだつながっていないため、リンクは待機中です。両方の端末に Tor が必要です。';
+
+  @override
+  String linkFailed(String error) {
+    return 'リンクを開始できませんでした: $error';
+  }
+
+  @override
+  String get linkScanInDevices =>
+      'これはパソコンをリンクするためのコードです。このスマホで 設定 → リンク済みの端末 → パソコンをリンク を開き、そこで読み取ってください。';
 }

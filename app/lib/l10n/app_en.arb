@@ -545,5 +545,60 @@
     }
   },
   "torChipFailed": "Tor error",
-  "protScreenshotsOffHint": "Off: screenshots and screen recording of Kilit work, and it shows in recent apps."
+  "protScreenshotsOffHint": "Off: screenshots and screen recording of Kilit work, and it shows in recent apps.",
+  "torReconnect": "Reconnect Tor",
+  "torReconnectHint": "New circuits, and Tor goes out again",
+  "torReconnecting": "Reconnecting Tor…",
+  "torRestartApp": "Restart Kilit",
+  "torRestartHint": "Tor stopped inside Kilit. Only a restart brings it back; you will unlock again.",
+  "torDetailsTitle": "Tor connection",
+  "torAnonTitle": "Your IP address is hidden",
+  "torAnonBody": "Kilit reaches the network only through Tor. No one sees your IP address, and only people who know your Kilit ID can reach you.",
+  "torRouteTitle": "The way your messages go",
+  "torRouteYou": "You",
+  "torRouteYouHint": "Your IP address stays here",
+  "torHopGuard": "Guard: sees your IP, not what you send",
+  "torHopMiddle": "Middle relay: sees neither",
+  "torHopExit": "Exit: sees the Kilit relay, never you",
+  "torHopUnknown": "a Tor relay",
+  "torRouteRelays": "Kilit relays",
+  "torRouteRelaysHint": "They hold sealed messages until your contact fetches them; they see Tor, not you",
+  "torRouteLayers": "three layers of encryption",
+  "torNotReadyDiagram": "The relays Tor uses show once it is ready.",
+  "torLog": "Tor log",
+  "torLogEmpty": "Nothing logged yet.",
+  "torLogRefresh": "Refresh",
+  "torLogCopied": "Tor log copied",
+  "torBlockedTitle": "Tor may be blocked here",
+  "torBlockedBody": "Kilit could not reach the Tor network. A bridge hides that you use Tor. Choose a way:",
+  "torBlockedOwn": "Paste my own bridges",
+  "torBlockedOwnHint": "Get them at bridges.torproject.org, or by email from bridges@torproject.org.",
+  "torBlockedLater": "Not now",
+  "selfNotes": "Notes to self",
+  "selfNotesHint": "Encrypted in the vault, only on this device",
+  "selfNotesCount": "Notes: {count}",
+  "@selfNotesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selfNoteNew": "New note",
+  "selfNotesEmpty": "No notes yet. What you write here is sealed in the vault, readable only after unlocking.",
+  "selfNoteDelete": "Delete note",
+  "selfNoteDeleteConfirm": "Delete this note? It cannot be brought back.",
+  "selfNoteSaved": "Note sealed",
+  "selfNoteUnsaved": "Leave without saving your changes?",
+  "selfNoteDiscard": "Discard",
+  "linkTorWait": "Tor is not connected yet, so linking waits. Both devices need Tor.",
+  "linkFailed": "Linking did not start: {error}",
+  "linkScanInDevices": "This is a code for linking a computer. On this phone open Settings, Linked devices, Link a computer, and scan it there.",
+  "@linkFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

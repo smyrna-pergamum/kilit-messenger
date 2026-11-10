@@ -1070,4 +1070,140 @@ class LAr extends L {
   @override
   String get protScreenshotsOffHint =>
       'متوقف: يمكن التقاط صور الشاشة وتسجيلها لـ Kilit، ويظهر في التطبيقات الأخيرة.';
+
+  @override
+  String get torReconnect => 'إعادة اتصال Tor';
+
+  @override
+  String get torReconnectHint => 'دوائر جديدة، ويتصل Tor من جديد';
+
+  @override
+  String get torReconnecting => 'جارٍ إعادة اتصال Tor…';
+
+  @override
+  String get torRestartApp => 'أعد تشغيل Kilit';
+
+  @override
+  String get torRestartHint =>
+      'توقف Tor داخل Kilit. لا يعيده إلا إعادة التشغيل؛ وستفتح القفل من جديد.';
+
+  @override
+  String get torDetailsTitle => 'اتصال Tor';
+
+  @override
+  String get torAnonTitle => 'عنوان IP الخاص بك مخفي';
+
+  @override
+  String get torAnonBody =>
+      'لا يتصل Kilit بالشبكة إلا عبر Tor. لا أحد يرى عنوان IP الخاص بك، ولا يصل إليك إلا من يعرف معرّف Kilit الخاص بك.';
+
+  @override
+  String get torRouteTitle => 'الطريق الذي تسلكه رسائلك';
+
+  @override
+  String get torRouteYou => 'أنت';
+
+  @override
+  String get torRouteYouHint => 'يبقى عنوان IP الخاص بك هنا';
+
+  @override
+  String get torHopGuard => 'الحارس: يرى عنوان IP، لا ما ترسله';
+
+  @override
+  String get torHopMiddle => 'المرحّل الأوسط: لا يرى أيًّا منهما';
+
+  @override
+  String get torHopExit => 'المخرج: يرى مرحّل Kilit، ولا يراك أبدًا';
+
+  @override
+  String get torHopUnknown => 'مرحّل Tor';
+
+  @override
+  String get torRouteRelays => 'مرحّلات Kilit';
+
+  @override
+  String get torRouteRelaysHint =>
+      'تحتفظ بالرسائل المختومة حتى يجلبها جهة اتصالك؛ ترى Tor لا أنت';
+
+  @override
+  String get torRouteLayers => 'ثلاث طبقات تشفير';
+
+  @override
+  String get torNotReadyDiagram =>
+      'تظهر المرحّلات التي يستخدمها Tor عندما يصبح جاهزًا.';
+
+  @override
+  String get torLog => 'سجل Tor';
+
+  @override
+  String get torLogEmpty => 'لا شيء في السجل بعد.';
+
+  @override
+  String get torLogRefresh => 'تحديث';
+
+  @override
+  String get torLogCopied => 'نُسخ سجل Tor';
+
+  @override
+  String get torBlockedTitle => 'ربما يكون Tor محجوبًا هنا';
+
+  @override
+  String get torBlockedBody =>
+      'لم يتمكن Kilit من الوصول إلى شبكة Tor. الجسر يخفي أنك تستخدم Tor. اختر طريقة:';
+
+  @override
+  String get torBlockedOwn => 'ألصق جسوري الخاصة';
+
+  @override
+  String get torBlockedOwnHint =>
+      'احصل عليها من bridges.torproject.org أو بالبريد من bridges@torproject.org.';
+
+  @override
+  String get torBlockedLater => 'ليس الآن';
+
+  @override
+  String get selfNotes => 'ملاحظات لنفسي';
+
+  @override
+  String get selfNotesHint => 'مشفّرة في الخزنة، على هذا الجهاز فقط';
+
+  @override
+  String selfNotesCount(int count) {
+    return 'الملاحظات: $count';
+  }
+
+  @override
+  String get selfNoteNew => 'ملاحظة جديدة';
+
+  @override
+  String get selfNotesEmpty =>
+      'لا ملاحظات بعد. ما تكتبه هنا يُختم في الخزنة ولا يُقرأ إلا بعد فتح القفل.';
+
+  @override
+  String get selfNoteDelete => 'حذف الملاحظة';
+
+  @override
+  String get selfNoteDeleteConfirm => 'حذف هذه الملاحظة؟ لا يمكن استعادتها.';
+
+  @override
+  String get selfNoteSaved => 'خُتمت الملاحظة';
+
+  @override
+  String get selfNoteUnsaved => 'المغادرة دون حفظ التغييرات؟';
+
+  @override
+  String get selfNoteDiscard => 'تجاهل';
+
+  @override
+  String get linkTorWait =>
+      'Tor غير متصل بعد، لذا ينتظر الربط. يحتاج الجهازان إلى Tor.';
+
+  @override
+  String linkFailed(String error) {
+    return 'لم يبدأ الربط: $error';
+  }
+
+  @override
+  String get linkScanInDevices =>
+      'هذا رمز لربط حاسوب. افتح على هذا الهاتف الإعدادات، الأجهزة المرتبطة، ربط حاسوب، وامسحه هناك.';
 }
