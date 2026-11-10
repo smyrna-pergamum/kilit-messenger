@@ -363,5 +363,19 @@
   "crashTitle": "Kilit wurde unerwartet beendet",
   "crashBody": "Beim letzten Mal wurde Kilit von selbst beendet. Der Bericht unten enthält keine Nachrichten oder Schlüssel, nur die Stelle des Fehlers. Kopiere ihn und schick ihn dem Entwickler, etwa in einem GitHub-Issue.",
   "crashCopy": "Bericht kopieren",
-  "linkFetchingKey": "Der Schlüssel des Computers wird von den Relais geholt…"
+  "linkFetchingKey": "Der Schlüssel des Computers wird von den Relais geholt…",
+  "deviceLinkById": "Computer per Kilit-ID koppeln",
+  "linkById": "Mit Kilit-ID",
+  "linkByQr": "Mit QR-Code",
+  "linkIdField": "Die Kilit-ID deines Telefons",
+  "linkIdHelp": "Gib die Kilit-ID deines Telefons ein. Öffne auf dem Telefon Einstellungen, Gekoppelte Geräte, Computer per Kilit-ID koppeln: Es zeigt die ID und wartet auf diesen Computer.",
+  "linkIdSend": "Anfrage senden",
+  "linkIdSent": "Anfrage gesendet. Bestätige auf dem Telefon die Anfrage mit diesem Code:",
+  "linkIdOrScan": "Oder scanne diesen Code mit dem Telefon, auf demselben Bildschirm:",
+  "linkListenHelp": "Wähle auf dem Computer Mit meinem Telefon koppeln, Mit Kilit-ID, und gib diese ID ein:",
+  "linkListenWaiting": "Warte auf die Anfrage des Computers…",
+  "linkListenScan": "Oder den Code des Computers scannen",
+  "linkRequestCode": "Ein Computer möchte gekoppelt werden. Ist das der Code auf seinem Bildschirm?",
+  "linkRequestApprove": "Gleicher Code: koppeln",
+  "linkRequestOther": "Ein anderer Code? Nicht bestätigen: Jemand anderes hat die Anfrage gesendet."
 }

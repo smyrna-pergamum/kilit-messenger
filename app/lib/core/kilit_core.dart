@@ -157,6 +157,19 @@ abstract interface class KilitCore {
   /// code both screens show.
   Future<String> linkAccept(String text, String name);
 
+  /// A new device: asks the phone whose Kilit ID is in [text] (`@ID` or a
+  /// link) to link it. Returns the code both screens show. Throws
+  /// [Offline] without Tor, [ContactRefused] when no one has that ID, and
+  /// [NotNewKilit] on a Kilit that has contacts.
+  Future<String> linkRequest(String text);
+
+  /// The phone: listens for requests to link by its Kilit ID.
+  Future<void> linkListen();
+
+  /// The phone: links the device whose request carried [tag], once the
+  /// codes on both screens matched.
+  Future<void> linkApprove(String tag, String name);
+
   /// Where linking stands.
   Future<LinkStatus> linkState();
   Future<void> linkCancel();
@@ -218,13 +231,37 @@ abstract interface class KilitCore {
 const maxChatFileBytes = 5 * 1024 * 1024;
 
 /// Where linking a device stands.
+/// A request to link a new device by Kilit ID, for the phone to approve.
+class LinkRequest {
+  const LinkRequest(this.tag, this.code);
+
+  /// What approving it names.
+  final String tag;
+
+  /// The code the new device shows.
+  final String code;
+}
+
+/// A new Kilit can link only before it has contacts.
+class NotNewKilit implements Exception {
+  const NotNewKilit();
+}
+
 class LinkStatus {
   const LinkStatus({
     this.offer,
     this.waiting = false,
     this.code,
     this.done = false,
+    this.listening = false,
+    this.requests = const [],
   });
+
+  /// The phone: listening for requests to link by Kilit ID.
+  final bool listening;
+
+  /// The requests that came, newest first.
+  final List<LinkRequest> requests;
 
   /// A new device: the text its QR code shows, while it waits.
   final String? offer;

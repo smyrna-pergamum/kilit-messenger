@@ -79,6 +79,7 @@ class Prefs extends ChangeNotifier {
     this._tor,
     this._torRoute,
     this._bridges,
+    this._torLastGood,
     this._blockScreenshots,
   );
 
@@ -102,6 +103,7 @@ class Prefs extends ChangeNotifier {
         for (final b in v['bridges'] is List ? v['bridges'] as List : const [])
           if (b is String) b,
       ],
+      TorRoute.values.where((r) => r.name == v['torLastGood']).firstOrNull,
       // absent: on
       v['blockScreenshots'] != false,
     );
@@ -114,6 +116,16 @@ class Prefs extends ChangeNotifier {
   bool _tor;
   TorRoute _torRoute;
   List<String> _bridges;
+  TorRoute? _torLastGood;
+
+  /// The way out that came up last time under automatic mode.
+  TorRoute? get torLastGood => _torLastGood;
+
+  Future<void> setTorLastGood(TorRoute r) {
+    _torLastGood = r;
+    return _save();
+  }
+
   bool _blockScreenshots;
 
   /// Whether Kilit keeps itself out of screenshots, screen recording and
@@ -152,6 +164,7 @@ class Prefs extends ChangeNotifier {
       'tor': _tor,
       'torRoute': _torRoute.name,
       'bridges': _bridges,
+      if (_torLastGood != null) 'torLastGood': _torLastGood!.name,
       'blockScreenshots': _blockScreenshots,
     });
   }
@@ -195,6 +208,7 @@ class Prefs extends ChangeNotifier {
     _tor = true;
     _torRoute = TorRoute.auto;
     _bridges = const [];
+    _torLastGood = null;
     _blockScreenshots = true;
     openSections
       ..clear()

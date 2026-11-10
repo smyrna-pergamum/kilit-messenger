@@ -1228,4 +1228,52 @@ class LEn extends L {
 
   @override
   String get linkFetchingKey => 'Getting the computer\'s key from the relays…';
+
+  @override
+  String get deviceLinkById => 'Link a computer by Kilit ID';
+
+  @override
+  String get linkById => 'With Kilit ID';
+
+  @override
+  String get linkByQr => 'With QR code';
+
+  @override
+  String get linkIdField => 'Your phone\'s Kilit ID';
+
+  @override
+  String get linkIdHelp =>
+      'Type your phone\'s Kilit ID. On the phone open Settings, Linked devices, Link a computer by Kilit ID: it shows the ID and waits for this computer.';
+
+  @override
+  String get linkIdSend => 'Send request';
+
+  @override
+  String get linkIdSent =>
+      'Request sent. On the phone, approve the request that shows this code:';
+
+  @override
+  String get linkIdOrScan =>
+      'Or scan this code with the phone, on the same screen:';
+
+  @override
+  String get linkListenHelp =>
+      'On the computer choose Link to my phone, With Kilit ID, and type this ID:';
+
+  @override
+  String get linkListenWaiting => 'Waiting for the computer\'s request…';
+
+  @override
+  String get linkListenScan => 'Scan the computer\'s code instead';
+
+  @override
+  String get linkRequestCode =>
+      'A computer asks to link. Is this the code on its screen?';
+
+  @override
+  String get linkRequestApprove => 'Same code: link it';
+
+  @override
+  String get linkRequestOther =>
+      'A different code? Do not approve it: someone else sent that request.';
 }

@@ -26,6 +26,28 @@ struct Offer {
     seed: ByteBuf,
     tag: String,
     at: i64,
+    /// Linking by Kilit ID: the ID typed in. A package for any other ID is
+    /// refused.
+    #[serde(default)]
+    expect_id: Option<String>,
+}
+
+/// On the phone: a new device asked to link by this ID's Kilit ID.
+#[derive(Clone, Serialize, Deserialize)]
+struct Request {
+    key: ByteBuf,
+    tag: String,
+    code: String,
+    at: i64,
+}
+
+/// What a request on the relays carries: the new device's one-time key
+/// and the tag it waits on. Nothing secret: the code on both screens
+/// shows the key is the one in front of the user.
+#[derive(Serialize, Deserialize)]
+struct RequestBody {
+    key: ByteBuf,
+    tag: String,
 }
 
 /// On the phone: a code was scanned, its key is on its way from the relays.
@@ -52,6 +74,11 @@ struct Linking {
     offer: Option<Offer>,
     #[serde(default)]
     pending: Option<Scanning>,
+    /// The phone listens for requests by Kilit ID since then.
+    #[serde(default)]
+    listening: Option<i64>,
+    #[serde(default)]
+    requests: Vec<Request>,
     waiting: Option<Waiting>,
     /// The code both screens show, once both sides have the package.
     code: Option<String>,
@@ -68,6 +95,10 @@ struct Wrap {
     package: ByteBuf,
     key: ByteBuf,
     name: String,
+    /// Sent for a request by Kilit ID: both screens show the request's
+    /// code, not one from this package.
+    #[serde(default)]
+    by_request: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -76,9 +107,22 @@ struct Reply {
     name: String,
 }
 
+/// A request to link by Kilit ID, for the phone to approve.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LinkRequest {
+    /// What approving it names.
+    pub tag: String,
+    /// The code the new device shows.
+    pub code: String,
+}
+
 /// Where linking stands, for the screens.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct LinkState {
+    /// The phone: listening for requests by Kilit ID.
+    pub listening: bool,
+    /// The requests that came, newest first.
+    pub requests: Vec<LinkRequest>,
     /// A new device: the text its QR code shows, while it waits.
     pub offer: Option<String>,
     /// The phone: waiting for the new device to answer.
@@ -116,6 +160,18 @@ fn key_tag(tag: &str) -> String {
 /// What the QR code carries instead of the key.
 fn key_hash(key: &[u8]) -> [u8; 32] {
     Sha256::digest([b"kilit/v1/link-key-hash\0".as_slice(), key].concat()).into()
+}
+
+/// Where requests to link by Kilit ID wait, for the ID at `address`.
+fn request_tag(address: &str) -> String {
+    hex(&Sha256::digest(
+        format!("kilit/v1/link-request\0{address}").as_bytes(),
+    ))
+}
+
+/// The code both screens show when linking by Kilit ID.
+fn request_code(key: &[u8]) -> String {
+    code_of(&key_hash(key))
 }
 
 /// The QR code's text for an offer.
@@ -183,6 +239,10 @@ impl Engine {
         }
         if l.pending.as_ref().is_some_and(|p| now - p.at > LINK_LIFE) {
             l.pending = None;
+        }
+        if l.listening.is_some_and(|at| now - at > LINK_LIFE) {
+            l.listening = None;
+            l.requests.clear();
         }
         Ok(l)
     }
@@ -275,6 +335,18 @@ impl Engine {
     /// A new device: starts linking. Returns the text its QR code shows.
     /// Only for a device that has nothing yet: it becomes the phone's.
     pub fn link_offer(&mut self) -> Result<String, EngineError> {
+        let (xw, tag) = self.new_offer(None)?;
+        // the key waits on the relays; the code only names it
+        let key = self.message_event(key_tag(&tag), &xw.recipient().to_bytes())?;
+        self.queue(vec![key])?;
+        Ok(offer_text(&xw, &tag))
+    }
+
+    /// A one-time key and tag for a new device to be linked with.
+    fn new_offer(
+        &mut self,
+        expect_id: Option<String>,
+    ) -> Result<(XWingIdentity, String), EngineError> {
         if self.store.len(SIGNAL)?.is_some() {
             let m = self.messaging()?;
             if m.device_id() != 1 || !m.contacts().is_empty() || !m.own_devices().is_empty() {
@@ -291,14 +363,125 @@ impl Engine {
             seed: ByteBuf::from(seed.to_vec()),
             tag: tag.clone(),
             at: (self.now)(),
+            expect_id,
         });
         l.code = None;
         l.done = false;
         self.save_linking(&l)?;
-        // the key waits on the relays; the code only names it
-        let key = self.message_event(key_tag(&tag), &xw.recipient().to_bytes())?;
-        self.queue(vec![key])?;
-        Ok(offer_text(&xw, &tag))
+        Ok((xw, tag))
+    }
+
+    /// A new device: asks the phone whose Kilit ID `invite` is to link it.
+    /// `cards` are what the relays returned for that ID. Returns the code
+    /// both screens show; the phone must be listening and approve it.
+    pub fn link_request(
+        &mut self,
+        invite: &Invite,
+        cards: &[Event],
+    ) -> Result<String, EngineError> {
+        let mut found: Vec<(i64, Vec<u8>)> = cards
+            .iter()
+            .filter(|e| e.kind == CARD_KIND && !e.content.is_empty() && e.verify())
+            .filter_map(|e| Some((e.created_at, URL_SAFE_NO_PAD.decode(&e.content).ok()?)))
+            .collect();
+        found.sort_by_key(|(t, _)| std::cmp::Reverse(*t));
+        let card = found
+            .into_iter()
+            .take(5)
+            .map(|(_, c)| c)
+            .find(|c| card_matches(c, invite))
+            .ok_or_else(|| EngineError::Rejected("no card for this ID".into()))?;
+        let address = card_address(&card).ok_or(EngineError::Damaged)?;
+        let (xw, tag) = self.new_offer(Some(invite.id.clone()))?;
+        let key = xw.recipient().to_bytes();
+        let body = RequestBody {
+            key: ByteBuf::from(key.to_vec()),
+            tag,
+        };
+        let mut b = Vec::new();
+        ciborium::into_writer(&body, &mut b).map_err(|_| EngineError::Damaged)?;
+        let event = self.message_event(request_tag(&address), &b)?;
+        // the key under its own tag too: the phone may scan the QR code
+        // instead of listening
+        let key_event = self.message_event(key_tag(&body.tag), &key)?;
+        self.queue(vec![event, key_event])?;
+        let code = request_code(&key);
+        let mut l = self.linking()?;
+        l.code = Some(code.clone());
+        self.save_linking(&l)?;
+        Ok(code)
+    }
+
+    /// The phone: listens for requests to link by its Kilit ID, for a
+    /// while. Only while listening is a request shown at all.
+    pub fn link_listen(&mut self) -> Result<(), EngineError> {
+        // the phone cannot link a device past the limit: say so now
+        self.messaging()?.link_package().map_err(messaging_err)?;
+        let mut l = self.linking()?;
+        l.listening = Some((self.now)());
+        l.requests.clear();
+        l.waiting = None;
+        l.code = None;
+        l.done = false;
+        self.save_linking(&l)
+    }
+
+    /// The phone: links the device whose request carried `tag`, after the
+    /// user saw its code on both screens.
+    pub fn link_approve(
+        &mut self,
+        tag: &str,
+        name: &str,
+    ) -> Result<(Vec<Event>, String), EngineError> {
+        let mut l = self.linking()?;
+        let r = l
+            .requests
+            .iter()
+            .find(|r| r.tag == tag)
+            .cloned()
+            .ok_or(EngineError::NotFound)?;
+        let recipient = XWingRecipient::from_bytes(&r.key).map_err(|_| EngineError::Damaged)?;
+        l.listening = None;
+        l.requests.clear();
+        self.save_linking(&l)?;
+        let (events, _) = self.seal_link(&recipient, &r.tag, name, true)?;
+        // the code compared is the request's, on both devices
+        let mut l = self.linking()?;
+        l.code = Some(r.code.clone());
+        self.save_linking(&l)?;
+        Ok((events, r.code))
+    }
+
+    /// The phone: a request came while listening.
+    fn take_request(&mut self, e: &Event) -> Result<(), EngineError> {
+        let raw = URL_SAFE_NO_PAD
+            .decode(&e.content)
+            .map_err(|_| EngineError::Damaged)?;
+        let body: RequestBody =
+            ciborium::from_reader(raw.as_slice()).map_err(|_| EngineError::Damaged)?;
+        XWingRecipient::from_bytes(&body.key).map_err(|_| EngineError::Damaged)?;
+        if body.tag.len() != 32 || !body.tag.bytes().all(|b| b.is_ascii_hexdigit()) {
+            return Err(EngineError::Damaged);
+        }
+        let mut l = self.linking()?;
+        let Some(since) = l.listening else {
+            return Ok(());
+        };
+        // one sent before listening began belongs to an earlier try
+        if e.created_at < since - 60 || l.requests.iter().any(|r| r.tag == body.tag) {
+            return Ok(());
+        }
+        l.requests.insert(
+            0,
+            Request {
+                code: request_code(&body.key),
+                key: body.key,
+                tag: body.tag,
+                at: e.created_at,
+            },
+        );
+        l.requests.truncate(5);
+        self.save_linking(&l)
     }
 
     /// The phone: links the device whose QR code said `text`. Returns the
@@ -311,10 +494,20 @@ impl Engine {
         name: &str,
     ) -> Result<(Vec<Event>, String), EngineError> {
         match read_link(text)? {
-            Scanned::Key(recipient, tag) => self.seal_link(&recipient, &tag, name),
+            Scanned::Key(recipient, tag) => self.seal_link(&recipient, &tag, name, false),
             Scanned::Hash(hash, tag) => {
                 // the phone cannot link a device past the limit: say so now
                 self.messaging()?.link_package().map_err(messaging_err)?;
+                // listening, and that computer's request came: scanning its
+                // code is the approval
+                let asked = self
+                    .linking()?
+                    .requests
+                    .iter()
+                    .any(|r| r.tag == tag && key_hash(&r.key).as_slice() == hash.as_slice());
+                if asked {
+                    return self.link_approve(&tag, name);
+                }
                 let mut l = self.linking()?;
                 l.pending = Some(Scanning {
                     hash: ByteBuf::from(hash.to_vec()),
@@ -345,7 +538,7 @@ impl Engine {
         let recipient = XWingRecipient::from_bytes(&key).map_err(|_| EngineError::Damaged)?;
         l.pending = None;
         self.save_linking(&l)?;
-        self.seal_link(&recipient, &p.tag, &p.name)?;
+        self.seal_link(&recipient, &p.tag, &p.name, false)?;
         Ok(())
     }
 
@@ -356,6 +549,7 @@ impl Engine {
         recipient: &XWingRecipient,
         tag: &str,
         name: &str,
+        by_request: bool,
     ) -> Result<(Vec<Event>, String), EngineError> {
         let m = self.messaging()?;
         let (package, device) = m.link_package().map_err(messaging_err)?;
@@ -364,6 +558,7 @@ impl Engine {
             package: ByteBuf::from(package),
             key: ByteBuf::from(key.to_vec()),
             name: name.chars().take(64).collect(),
+            by_request,
         };
         let mut plain = Vec::new();
         ciborium::into_writer(&wrap, &mut plain).map_err(|_| EngineError::Damaged)?;
@@ -406,6 +601,9 @@ impl Engine {
         if let Some(p) = &l.pending {
             v.push(key_tag(&p.tag));
         }
+        if l.listening.is_some() {
+            v.push(request_tag(self.messaging()?.my_address()));
+        }
         Ok(v)
     }
 
@@ -415,9 +613,14 @@ impl Engine {
         events: Vec<&'a Event>,
     ) -> Result<Vec<&'a Event>, EngineError> {
         let l = self.linking()?;
-        if l.offer.is_none() && l.waiting.is_none() && l.pending.is_none() {
+        if l.offer.is_none() && l.waiting.is_none() && l.pending.is_none() && l.listening.is_none()
+        {
             return Ok(events);
         }
+        let asked = match l.listening {
+            Some(_) => Some(request_tag(self.messaging()?.my_address())),
+            None => None,
+        };
         let mut rest = Vec::new();
         for e in events {
             let tag = e.tag("p").unwrap_or_default().to_owned();
@@ -429,6 +632,8 @@ impl Engine {
             } else if l.pending.as_ref().is_some_and(|p| key_tag(&p.tag) == tag) {
                 // a key that does not match the code is someone else's
                 let _ = self.take_key(e);
+            } else if asked.as_deref() == Some(tag.as_str()) {
+                let _ = self.take_request(e);
             } else {
                 rest.push(e);
             }
@@ -457,6 +662,16 @@ impl Engine {
         let o = self.require_open()?;
         let m = Messaging::create_linked(&o.vault, &wrap.package, self.system_now())
             .map_err(messaging_err)?;
+        // linking by Kilit ID: only the ID typed in may take this device
+        if offer
+            .expect_id
+            .as_ref()
+            .is_some_and(|id| id != m.kilit_id())
+        {
+            return Err(EngineError::Rejected(
+                "a package for another Kilit ID".into(),
+            ));
+        }
         self.save_messaging(&m)?;
         let reply = Reply {
             bundle: m.device_bundle().map_err(messaging_err)?,
@@ -476,7 +691,10 @@ impl Engine {
         let event = self.message_event(reply_tag(&offer.tag), &content)?;
         self.queue(vec![event])?;
         l.offer = None;
-        l.code = Some(code_of(&wrap.key));
+        // a request's code stays; a scanned code compares the package's
+        if !(offer.expect_id.is_some() && wrap.by_request) {
+            l.code = Some(code_of(&wrap.key));
+        }
         l.done = true;
         l.names.insert(1, (wrap.name, (self.now)()));
         l.names.insert(m.device_id(), (device_name(), (self.now)()));
@@ -531,6 +749,15 @@ impl Engine {
             None => None,
         };
         Ok(LinkState {
+            listening: l.listening.is_some(),
+            requests: l
+                .requests
+                .iter()
+                .map(|r| LinkRequest {
+                    tag: r.tag.clone(),
+                    code: r.code.clone(),
+                })
+                .collect(),
             offer,
             waiting: l.waiting.is_some() || l.pending.is_some(),
             code: l.code,
@@ -543,6 +770,8 @@ impl Engine {
         let mut l = self.linking()?;
         l.offer = None;
         l.pending = None;
+        l.listening = None;
+        l.requests.clear();
         l.waiting = None;
         l.code = None;
         l.done = false;

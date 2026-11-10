@@ -29,8 +29,8 @@ use chacha20poly1305::{KeyInit, XChaCha20Poly1305, XNonce};
 use kilit_net::{Event, Filter};
 use kilit_vault::messaging::{
     ContactInfo, ContactState, Content, FileRef, GroupWire, Invite, MAX_GROUP, MAX_GROUP_NAME,
-    MAX_TEXT, Messaging, MessagingError, Received, Roster, RosterMember, card_matches, card_tag,
-    parse_invite, sticker_name,
+    MAX_TEXT, Messaging, MessagingError, Received, Roster, RosterMember, card_address,
+    card_matches, card_tag, parse_invite, sticker_name,
 };
 use serde::{Deserialize, Serialize};
 use serde_bytes::ByteBuf;
@@ -1703,6 +1703,89 @@ mod tests {
         let out = bora.outbox().unwrap();
         relays.take_outbox(&mut bora);
         assert_eq!(out.len(), 1);
+    }
+
+    #[test]
+    fn a_computer_links_by_kilit_id_once_the_codes_match() {
+        let dirs: Vec<_> = (0..4).map(|_| tempfile::tempdir().unwrap()).collect();
+        let mut ayse = ready(&dirs[0], "482916");
+        let mut bora = ready(&dirs[1], "739204");
+        let mut pc = ready(&dirs[2], "615283");
+        let mut eve = ready(&dirs[3], "250817");
+        let mut relays = Relays::default();
+        meet(&mut ayse, &mut bora, &mut relays);
+        relays.0.push(ayse.card_event().unwrap());
+
+        // the computer has only the ID typed in
+        let typed = format!("@{}", ayse.my_kilit().unwrap().kilit_id);
+        let inv = Engine::invite(&typed).unwrap();
+        let cards = relays.get(&Engine::card_filter(&inv));
+        // a phone not listening shows no request
+        eve.link_request(&inv, &cards).unwrap();
+        relays.take_outbox(&mut eve);
+        relays.deliver(&mut ayse);
+        assert!(ayse.link_state().unwrap().requests.is_empty());
+
+        let code = pc.link_request(&inv, &cards).unwrap();
+        assert_eq!(
+            pc.link_state().unwrap().code.as_deref(),
+            Some(code.as_str())
+        );
+        relays.take_outbox(&mut pc);
+        ayse.link_listen().unwrap();
+        relays.deliver(&mut ayse);
+        let s = ayse.link_state().unwrap();
+        assert!(s.listening);
+        // someone else asked too: only the code on the screen in front of
+        // the user tells them apart
+        assert_eq!(s.requests.len(), 2);
+        let mine = s.requests.iter().find(|r| r.code == code).unwrap();
+        assert_eq!(s.requests.iter().filter(|r| r.code == code).count(), 1);
+        ayse.link_approve(&mine.tag, "Telefon").unwrap();
+        assert!(ayse.link_state().unwrap().requests.is_empty());
+        relays.take_outbox(&mut ayse);
+
+        relays.deliver(&mut pc);
+        let s = pc.link_state().unwrap();
+        assert!(s.done);
+        assert_eq!(s.code.as_deref(), Some(code.as_str()));
+        assert_eq!(
+            pc.my_kilit().unwrap().kilit_id,
+            ayse.my_kilit().unwrap().kilit_id
+        );
+        relays.take_outbox(&mut pc);
+        relays.deliver(&mut ayse);
+        let s = ayse.link_state().unwrap();
+        assert!(s.done);
+        assert_eq!(s.code.as_deref(), Some(code.as_str()));
+        assert_eq!(ayse.devices().unwrap().len(), 2);
+        // the other asker got nothing
+        relays.deliver(&mut eve);
+        assert!(!eve.link_state().unwrap().done);
+
+        // a second computer: the phone scans its QR code while listening
+        let dq = tempfile::tempdir().unwrap();
+        let mut pc2 = ready(&dq, "907316");
+        let code2 = pc2.link_request(&inv, &cards).unwrap();
+        let qr = pc2.link_state().unwrap().offer.unwrap();
+        assert!(qr.len() < 120);
+        relays.take_outbox(&mut pc2);
+        ayse.link_listen().unwrap();
+        relays.deliver(&mut ayse);
+        let (_, scanned) = ayse.link_accept(&qr, "Telefon").unwrap();
+        assert_eq!(scanned, code2);
+        relays.take_outbox(&mut ayse);
+        relays.deliver(&mut pc2);
+        assert_eq!(
+            pc2.link_state().unwrap().code.as_deref(),
+            Some(code2.as_str())
+        );
+        assert!(pc2.link_state().unwrap().done);
+        assert!(!eve.link_state().unwrap().done);
+        assert_ne!(
+            eve.my_kilit().unwrap().kilit_id,
+            ayse.my_kilit().unwrap().kilit_id
+        );
     }
 
     #[test]

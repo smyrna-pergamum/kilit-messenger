@@ -29,11 +29,13 @@ class WindowsTor implements TorBackend {
   WindowsTor.at(String bundle) : this._(bundle);
 
   final String _bundle;
-  Process? _tor;
   TorState _state = const TorState(TorPhase.off);
-  String _mode = '';
   String? _dir;
   String? _config;
+
+  /// The tor.exe processes of this start: one, or several racing each
+  /// other on different ways out until one comes up.
+  List<_Slot> _slots = [];
 
   // the last lines tor printed
   final _log = <String>[];
@@ -44,6 +46,11 @@ class WindowsTor implements TorBackend {
 
   @override
   bool get available => true;
+
+  /// tor.exe is a process of its own: several can try different ways out
+  /// at once.
+  @override
+  bool get canRace => true;
 
   @override
   TorState state() => _state;
@@ -67,73 +74,151 @@ class WindowsTor implements TorBackend {
     } on StateError catch (e) {
       return e.message;
     }
+    // ways out tried at the same time; one that cannot start is left out
+    final race = <(String, List<String>)>[];
+    for (final r in cfg['race'] as List? ?? const []) {
+      try {
+        race.add(('$r', _bridgeLines('$r', const [])));
+      } on StateError {
+        // no built-in bridges for it
+      }
+    }
     _dir = dir;
     _config = config;
-    final data = '$dir\\tor';
-    Directory(data).createSync(recursive: true);
-    File('$data\\torrc').writeAsStringSync(_torrc(data, bridges));
-    _mode = mode;
     final run = ++_run;
-    _tor?.kill();
+    _killAll();
     _set(TorState(TorPhase.starting, summary: 'starting', mode: mode));
-    unawaited(_launch(run, data));
+    final main = '$dir\\tor';
+    _slots = [
+      _Slot(mode, main, bridges),
+      for (final (m, lines) in race) _Slot(m, '$dir\\tor-$m', lines),
+    ];
+    for (final slot in _slots) {
+      Directory(slot.data).createSync(recursive: true);
+      if (slot.data != main) _shareCache(main, slot.data);
+      File('${slot.data}\\torrc')
+          .writeAsStringSync(_torrc(slot.data, slot.bridges));
+      unawaited(_launch(run, slot));
+    }
     return null;
   }
 
-  Future<void> _launch(int run, String data) async {
+  /// A racing tor starts from what the main one already downloaded, so it
+  /// does not fetch the whole directory again.
+  static void _shareCache(String from, String to) {
+    for (final name in const [
+      'cached-certs',
+      'cached-microdesc-consensus',
+      'cached-microdescs',
+    ]) {
+      final src = File('$from\\$name');
+      final dst = File('$to\\$name');
+      try {
+        if (src.existsSync() &&
+            (!dst.existsSync() ||
+                dst.lastModifiedSync().isBefore(src.lastModifiedSync()))) {
+          src.copySync(dst.path);
+        }
+      } on FileSystemException {
+        // it downloads its own
+      }
+    }
+  }
+
+  void _killAll() {
+    for (final s in _slots) {
+      s.done = true;
+      s.process?.kill();
+    }
+    _slots = [];
+  }
+
+  /// The state of this start: the first tor to come up wins and the others
+  /// stop; until then the one furthest along shows.
+  void _report(int run) {
+    if (run != _run || _slots.isEmpty) return;
+    final winner = _slots.where((s) => s.ready).firstOrNull;
+    if (winner != null) {
+      for (final s in _slots) {
+        if (s != winner) {
+          s.done = true;
+          s.process?.kill();
+        }
+      }
+      _slots = [winner];
+      _set(
+        TorState(
+          TorPhase.ready,
+          progress: 100,
+          summary: winner.summary,
+          socks: winner.socks,
+          mode: winner.mode,
+        ),
+      );
+      return;
+    }
+    final alive = _slots.where((s) => s.error == null).toList();
+    if (alive.isEmpty) {
+      final last = _slots.last;
+      _set(
+        TorState(TorPhase.failed, error: last.error ?? 'tor', mode: last.mode),
+      );
+      return;
+    }
+    alive.sort((a, b) => b.progress.compareTo(a.progress));
+    final best = alive.first;
+    _set(
+      TorState(
+        TorPhase.starting,
+        progress: best.progress,
+        summary: best.summary,
+        socks: best.socks,
+        mode: best.mode,
+      ),
+    );
+  }
+
+  Future<void> _launch(int run, _Slot slot) async {
+    final racing = _slots.length > 1;
     try {
       final p = await Process.start('$_bundle\\tor\\tor.exe', [
         '-f',
-        '$data\\torrc',
+        '${slot.data}\\torrc',
         '--defaults-torrc',
-        '$data\\torrc-none',
+        '${slot.data}\\torrc-none',
         '--ignore-missing-torrc',
       ], workingDirectory: '$_bundle\\tor');
-      if (run != _run) {
+      if (run != _run || slot.done) {
         p.kill();
         return;
       }
-      _tor = p;
-      var progress = 0;
-      var socks = 0;
-      var summary = '';
-      void report() {
-        if (run != _run) return;
-        _set(
-          TorState(
-            progress == 100 && socks > 0 ? TorPhase.ready : TorPhase.starting,
-            progress: progress,
-            summary: summary,
-            socks: socks,
-            mode: _mode,
-          ),
-        );
-      }
-
+      slot.process = p;
       p.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((
         line,
       ) {
-        _log.add(line);
+        _log.add(racing ? '[${slot.mode}] $line' : line);
         if (_log.length > 200) _log.removeAt(0);
         final boot = _bootstrapped.firstMatch(line);
         if (boot != null) {
-          progress = int.parse(boot[1]!);
-          summary = boot[2]!;
+          slot.progress = int.parse(boot[1]!);
+          slot.summary = boot[2]!;
         }
         final port = _socksOpened.firstMatch(line);
-        if (port != null) socks = int.parse(port[1]!);
-        if (boot != null || port != null) report();
+        if (port != null) slot.socks = int.parse(port[1]!);
+        if (boot != null || port != null) _report(run);
       });
       p.stderr.drain<void>();
       final code = await p.exitCode;
-      if (run == _run && _state.phase != TorPhase.off) {
-        _set(
-          TorState(TorPhase.failed, error: 'tor exited ($code)', mode: _mode),
-        );
+      if (run == _run && !slot.done) {
+        slot.error = '${slot.mode}: tor exited ($code)';
+        slot.progress = 0;
+        slot.socks = 0;
+        _report(run);
       }
     } on ProcessException catch (e) {
       if (run == _run) {
-        _set(TorState(TorPhase.failed, error: e.message, mode: _mode));
+        slot.error = '${slot.mode}: ${e.message}';
+        _report(run);
       }
     }
   }
@@ -157,8 +242,7 @@ class WindowsTor implements TorBackend {
   @override
   void stop() {
     _run++;
-    _tor?.kill();
-    _tor = null;
+    _killAll();
     _set(const TorState(TorPhase.off));
   }
 
@@ -213,6 +297,25 @@ class WindowsTor implements TorBackend {
     }
     throw StateError('unknown mode $mode');
   }
+}
+
+/// One tor.exe of a start, and how far it got.
+class _Slot {
+  _Slot(this.mode, this.data, this.bridges);
+
+  final String mode;
+  final String data;
+  final List<String> bridges;
+  Process? process;
+  int progress = 0;
+  int socks = 0;
+  String summary = '';
+  String? error;
+
+  /// Stopped on purpose: its exit is no failure.
+  bool done = false;
+
+  bool get ready => progress == 100 && socks > 0;
 }
 
 /// A bridge line someone pasted, trimmed ("Bridge " in front, spaces), or

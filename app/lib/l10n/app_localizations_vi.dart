@@ -1225,4 +1225,52 @@ class LVi extends L {
 
   @override
   String get linkFetchingKey => 'Đang lấy khóa của máy tính từ rơ-le…';
+
+  @override
+  String get deviceLinkById => 'Liên kết máy tính bằng Kilit ID';
+
+  @override
+  String get linkById => 'Bằng Kilit ID';
+
+  @override
+  String get linkByQr => 'Bằng mã QR';
+
+  @override
+  String get linkIdField => 'Kilit ID trên điện thoại';
+
+  @override
+  String get linkIdHelp =>
+      'Nhập Kilit ID của điện thoại. Trên điện thoại mở Cài đặt, Thiết bị đã liên kết, Liên kết máy tính bằng Kilit ID: điện thoại hiện ID và chờ máy tính này.';
+
+  @override
+  String get linkIdSend => 'Gửi yêu cầu';
+
+  @override
+  String get linkIdSent =>
+      'Đã gửi yêu cầu. Trên điện thoại, chấp thuận yêu cầu có mã này:';
+
+  @override
+  String get linkIdOrScan =>
+      'Hoặc quét mã này bằng điện thoại, trên cùng màn hình:';
+
+  @override
+  String get linkListenHelp =>
+      'Trên máy tính chọn Liên kết với điện thoại, Bằng Kilit ID, rồi nhập ID này:';
+
+  @override
+  String get linkListenWaiting => 'Đang chờ yêu cầu từ máy tính…';
+
+  @override
+  String get linkListenScan => 'Hoặc quét mã trên máy tính';
+
+  @override
+  String get linkRequestCode =>
+      'Một máy tính muốn liên kết. Đây có phải mã trên màn hình của nó?';
+
+  @override
+  String get linkRequestApprove => 'Cùng mã: liên kết';
+
+  @override
+  String get linkRequestOther =>
+      'Mã khác? Đừng chấp thuận: người khác đã gửi yêu cầu đó.';
 }

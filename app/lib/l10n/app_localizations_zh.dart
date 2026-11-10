@@ -1172,4 +1172,47 @@ class LZh extends L {
 
   @override
   String get linkFetchingKey => '正在从中继获取电脑的密钥…';
+
+  @override
+  String get deviceLinkById => '用 Kilit ID 关联电脑';
+
+  @override
+  String get linkById => '用 Kilit ID';
+
+  @override
+  String get linkByQr => '用二维码';
+
+  @override
+  String get linkIdField => '手机上的 Kilit ID';
+
+  @override
+  String get linkIdHelp =>
+      '输入手机的 Kilit ID。在手机上打开 设置 → 已关联设备 → 用 Kilit ID 关联电脑：它会显示 ID 并等待这台电脑。';
+
+  @override
+  String get linkIdSend => '发送请求';
+
+  @override
+  String get linkIdSent => '请求已发送。请在手机上批准显示此代码的请求：';
+
+  @override
+  String get linkIdOrScan => '或者在同一界面用手机扫描此二维码：';
+
+  @override
+  String get linkListenHelp => '在电脑上选择“关联到我的手机”→“用 Kilit ID”，然后输入此 ID：';
+
+  @override
+  String get linkListenWaiting => '正在等待电脑的请求…';
+
+  @override
+  String get linkListenScan => '或者扫描电脑上的二维码';
+
+  @override
+  String get linkRequestCode => '有电脑请求关联。这是它屏幕上的代码吗？';
+
+  @override
+  String get linkRequestApprove => '代码相同：关联';
+
+  @override
+  String get linkRequestOther => '代码不同？不要批准：那个请求是别人发送的。';
 }

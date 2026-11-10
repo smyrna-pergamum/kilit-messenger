@@ -122,6 +122,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   KilitErrorKind dco_decode_kilit_error_kind(dynamic raw);
 
   @protected
+  LinkRequestItem dco_decode_link_request_item(dynamic raw);
+
+  @protected
   LinkStatus dco_decode_link_status(dynamic raw);
 
   @protected
@@ -150,6 +153,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<ItemInfo> dco_decode_list_item_info(dynamic raw);
+
+  @protected
+  List<LinkRequestItem> dco_decode_list_link_request_item(dynamic raw);
 
   @protected
   List<int> dco_decode_list_prim_u_8_loose(dynamic raw);
@@ -317,6 +323,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   KilitErrorKind sse_decode_kilit_error_kind(SseDeserializer deserializer);
 
   @protected
+  LinkRequestItem sse_decode_link_request_item(SseDeserializer deserializer);
+
+  @protected
   LinkStatus sse_decode_link_status(SseDeserializer deserializer);
 
   @protected
@@ -349,6 +358,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<ItemInfo> sse_decode_list_item_info(SseDeserializer deserializer);
+
+  @protected
+  List<LinkRequestItem> sse_decode_list_link_request_item(
+    SseDeserializer deserializer,
+  );
 
   @protected
   List<int> sse_decode_list_prim_u_8_loose(SseDeserializer deserializer);
@@ -537,6 +551,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_link_request_item(
+    LinkRequestItem self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_link_status(LinkStatus self, SseSerializer serializer);
 
   @protected
@@ -583,6 +603,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_list_item_info(List<ItemInfo> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_link_request_item(
+    List<LinkRequestItem> self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_list_prim_u_8_loose(List<int> self, SseSerializer serializer);

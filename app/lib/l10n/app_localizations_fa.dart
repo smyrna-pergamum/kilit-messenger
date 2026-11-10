@@ -1228,4 +1228,51 @@ class LFa extends L {
 
   @override
   String get linkFetchingKey => 'کلید رایانه از رله‌ها گرفته می‌شود…';
+
+  @override
+  String get deviceLinkById => 'پیوند رایانه با شناسهٔ Kilit';
+
+  @override
+  String get linkById => 'با شناسهٔ Kilit';
+
+  @override
+  String get linkByQr => 'با کد QR';
+
+  @override
+  String get linkIdField => 'شناسهٔ Kilit گوشی‌ات';
+
+  @override
+  String get linkIdHelp =>
+      'شناسهٔ Kilit گوشی‌ات را بنویس. در گوشی تنظیمات، دستگاه‌های پیوندی، پیوند رایانه با شناسهٔ Kilit را باز کن: شناسه را نشان می‌دهد و منتظر این رایانه می‌ماند.';
+
+  @override
+  String get linkIdSend => 'فرستادن درخواست';
+
+  @override
+  String get linkIdSent =>
+      'درخواست فرستاده شد. در گوشی درخواستی را که این کد را نشان می‌دهد تأیید کن:';
+
+  @override
+  String get linkIdOrScan => 'یا در همان صفحه این کد را با گوشی اسکن کن:';
+
+  @override
+  String get linkListenHelp =>
+      'در رایانه «پیوند با گوشی‌ام»، «با شناسهٔ Kilit» را برگزین و این شناسه را بنویس:';
+
+  @override
+  String get linkListenWaiting => 'در انتظار درخواست رایانه…';
+
+  @override
+  String get linkListenScan => 'یا کد رایانه را اسکن کن';
+
+  @override
+  String get linkRequestCode =>
+      'رایانه‌ای درخواست پیوند دارد. آیا این کدِ روی صفحهٔ آن است؟';
+
+  @override
+  String get linkRequestApprove => 'همان کد است: پیوند بده';
+
+  @override
+  String get linkRequestOther =>
+      'کد دیگری است؟ تأیید نکن: آن درخواست را کس دیگری فرستاده.';
 }

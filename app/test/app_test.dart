@@ -91,6 +91,12 @@ class FakeTor implements TorBackend {
   @override
   bool get available => true;
 
+  /// Set to try ways out at the same time, like tor.exe on Windows.
+  bool racing = false;
+
+  @override
+  bool get canRace => racing;
+
   @override
   String? start(String dir, String config) {
     configs.add(config);
@@ -129,6 +135,24 @@ class FakeTor implements TorBackend {
     reconnects++;
     progress = 0;
     return null;
+  }
+}
+
+/// A network that blocks the direct way: only obfs4 comes up.
+class _Obfs4OnlyTor extends FakeTor {
+  @override
+  TorState state() {
+    final last = configs.isEmpty ? '' : configs.last;
+    if (progress >= 0 && !last.contains('obfs4')) {
+      return const TorState(TorPhase.starting, progress: 5, mode: 'direct');
+    }
+    final s = super.state();
+    return TorState(
+      s.phase,
+      progress: s.progress,
+      socks: s.socks,
+      mode: 'obfs4',
+    );
   }
 }
 
@@ -732,6 +756,75 @@ void main() {
     tor.stop();
   });
 
+  testWidgets('a new Kilit links to a phone by its Kilit ID', (tester) async {
+    final (core, _) = await startApp(tester);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    await openSettingsSection(tester, 'devices');
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('device-link-to-phone')),
+    );
+    await tester.tap(find.byKey(const ValueKey('device-link-to-phone')));
+    await tester.pumpAndSettle();
+    // not an ID: said so, nothing sent
+    await tester.enterText(find.byKey(const ValueKey('link-id-field')), 'x');
+    await tester.tap(find.byKey(const ValueKey('link-id-send')));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+        'No one found for this ID. Check it, or try again in a moment.',
+      ),
+      findsOneWidget,
+    );
+    await tester.enterText(
+      find.byKey(const ValueKey('link-id-field')),
+      '@abandon-ability-able-about',
+    );
+    await tester.tap(find.byKey(const ValueKey('link-id-send')));
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+    // the code to approve on the phone, and the same request as a QR code
+    expect(find.text('654 321'), findsOneWidget);
+    expect(find.byKey(const ValueKey('link-id-qr')), findsOneWidget);
+    core.finishLink();
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('link-done')), findsOneWidget);
+    expect(find.text('654 321'), findsOneWidget);
+  });
+
+  testWidgets('the phone approves a computer that asked by Kilit ID', (
+    tester,
+  ) async {
+    final (core, _) = await startApp(tester);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    await openSettingsSection(tester, 'devices');
+    await tester.ensureVisible(find.byKey(const ValueKey('device-link-id')));
+    await tester.tap(find.byKey(const ValueKey('device-link-id')));
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+    // its own ID, to type on the computer, and the request that came
+    expect(find.text('@${DevCore.myId}'), findsOneWidget);
+    const tag = '00112233445566778899aabbccddeeff';
+    expect(find.byKey(const ValueKey('link-request-$tag')), findsOneWidget);
+    expect(find.text('654 321'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('link-approve-$tag')));
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+    // waiting for the computer, with the same code
+    expect(find.byKey(const ValueKey('link-code')), findsOneWidget);
+    expect(find.text('654 321'), findsOneWidget);
+    expect((await core.linkState()).waiting, isTrue);
+    core.finishLink();
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('link-done')), findsOneWidget);
+  });
+
   testWidgets('a new Kilit links to a phone with a QR code', (tester) async {
     final (core, _) = await startApp(tester);
     await enterPin(tester, '482916');
@@ -741,6 +834,10 @@ void main() {
       find.byKey(const ValueKey('device-link-to-phone')),
     );
     await tester.tap(find.byKey(const ValueKey('device-link-to-phone')));
+    await tester.pumpAndSettle();
+    // Kilit ID comes first; the QR code is the other way
+    expect(find.byKey(const ValueKey('link-id-field')), findsOneWidget);
+    await tester.tap(find.text('With QR code'));
     // the waiting spinner never settles: pump by the clock
     for (var i = 0; i < 3; i++) {
       await tester.pump(const Duration(milliseconds: 500));
@@ -1277,6 +1374,51 @@ void main() {
     await tester.pumpAndSettle();
     expect(await core.items(), isEmpty);
     expect(find.byKey(const ValueKey('self-notes-empty')), findsOneWidget);
+  });
+
+  testWidgets('automatic starts with the way out that worked last time', (
+    tester,
+  ) async {
+    final backend = _Obfs4OnlyTor();
+    final first = TorController(backend, '/data');
+    addTearDown(first.dispose);
+    final worked = <TorRoute>[];
+    first.onWorked = worked.add;
+    first.start();
+    await tester.pump(const Duration(seconds: 46));
+    await tester.pump(const Duration(seconds: 3));
+    expect(first.state.phase, TorPhase.ready);
+    expect(worked, [TorRoute.obfs4]);
+    first.stop();
+
+    // the next start goes straight to obfs4, without the wait on direct
+    final again = _Obfs4OnlyTor();
+    final second = TorController(again, '/data')..lastGood = TorRoute.obfs4;
+    addTearDown(second.dispose);
+    second.start();
+    expect(again.configs, ['{"mode":"obfs4"}']);
+    await tester.pump(const Duration(seconds: 3));
+    expect(second.state.phase, TorPhase.ready);
+    second.stop();
+  });
+
+  testWidgets('where it can, direct and obfs4 race, then snowflake', (
+    tester,
+  ) async {
+    final backend = FakeTor(stuck: true)..racing = true;
+    final tor = TorController(backend, '/data');
+    addTearDown(tor.dispose);
+    tor.start();
+    expect(backend.configs, ['{"mode":"direct","race":["obfs4"]}']);
+    // the race gets the longer wait, and obfs4 is not tried alone after it
+    await tester.pump(const Duration(seconds: 46));
+    expect(backend.configs.length, 1);
+    await tester.pump(const Duration(seconds: 45));
+    expect(backend.configs.last, '{"mode":"snowflake"}');
+    expect(tor.blocked, isFalse);
+    await tester.pump(const Duration(seconds: 121));
+    expect(tor.blocked, isTrue);
+    tor.stop();
   });
 
   testWidgets('a Tor that comes up stays on its way out', (tester) async {

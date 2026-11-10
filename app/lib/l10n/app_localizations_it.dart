@@ -1238,4 +1238,52 @@ class LIt extends L {
 
   @override
   String get linkFetchingKey => 'Recupero della chiave del computer dai relay…';
+
+  @override
+  String get deviceLinkById => 'Collega un computer con l\'ID Kilit';
+
+  @override
+  String get linkById => 'Con ID Kilit';
+
+  @override
+  String get linkByQr => 'Con codice QR';
+
+  @override
+  String get linkIdField => 'L\'ID Kilit del tuo telefono';
+
+  @override
+  String get linkIdHelp =>
+      'Scrivi l\'ID Kilit del tuo telefono. Sul telefono apri Impostazioni, Dispositivi collegati, Collega un computer con l\'ID Kilit: mostra l\'ID e attende questo computer.';
+
+  @override
+  String get linkIdSend => 'Invia richiesta';
+
+  @override
+  String get linkIdSent =>
+      'Richiesta inviata. Sul telefono approva la richiesta che mostra questo codice:';
+
+  @override
+  String get linkIdOrScan =>
+      'Oppure scansiona questo codice con il telefono, nella stessa schermata:';
+
+  @override
+  String get linkListenHelp =>
+      'Sul computer scegli Collega al mio telefono, Con ID Kilit, e scrivi questo ID:';
+
+  @override
+  String get linkListenWaiting => 'In attesa della richiesta del computer…';
+
+  @override
+  String get linkListenScan => 'Oppure scansiona il codice del computer';
+
+  @override
+  String get linkRequestCode =>
+      'Un computer chiede di collegarsi. È questo il codice sul suo schermo?';
+
+  @override
+  String get linkRequestApprove => 'Stesso codice: collega';
+
+  @override
+  String get linkRequestOther =>
+      'Un codice diverso? Non approvarla: quella richiesta l\'ha inviata qualcun altro.';
 }

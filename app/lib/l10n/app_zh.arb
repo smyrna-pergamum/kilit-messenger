@@ -363,5 +363,19 @@
   "crashTitle": "Kilit 意外关闭",
   "crashBody": "上次 Kilit 自行关闭了。下面的报告不含消息或密钥，只有出错的位置。请复制并发送给开发者，例如在 GitHub issue 中。",
   "crashCopy": "复制报告",
-  "linkFetchingKey": "正在从中继获取电脑的密钥…"
+  "linkFetchingKey": "正在从中继获取电脑的密钥…",
+  "deviceLinkById": "用 Kilit ID 关联电脑",
+  "linkById": "用 Kilit ID",
+  "linkByQr": "用二维码",
+  "linkIdField": "手机上的 Kilit ID",
+  "linkIdHelp": "输入手机的 Kilit ID。在手机上打开 设置 → 已关联设备 → 用 Kilit ID 关联电脑：它会显示 ID 并等待这台电脑。",
+  "linkIdSend": "发送请求",
+  "linkIdSent": "请求已发送。请在手机上批准显示此代码的请求：",
+  "linkIdOrScan": "或者在同一界面用手机扫描此二维码：",
+  "linkListenHelp": "在电脑上选择“关联到我的手机”→“用 Kilit ID”，然后输入此 ID：",
+  "linkListenWaiting": "正在等待电脑的请求…",
+  "linkListenScan": "或者扫描电脑上的二维码",
+  "linkRequestCode": "有电脑请求关联。这是它屏幕上的代码吗？",
+  "linkRequestApprove": "代码相同：关联",
+  "linkRequestOther": "代码不同？不要批准：那个请求是别人发送的。"
 }

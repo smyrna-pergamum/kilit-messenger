@@ -363,5 +363,19 @@
   "crashTitle": "Kilit si è chiuso inaspettatamente",
   "crashBody": "L'ultima volta Kilit si è chiuso da solo. Il rapporto qui sotto non contiene messaggi né chiavi, solo dove si è verificato l'errore. Copialo e invialo allo sviluppatore, ad esempio in una issue su GitHub.",
   "crashCopy": "Copia rapporto",
-  "linkFetchingKey": "Recupero della chiave del computer dai relay…"
+  "linkFetchingKey": "Recupero della chiave del computer dai relay…",
+  "deviceLinkById": "Collega un computer con l'ID Kilit",
+  "linkById": "Con ID Kilit",
+  "linkByQr": "Con codice QR",
+  "linkIdField": "L'ID Kilit del tuo telefono",
+  "linkIdHelp": "Scrivi l'ID Kilit del tuo telefono. Sul telefono apri Impostazioni, Dispositivi collegati, Collega un computer con l'ID Kilit: mostra l'ID e attende questo computer.",
+  "linkIdSend": "Invia richiesta",
+  "linkIdSent": "Richiesta inviata. Sul telefono approva la richiesta che mostra questo codice:",
+  "linkIdOrScan": "Oppure scansiona questo codice con il telefono, nella stessa schermata:",
+  "linkListenHelp": "Sul computer scegli Collega al mio telefono, Con ID Kilit, e scrivi questo ID:",
+  "linkListenWaiting": "In attesa della richiesta del computer…",
+  "linkListenScan": "Oppure scansiona il codice del computer",
+  "linkRequestCode": "Un computer chiede di collegarsi. È questo il codice sul suo schermo?",
+  "linkRequestApprove": "Stesso codice: collega",
+  "linkRequestOther": "Un codice diverso? Non approvarla: quella richiesta l'ha inviata qualcun altro."
 }

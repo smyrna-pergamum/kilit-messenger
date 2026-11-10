@@ -1232,4 +1232,52 @@ class LUk extends L {
 
   @override
   String get linkFetchingKey => 'Отримання ключа комп’ютера з реле…';
+
+  @override
+  String get deviceLinkById => 'Прив’язати комп’ютер за Kilit ID';
+
+  @override
+  String get linkById => 'За Kilit ID';
+
+  @override
+  String get linkByQr => 'За QR-кодом';
+
+  @override
+  String get linkIdField => 'Kilit ID вашого телефона';
+
+  @override
+  String get linkIdHelp =>
+      'Введіть Kilit ID вашого телефона. На телефоні відкрийте Налаштування → Пов’язані пристрої → Прив’язати комп’ютер за Kilit ID: він покаже ID і чекатиме на цей комп’ютер.';
+
+  @override
+  String get linkIdSend => 'Надіслати запит';
+
+  @override
+  String get linkIdSent =>
+      'Запит надіслано. На телефоні підтвердьте запит із цим кодом:';
+
+  @override
+  String get linkIdOrScan =>
+      'Або відскануйте цей код телефоном на тому ж екрані:';
+
+  @override
+  String get linkListenHelp =>
+      'На комп’ютері виберіть «Прив’язати до телефона» → «За Kilit ID» і введіть цей ID:';
+
+  @override
+  String get linkListenWaiting => 'Очікування запиту комп’ютера…';
+
+  @override
+  String get linkListenScan => 'Або відсканувати код комп’ютера';
+
+  @override
+  String get linkRequestCode =>
+      'Комп’ютер просить прив’язку. Це код на його екрані?';
+
+  @override
+  String get linkRequestApprove => 'Код той самий: прив’язати';
+
+  @override
+  String get linkRequestOther =>
+      'Код інший? Не підтверджуйте: цей запит надіслав хтось інший.';
 }

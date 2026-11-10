@@ -16,7 +16,7 @@ import 'devices_screen.dart';
 import 'tor_screen.dart';
 
 /// Shown in "About"; kept in step with pubspec.yaml's version.
-const appVersion = '0.1.7-alpha';
+const appVersion = '0.1.8-alpha';
 
 String pinProtectionName(L l, PinProtection p) => switch (p) {
   PinProtection.strongbox => l.hwStrongbox,
@@ -165,7 +165,12 @@ class SettingsScreen extends StatelessWidget {
                   value: prefs.tor,
                   onChanged: (on) async {
                     await prefs.setTor(on);
-                    on ? tor.start() : tor.stop();
+                    on
+                        ? tor.start(
+                            route: prefs.torRoute,
+                            bridges: prefs.bridges,
+                          )
+                        : tor.stop();
                   },
                   title: Text(l.torSwitch),
                   subtitle: Text(l.torSwitchHint),

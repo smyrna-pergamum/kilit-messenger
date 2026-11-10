@@ -481,9 +481,32 @@ class RustCore implements KilitCore {
       _h.linkAccept(text: text, name: name);
 
   @override
+  Future<String> linkRequest(String text) async {
+    try {
+      return await _h.linkRequest(text: text);
+    } on rust.KilitError catch (e) {
+      if (e.kind == rust.KilitErrorKind.rejected) {
+        if (e.detail == 'offline') throw const Offline();
+        if (e.detail.startsWith('only a new Kilit')) throw const NotNewKilit();
+        throw const ContactRefused();
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> linkListen() => _h.linkListen();
+
+  @override
+  Future<void> linkApprove(String tag, String name) =>
+      _h.linkApprove(tag: tag, name: name);
+
+  @override
   Future<LinkStatus> linkState() async {
     final s = await _h.linkState();
     return LinkStatus(
+      listening: s.listening,
+      requests: [for (final r in s.requests) LinkRequest(r.tag, r.code)],
       offer: s.offer,
       waiting: s.waiting,
       code: s.code,

@@ -363,5 +363,19 @@
   "crashTitle": "Kilit tertutup tiba-tiba",
   "crashBody": "Terakhir kali Kilit tertutup sendiri. Laporan di bawah tidak berisi pesan atau kunci, hanya letak kesalahannya. Salin dan kirim ke pengembang, misalnya lewat issue GitHub.",
   "crashCopy": "Salin laporan",
-  "linkFetchingKey": "Mengambil kunci komputer dari relay…"
+  "linkFetchingKey": "Mengambil kunci komputer dari relay…",
+  "deviceLinkById": "Tautkan komputer dengan ID Kilit",
+  "linkById": "Dengan ID Kilit",
+  "linkByQr": "Dengan kode QR",
+  "linkIdField": "ID Kilit di ponselmu",
+  "linkIdHelp": "Ketik ID Kilit ponselmu. Di ponsel buka Pengaturan, Perangkat tertaut, Tautkan komputer dengan ID Kilit: ponsel menampilkan ID dan menunggu komputer ini.",
+  "linkIdSend": "Kirim permintaan",
+  "linkIdSent": "Permintaan terkirim. Di ponsel, setujui permintaan yang menampilkan kode ini:",
+  "linkIdOrScan": "Atau pindai kode ini dengan ponsel, di layar yang sama:",
+  "linkListenHelp": "Di komputer pilih Tautkan ke ponselku, Dengan ID Kilit, lalu ketik ID ini:",
+  "linkListenWaiting": "Menunggu permintaan komputer…",
+  "linkListenScan": "Atau pindai kode komputer",
+  "linkRequestCode": "Sebuah komputer meminta ditautkan. Apakah ini kode di layarnya?",
+  "linkRequestApprove": "Kode sama: tautkan",
+  "linkRequestOther": "Kodenya beda? Jangan setujui: orang lain yang mengirim permintaan itu."
 }

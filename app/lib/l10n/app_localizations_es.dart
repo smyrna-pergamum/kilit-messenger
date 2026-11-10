@@ -1237,4 +1237,52 @@ class LEs extends L {
   @override
   String get linkFetchingKey =>
       'Obteniendo la clave del ordenador desde los relés…';
+
+  @override
+  String get deviceLinkById => 'Vincular un ordenador con el ID de Kilit';
+
+  @override
+  String get linkById => 'Con ID de Kilit';
+
+  @override
+  String get linkByQr => 'Con código QR';
+
+  @override
+  String get linkIdField => 'El ID de Kilit de tu teléfono';
+
+  @override
+  String get linkIdHelp =>
+      'Escribe el ID de Kilit de tu teléfono. En el teléfono abre Ajustes, Dispositivos vinculados, Vincular un ordenador con el ID de Kilit: muestra el ID y espera a este ordenador.';
+
+  @override
+  String get linkIdSend => 'Enviar solicitud';
+
+  @override
+  String get linkIdSent =>
+      'Solicitud enviada. En el teléfono, aprueba la solicitud que muestra este código:';
+
+  @override
+  String get linkIdOrScan =>
+      'O escanea este código con el teléfono, en esa misma pantalla:';
+
+  @override
+  String get linkListenHelp =>
+      'En el ordenador elige Vincular a mi teléfono, Con ID de Kilit, y escribe este ID:';
+
+  @override
+  String get linkListenWaiting => 'Esperando la solicitud del ordenador…';
+
+  @override
+  String get linkListenScan => 'O escanear el código del ordenador';
+
+  @override
+  String get linkRequestCode =>
+      'Un ordenador pide vincularse. ¿Es este el código de su pantalla?';
+
+  @override
+  String get linkRequestApprove => 'Mismo código: vincular';
+
+  @override
+  String get linkRequestOther =>
+      '¿Un código distinto? No lo apruebes: esa solicitud la envió otra persona.';
 }

@@ -604,5 +604,19 @@
   "crashTitle": "Kilit closed unexpectedly",
   "crashBody": "Last time Kilit closed on its own. The report below holds no messages or keys, only where it failed. Copy it and send it to the developer, for example in a GitHub issue.",
   "crashCopy": "Copy report",
-  "linkFetchingKey": "Getting the computer's key from the relays…"
+  "linkFetchingKey": "Getting the computer's key from the relays…",
+  "deviceLinkById": "Link a computer by Kilit ID",
+  "linkById": "With Kilit ID",
+  "linkByQr": "With QR code",
+  "linkIdField": "Your phone's Kilit ID",
+  "linkIdHelp": "Type your phone's Kilit ID. On the phone open Settings, Linked devices, Link a computer by Kilit ID: it shows the ID and waits for this computer.",
+  "linkIdSend": "Send request",
+  "linkIdSent": "Request sent. On the phone, approve the request that shows this code:",
+  "linkIdOrScan": "Or scan this code with the phone, on the same screen:",
+  "linkListenHelp": "On the computer choose Link to my phone, With Kilit ID, and type this ID:",
+  "linkListenWaiting": "Waiting for the computer's request…",
+  "linkListenScan": "Scan the computer's code instead",
+  "linkRequestCode": "A computer asks to link. Is this the code on its screen?",
+  "linkRequestApprove": "Same code: link it",
+  "linkRequestOther": "A different code? Do not approve it: someone else sent that request."
 }

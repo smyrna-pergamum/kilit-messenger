@@ -1233,4 +1233,52 @@ class LPt extends L {
 
   @override
   String get linkFetchingKey => 'Buscando a chave do computador nos relays…';
+
+  @override
+  String get deviceLinkById => 'Vincular um computador pelo ID do Kilit';
+
+  @override
+  String get linkById => 'Com ID do Kilit';
+
+  @override
+  String get linkByQr => 'Com código QR';
+
+  @override
+  String get linkIdField => 'O ID do Kilit do seu celular';
+
+  @override
+  String get linkIdHelp =>
+      'Digite o ID do Kilit do seu celular. No celular abra Configurações, Aparelhos vinculados, Vincular um computador pelo ID do Kilit: ele mostra o ID e espera este computador.';
+
+  @override
+  String get linkIdSend => 'Enviar pedido';
+
+  @override
+  String get linkIdSent =>
+      'Pedido enviado. No celular, aprove o pedido que mostra este código:';
+
+  @override
+  String get linkIdOrScan =>
+      'Ou escaneie este código com o celular, na mesma tela:';
+
+  @override
+  String get linkListenHelp =>
+      'No computador escolha Vincular ao meu celular, Com ID do Kilit, e digite este ID:';
+
+  @override
+  String get linkListenWaiting => 'Esperando o pedido do computador…';
+
+  @override
+  String get linkListenScan => 'Ou escanear o código do computador';
+
+  @override
+  String get linkRequestCode =>
+      'Um computador pede para vincular. É este o código na tela dele?';
+
+  @override
+  String get linkRequestApprove => 'Mesmo código: vincular';
+
+  @override
+  String get linkRequestOther =>
+      'Código diferente? Não aprove: outra pessoa enviou esse pedido.';
 }

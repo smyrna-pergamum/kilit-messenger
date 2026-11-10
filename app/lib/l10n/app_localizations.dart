@@ -2306,6 +2306,90 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Getting the computer\'s key from the relays…'**
   String get linkFetchingKey;
+
+  /// No description provided for @deviceLinkById.
+  ///
+  /// In en, this message translates to:
+  /// **'Link a computer by Kilit ID'**
+  String get deviceLinkById;
+
+  /// No description provided for @linkById.
+  ///
+  /// In en, this message translates to:
+  /// **'With Kilit ID'**
+  String get linkById;
+
+  /// No description provided for @linkByQr.
+  ///
+  /// In en, this message translates to:
+  /// **'With QR code'**
+  String get linkByQr;
+
+  /// No description provided for @linkIdField.
+  ///
+  /// In en, this message translates to:
+  /// **'Your phone\'s Kilit ID'**
+  String get linkIdField;
+
+  /// No description provided for @linkIdHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your phone\'s Kilit ID. On the phone open Settings, Linked devices, Link a computer by Kilit ID: it shows the ID and waits for this computer.'**
+  String get linkIdHelp;
+
+  /// No description provided for @linkIdSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send request'**
+  String get linkIdSend;
+
+  /// No description provided for @linkIdSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent. On the phone, approve the request that shows this code:'**
+  String get linkIdSent;
+
+  /// No description provided for @linkIdOrScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Or scan this code with the phone, on the same screen:'**
+  String get linkIdOrScan;
+
+  /// No description provided for @linkListenHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'On the computer choose Link to my phone, With Kilit ID, and type this ID:'**
+  String get linkListenHelp;
+
+  /// No description provided for @linkListenWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the computer\'s request…'**
+  String get linkListenWaiting;
+
+  /// No description provided for @linkListenScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the computer\'s code instead'**
+  String get linkListenScan;
+
+  /// No description provided for @linkRequestCode.
+  ///
+  /// In en, this message translates to:
+  /// **'A computer asks to link. Is this the code on its screen?'**
+  String get linkRequestCode;
+
+  /// No description provided for @linkRequestApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Same code: link it'**
+  String get linkRequestApprove;
+
+  /// No description provided for @linkRequestOther.
+  ///
+  /// In en, this message translates to:
+  /// **'A different code? Do not approve it: someone else sent that request.'**
+  String get linkRequestOther;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

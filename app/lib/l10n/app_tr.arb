@@ -363,5 +363,19 @@
   "crashTitle": "Kilit beklenmedik şekilde kapandı",
   "crashBody": "Kilit geçen sefer kendiliğinden kapandı. Aşağıdaki kayıtta mesaj ya da anahtar yok, yalnızca nerede hata olduğu var. Kopyala ve geliştiriciye gönder, örneğin bir GitHub kaydında.",
   "crashCopy": "Kaydı kopyala",
-  "linkFetchingKey": "Bilgisayarın anahtarı aktarıcılardan alınıyor…"
+  "linkFetchingKey": "Bilgisayarın anahtarı aktarıcılardan alınıyor…",
+  "deviceLinkById": "Kilit ID ile bilgisayar bağla",
+  "linkById": "Kilit ID ile",
+  "linkByQr": "Kare kod ile",
+  "linkIdField": "Telefonundaki Kilit ID",
+  "linkIdHelp": "Telefonundaki Kilit ID'yi yaz. Telefonda Ayarlar → Bağlı cihazlar → Kilit ID ile bilgisayar bağla'yı aç: ID'yi gösterir ve bu bilgisayarı bekler.",
+  "linkIdSend": "İsteği gönder",
+  "linkIdSent": "İstek gönderildi. Telefonda bu kodu gösteren isteği onayla:",
+  "linkIdOrScan": "Ya da aynı ekranda bu kare kodu telefonla okut:",
+  "linkListenHelp": "Bilgisayarda Telefonuma bağla → Kilit ID ile'yi seç ve bu ID'yi yaz:",
+  "linkListenWaiting": "Bilgisayarın isteği bekleniyor…",
+  "linkListenScan": "Ya da bilgisayardaki kare kodu okut",
+  "linkRequestCode": "Bir bilgisayar bağlanmak istiyor. Ekranındaki kod bu mu?",
+  "linkRequestApprove": "Kod aynı: bağla",
+  "linkRequestOther": "Kod farklı mı? Onaylama: o isteği başka biri göndermiştir."
 }

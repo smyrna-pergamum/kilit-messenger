@@ -1236,4 +1236,52 @@ class LDe extends L {
   @override
   String get linkFetchingKey =>
       'Der Schlüssel des Computers wird von den Relais geholt…';
+
+  @override
+  String get deviceLinkById => 'Computer per Kilit-ID koppeln';
+
+  @override
+  String get linkById => 'Mit Kilit-ID';
+
+  @override
+  String get linkByQr => 'Mit QR-Code';
+
+  @override
+  String get linkIdField => 'Die Kilit-ID deines Telefons';
+
+  @override
+  String get linkIdHelp =>
+      'Gib die Kilit-ID deines Telefons ein. Öffne auf dem Telefon Einstellungen, Gekoppelte Geräte, Computer per Kilit-ID koppeln: Es zeigt die ID und wartet auf diesen Computer.';
+
+  @override
+  String get linkIdSend => 'Anfrage senden';
+
+  @override
+  String get linkIdSent =>
+      'Anfrage gesendet. Bestätige auf dem Telefon die Anfrage mit diesem Code:';
+
+  @override
+  String get linkIdOrScan =>
+      'Oder scanne diesen Code mit dem Telefon, auf demselben Bildschirm:';
+
+  @override
+  String get linkListenHelp =>
+      'Wähle auf dem Computer Mit meinem Telefon koppeln, Mit Kilit-ID, und gib diese ID ein:';
+
+  @override
+  String get linkListenWaiting => 'Warte auf die Anfrage des Computers…';
+
+  @override
+  String get linkListenScan => 'Oder den Code des Computers scannen';
+
+  @override
+  String get linkRequestCode =>
+      'Ein Computer möchte gekoppelt werden. Ist das der Code auf seinem Bildschirm?';
+
+  @override
+  String get linkRequestApprove => 'Gleicher Code: koppeln';
+
+  @override
+  String get linkRequestOther =>
+      'Ein anderer Code? Nicht bestätigen: Jemand anderes hat die Anfrage gesendet.';
 }

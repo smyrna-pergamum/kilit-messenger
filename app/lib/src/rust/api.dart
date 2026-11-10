@@ -7,7 +7,7 @@ import 'frb_generated.dart';
 
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `engine`, `group_item`, `mac32`, `network`, `offline`, `publish_now`, `reply`, `unhex16`
+// These functions are ignored because they are not marked as `pub`: `crash_log_to`, `engine`, `group_item`, `mac32`, `network`, `offline`, `publish_now`, `reply`, `unhex16`
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `Network`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `from`, `from`, `from`, `from`, `from`, `from`
 
@@ -175,12 +175,24 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// code both screens show.
   Future<String> linkAccept({required String text, required String name});
 
+  /// The phone: links the device whose request carried `tag`, once the
+  /// codes on both screens matched.
+  Future<void> linkApprove({required String tag, required String name});
+
   /// Stops a linking under way.
   Future<void> linkCancel();
+
+  /// The phone: listens for requests to link by its Kilit ID.
+  Future<void> linkListen();
 
   /// A new device: starts linking to a phone. Returns the text to show
   /// as a QR code.
   Future<String> linkOffer();
+
+  /// A new device: asks the phone with the Kilit ID in `text` (`@ID`, a
+  /// link) to link it. Looks its card up on the relays, so it needs the
+  /// network. Returns the code both screens show.
+  Future<String> linkRequest({required String text});
 
   /// Where linking stands.
   Future<LinkStatus> linkState();
@@ -973,6 +985,28 @@ enum KilitErrorKind {
   storage,
 }
 
+/// A request to link a new device by Kilit ID.
+class LinkRequestItem {
+  /// What approving it names.
+  final String tag;
+
+  /// The code the new device shows.
+  final String code;
+
+  const LinkRequestItem({required this.tag, required this.code});
+
+  @override
+  int get hashCode => tag.hashCode ^ code.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LinkRequestItem &&
+          runtimeType == other.runtimeType &&
+          tag == other.tag &&
+          code == other.code;
+}
+
 /// Where linking a device stands.
 class LinkStatus {
   /// A new device: the text its QR code shows, while it waits.
@@ -987,16 +1021,29 @@ class LinkStatus {
   /// Linking finished.
   final bool done;
 
+  /// The phone: listening for requests to link by Kilit ID.
+  final bool listening;
+
+  /// The requests that came, newest first.
+  final List<LinkRequestItem> requests;
+
   const LinkStatus({
     this.offer,
     required this.waiting,
     this.code,
     required this.done,
+    required this.listening,
+    required this.requests,
   });
 
   @override
   int get hashCode =>
-      offer.hashCode ^ waiting.hashCode ^ code.hashCode ^ done.hashCode;
+      offer.hashCode ^
+      waiting.hashCode ^
+      code.hashCode ^
+      done.hashCode ^
+      listening.hashCode ^
+      requests.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -1006,7 +1053,9 @@ class LinkStatus {
           offer == other.offer &&
           waiting == other.waiting &&
           code == other.code &&
-          done == other.done;
+          done == other.done &&
+          listening == other.listening &&
+          requests == other.requests;
 }
 
 /// How opening a pasted message went.

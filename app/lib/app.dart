@@ -57,6 +57,10 @@ class _KilitAppState extends State<KilitApp> {
     super.initState();
     // on from the first frame; only the user's choice turns it off
     if (!widget.prefs.blockScreenshots) ScreenGuard.set(false);
+    // automatic mode starts with the way out that worked last time
+    _tor
+      ..lastGood = widget.prefs.torLastGood
+      ..onWorked = widget.prefs.setTorLastGood;
     if (widget.prefs.tor) {
       _tor.start(route: widget.prefs.torRoute, bridges: widget.prefs.bridges);
     }

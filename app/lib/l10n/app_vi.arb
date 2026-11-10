@@ -363,5 +363,19 @@
   "crashTitle": "Kilit đã đóng bất ngờ",
   "crashBody": "Lần trước Kilit tự đóng. Báo cáo dưới đây không có tin nhắn hay khóa, chỉ có nơi xảy ra lỗi. Hãy sao chép và gửi cho nhà phát triển, ví dụ qua issue trên GitHub.",
   "crashCopy": "Sao chép báo cáo",
-  "linkFetchingKey": "Đang lấy khóa của máy tính từ rơ-le…"
+  "linkFetchingKey": "Đang lấy khóa của máy tính từ rơ-le…",
+  "deviceLinkById": "Liên kết máy tính bằng Kilit ID",
+  "linkById": "Bằng Kilit ID",
+  "linkByQr": "Bằng mã QR",
+  "linkIdField": "Kilit ID trên điện thoại",
+  "linkIdHelp": "Nhập Kilit ID của điện thoại. Trên điện thoại mở Cài đặt, Thiết bị đã liên kết, Liên kết máy tính bằng Kilit ID: điện thoại hiện ID và chờ máy tính này.",
+  "linkIdSend": "Gửi yêu cầu",
+  "linkIdSent": "Đã gửi yêu cầu. Trên điện thoại, chấp thuận yêu cầu có mã này:",
+  "linkIdOrScan": "Hoặc quét mã này bằng điện thoại, trên cùng màn hình:",
+  "linkListenHelp": "Trên máy tính chọn Liên kết với điện thoại, Bằng Kilit ID, rồi nhập ID này:",
+  "linkListenWaiting": "Đang chờ yêu cầu từ máy tính…",
+  "linkListenScan": "Hoặc quét mã trên máy tính",
+  "linkRequestCode": "Một máy tính muốn liên kết. Đây có phải mã trên màn hình của nó?",
+  "linkRequestApprove": "Cùng mã: liên kết",
+  "linkRequestOther": "Mã khác? Đừng chấp thuận: người khác đã gửi yêu cầu đó."
 }

@@ -1232,4 +1232,52 @@ class LRu extends L {
 
   @override
   String get linkFetchingKey => 'Получение ключа компьютера с реле…';
+
+  @override
+  String get deviceLinkById => 'Привязать компьютер по Kilit ID';
+
+  @override
+  String get linkById => 'По Kilit ID';
+
+  @override
+  String get linkByQr => 'По QR-коду';
+
+  @override
+  String get linkIdField => 'Kilit ID вашего телефона';
+
+  @override
+  String get linkIdHelp =>
+      'Введите Kilit ID вашего телефона. На телефоне откройте Настройки → Связанные устройства → Привязать компьютер по Kilit ID: он покажет ID и будет ждать этот компьютер.';
+
+  @override
+  String get linkIdSend => 'Отправить запрос';
+
+  @override
+  String get linkIdSent =>
+      'Запрос отправлен. На телефоне подтвердите запрос с этим кодом:';
+
+  @override
+  String get linkIdOrScan =>
+      'Или отсканируйте этот код телефоном на том же экране:';
+
+  @override
+  String get linkListenHelp =>
+      'На компьютере выберите «Привязать к телефону» → «По Kilit ID» и введите этот ID:';
+
+  @override
+  String get linkListenWaiting => 'Ожидание запроса компьютера…';
+
+  @override
+  String get linkListenScan => 'Или отсканировать код компьютера';
+
+  @override
+  String get linkRequestCode =>
+      'Компьютер просит привязку. Это код на его экране?';
+
+  @override
+  String get linkRequestApprove => 'Код тот же: привязать';
+
+  @override
+  String get linkRequestOther =>
+      'Код другой? Не подтверждайте: этот запрос отправил кто-то другой.';
 }

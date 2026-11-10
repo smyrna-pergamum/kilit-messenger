@@ -1191,4 +1191,48 @@ class LJa extends L {
 
   @override
   String get linkFetchingKey => 'リレーからパソコンの鍵を取得中…';
+
+  @override
+  String get deviceLinkById => 'Kilit ID でパソコンをリンク';
+
+  @override
+  String get linkById => 'Kilit ID で';
+
+  @override
+  String get linkByQr => 'QR コードで';
+
+  @override
+  String get linkIdField => 'スマホの Kilit ID';
+
+  @override
+  String get linkIdHelp =>
+      'スマホの Kilit ID を入力してください。スマホで 設定 → リンク済みの端末 → Kilit ID でパソコンをリンク を開くと、ID が表示され、このパソコンを待ちます。';
+
+  @override
+  String get linkIdSend => 'リクエストを送信';
+
+  @override
+  String get linkIdSent => 'リクエストを送信しました。スマホで、このコードが表示されたリクエストを承認してください:';
+
+  @override
+  String get linkIdOrScan => 'または、同じ画面からスマホでこのコードを読み取ってください:';
+
+  @override
+  String get linkListenHelp =>
+      'パソコンで「スマホにリンク」→「Kilit ID で」を選び、この ID を入力してください:';
+
+  @override
+  String get linkListenWaiting => 'パソコンからのリクエストを待っています…';
+
+  @override
+  String get linkListenScan => 'またはパソコンのコードを読み取る';
+
+  @override
+  String get linkRequestCode => 'パソコンがリンクを求めています。画面のコードはこれですか？';
+
+  @override
+  String get linkRequestApprove => '同じコード: リンクする';
+
+  @override
+  String get linkRequestOther => 'コードが違いますか？ 承認しないでください。そのリクエストは別の人が送ったものです。';
 }

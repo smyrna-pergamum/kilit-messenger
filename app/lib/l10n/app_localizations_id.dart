@@ -1228,4 +1228,52 @@ class LId extends L {
 
   @override
   String get linkFetchingKey => 'Mengambil kunci komputer dari relay…';
+
+  @override
+  String get deviceLinkById => 'Tautkan komputer dengan ID Kilit';
+
+  @override
+  String get linkById => 'Dengan ID Kilit';
+
+  @override
+  String get linkByQr => 'Dengan kode QR';
+
+  @override
+  String get linkIdField => 'ID Kilit di ponselmu';
+
+  @override
+  String get linkIdHelp =>
+      'Ketik ID Kilit ponselmu. Di ponsel buka Pengaturan, Perangkat tertaut, Tautkan komputer dengan ID Kilit: ponsel menampilkan ID dan menunggu komputer ini.';
+
+  @override
+  String get linkIdSend => 'Kirim permintaan';
+
+  @override
+  String get linkIdSent =>
+      'Permintaan terkirim. Di ponsel, setujui permintaan yang menampilkan kode ini:';
+
+  @override
+  String get linkIdOrScan =>
+      'Atau pindai kode ini dengan ponsel, di layar yang sama:';
+
+  @override
+  String get linkListenHelp =>
+      'Di komputer pilih Tautkan ke ponselku, Dengan ID Kilit, lalu ketik ID ini:';
+
+  @override
+  String get linkListenWaiting => 'Menunggu permintaan komputer…';
+
+  @override
+  String get linkListenScan => 'Atau pindai kode komputer';
+
+  @override
+  String get linkRequestCode =>
+      'Sebuah komputer meminta ditautkan. Apakah ini kode di layarnya?';
+
+  @override
+  String get linkRequestApprove => 'Kode sama: tautkan';
+
+  @override
+  String get linkRequestOther =>
+      'Kodenya beda? Jangan setujui: orang lain yang mengirim permintaan itu.';
 }

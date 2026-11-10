@@ -1219,4 +1219,49 @@ class LAr extends L {
 
   @override
   String get linkFetchingKey => 'جارٍ جلب مفتاح الحاسوب من المرحّلات…';
+
+  @override
+  String get deviceLinkById => 'اربط حاسوبًا بمعرّف Kilit';
+
+  @override
+  String get linkById => 'بمعرّف Kilit';
+
+  @override
+  String get linkByQr => 'برمز QR';
+
+  @override
+  String get linkIdField => 'معرّف Kilit على هاتفك';
+
+  @override
+  String get linkIdHelp =>
+      'اكتب معرّف Kilit الخاص بهاتفك. على الهاتف افتح الإعدادات، الأجهزة المرتبطة، اربط حاسوبًا بمعرّف Kilit: يعرض المعرّف وينتظر هذا الحاسوب.';
+
+  @override
+  String get linkIdSend => 'أرسل الطلب';
+
+  @override
+  String get linkIdSent =>
+      'أُرسل الطلب. على الهاتف وافق على الطلب الذي يعرض هذا الرمز:';
+
+  @override
+  String get linkIdOrScan => 'أو امسح هذا الرمز بالهاتف من الشاشة نفسها:';
+
+  @override
+  String get linkListenHelp =>
+      'على الحاسوب اختر اربط بهاتفي، بمعرّف Kilit، واكتب هذا المعرّف:';
+
+  @override
+  String get linkListenWaiting => 'بانتظار طلب الحاسوب…';
+
+  @override
+  String get linkListenScan => 'أو امسح رمز الحاسوب';
+
+  @override
+  String get linkRequestCode => 'حاسوب يطلب الربط. هل هذا هو الرمز على شاشته؟';
+
+  @override
+  String get linkRequestApprove => 'الرمز نفسه: اربطه';
+
+  @override
+  String get linkRequestOther => 'رمز مختلف؟ لا توافق: أرسل الطلبَ شخصٌ آخر.';
 }

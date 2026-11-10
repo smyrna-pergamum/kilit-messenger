@@ -482,6 +482,18 @@ pub struct LinkStatus {
     pub code: Option<String>,
     /// Linking finished.
     pub done: bool,
+    /// The phone: listening for requests to link by Kilit ID.
+    pub listening: bool,
+    /// The requests that came, newest first.
+    pub requests: Vec<LinkRequestItem>,
+}
+
+/// A request to link a new device by Kilit ID.
+pub struct LinkRequestItem {
+    /// What approving it names.
+    pub tag: String,
+    /// The code the new device shows.
+    pub code: String,
 }
 
 /// One of this Kilit ID's devices.
@@ -1160,7 +1172,45 @@ impl KilitHandle {
             waiting: s.waiting,
             code: s.code,
             done: s.done,
+            listening: s.listening,
+            requests: s
+                .requests
+                .into_iter()
+                .map(|r| LinkRequestItem {
+                    tag: r.tag,
+                    code: r.code,
+                })
+                .collect(),
         })
+    }
+
+    /// A new device: asks the phone with the Kilit ID in `text` (`@ID`, a
+    /// link) to link it. Looks its card up on the relays, so it needs the
+    /// network. Returns the code both screens show.
+    pub fn link_request(&self, text: String) -> Result<String, KilitError> {
+        let invite = Engine::invite(&text)?;
+        let net = self
+            .network()?
+            .as_ref()
+            .map(|n| n.net.clone())
+            .ok_or_else(Self::offline)?;
+        // waits for the relays without holding the vault
+        let cards = net.query(&Engine::card_filter(&invite), LOOKUP_WAIT);
+        // the request goes on the next network round
+        Ok(self.engine()?.link_request(&invite, &cards)?)
+    }
+
+    /// The phone: listens for requests to link by its Kilit ID.
+    pub fn link_listen(&self) -> Result<(), KilitError> {
+        Ok(self.engine()?.link_listen()?)
+    }
+
+    /// The phone: links the device whose request carried `tag`, once the
+    /// codes on both screens matched.
+    pub fn link_approve(&self, tag: String, name: String) -> Result<(), KilitError> {
+        let (events, _) = self.engine()?.link_approve(&tag, &name)?;
+        self.publish_now(events)?;
+        Ok(())
     }
 
     /// Stops a linking under way.

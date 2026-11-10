@@ -363,5 +363,19 @@
   "crashTitle": "Kilit s'est fermé de façon inattendue",
   "crashBody": "La dernière fois, Kilit s'est fermé tout seul. Le rapport ci-dessous ne contient ni messages ni clés, seulement l'endroit de l'erreur. Copiez-le et envoyez-le au développeur, par exemple dans un ticket GitHub.",
   "crashCopy": "Copier le rapport",
-  "linkFetchingKey": "Récupération de la clé de l'ordinateur sur les relais…"
+  "linkFetchingKey": "Récupération de la clé de l'ordinateur sur les relais…",
+  "deviceLinkById": "Lier un ordinateur par l'ID Kilit",
+  "linkById": "Par ID Kilit",
+  "linkByQr": "Par code QR",
+  "linkIdField": "L'ID Kilit de votre téléphone",
+  "linkIdHelp": "Tapez l'ID Kilit de votre téléphone. Sur le téléphone, ouvrez Réglages, Appareils liés, Lier un ordinateur par l'ID Kilit : il affiche l'ID et attend cet ordinateur.",
+  "linkIdSend": "Envoyer la demande",
+  "linkIdSent": "Demande envoyée. Sur le téléphone, approuvez la demande qui affiche ce code :",
+  "linkIdOrScan": "Ou scannez ce code avec le téléphone, sur le même écran :",
+  "linkListenHelp": "Sur l'ordinateur, choisissez Lier à mon téléphone, Par ID Kilit, et tapez cet ID :",
+  "linkListenWaiting": "En attente de la demande de l'ordinateur…",
+  "linkListenScan": "Ou scanner le code de l'ordinateur",
+  "linkRequestCode": "Un ordinateur demande à être lié. Est-ce le code affiché sur son écran ?",
+  "linkRequestApprove": "Même code : lier",
+  "linkRequestOther": "Un code différent ? N'approuvez pas : quelqu'un d'autre a envoyé cette demande."
 }

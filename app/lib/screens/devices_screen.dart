@@ -100,6 +100,20 @@ class _DevicesSectionState extends State<DevicesSection> {
     await _load();
   }
 
+  /// The phone: waits for a computer to ask by this Kilit ID.
+  Future<void> _linkById() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => LinkListenScreen(
+          core: widget.core,
+          tor: widget.tor,
+          chats: widget.chats,
+        ),
+      ),
+    );
+    await _load();
+  }
+
   Future<void> _linkToPhone() async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -175,11 +189,23 @@ class _DevicesSectionState extends State<DevicesSection> {
         if (_primary && !_fresh)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-            child: OutlinedButton.icon(
-              key: const ValueKey('device-link'),
-              onPressed: _linkComputer,
-              icon: const Icon(Icons.qr_code_scanner),
-              label: Text(l.deviceLink),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                FilledButton.tonalIcon(
+                  key: const ValueKey('device-link-id'),
+                  onPressed: _linkById,
+                  icon: const Icon(Icons.alternate_email_rounded),
+                  label: Text(l.deviceLinkById),
+                ),
+                OutlinedButton.icon(
+                  key: const ValueKey('device-link'),
+                  onPressed: _linkComputer,
+                  icon: const Icon(Icons.qr_code_scanner),
+                  label: Text(l.deviceLink),
+                ),
+              ],
             ),
           ),
         if (_fresh)
@@ -193,6 +219,13 @@ class _DevicesSectionState extends State<DevicesSection> {
                   onPressed: _linkToPhone,
                   icon: const Icon(Icons.phonelink_outlined),
                   label: Text(l.linkToPhone),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  key: const ValueKey('device-link-id'),
+                  onPressed: _linkById,
+                  icon: const Icon(Icons.alternate_email_rounded),
+                  label: Text(l.deviceLinkById),
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
@@ -218,7 +251,8 @@ mixin _LinkPoll<T extends StatefulWidget> on State<T> {
   KilitCore get core;
 
   void startPolling() {
-    _poll = Timer.periodic(const Duration(seconds: 2), (_) => _check());
+    _poll ??= Timer.periodic(const Duration(seconds: 2), (_) => _check());
+    unawaited(_check());
   }
 
   Future<void> _check() async {
@@ -249,19 +283,26 @@ class LinkOfferScreen extends StatefulWidget {
 
 class _LinkOfferScreenState extends State<LinkOfferScreen>
     with _LinkPoll<LinkOfferScreen> {
+  // the phone's Kilit ID typed in, or the QR code to scan
+  bool _byId = true;
   String? _offer;
   bool _refused = false;
+  final _id = TextEditingController();
+  bool _sending = false;
+  String? _sent;
+  String? Function(L)? _error;
 
   @override
   KilitCore get core => widget.core;
 
   @override
-  void initState() {
-    super.initState();
-    _start();
+  void dispose() {
+    _id.dispose();
+    super.dispose();
   }
 
-  Future<void> _start() async {
+  Future<void> _showQr() async {
+    if (_offer != null) return;
     try {
       final o = await widget.core.linkOffer();
       if (!mounted) return;
@@ -273,6 +314,143 @@ class _LinkOfferScreenState extends State<LinkOfferScreen>
       if (mounted) setState(() => _refused = true);
     }
   }
+
+  Future<void> _request() async {
+    setState(() {
+      _sending = true;
+      _error = null;
+    });
+    try {
+      final code = await widget.core.linkRequest(_id.text);
+      if (!mounted) return;
+      setState(() => _sent = code);
+      widget.chats?.hurry();
+      startPolling();
+    } on Offline {
+      if (mounted) setState(() => _error = (l) => l.addOffline);
+    } on ContactRefused {
+      if (mounted) setState(() => _error = (l) => l.addNotFound);
+    } on NotNewKilit {
+      if (mounted) setState(() => _refused = true);
+    } on Object catch (e) {
+      if (mounted) setState(() => _error = (l) => l.linkFailed('$e'));
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  Widget _waiting(KilitTokens t, L l) => Row(
+    children: [
+      const SizedBox(
+        width: 16,
+        height: 16,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        child: Text(l.linkWaiting, style: TextStyle(color: t.textMuted)),
+      ),
+    ],
+  );
+
+  List<Widget> _byIdPanel(KilitTokens t, L l) {
+    final sent = _sent;
+    if (sent != null) {
+      final qr = status.offer;
+      return [
+        Text(l.linkIdSent, style: TextStyle(color: t.textMuted)),
+        const SizedBox(height: 12),
+        _Code(sent),
+        const SizedBox(height: 16),
+        _waiting(t, l),
+        _TorWait(tor: widget.tor),
+        // the same request in a small code: the phone scans it instead
+        if (qr != null) ...[
+          const SizedBox(height: 24),
+          Text(l.linkIdOrScan, style: TextStyle(color: t.textMuted)),
+          const SizedBox(height: 12),
+          Center(
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: QrImageView(
+                key: const ValueKey('link-id-qr'),
+                data: qr,
+                size: 200,
+                errorCorrectionLevel: QrErrorCorrectLevel.M,
+              ),
+            ),
+          ),
+        ],
+      ];
+    }
+    final error = _error?.call(l);
+    return [
+      Text(l.linkIdHelp, style: TextStyle(color: t.textMuted)),
+      const SizedBox(height: 16),
+      TextField(
+        key: const ValueKey('link-id-field'),
+        controller: _id,
+        autocorrect: false,
+        enableSuggestions: false,
+        enableIMEPersonalizedLearning: false,
+        style: const TextStyle(fontFamily: monoFamily),
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          labelText: l.linkIdField,
+          hintText: '@word-word-word-word',
+          errorText: error,
+          errorMaxLines: 3,
+        ),
+        onSubmitted: (_) => _sending ? null : _request(),
+      ),
+      const SizedBox(height: 12),
+      Align(
+        alignment: AlignmentDirectional.centerEnd,
+        child: FilledButton.icon(
+          key: const ValueKey('link-id-send'),
+          onPressed: _sending ? null : _request,
+          icon: _sending
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.send_rounded),
+          label: Text(l.linkIdSend),
+        ),
+      ),
+      _TorWait(tor: widget.tor),
+    ];
+  }
+
+  List<Widget> _qrPanel(KilitTokens t, L l) => [
+    Text(l.linkToPhoneHint, style: TextStyle(color: t.textMuted)),
+    const SizedBox(height: 16),
+    if (_offer != null)
+      Center(
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          // a short code (the key's hash): few, large squares
+          child: QrImageView(
+            key: const ValueKey('link-qr'),
+            data: _offer!,
+            size: 280,
+            errorCorrectionLevel: QrErrorCorrectLevel.M,
+          ),
+        ),
+      ),
+    const SizedBox(height: 16),
+    _waiting(t, l),
+    _TorWait(tor: widget.tor),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -292,43 +470,232 @@ class _LinkOfferScreenState extends State<LinkOfferScreen>
                 onClose: () => Navigator.pop(context),
               )
             else ...[
-              Text(l.linkToPhoneHint, style: TextStyle(color: t.textMuted)),
-              const SizedBox(height: 16),
-              if (_offer != null)
-                Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+              if (_sent == null) ...[
+                SegmentedButton<bool>(
+                  key: const ValueKey('link-way'),
+                  segments: [
+                    ButtonSegment(
+                      value: true,
+                      icon: const Icon(Icons.alternate_email_rounded),
+                      label: Text(l.linkById),
                     ),
-                    // a short code (the key's hash): few, large squares
-                    child: QrImageView(
-                      key: const ValueKey('link-qr'),
-                      data: _offer!,
-                      size: 280,
-                      errorCorrectionLevel: QrErrorCorrectLevel.M,
+                    ButtonSegment(
+                      value: false,
+                      icon: const Icon(Icons.qr_code_2_rounded),
+                      label: Text(l.linkByQr),
                     ),
+                  ],
+                  selected: {_byId},
+                  onSelectionChanged: (v) {
+                    setState(() => _byId = v.first);
+                    if (!_byId) _showQr();
+                  },
+                ),
+                const SizedBox(height: 20),
+              ],
+              ...(_byId ? _byIdPanel(t, l) : _qrPanel(t, l)),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The phone: listens for a computer asking by this Kilit ID, and links it
+/// once the user saw the same code on both screens.
+class LinkListenScreen extends StatefulWidget {
+  const LinkListenScreen({super.key, required this.core, this.tor, this.chats});
+
+  final KilitCore core;
+  final TorController? tor;
+  final ChatService? chats;
+
+  @override
+  State<LinkListenScreen> createState() => _LinkListenScreenState();
+}
+
+class _LinkListenScreenState extends State<LinkListenScreen>
+    with _LinkPoll<LinkListenScreen> {
+  String? _me;
+  String? _failed;
+  bool _approving = false;
+
+  @override
+  KilitCore get core => widget.core;
+
+  @override
+  void initState() {
+    super.initState();
+    _listen();
+  }
+
+  Future<void> _listen() async {
+    try {
+      await widget.core.linkListen();
+      final me = await widget.core.myKilit();
+      if (!mounted) return;
+      setState(() => _me = me.id);
+      widget.chats?.hurry(const Duration(minutes: 15));
+      startPolling();
+    } on Object catch (e) {
+      if (mounted) setState(() => _failed = '$e');
+    }
+  }
+
+  /// The computer's QR code, scanned: its request, approved; or, from a
+  /// computer showing only a code, linking the usual way.
+  Future<void> _scan() async {
+    final l = L.of(context);
+    final text = await Navigator.of(context)
+        .push<String>(MaterialPageRoute(builder: (_) => const ScanScreen()));
+    if (text == null || !mounted) return;
+    if (!text.trim().startsWith(_linkPrefix)) {
+      setState(() => _failed = l.linkNotCode);
+      return;
+    }
+    final String code;
+    try {
+      code = await widget.core.linkAccept(text, _deviceKind());
+      widget.chats?.hurry();
+    } on Object catch (e) {
+      if (mounted) setState(() => _failed = '$e');
+      return;
+    }
+    if (!mounted) return;
+    await Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => LinkProgressScreen(
+          core: widget.core,
+          code: code,
+          tor: widget.tor,
+          chats: widget.chats,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _approve(LinkRequest r) async {
+    setState(() => _approving = true);
+    try {
+      await widget.core.linkApprove(r.tag, _deviceKind());
+      widget.chats?.hurry();
+    } on Object catch (e) {
+      if (mounted) {
+        setState(() {
+          _approving = false;
+          _failed = '$e';
+        });
+      }
+      return;
+    }
+    if (!mounted) return;
+    await Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => LinkProgressScreen(
+          core: widget.core,
+          code: r.code,
+          tor: widget.tor,
+          chats: widget.chats,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final l = L.of(context);
+    final me = _me;
+    final failed = _failed;
+    return Scaffold(
+      appBar: AppBar(title: Text(l.deviceLinkById)),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            if (failed != null)
+              Text(
+                l.linkFailed(failed),
+                key: const ValueKey('link-listen-failed'),
+                style: TextStyle(color: t.danger),
+              )
+            else ...[
+              Text(l.linkListenHelp, style: TextStyle(color: t.textMuted)),
+              if (me != null) ...[
+                const SizedBox(height: 12),
+                SelectableText(
+                  '@$me',
+                  key: const ValueKey('link-listen-id'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: monoFamily,
+                    fontSize: 18,
+                    color: t.accent,
                   ),
                 ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      l.linkWaiting,
-                      style: TextStyle(color: t.textMuted),
+              ],
+              const SizedBox(height: 20),
+              if (status.requests.isEmpty)
+                Row(
+                  children: [
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        l.linkListenWaiting,
+                        style: TextStyle(color: t.textMuted),
+                      ),
+                    ),
+                  ],
+                )
+              else ...[
+                Text(l.linkRequestCode),
+                const SizedBox(height: 8),
+                for (final r in status.requests)
+                  Card(
+                    key: ValueKey('link-request-${r.tag}'),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _Code(r.code),
+                          const SizedBox(height: 12),
+                          FilledButton.icon(
+                            key: ValueKey('link-approve-${r.tag}'),
+                            onPressed: _approving ? null : () => _approve(r),
+                            icon: const Icon(Icons.check_rounded),
+                            label: Text(l.linkRequestApprove),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ],
+                const SizedBox(height: 8),
+                Text(l.linkRequestOther, style: TextStyle(color: t.textMuted)),
+              ],
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                key: const ValueKey('link-listen-scan'),
+                onPressed: _approving ? null : _scan,
+                icon: const Icon(Icons.qr_code_scanner),
+                label: Text(l.linkListenScan),
               ),
               _TorWait(tor: widget.tor),
+              const SizedBox(height: 24),
+              TextButton(
+                key: const ValueKey('link-listen-cancel'),
+                onPressed: () async {
+                  await widget.core.linkCancel();
+                  if (context.mounted) Navigator.pop(context);
+                },
+                child: Text(l.cancel),
+              ),
             ],
           ],
         ),

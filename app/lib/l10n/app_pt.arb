@@ -363,5 +363,19 @@
   "crashTitle": "O Kilit fechou inesperadamente",
   "crashBody": "Da última vez o Kilit fechou sozinho. O relatório abaixo não contém mensagens nem chaves, só onde falhou. Copie e envie ao desenvolvedor, por exemplo numa issue do GitHub.",
   "crashCopy": "Copiar relatório",
-  "linkFetchingKey": "Buscando a chave do computador nos relays…"
+  "linkFetchingKey": "Buscando a chave do computador nos relays…",
+  "deviceLinkById": "Vincular um computador pelo ID do Kilit",
+  "linkById": "Com ID do Kilit",
+  "linkByQr": "Com código QR",
+  "linkIdField": "O ID do Kilit do seu celular",
+  "linkIdHelp": "Digite o ID do Kilit do seu celular. No celular abra Configurações, Aparelhos vinculados, Vincular um computador pelo ID do Kilit: ele mostra o ID e espera este computador.",
+  "linkIdSend": "Enviar pedido",
+  "linkIdSent": "Pedido enviado. No celular, aprove o pedido que mostra este código:",
+  "linkIdOrScan": "Ou escaneie este código com o celular, na mesma tela:",
+  "linkListenHelp": "No computador escolha Vincular ao meu celular, Com ID do Kilit, e digite este ID:",
+  "linkListenWaiting": "Esperando o pedido do computador…",
+  "linkListenScan": "Ou escanear o código do computador",
+  "linkRequestCode": "Um computador pede para vincular. É este o código na tela dele?",
+  "linkRequestApprove": "Mesmo código: vincular",
+  "linkRequestOther": "Código diferente? Não aprove: outra pessoa enviou esse pedido."
 }

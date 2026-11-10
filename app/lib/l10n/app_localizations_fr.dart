@@ -1238,4 +1238,52 @@ class LFr extends L {
   @override
   String get linkFetchingKey =>
       'Récupération de la clé de l\'ordinateur sur les relais…';
+
+  @override
+  String get deviceLinkById => 'Lier un ordinateur par l\'ID Kilit';
+
+  @override
+  String get linkById => 'Par ID Kilit';
+
+  @override
+  String get linkByQr => 'Par code QR';
+
+  @override
+  String get linkIdField => 'L\'ID Kilit de votre téléphone';
+
+  @override
+  String get linkIdHelp =>
+      'Tapez l\'ID Kilit de votre téléphone. Sur le téléphone, ouvrez Réglages, Appareils liés, Lier un ordinateur par l\'ID Kilit : il affiche l\'ID et attend cet ordinateur.';
+
+  @override
+  String get linkIdSend => 'Envoyer la demande';
+
+  @override
+  String get linkIdSent =>
+      'Demande envoyée. Sur le téléphone, approuvez la demande qui affiche ce code :';
+
+  @override
+  String get linkIdOrScan =>
+      'Ou scannez ce code avec le téléphone, sur le même écran :';
+
+  @override
+  String get linkListenHelp =>
+      'Sur l\'ordinateur, choisissez Lier à mon téléphone, Par ID Kilit, et tapez cet ID :';
+
+  @override
+  String get linkListenWaiting => 'En attente de la demande de l\'ordinateur…';
+
+  @override
+  String get linkListenScan => 'Ou scanner le code de l\'ordinateur';
+
+  @override
+  String get linkRequestCode =>
+      'Un ordinateur demande à être lié. Est-ce le code affiché sur son écran ?';
+
+  @override
+  String get linkRequestApprove => 'Même code : lier';
+
+  @override
+  String get linkRequestOther =>
+      'Un code différent ? N\'approuvez pas : quelqu\'un d\'autre a envoyé cette demande.';
 }

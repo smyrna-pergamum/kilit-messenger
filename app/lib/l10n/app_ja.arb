@@ -363,5 +363,19 @@
   "crashTitle": "Kilit が予期せず終了しました",
   "crashBody": "前回、Kilit が勝手に終了しました。下のレポートにメッセージや鍵は含まれず、失敗した場所だけが書かれています。コピーして開発者に送ってください（GitHub の issue など）。",
   "crashCopy": "レポートをコピー",
-  "linkFetchingKey": "リレーからパソコンの鍵を取得中…"
+  "linkFetchingKey": "リレーからパソコンの鍵を取得中…",
+  "deviceLinkById": "Kilit ID でパソコンをリンク",
+  "linkById": "Kilit ID で",
+  "linkByQr": "QR コードで",
+  "linkIdField": "スマホの Kilit ID",
+  "linkIdHelp": "スマホの Kilit ID を入力してください。スマホで 設定 → リンク済みの端末 → Kilit ID でパソコンをリンク を開くと、ID が表示され、このパソコンを待ちます。",
+  "linkIdSend": "リクエストを送信",
+  "linkIdSent": "リクエストを送信しました。スマホで、このコードが表示されたリクエストを承認してください:",
+  "linkIdOrScan": "または、同じ画面からスマホでこのコードを読み取ってください:",
+  "linkListenHelp": "パソコンで「スマホにリンク」→「Kilit ID で」を選び、この ID を入力してください:",
+  "linkListenWaiting": "パソコンからのリクエストを待っています…",
+  "linkListenScan": "またはパソコンのコードを読み取る",
+  "linkRequestCode": "パソコンがリンクを求めています。画面のコードはこれですか？",
+  "linkRequestApprove": "同じコード: リンクする",
+  "linkRequestOther": "コードが違いますか？ 承認しないでください。そのリクエストは別の人が送ったものです。"
 }

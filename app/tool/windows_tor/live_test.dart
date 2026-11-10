@@ -21,7 +21,7 @@ Future<TorState> _until(WindowsTor t, Duration limit) async {
 
 void main() {
   test(
-    'tor.exe comes up, straight and through obfs4',
+    'tor.exe comes up, straight, through obfs4, and in a race',
     () async {
       final tor = WindowsTor.at(
         '${Directory.current.path}'
@@ -39,6 +39,18 @@ void main() {
         expect(s.phase, TorPhase.ready, reason: mode);
         expect(s.socks, greaterThan(0));
       }
+      // a race: direct and obfs4 at once, the first up wins, one remains
+      final began = DateTime.now();
+      expect(tor.start(dir.path, '{"mode":"direct","race":["obfs4"]}'), isNull);
+      final s = await _until(tor, const Duration(minutes: 3));
+      // ignore: avoid_print
+      print(
+        'race: ${s.phase} via ${s.mode} in '
+        '${DateTime.now().difference(began).inSeconds}s',
+      );
+      expect(s.phase, TorPhase.ready);
+      expect(['direct', 'obfs4'], contains(s.mode));
+      expect(tor.log(), contains('[obfs4]'));
     },
     timeout: const Timeout(Duration(minutes: 7)),
     skip: !Platform.isWindows,

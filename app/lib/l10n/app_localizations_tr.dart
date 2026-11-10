@@ -1228,4 +1228,51 @@ class LTr extends L {
   @override
   String get linkFetchingKey =>
       'Bilgisayarın anahtarı aktarıcılardan alınıyor…';
+
+  @override
+  String get deviceLinkById => 'Kilit ID ile bilgisayar bağla';
+
+  @override
+  String get linkById => 'Kilit ID ile';
+
+  @override
+  String get linkByQr => 'Kare kod ile';
+
+  @override
+  String get linkIdField => 'Telefonundaki Kilit ID';
+
+  @override
+  String get linkIdHelp =>
+      'Telefonundaki Kilit ID\'yi yaz. Telefonda Ayarlar → Bağlı cihazlar → Kilit ID ile bilgisayar bağla\'yı aç: ID\'yi gösterir ve bu bilgisayarı bekler.';
+
+  @override
+  String get linkIdSend => 'İsteği gönder';
+
+  @override
+  String get linkIdSent =>
+      'İstek gönderildi. Telefonda bu kodu gösteren isteği onayla:';
+
+  @override
+  String get linkIdOrScan => 'Ya da aynı ekranda bu kare kodu telefonla okut:';
+
+  @override
+  String get linkListenHelp =>
+      'Bilgisayarda Telefonuma bağla → Kilit ID ile\'yi seç ve bu ID\'yi yaz:';
+
+  @override
+  String get linkListenWaiting => 'Bilgisayarın isteği bekleniyor…';
+
+  @override
+  String get linkListenScan => 'Ya da bilgisayardaki kare kodu okut';
+
+  @override
+  String get linkRequestCode =>
+      'Bir bilgisayar bağlanmak istiyor. Ekranındaki kod bu mu?';
+
+  @override
+  String get linkRequestApprove => 'Kod aynı: bağla';
+
+  @override
+  String get linkRequestOther =>
+      'Kod farklı mı? Onaylama: o isteği başka biri göndermiştir.';
 }

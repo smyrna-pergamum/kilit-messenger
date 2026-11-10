@@ -2098,6 +2098,13 @@ pub fn card_tag(words: &str) -> String {
     format!("kilit:{words}")
 }
 
+/// The address (32 hex digits) of the identity a card carries.
+pub fn card_address(card: &[u8]) -> Option<String> {
+    let c = ciborium::from_reader::<Card, _>(card).ok()?;
+    let identity = IdentityKey::try_from(c.identity.as_slice()).ok()?;
+    Some(address_name(&identity))
+}
+
 /// Whether a card fetched from the relays is the one `invite` names: its
 /// identity key hashes to the ID, and to the address when there is one.
 pub fn card_matches(card: &[u8], invite: &Invite) -> bool {

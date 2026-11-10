@@ -363,5 +363,19 @@
   "crashTitle": "Kilit se cerró inesperadamente",
   "crashBody": "La última vez Kilit se cerró solo. El informe de abajo no contiene mensajes ni claves, solo dónde falló. Cópialo y envíalo al desarrollador, por ejemplo en un issue de GitHub.",
   "crashCopy": "Copiar informe",
-  "linkFetchingKey": "Obteniendo la clave del ordenador desde los relés…"
+  "linkFetchingKey": "Obteniendo la clave del ordenador desde los relés…",
+  "deviceLinkById": "Vincular un ordenador con el ID de Kilit",
+  "linkById": "Con ID de Kilit",
+  "linkByQr": "Con código QR",
+  "linkIdField": "El ID de Kilit de tu teléfono",
+  "linkIdHelp": "Escribe el ID de Kilit de tu teléfono. En el teléfono abre Ajustes, Dispositivos vinculados, Vincular un ordenador con el ID de Kilit: muestra el ID y espera a este ordenador.",
+  "linkIdSend": "Enviar solicitud",
+  "linkIdSent": "Solicitud enviada. En el teléfono, aprueba la solicitud que muestra este código:",
+  "linkIdOrScan": "O escanea este código con el teléfono, en esa misma pantalla:",
+  "linkListenHelp": "En el ordenador elige Vincular a mi teléfono, Con ID de Kilit, y escribe este ID:",
+  "linkListenWaiting": "Esperando la solicitud del ordenador…",
+  "linkListenScan": "O escanear el código del ordenador",
+  "linkRequestCode": "Un ordenador pide vincularse. ¿Es este el código de su pantalla?",
+  "linkRequestApprove": "Mismo código: vincular",
+  "linkRequestOther": "¿Un código distinto? No lo apruebes: esa solicitud la envió otra persona."
 }

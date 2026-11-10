@@ -64,6 +64,10 @@ class TorState {
 abstract interface class TorBackend {
   bool get available;
 
+  /// Whether several ways out can be tried at the same time (config
+  /// `"race": [...]`): tor.exe on Windows can, the embedded Tor cannot.
+  bool get canRace;
+
   /// Starts Tor in [dir]/tor, going out the way [config] says (JSON:
   /// mode and, for custom, bridges), or changes the way out of a running
   /// one. Returns an error, or null.
@@ -151,6 +155,10 @@ class NativeTor implements TorBackend {
   @override
   bool get available => true;
 
+  /// One Tor per process.
+  @override
+  bool get canRace => false;
+
   @override
   String? start(String dir, String config) {
     final d = dir.toNativeUtf8();
@@ -207,6 +215,9 @@ class NoTor implements TorBackend {
 
   @override
   bool get available => false;
+
+  @override
+  bool get canRace => false;
 
   @override
   String? start(String dir, String config) => 'unavailable';
@@ -281,6 +292,26 @@ class TorController extends ChangeNotifier {
   bool get running => _poll != null;
   TorRoute get route => _route;
 
+  /// The way out that came up last time, where automatic mode starts: on a
+  /// network that blocks Tor, the bridge that worked, without first waiting
+  /// on the direct way again.
+  TorRoute? lastGood;
+
+  /// Told when a way out came up under automatic mode, to keep it.
+  ValueChanged<TorRoute>? onWorked;
+
+  // under auto: how many ways out failed since the start
+  int _failed = 0;
+
+  /// Under auto on a backend that can race: the direct way and obfs4 go at
+  /// the same time, and get the longer of their waits.
+  bool get _racing =>
+      _backend.canRace &&
+      _route == TorRoute.auto &&
+      autoRoutes[_try].$1 == TorRoute.direct;
+
+  int get _limit => _racing ? autoRoutes[1].$2 : autoRoutes[_try].$2;
+
   /// Tor did not come up any way it tried: every way of automatic mode,
   /// or the one way the user chose. The app then offers bridges.
   bool get blocked => _blocked;
@@ -318,6 +349,7 @@ class TorController extends ChangeNotifier {
     final config = jsonEncode({
       'mode': _now.name,
       if (_now == TorRoute.custom) 'bridges': _bridges,
+      if (_racing) 'race': [TorRoute.obfs4.name],
     });
     final err = _backend.start(_dir, config);
     if (err != null) {
@@ -336,8 +368,10 @@ class TorController extends ChangeNotifier {
     if (!_backend.available) return;
     _route = route;
     _bridges = bridges;
-    _try = 0;
+    final first = autoRoutes.indexWhere((r) => r.$1 == lastGood);
+    _try = route == TorRoute.auto && first > 0 ? first : 0;
     _waited = 0;
+    _failed = 0;
     _blocked = false;
     _poll ??= Timer.periodic(const Duration(seconds: 1), (_) => _tick());
     if (_apply()) _update(_backend.state());
@@ -392,14 +426,26 @@ class TorController extends ChangeNotifier {
       _waited = 0;
       _lastError = '';
       _blocked = false;
+      if (_route == TorRoute.auto) {
+        // the way that won, which a race decides
+        final worked =
+            TorRoute.values.where((r) => r.name == s.mode).firstOrNull ?? _now;
+        if (worked != lastGood) {
+          lastGood = worked;
+          onWorked?.call(worked);
+        }
+      }
     } else if (_route == TorRoute.auto &&
-        (s.phase == TorPhase.failed || ++_waited >= autoRoutes[_try].$2)) {
-      // a way out that failed is left at once, not after its full wait
-      if (_try == autoRoutes.length - 1 && !_blocked) {
+        (s.phase == TorPhase.failed || ++_waited >= _limit)) {
+      // a way out that failed is left at once, not after its full wait;
+      // a race tried obfs4 already
+      final tried = _racing ? 2 : 1;
+      _failed += tried;
+      if (_failed >= autoRoutes.length && !_blocked) {
         _blocked = true;
         notifyListeners();
       }
-      _try = (_try + 1) % autoRoutes.length;
+      _try = (_try + tried) % autoRoutes.length;
       _waited = 0;
       if (!_apply()) return;
     } else if (_route != TorRoute.auto &&

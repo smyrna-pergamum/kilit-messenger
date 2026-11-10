@@ -430,6 +430,36 @@ class DevCore implements KilitCore {
   }
 
   @override
+  Future<String> linkRequest(String text) async {
+    _requireOpen();
+    if (_contacts.isNotEmpty) throw const NotNewKilit();
+    if (!isInvite(text)) throw const ContactRefused();
+    _link = const LinkStatus(
+      code: '654 321',
+      offer: 'kilit://link?h=AAAA&t=00112233445566778899aabbccddeeff',
+    );
+    return '654 321';
+  }
+
+  @override
+  Future<void> linkListen() async {
+    _requireOpen();
+    // a computer asked: the stand-in shows its request at once
+    _link = const LinkStatus(
+      listening: true,
+      requests: [LinkRequest('00112233445566778899aabbccddeeff', '654 321')],
+    );
+  }
+
+  @override
+  Future<void> linkApprove(String tag, String name) async {
+    _requireOpen();
+    final r = _link.requests.where((r) => r.tag == tag).firstOrNull;
+    if (r == null) throw StateError('no such request');
+    _link = LinkStatus(waiting: true, code: r.code);
+  }
+
+  @override
   Future<LinkStatus> linkState() async => _link;
 
   @override
