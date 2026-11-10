@@ -19,6 +19,50 @@ pub fn init_app() {
     flutter_rust_bridge::setup_default_user_utils();
 }
 
+/// The file a panic is written to before the release build aborts, so the
+/// app can show why it closed the next time it starts. It holds no message
+/// text or keys: only the panic's words and where in the code it was.
+pub const CRASH_LOG: &str = "crash.log";
+
+static CRASH_HOOK: std::sync::Once = std::sync::Once::new();
+
+fn crash_log_to(dir: &str) {
+    let path = std::path::Path::new(dir).join(CRASH_LOG);
+    CRASH_HOOK.call_once(move || {
+        let previous = std::panic::take_hook();
+        std::panic::set_hook(Box::new(move |info| {
+            use std::io::Write;
+            let what = info
+                .payload()
+                .downcast_ref::<&str>()
+                .map(|s| (*s).to_owned())
+                .or_else(|| info.payload().downcast_ref::<String>().cloned())
+                .unwrap_or_default();
+            let at = info
+                .location()
+                .map(|l| format!("{}:{}", l.file(), l.line()))
+                .unwrap_or_default();
+            let when = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_secs())
+                .unwrap_or_default();
+            let thread = std::thread::current().name().unwrap_or("?").to_owned();
+            // a log that grew too big starts over
+            if std::fs::metadata(&path).is_ok_and(|m| m.len() > 64 * 1024) {
+                let _ = std::fs::remove_file(&path);
+            }
+            if let Ok(mut f) = std::fs::OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(&path)
+            {
+                let _ = writeln!(f, "rust panic at {when} on {thread}: {what} ({at})");
+            }
+            previous(info);
+        }));
+    });
+}
+
 /// What kind of failure a call ended in.
 pub enum KilitErrorKind {
     /// Needs an unlocked vault.
@@ -660,6 +704,7 @@ impl KilitHandle {
 
     /// Opens the store in `dir`; `desktop` picks the larger Argon2id cost.
     pub fn open(dir: String, desktop: bool) -> Result<KilitHandle, KilitError> {
+        crash_log_to(&dir);
         Ok(Self {
             engine: Mutex::new(Engine::open(&dir, desktop)?),
             network: Mutex::new(None),

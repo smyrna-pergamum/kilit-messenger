@@ -769,11 +769,11 @@ class LTr extends L {
       'Donanım anahtarı yok: kasa dosyası kopyalanırsa PIN başka bir cihazda tahmin edilebilir.';
 
   @override
-  String get settingsFingerprint => 'Güvenlik numaran';
+  String get settingsFingerprint => 'Kasa imza numaran';
 
   @override
   String get settingsFingerprintHint =>
-      'Bir kişiyi doğrularken iki cihazda da aynı olmalı.';
+      'Bu numara kasanın anahtarlarına aittir; bu anahtarlar mühürlediğin paketleri (taşıyıcı mod) imzalar. Senden imzalı bir paket alan kişi, paketteki imzacı numarasını görür; yüz yüze ya da telefonda seninle karşılaştırdığında bununla aynıysa paket sendendir. Sohbetler için bunu değil, her sohbetin içindeki güvenlik numarasını karşılaştır.';
 
   @override
   String get settingsAppearance => 'Görünüm';
@@ -1214,4 +1214,18 @@ class LTr extends L {
   @override
   String get linkScanInDevices =>
       'Bu bir bilgisayar bağlama kodu. Bu telefonda Ayarlar → Bağlı cihazlar → Bilgisayar bağla\'yı açıp orada okut.';
+
+  @override
+  String get crashTitle => 'Kilit beklenmedik şekilde kapandı';
+
+  @override
+  String get crashBody =>
+      'Kilit geçen sefer kendiliğinden kapandı. Aşağıdaki kayıtta mesaj ya da anahtar yok, yalnızca nerede hata olduğu var. Kopyala ve geliştiriciye gönder, örneğin bir GitHub kaydında.';
+
+  @override
+  String get crashCopy => 'Kaydı kopyala';
+
+  @override
+  String get linkFetchingKey =>
+      'Bilgisayarın anahtarı aktarıcılardan alınıyor…';
 }

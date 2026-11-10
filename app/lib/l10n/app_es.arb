@@ -231,8 +231,8 @@
   "hwDev": "Ninguno (núcleo de desarrollo)",
   "hwBoundHint": "Tu PIN está vinculado a la clave de hardware de este dispositivo. Ni siquiera una copia del archivo de la bóveda se puede probar en otro dispositivo.",
   "hwNotBoundHint": "Sin clave de hardware: si se copia el archivo de la bóveda, el PIN se puede adivinar en otro dispositivo.",
-  "settingsFingerprint": "Tu número de seguridad",
-  "settingsFingerprintHint": "Al verificar un contacto, debe ser el mismo en ambos dispositivos.",
+  "settingsFingerprint": "Tu número de firma de la bóveda",
+  "settingsFingerprintHint": "Este número pertenece a las claves de tu bóveda, que firman los paquetes que sellas (modo portador). Quien recibe de ti un paquete firmado ve en él el número del firmante; si coincide con este, algo que puede comprobar contigo en persona o en una llamada, el paquete es tuyo. Para los chats, compara en su lugar el número de seguridad de cada conversación.",
   "settingsAppearance": "Apariencia",
   "themeSystem": "Sistema",
   "themeLight": "Claro",
@@ -359,5 +359,9 @@
   "selfNoteDiscard": "Descartar",
   "linkTorWait": "Tor aún no está conectado, así que la vinculación espera. Ambos dispositivos necesitan Tor.",
   "linkFailed": "La vinculación no empezó: {error}",
-  "linkScanInDevices": "Este es un código para vincular un ordenador. En este teléfono abre Ajustes, Dispositivos vinculados, Vincular un ordenador, y escanéalo allí."
+  "linkScanInDevices": "Este es un código para vincular un ordenador. En este teléfono abre Ajustes, Dispositivos vinculados, Vincular un ordenador, y escanéalo allí.",
+  "crashTitle": "Kilit se cerró inesperadamente",
+  "crashBody": "La última vez Kilit se cerró solo. El informe de abajo no contiene mensajes ni claves, solo dónde falló. Cópialo y envíalo al desarrollador, por ejemplo en un issue de GitHub.",
+  "crashCopy": "Copiar informe",
+  "linkFetchingKey": "Obteniendo la clave del ordenador desde los relés…"
 }

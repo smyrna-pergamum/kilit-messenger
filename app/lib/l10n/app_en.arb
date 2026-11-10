@@ -355,8 +355,8 @@
   "hwDev": "None (development core)",
   "hwBoundHint": "Your PIN is bound to this device's hardware key. Even a copy of the vault file cannot be tried on another device.",
   "hwNotBoundHint": "No hardware key: if the vault file is copied, the PIN can be guessed on another device.",
-  "settingsFingerprint": "Your safety number",
-  "settingsFingerprintHint": "When verifying a contact it must be the same on both devices.",
+  "settingsFingerprint": "Your vault signature number",
+  "settingsFingerprintHint": "This number belongs to the keys of your vault, which sign the packets you seal (carrier mode). Someone who gets a signed packet from you sees the signer's number in it; if it matches this one, which they can check with you in person or on a call, the packet is from you. For chats, compare the safety number inside each conversation instead.",
   "settingsAppearance": "Appearance",
   "themeSystem": "System",
   "themeLight": "Light",
@@ -600,5 +600,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "crashTitle": "Kilit closed unexpectedly",
+  "crashBody": "Last time Kilit closed on its own. The report below holds no messages or keys, only where it failed. Copy it and send it to the developer, for example in a GitHub issue.",
+  "crashCopy": "Copy report",
+  "linkFetchingKey": "Getting the computer's key from the relays…"
 }

@@ -231,8 +231,8 @@
   "hwDev": "Tidak ada (inti pengembangan)",
   "hwBoundHint": "PIN Anda terikat ke kunci perangkat keras perangkat ini. Bahkan salinan file brankas tidak bisa dicoba di perangkat lain.",
   "hwNotBoundHint": "Tidak ada kunci perangkat keras: jika file brankas disalin, PIN bisa ditebak di perangkat lain.",
-  "settingsFingerprint": "Nomor keamanan Anda",
-  "settingsFingerprintHint": "Saat memverifikasi kontak, nomor ini harus sama di kedua perangkat.",
+  "settingsFingerprint": "Nomor tanda tangan brankasmu",
+  "settingsFingerprintHint": "Nomor ini milik kunci brankasmu, yang menandatangani paket yang kamu segel (mode pembawa). Orang yang menerima paket bertanda tangan darimu melihat nomor penandatangan di dalamnya; jika sama dengan nomor ini, yang bisa ia cek denganmu langsung atau lewat telepon, paket itu darimu. Untuk obrolan, bandingkan nomor keamanan di dalam tiap percakapan.",
   "settingsAppearance": "Tampilan",
   "themeSystem": "Sistem",
   "themeLight": "Terang",
@@ -359,5 +359,9 @@
   "selfNoteDiscard": "Buang",
   "linkTorWait": "Tor belum tersambung, jadi penautan menunggu. Kedua perangkat perlu Tor.",
   "linkFailed": "Penautan tidak dimulai: {error}",
-  "linkScanInDevices": "Ini kode untuk menautkan komputer. Di ponsel ini buka Pengaturan, Perangkat tertaut, Tautkan komputer, lalu pindai di sana."
+  "linkScanInDevices": "Ini kode untuk menautkan komputer. Di ponsel ini buka Pengaturan, Perangkat tertaut, Tautkan komputer, lalu pindai di sana.",
+  "crashTitle": "Kilit tertutup tiba-tiba",
+  "crashBody": "Terakhir kali Kilit tertutup sendiri. Laporan di bawah tidak berisi pesan atau kunci, hanya letak kesalahannya. Salin dan kirim ke pengembang, misalnya lewat issue GitHub.",
+  "crashCopy": "Salin laporan",
+  "linkFetchingKey": "Mengambil kunci komputer dari relay…"
 }

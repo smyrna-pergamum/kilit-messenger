@@ -774,11 +774,11 @@ class LPt extends L {
       'Sem chave de hardware: se o arquivo do cofre for copiado, o PIN pode ser adivinhado em outro aparelho.';
 
   @override
-  String get settingsFingerprint => 'Seu número de segurança';
+  String get settingsFingerprint => 'Seu número de assinatura do cofre';
 
   @override
   String get settingsFingerprintHint =>
-      'Ao verificar um contato, ele deve ser igual nos dois aparelhos.';
+      'Este número pertence às chaves do seu cofre, que assinam os pacotes que você sela (modo portador). Quem recebe de você um pacote assinado vê nele o número de quem assinou; se for igual a este, o que pode conferir com você pessoalmente ou numa ligação, o pacote é seu. Para conversas, compare o número de segurança dentro de cada conversa.';
 
   @override
   String get settingsAppearance => 'Aparência';
@@ -1220,4 +1220,17 @@ class LPt extends L {
   @override
   String get linkScanInDevices =>
       'Este é um código para vincular um computador. Neste celular abra Configurações, Aparelhos vinculados, Vincular um computador, e escaneie lá.';
+
+  @override
+  String get crashTitle => 'O Kilit fechou inesperadamente';
+
+  @override
+  String get crashBody =>
+      'Da última vez o Kilit fechou sozinho. O relatório abaixo não contém mensagens nem chaves, só onde falhou. Copie e envie ao desenvolvedor, por exemplo numa issue do GitHub.';
+
+  @override
+  String get crashCopy => 'Copiar relatório';
+
+  @override
+  String get linkFetchingKey => 'Buscando a chave do computador nos relays…';
 }

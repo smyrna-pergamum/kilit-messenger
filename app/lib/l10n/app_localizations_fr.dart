@@ -776,11 +776,11 @@ class LFr extends L {
       'Pas de clé matérielle : si le fichier du coffre est copié, le PIN peut être deviné sur un autre appareil.';
 
   @override
-  String get settingsFingerprint => 'Votre numéro de sécurité';
+  String get settingsFingerprint => 'Votre numéro de signature du coffre';
 
   @override
   String get settingsFingerprintHint =>
-      'Lors de la vérification d\'un contact, il doit être identique sur les deux appareils.';
+      'Ce numéro appartient aux clés de votre coffre, qui signent les paquets que vous scellez (mode porteur). Qui reçoit de vous un paquet signé y voit le numéro du signataire ; s\'il correspond à celui-ci, ce qu\'il peut vérifier avec vous en personne ou par téléphone, le paquet vient de vous. Pour les discussions, comparez plutôt le numéro de sécurité de chaque conversation.';
 
   @override
   String get settingsAppearance => 'Apparence';
@@ -1224,4 +1224,18 @@ class LFr extends L {
   @override
   String get linkScanInDevices =>
       'C\'est un code pour lier un ordinateur. Sur ce téléphone, ouvrez Réglages, Appareils liés, Lier un ordinateur, et scannez-le là.';
+
+  @override
+  String get crashTitle => 'Kilit s\'est fermé de façon inattendue';
+
+  @override
+  String get crashBody =>
+      'La dernière fois, Kilit s\'est fermé tout seul. Le rapport ci-dessous ne contient ni messages ni clés, seulement l\'endroit de l\'erreur. Copiez-le et envoyez-le au développeur, par exemple dans un ticket GitHub.';
+
+  @override
+  String get crashCopy => 'Copier le rapport';
+
+  @override
+  String get linkFetchingKey =>
+      'Récupération de la clé de l\'ordinateur sur les relais…';
 }

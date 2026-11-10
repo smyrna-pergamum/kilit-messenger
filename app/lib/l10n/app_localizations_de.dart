@@ -776,11 +776,11 @@ class LDe extends L {
       'Kein Hardware-Schlüssel: Wird die Tresordatei kopiert, kann die PIN auf einem anderen Gerät erraten werden.';
 
   @override
-  String get settingsFingerprint => 'Deine Sicherheitsnummer';
+  String get settingsFingerprint => 'Deine Tresor-Signaturnummer';
 
   @override
   String get settingsFingerprintHint =>
-      'Beim Verifizieren eines Kontakts muss sie auf beiden Geräten gleich sein.';
+      'Diese Nummer gehört zu den Schlüsseln deines Tresors, die deine versiegelten Pakete signieren (Trägermodus). Wer ein signiertes Paket von dir bekommt, sieht darin die Nummer des Unterzeichners; stimmt sie mit dieser überein, was er mit dir persönlich oder am Telefon prüfen kann, stammt das Paket von dir. Für Chats vergleiche stattdessen die Sicherheitsnummer im jeweiligen Chat.';
 
   @override
   String get settingsAppearance => 'Darstellung';
@@ -1222,4 +1222,18 @@ class LDe extends L {
   @override
   String get linkScanInDevices =>
       'Das ist ein Code zum Koppeln eines Computers. Öffne auf diesem Telefon Einstellungen, Gekoppelte Geräte, Computer koppeln, und scanne ihn dort.';
+
+  @override
+  String get crashTitle => 'Kilit wurde unerwartet beendet';
+
+  @override
+  String get crashBody =>
+      'Beim letzten Mal wurde Kilit von selbst beendet. Der Bericht unten enthält keine Nachrichten oder Schlüssel, nur die Stelle des Fehlers. Kopiere ihn und schick ihn dem Entwickler, etwa in einem GitHub-Issue.';
+
+  @override
+  String get crashCopy => 'Bericht kopieren';
+
+  @override
+  String get linkFetchingKey =>
+      'Der Schlüssel des Computers wird von den Relais geholt…';
 }

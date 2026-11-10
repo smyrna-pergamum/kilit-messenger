@@ -772,11 +772,11 @@ class LEn extends L {
       'No hardware key: if the vault file is copied, the PIN can be guessed on another device.';
 
   @override
-  String get settingsFingerprint => 'Your safety number';
+  String get settingsFingerprint => 'Your vault signature number';
 
   @override
   String get settingsFingerprintHint =>
-      'When verifying a contact it must be the same on both devices.';
+      'This number belongs to the keys of your vault, which sign the packets you seal (carrier mode). Someone who gets a signed packet from you sees the signer\'s number in it; if it matches this one, which they can check with you in person or on a call, the packet is from you. For chats, compare the safety number inside each conversation instead.';
 
   @override
   String get settingsAppearance => 'Appearance';
@@ -1215,4 +1215,17 @@ class LEn extends L {
   @override
   String get linkScanInDevices =>
       'This is a code for linking a computer. On this phone open Settings, Linked devices, Link a computer, and scan it there.';
+
+  @override
+  String get crashTitle => 'Kilit closed unexpectedly';
+
+  @override
+  String get crashBody =>
+      'Last time Kilit closed on its own. The report below holds no messages or keys, only where it failed. Copy it and send it to the developer, for example in a GitHub issue.';
+
+  @override
+  String get crashCopy => 'Copy report';
+
+  @override
+  String get linkFetchingKey => 'Getting the computer\'s key from the relays…';
 }

@@ -19,6 +19,7 @@ class ChatService extends ChangeNotifier {
   final Duration every;
 
   Timer? _timer;
+  Timer? _hurry;
   bool _online = false;
   bool _busy = false;
   bool _disposed = false;
@@ -93,6 +94,21 @@ class ChatService extends ChangeNotifier {
     }
   }
 
+  /// A round every second for [how] long, now too: linking a device waits
+  /// on several trips through the relays, and each one starts on a round.
+  void hurry([Duration how = const Duration(minutes: 3)]) {
+    _hurry?.cancel();
+    final until = DateTime.now().add(how);
+    _hurry = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (_disposed || DateTime.now().isAfter(until)) {
+        t.cancel();
+        return;
+      }
+      unawaited(tick());
+    });
+    unawaited(tick());
+  }
+
   /// Something changed here (a message sent, a contact added).
   void touched() {
     revision++;
@@ -105,6 +121,7 @@ class ChatService extends ChangeNotifier {
     _disposed = true;
     tor.removeListener(_torChanged);
     _timer?.cancel();
+    _hurry?.cancel();
     if (_online) core.netStop();
     _arrivals.close();
     super.dispose();

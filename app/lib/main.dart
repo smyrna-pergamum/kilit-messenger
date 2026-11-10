@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'app.dart';
 import 'core/rust_core.dart';
+import 'platform/crash_report.dart';
 import 'platform/files.dart';
 import 'platform/tor.dart';
 import 'platform/windows_tor.dart';
@@ -18,6 +19,8 @@ Future<void> main(List<String> args) async {
   // (res/xml/data_extraction_rules.xml); %APPDATA% on Windows
   final dir = await getApplicationSupportDirectory();
   final sep = Platform.pathSeparator;
+  // why Kilit closed on its own last time, shown once after unlocking
+  await CrashReport.take(dir.path);
   final core = await RustCore.open(
     '${dir.path}${sep}kilit',
     desktop: Platform.isWindows || Platform.isLinux || Platform.isMacOS,

@@ -1608,7 +1608,16 @@ mod tests {
             ayse.link_accept("kilit://link?k=AAAA&t=00", "Telefon")
                 .is_err()
         );
-        let (_, code) = ayse.link_accept(&offer, "Telefon").unwrap();
+        // a small code: the key's hash, not the key
+        assert!(offer.len() < 120, "{}", offer.len());
+        relays.take_outbox(&mut pc);
+        let (none, code) = ayse.link_accept(&offer, "Telefon").unwrap();
+        assert!(none.is_empty() && code.is_empty());
+        assert!(ayse.link_state().unwrap().waiting);
+        assert!(ayse.link_state().unwrap().code.is_none());
+        // the phone fetches the key, checks it and seals the package
+        relays.deliver(&mut ayse);
+        let code = ayse.link_state().unwrap().code.unwrap();
         assert!(ayse.link_state().unwrap().waiting);
         relays.take_outbox(&mut ayse);
 

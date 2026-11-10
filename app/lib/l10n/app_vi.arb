@@ -231,8 +231,8 @@
   "hwDev": "Không có (lõi phát triển)",
   "hwBoundHint": "Mã PIN của bạn được gắn với khóa phần cứng của thiết bị này. Ngay cả bản sao tệp kho cũng không thể thử trên thiết bị khác.",
   "hwNotBoundHint": "Không có khóa phần cứng: nếu tệp kho bị sao chép, mã PIN có thể bị đoán trên thiết bị khác.",
-  "settingsFingerprint": "Mã an toàn của bạn",
-  "settingsFingerprintHint": "Khi xác minh một liên hệ, mã này phải giống nhau trên cả hai thiết bị.",
+  "settingsFingerprint": "Số chữ ký két của bạn",
+  "settingsFingerprintHint": "Số này thuộc về khóa của két, dùng để ký các gói bạn niêm phong (chế độ mang). Ai nhận gói đã ký từ bạn sẽ thấy số của người ký trong đó; nếu trùng với số này, điều họ có thể kiểm tra với bạn trực tiếp hoặc qua điện thoại, thì gói đó do bạn gửi. Với trò chuyện, hãy so số an toàn trong từng cuộc trò chuyện.",
   "settingsAppearance": "Giao diện",
   "themeSystem": "Hệ thống",
   "themeLight": "Sáng",
@@ -359,5 +359,9 @@
   "selfNoteDiscard": "Bỏ",
   "linkTorWait": "Tor chưa kết nối nên việc liên kết đang chờ. Cả hai thiết bị đều cần Tor.",
   "linkFailed": "Không bắt đầu liên kết được: {error}",
-  "linkScanInDevices": "Đây là mã để liên kết máy tính. Trên điện thoại này mở Cài đặt, Thiết bị đã liên kết, Liên kết máy tính, rồi quét ở đó."
+  "linkScanInDevices": "Đây là mã để liên kết máy tính. Trên điện thoại này mở Cài đặt, Thiết bị đã liên kết, Liên kết máy tính, rồi quét ở đó.",
+  "crashTitle": "Kilit đã đóng bất ngờ",
+  "crashBody": "Lần trước Kilit tự đóng. Báo cáo dưới đây không có tin nhắn hay khóa, chỉ có nơi xảy ra lỗi. Hãy sao chép và gửi cho nhà phát triển, ví dụ qua issue trên GitHub.",
+  "crashCopy": "Sao chép báo cáo",
+  "linkFetchingKey": "Đang lấy khóa của máy tính từ rơ-le…"
 }

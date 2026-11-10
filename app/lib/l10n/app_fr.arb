@@ -231,8 +231,8 @@
   "hwDev": "Aucun (noyau de développement)",
   "hwBoundHint": "Votre PIN est lié à la clé matérielle de cet appareil. Même une copie du fichier du coffre ne peut pas être testée sur un autre appareil.",
   "hwNotBoundHint": "Pas de clé matérielle : si le fichier du coffre est copié, le PIN peut être deviné sur un autre appareil.",
-  "settingsFingerprint": "Votre numéro de sécurité",
-  "settingsFingerprintHint": "Lors de la vérification d'un contact, il doit être identique sur les deux appareils.",
+  "settingsFingerprint": "Votre numéro de signature du coffre",
+  "settingsFingerprintHint": "Ce numéro appartient aux clés de votre coffre, qui signent les paquets que vous scellez (mode porteur). Qui reçoit de vous un paquet signé y voit le numéro du signataire ; s'il correspond à celui-ci, ce qu'il peut vérifier avec vous en personne ou par téléphone, le paquet vient de vous. Pour les discussions, comparez plutôt le numéro de sécurité de chaque conversation.",
   "settingsAppearance": "Apparence",
   "themeSystem": "Système",
   "themeLight": "Clair",
@@ -359,5 +359,9 @@
   "selfNoteDiscard": "Abandonner",
   "linkTorWait": "Tor n'est pas encore connecté, la liaison attend donc. Les deux appareils ont besoin de Tor.",
   "linkFailed": "La liaison n'a pas démarré : {error}",
-  "linkScanInDevices": "C'est un code pour lier un ordinateur. Sur ce téléphone, ouvrez Réglages, Appareils liés, Lier un ordinateur, et scannez-le là."
+  "linkScanInDevices": "C'est un code pour lier un ordinateur. Sur ce téléphone, ouvrez Réglages, Appareils liés, Lier un ordinateur, et scannez-le là.",
+  "crashTitle": "Kilit s'est fermé de façon inattendue",
+  "crashBody": "La dernière fois, Kilit s'est fermé tout seul. Le rapport ci-dessous ne contient ni messages ni clés, seulement l'endroit de l'erreur. Copiez-le et envoyez-le au développeur, par exemple dans un ticket GitHub.",
+  "crashCopy": "Copier le rapport",
+  "linkFetchingKey": "Récupération de la clé de l'ordinateur sur les relais…"
 }

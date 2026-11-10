@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import '../platform/files.dart';
 import '../platform/screen.dart';
 import '../platform/tor.dart';
+import '../state/chat_service.dart';
 import '../state/prefs.dart';
 import '../state/session.dart';
 import '../theme/theme.dart';
@@ -15,7 +16,7 @@ import 'devices_screen.dart';
 import 'tor_screen.dart';
 
 /// Shown in "About"; kept in step with pubspec.yaml's version.
-const appVersion = '0.1.6-alpha';
+const appVersion = '0.1.7-alpha';
 
 String pinProtectionName(L l, PinProtection p) => switch (p) {
   PinProtection.strongbox => l.hwStrongbox,
@@ -35,7 +36,11 @@ class SettingsScreen extends StatelessWidget {
     required this.files,
     required this.tor,
     this.onOwnBridges,
+    this.chats,
   });
+
+  /// The network rounds, hurried while linking a device.
+  final ChatService? chats;
 
   final Session session;
   final Prefs prefs;
@@ -181,7 +186,7 @@ class SettingsScreen extends StatelessWidget {
             id: 'devices',
             icon: Icons.devices_outlined,
             title: l.devicesTitle,
-            children: [DevicesSection(core: core, tor: tor)],
+            children: [DevicesSection(core: core, tor: tor, chats: chats)],
           ),
           _Section(
             open: prefs.openSections,

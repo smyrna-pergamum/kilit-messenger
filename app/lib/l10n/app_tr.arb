@@ -231,8 +231,8 @@
   "hwDev": "Yok (geliştirme çekirdeği)",
   "hwBoundHint": "PIN bu cihazın donanım anahtarına bağlı. Kasa dosyası kopyalansa bile başka bir cihazda denenemez.",
   "hwNotBoundHint": "Donanım anahtarı yok: kasa dosyası kopyalanırsa PIN başka bir cihazda tahmin edilebilir.",
-  "settingsFingerprint": "Güvenlik numaran",
-  "settingsFingerprintHint": "Bir kişiyi doğrularken iki cihazda da aynı olmalı.",
+  "settingsFingerprint": "Kasa imza numaran",
+  "settingsFingerprintHint": "Bu numara kasanın anahtarlarına aittir; bu anahtarlar mühürlediğin paketleri (taşıyıcı mod) imzalar. Senden imzalı bir paket alan kişi, paketteki imzacı numarasını görür; yüz yüze ya da telefonda seninle karşılaştırdığında bununla aynıysa paket sendendir. Sohbetler için bunu değil, her sohbetin içindeki güvenlik numarasını karşılaştır.",
   "settingsAppearance": "Görünüm",
   "themeSystem": "Sistem",
   "themeLight": "Aydınlık",
@@ -359,5 +359,9 @@
   "selfNoteDiscard": "Kaydetme",
   "linkTorWait": "Tor henüz bağlı değil, bu yüzden bağlama bekliyor. İki cihazda da Tor gerekli.",
   "linkFailed": "Bağlama başlamadı: {error}",
-  "linkScanInDevices": "Bu bir bilgisayar bağlama kodu. Bu telefonda Ayarlar → Bağlı cihazlar → Bilgisayar bağla'yı açıp orada okut."
+  "linkScanInDevices": "Bu bir bilgisayar bağlama kodu. Bu telefonda Ayarlar → Bağlı cihazlar → Bilgisayar bağla'yı açıp orada okut.",
+  "crashTitle": "Kilit beklenmedik şekilde kapandı",
+  "crashBody": "Kilit geçen sefer kendiliğinden kapandı. Aşağıdaki kayıtta mesaj ya da anahtar yok, yalnızca nerede hata olduğu var. Kopyala ve geliştiriciye gönder, örneğin bir GitHub kaydında.",
+  "crashCopy": "Kaydı kopyala",
+  "linkFetchingKey": "Bilgisayarın anahtarı aktarıcılardan alınıyor…"
 }

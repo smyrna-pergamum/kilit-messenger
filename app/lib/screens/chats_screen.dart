@@ -429,6 +429,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
                                     builder: (_) => LinkOfferScreen(
                                       core: core,
                                       tor: widget.tor,
+                                      chats: widget.chats,
                                     ),
                                   ),
                                 );

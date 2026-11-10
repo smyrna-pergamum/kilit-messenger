@@ -231,8 +231,8 @@
   "hwDev": "Nessuno (nucleo di sviluppo)",
   "hwBoundHint": "Il tuo PIN è legato alla chiave hardware di questo dispositivo. Nemmeno una copia del file della cassaforte può essere provata su un altro dispositivo.",
   "hwNotBoundHint": "Nessuna chiave hardware: se il file della cassaforte viene copiato, il PIN può essere indovinato su un altro dispositivo.",
-  "settingsFingerprint": "Il tuo numero di sicurezza",
-  "settingsFingerprintHint": "Quando verifichi un contatto, deve essere uguale su entrambi i dispositivi.",
+  "settingsFingerprint": "Il tuo numero di firma della cassaforte",
+  "settingsFingerprintHint": "Questo numero appartiene alle chiavi della tua cassaforte, che firmano i pacchetti che sigilli (modalità vettore). Chi riceve da te un pacchetto firmato vi vede il numero del firmatario; se coincide con questo, cosa che può verificare con te di persona o al telefono, il pacchetto è tuo. Per le chat confronta invece il numero di sicurezza dentro ogni conversazione.",
   "settingsAppearance": "Aspetto",
   "themeSystem": "Sistema",
   "themeLight": "Chiaro",
@@ -359,5 +359,9 @@
   "selfNoteDiscard": "Scarta",
   "linkTorWait": "Tor non è ancora connesso, quindi il collegamento attende. Entrambi i dispositivi hanno bisogno di Tor.",
   "linkFailed": "Il collegamento non è partito: {error}",
-  "linkScanInDevices": "Questo è un codice per collegare un computer. Su questo telefono apri Impostazioni, Dispositivi collegati, Collega un computer, e scansionalo lì."
+  "linkScanInDevices": "Questo è un codice per collegare un computer. Su questo telefono apri Impostazioni, Dispositivi collegati, Collega un computer, e scansionalo lì.",
+  "crashTitle": "Kilit si è chiuso inaspettatamente",
+  "crashBody": "L'ultima volta Kilit si è chiuso da solo. Il rapporto qui sotto non contiene messaggi né chiavi, solo dove si è verificato l'errore. Copialo e invialo allo sviluppatore, ad esempio in una issue su GitHub.",
+  "crashCopy": "Copia rapporto",
+  "linkFetchingKey": "Recupero della chiave del computer dai relay…"
 }

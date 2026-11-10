@@ -1512,13 +1512,13 @@ abstract class L {
   /// No description provided for @settingsFingerprint.
   ///
   /// In en, this message translates to:
-  /// **'Your safety number'**
+  /// **'Your vault signature number'**
   String get settingsFingerprint;
 
   /// No description provided for @settingsFingerprintHint.
   ///
   /// In en, this message translates to:
-  /// **'When verifying a contact it must be the same on both devices.'**
+  /// **'This number belongs to the keys of your vault, which sign the packets you seal (carrier mode). Someone who gets a signed packet from you sees the signer\'s number in it; if it matches this one, which they can check with you in person or on a call, the packet is from you. For chats, compare the safety number inside each conversation instead.'**
   String get settingsFingerprintHint;
 
   /// No description provided for @settingsAppearance.
@@ -2282,6 +2282,30 @@ abstract class L {
   /// In en, this message translates to:
   /// **'This is a code for linking a computer. On this phone open Settings, Linked devices, Link a computer, and scan it there.'**
   String get linkScanInDevices;
+
+  /// No description provided for @crashTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Kilit closed unexpectedly'**
+  String get crashTitle;
+
+  /// No description provided for @crashBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Last time Kilit closed on its own. The report below holds no messages or keys, only where it failed. Copy it and send it to the developer, for example in a GitHub issue.'**
+  String get crashBody;
+
+  /// No description provided for @crashCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy report'**
+  String get crashCopy;
+
+  /// No description provided for @linkFetchingKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting the computer\'s key from the relays…'**
+  String get linkFetchingKey;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

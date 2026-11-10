@@ -750,10 +750,11 @@ class LJa extends L {
       'ハードウェア鍵がありません。金庫ファイルがコピーされると、別の端末でPINを推測される可能性があります。';
 
   @override
-  String get settingsFingerprint => '安全番号';
+  String get settingsFingerprint => '金庫の署名番号';
 
   @override
-  String get settingsFingerprintHint => '連絡先を確認する際は、両方の端末で同じである必要があります。';
+  String get settingsFingerprintHint =>
+      'この番号は金庫の鍵のもので、その鍵があなたが封印したパケット（キャリアモード）に署名します。あなたから署名付きパケットを受け取った人はその中に署名者の番号を見ます。対面や通話であなたと確かめてこの番号と同じなら、そのパケットはあなたからのものです。チャットの確認には、各会話の中の安全番号を比べてください。';
 
   @override
   String get settingsAppearance => '外観';
@@ -1177,4 +1178,17 @@ class LJa extends L {
   @override
   String get linkScanInDevices =>
       'これはパソコンをリンクするためのコードです。このスマホで 設定 → リンク済みの端末 → パソコンをリンク を開き、そこで読み取ってください。';
+
+  @override
+  String get crashTitle => 'Kilit が予期せず終了しました';
+
+  @override
+  String get crashBody =>
+      '前回、Kilit が勝手に終了しました。下のレポートにメッセージや鍵は含まれず、失敗した場所だけが書かれています。コピーして開発者に送ってください（GitHub の issue など）。';
+
+  @override
+  String get crashCopy => 'レポートをコピー';
+
+  @override
+  String get linkFetchingKey => 'リレーからパソコンの鍵を取得中…';
 }

@@ -231,8 +231,8 @@
   "hwDev": "无（开发版核心）",
   "hwBoundHint": "你的 PIN 已绑定到本设备的硬件密钥。即使保险库文件被复制，也无法在其他设备上尝试破解。",
   "hwNotBoundHint": "没有硬件密钥：如果保险库文件被复制，PIN 可能在其他设备上被猜出。",
-  "settingsFingerprint": "你的安全码",
-  "settingsFingerprintHint": "验证联系人时，两台设备上的安全码必须相同。",
+  "settingsFingerprint": "你的保险库签名号码",
+  "settingsFingerprintHint": "这个号码属于你保险库的密钥，它们为你封装的数据包（携带模式）签名。收到你签名数据包的人会在其中看到签名者号码；如果与这里的号码一致（可当面或通话与你核对），数据包就来自你。核对聊天时，请比对每个对话里的安全码。",
   "settingsAppearance": "外观",
   "themeSystem": "跟随系统",
   "themeLight": "浅色",
@@ -359,5 +359,9 @@
   "selfNoteDiscard": "放弃",
   "linkTorWait": "Tor 尚未连接，因此关联正在等待。两台设备都需要 Tor。",
   "linkFailed": "关联未能开始：{error}",
-  "linkScanInDevices": "这是用于关联电脑的代码。请在这部手机上打开 设置 → 已关联设备 → 关联电脑，并在那里扫描。"
+  "linkScanInDevices": "这是用于关联电脑的代码。请在这部手机上打开 设置 → 已关联设备 → 关联电脑，并在那里扫描。",
+  "crashTitle": "Kilit 意外关闭",
+  "crashBody": "上次 Kilit 自行关闭了。下面的报告不含消息或密钥，只有出错的位置。请复制并发送给开发者，例如在 GitHub issue 中。",
+  "crashCopy": "复制报告",
+  "linkFetchingKey": "正在从中继获取电脑的密钥…"
 }

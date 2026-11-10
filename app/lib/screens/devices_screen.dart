@@ -9,6 +9,7 @@ import '../l10n/app_localizations.dart';
 import '../platform/tor.dart';
 import '../theme/theme.dart';
 import '../theme/tokens.dart';
+import '../state/chat_service.dart';
 import 'chats_screen.dart' show ScanScreen;
 import 'tor_screen.dart';
 
@@ -24,9 +25,12 @@ const _linkPrefix = 'kilit://link?';
 /// Settings, Linked devices: this ID's devices; on the phone, linking a
 /// computer and taking one off; on a new Kilit, linking it to a phone.
 class DevicesSection extends StatefulWidget {
-  const DevicesSection({super.key, required this.core, this.tor});
+  const DevicesSection({super.key, required this.core, this.tor, this.chats});
 
   final KilitCore core;
+
+  /// The network rounds, hurried while linking.
+  final ChatService? chats;
 
   /// Linking travels over Tor: shown while it is not ready.
   final TorController? tor;
@@ -76,6 +80,7 @@ class _DevicesSectionState extends State<DevicesSection> {
     final String code;
     try {
       code = await widget.core.linkAccept(text, _deviceKind());
+      widget.chats?.hurry();
     } on Object catch (e) {
       // why, not just "not a code": a full device list, or no messaging yet
       if (mounted) _say(l.linkFailed('$e'));
@@ -84,8 +89,12 @@ class _DevicesSectionState extends State<DevicesSection> {
     if (!mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) =>
-            LinkProgressScreen(core: widget.core, code: code, tor: widget.tor),
+        builder: (_) => LinkProgressScreen(
+          core: widget.core,
+          code: code,
+          tor: widget.tor,
+          chats: widget.chats,
+        ),
       ),
     );
     await _load();
@@ -94,7 +103,11 @@ class _DevicesSectionState extends State<DevicesSection> {
   Future<void> _linkToPhone() async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => LinkOfferScreen(core: widget.core, tor: widget.tor),
+        builder: (_) => LinkOfferScreen(
+          core: widget.core,
+          tor: widget.tor,
+          chats: widget.chats,
+        ),
       ),
     );
     await _load();
@@ -224,10 +237,11 @@ mixin _LinkPoll<T extends StatefulWidget> on State<T> {
 
 /// A new device: the QR code the phone scans, then the code to compare.
 class LinkOfferScreen extends StatefulWidget {
-  const LinkOfferScreen({super.key, required this.core, this.tor});
+  const LinkOfferScreen({super.key, required this.core, this.tor, this.chats});
 
   final KilitCore core;
   final TorController? tor;
+  final ChatService? chats;
 
   @override
   State<LinkOfferScreen> createState() => _LinkOfferScreenState();
@@ -252,6 +266,8 @@ class _LinkOfferScreenState extends State<LinkOfferScreen>
       final o = await widget.core.linkOffer();
       if (!mounted) return;
       setState(() => _offer = o);
+      // the key goes to the relays, and the package comes, without waiting
+      widget.chats?.hurry();
       startPolling();
     } on Object {
       if (mounted) setState(() => _refused = true);
@@ -286,11 +302,12 @@ class _LinkOfferScreenState extends State<LinkOfferScreen>
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
                     ),
+                    // a short code (the key's hash): few, large squares
                     child: QrImageView(
                       key: const ValueKey('link-qr'),
                       data: _offer!,
-                      size: 320,
-                      errorCorrectionLevel: QrErrorCorrectLevel.L,
+                      size: 280,
+                      errorCorrectionLevel: QrErrorCorrectLevel.M,
                     ),
                   ),
                 ),
@@ -328,11 +345,16 @@ class LinkProgressScreen extends StatefulWidget {
     required this.core,
     required this.code,
     this.tor,
+    this.chats,
   });
 
   final KilitCore core;
+
+  /// The code to compare; empty until the computer's key came from the
+  /// relays, then [LinkStatus.code].
   final String code;
   final TorController? tor;
+  final ChatService? chats;
 
   @override
   State<LinkProgressScreen> createState() => _LinkProgressScreenState();
@@ -349,6 +371,8 @@ class _LinkProgressScreenState extends State<LinkProgressScreen>
     startPolling();
   }
 
+  String get _code => widget.code.isNotEmpty ? widget.code : status.code ?? '';
+
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
@@ -360,14 +384,38 @@ class _LinkProgressScreenState extends State<LinkProgressScreen>
           padding: const EdgeInsets.all(24),
           children: [
             if (status.done)
-              _LinkDone(
-                code: widget.code,
-                onClose: () => Navigator.pop(context),
-              )
-            else ...[
+              _LinkDone(code: _code, onClose: () => Navigator.pop(context))
+            else if (_code.isEmpty) ...[
+              Row(
+                children: [
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      l.linkFetchingKey,
+                      key: const ValueKey('link-fetching'),
+                      style: TextStyle(color: t.textMuted),
+                    ),
+                  ),
+                ],
+              ),
+              _TorWait(tor: widget.tor),
+              const SizedBox(height: 24),
+              TextButton(
+                onPressed: () async {
+                  await widget.core.linkCancel();
+                  if (context.mounted) Navigator.pop(context);
+                },
+                child: Text(l.cancel),
+              ),
+            ] else ...[
               Text(l.linkCompare, style: TextStyle(color: t.textMuted)),
               const SizedBox(height: 12),
-              _Code(widget.code),
+              _Code(_code),
               const SizedBox(height: 24),
               Row(
                 children: [

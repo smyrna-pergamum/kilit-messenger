@@ -771,11 +771,11 @@ class LVi extends L {
       'Không có khóa phần cứng: nếu tệp kho bị sao chép, mã PIN có thể bị đoán trên thiết bị khác.';
 
   @override
-  String get settingsFingerprint => 'Mã an toàn của bạn';
+  String get settingsFingerprint => 'Số chữ ký két của bạn';
 
   @override
   String get settingsFingerprintHint =>
-      'Khi xác minh một liên hệ, mã này phải giống nhau trên cả hai thiết bị.';
+      'Số này thuộc về khóa của két, dùng để ký các gói bạn niêm phong (chế độ mang). Ai nhận gói đã ký từ bạn sẽ thấy số của người ký trong đó; nếu trùng với số này, điều họ có thể kiểm tra với bạn trực tiếp hoặc qua điện thoại, thì gói đó do bạn gửi. Với trò chuyện, hãy so số an toàn trong từng cuộc trò chuyện.';
 
   @override
   String get settingsAppearance => 'Giao diện';
@@ -1212,4 +1212,17 @@ class LVi extends L {
   @override
   String get linkScanInDevices =>
       'Đây là mã để liên kết máy tính. Trên điện thoại này mở Cài đặt, Thiết bị đã liên kết, Liên kết máy tính, rồi quét ở đó.';
+
+  @override
+  String get crashTitle => 'Kilit đã đóng bất ngờ';
+
+  @override
+  String get crashBody =>
+      'Lần trước Kilit tự đóng. Báo cáo dưới đây không có tin nhắn hay khóa, chỉ có nơi xảy ra lỗi. Hãy sao chép và gửi cho nhà phát triển, ví dụ qua issue trên GitHub.';
+
+  @override
+  String get crashCopy => 'Sao chép báo cáo';
+
+  @override
+  String get linkFetchingKey => 'Đang lấy khóa của máy tính từ rơ-le…';
 }

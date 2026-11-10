@@ -363,7 +363,7 @@ footer{border-top:1px solid var(--line);padding-block:48px 56px}
             <a class="btn primary" href="#download"><svg class="ico" aria-hidden="true"><use href="#i-dl"/></svg><span data-k="ctaDl">Download</span></a>
             <a class="btn ghost" href="https://github.com/smyrna-pergamum/kilit-messenger"><svg class="ico" aria-hidden="true"><use href="#i-gh"/></svg><span data-k="viewGh">View on GitHub</span></a>
           </div>
-          <div class="meta"><span>v0.1.6-alpha</span><span>Android 7.0+</span><span>Windows 10+</span><span>GPL-3.0-or-later</span></div>
+          <div class="meta"><span>v0.1.7-alpha</span><span>Android 7.0+</span><span>Windows 10+</span><span>GPL-3.0-or-later</span></div>
         </div>
         <div class="phone hero-phone"><img src="assets/01-chats.webp" width="540" height="1170" alt="Kilit's chat list: a group, two contacts and one request, with Tor ready" data-k-alt="altChats"></div>
       </div>
@@ -529,36 +529,36 @@ footer{border-top:1px solid var(--line);padding-block:48px 56px}
         <span class="tag">android 7.0+</span>
         <h3>Android</h3>
         <p data-k="andP">Two permissions: the network, used only by the embedded Tor, and the camera, for photos you take in a chat.</p>
-        <a class="btn primary" href="https://github.com/smyrna-pergamum/kilit-messenger/releases/download/v0.1.6-alpha/Kilit-0.1.6-alpha.apk"><svg class="ico" aria-hidden="true"><use href="#i-dl"/></svg><span data-k="dlApk">Download APK</span></a>
-        <span class="files">Kilit-0.1.6-alpha.apk · 150 MB</span>
+        <a class="btn primary" href="https://github.com/smyrna-pergamum/kilit-messenger/releases/download/v0.1.7-alpha/Kilit-0.1.7-alpha.apk"><svg class="ico" aria-hidden="true"><use href="#i-dl"/></svg><span data-k="dlApk">Download APK</span></a>
+        <span class="files">Kilit-0.1.7-alpha.apk · 150 MB</span>
       </div>
       <div class="plat panel">
         <span class="tag">windows 10+ · 64-bit</span>
         <h3>Windows</h3>
         <p data-k="winP">Installs for your user only, no administrator rights. Not code-signed yet, so SmartScreen warns: check the SHA-256, then More info, Run anyway.</p>
-        <a class="btn ghost" href="https://github.com/smyrna-pergamum/kilit-messenger/releases/download/v0.1.6-alpha/Kilit-0.1.6-alpha-windows-setup.exe"><svg class="ico" aria-hidden="true"><use href="#i-dl"/></svg><span data-k="dlWin">Installer (.exe)</span></a>
-        <span class="files">windows-setup.exe · 36 MB<br>windows-x64.zip · 51 MB (<a href="https://github.com/smyrna-pergamum/kilit-messenger/releases/download/v0.1.6-alpha/Kilit-0.1.6-alpha-windows-x64.zip" data-k="portable">portable</a>)</span>
+        <a class="btn ghost" href="https://github.com/smyrna-pergamum/kilit-messenger/releases/download/v0.1.7-alpha/Kilit-0.1.7-alpha-windows-setup.exe"><svg class="ico" aria-hidden="true"><use href="#i-dl"/></svg><span data-k="dlWin">Installer (.exe)</span></a>
+        <span class="files">windows-setup.exe · 36 MB<br>windows-x64.zip · 51 MB (<a href="https://github.com/smyrna-pergamum/kilit-messenger/releases/download/v0.1.7-alpha/Kilit-0.1.7-alpha-windows-x64.zip" data-k="portable">portable</a>)</span>
       </div>
       <div class="plat panel">
         <span class="tag" data-k="relTag">release notes</span>
-        <h3>0.1.6-alpha</h3>
-        <p data-k="relP">Reconnect Tor from Settings, see the route your messages take, get offered a bridge when Tor is blocked, keep encrypted notes to self, and type the PIN on a keyboard on Windows.</p>
+        <h3>0.1.7-alpha</h3>
+        <p data-k="relP">A small linking code that scans at once, faster linking of a computer, and a crash report you can copy when Kilit closes on its own.</p>
         <a class="btn ghost" href="https://github.com/smyrna-pergamum/kilit-messenger/releases"><span data-k="allRel">All releases</span><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
       </div>
       <div class="term" id="term">
-        <div class="term-head"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span>verify · v0.1.6-alpha</span><button class="copy" id="copyBtn" data-k="copy">copy</button></div>
+        <div class="term-head"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span>verify · v0.1.7-alpha</span><button class="copy" id="copyBtn" data-k="copy">copy</button></div>
 <pre id="termText"><span class="c"># 1. checksum must match the release notes</span>
-<span class="p">$</span> sha256sum Kilit-0.1.6-alpha.apk
-<span class="h">63855b0e50c3b6a5bfc43b38eadb279cef8d83de4ee27833c0fef25d7afd3a51</span>
+<span class="p">$</span> sha256sum Kilit-0.1.7-alpha.apk
+<span class="h">0b359e4ea476c5352166e91f4f81d2faff2acb8565ee69c310cbe6726a0323ac</span>
 
 <span class="c"># 2. the signing certificate must be Kilit's</span>
-<span class="p">$</span> apksigner verify --print-certs Kilit-0.1.6-alpha.apk
+<span class="p">$</span> apksigner verify --print-certs Kilit-0.1.7-alpha.apk
 <span class="h">SHA-256: DE:B8:42:2C:53:F6:FB:C3:34:7C:5C:0B:84:31:61:17:
          D2:C9:4A:53:CD:70:FA:6A:B4:E9:50:16:DA:9D:B1:E1</span>
 
 <span class="c"># windows (PowerShell)</span>
-<span class="p">&gt;</span> Get-FileHash Kilit-0.1.6-alpha-windows-setup.exe
-<span class="h">108b934e08df07fff05e806c5a6e49910427cb30be5b9f7ada22bea61c9e6439</span></pre>
+<span class="p">&gt;</span> Get-FileHash Kilit-0.1.7-alpha-windows-setup.exe
+<span class="h">a6c62d2171d317d6f2e6ab38dc6ae997307ad775b057f4cf77aa0ee88805cff4</span></pre>
       </div>
     </div>
   </div>
@@ -637,7 +637,7 @@ noH:"Does not protect against",n1t:"Metadata on public relays",n1d:"Someone who 
 specCap:"cryptography in use",t1:"First contact",t2:"Ongoing messages",t3:"Relay wrapping",t4:"Vault and carrier",t5:"PIN",t6:"Network",
 b1:"independent audit",b1v:"none yet",b2:"analytics / crash reports",b2v:"none",b3:"own server",b3v:"none",b4:"builds",b4v:"pinned Docker images",b5:"windows installer",b5v:"not code-signed yet",b6:"vulnerability reports",b6v:"private, 90 days",
 prevTag:"app preview",prevH:"The real screens",shotNote:"The people and messages are made up. Kilit blocks screenshots by default, so these are drawn from the real screens by app/tool/screenshots.",
-dlTag:"download",dlH:"Get Kilit, then check it",dlP:"Every build is on GitHub Releases. Before installing, compare the SHA-256 and, on Android, the signing certificate.",andP:"Two permissions: the network, used only by the embedded Tor, and the camera, for photos you take in a chat.",dlApk:"Download APK",winP:"Installs for your user only, no administrator rights. Not code-signed yet, so SmartScreen warns: check the SHA-256, then More info, Run anyway.",dlWin:"Installer (.exe)",portable:"portable",relTag:"release notes",relP:"Reconnect Tor from Settings, see the route your messages take, get offered a bridge when Tor is blocked, keep encrypted notes to self, and type the PIN on a keyboard on Windows.",allRel:"All releases",copy:"copy",copied:"copied",copyFail:"select and copy",
+dlTag:"download",dlH:"Get Kilit, then check it",dlP:"Every build is on GitHub Releases. Before installing, compare the SHA-256 and, on Android, the signing certificate.",andP:"Two permissions: the network, used only by the embedded Tor, and the camera, for photos you take in a chat.",dlApk:"Download APK",winP:"Installs for your user only, no administrator rights. Not code-signed yet, so SmartScreen warns: check the SHA-256, then More info, Run anyway.",dlWin:"Installer (.exe)",portable:"portable",relTag:"release notes",relP:"A small linking code that scans at once, faster linking of a computer, and a crash report you can copy when Kilit closes on its own.",allRel:"All releases",copy:"copy",copied:"copied",copyFail:"select and copy",
 docTag:"documentation",docH:"Read how it works",d1:"network protocol (Turkish)",d2:"linked devices (Turkish)",d3:"vault and carrier format",d4:"what it protects, what it doesn't",d5:"what relays can see",d6:"build it yourself (Turkish)",
 q1:"Does Kilit need a phone number or an account?",a1:"No. You get a Kilit ID of four words and share it as a QR code or link. No phone number, email or contact upload.",q2:"What can the relays see?",a2:"Mailbox addresses, message times and a size class. Not the content, and not your IP address, because Kilit connects through Tor.",q3:"Tor is blocked where I live. Will it work?",a3:"Kilit can use bridges: built-in obfs4 or Snowflake, or bridge lines you add yourself. Automatic mode tries direct, then obfs4, then Snowflake.",q4:"What happens if I lose my phone?",a4:"The vault is bound to that phone's hardware key and cannot be opened elsewhere. Encrypted backup is planned for a later stage.",q5:"Why does Windows warn about the installer?",a5:"The installer is not code-signed yet. Check its SHA-256 against the release notes, then choose More info and Run anyway. The portable zip is the same app.",q6:"Has Kilit been audited?",a6:"No. Kilit is alpha and has had no independent security review. Do not rely on it where your life or freedom depends on it.",
 ossH:"Read the code.<br><em>Then trust it.</em>",ossRepo:"Repository",ossIssues:"Issues and ideas",ossVuln:"Report a vulnerability privately",lic:"GPL-3.0-or-later. Derived in part from Kryfo (GPL-3.0-or-later) and linked with libsignal (AGPL-3.0), so the combined program carries the AGPL-3.0 network-interaction terms. Kilit is not Kryfo and is not endorsed by its authors.",
@@ -656,7 +656,7 @@ noH:"Korumaz",n1t:"Açık relay'lerdeki meta veri",n1d:"Bir posta kutusu adresin
 specCap:"kullanılan kriptografi",t1:"İlk temas",t2:"Süren mesajlar",t3:"Relay sarmalama",t4:"Kasa ve taşıyıcı",t5:"PIN",t6:"Ağ",
 b1:"bağımsız denetim",b1v:"henüz yok",b2:"analitik / çökme raporu",b2v:"yok",b3:"kendi sunucusu",b3v:"yok",b4:"derleme",b4v:"sabit Docker imajları",b5:"windows kurulumu",b5v:"henüz kod imzalı değil",b6:"açık bildirimi",b6v:"özel, 90 gün",
 prevTag:"uygulama önizlemesi",prevH:"Gerçek ekranlar",shotNote:"Kişiler ve mesajlar uydurmadır. Kilit varsayılan olarak ekran görüntüsünü engeller; bu görüntüler gerçek ekranlardan app/tool/screenshots ile çizildi.",
-dlTag:"indir",dlH:"Kilit'i indir, sonra doğrula",dlP:"Tüm sürümler GitHub Releases'te. Kurmadan önce SHA-256'yı ve Android'de imza sertifikasını karşılaştır.",andP:"İki izin: yalnızca gömülü Tor'un kullandığı ağ ve sohbette çektiğin fotoğraflar için kamera.",dlApk:"APK'yı indir",winP:"Yalnızca senin kullanıcın için kurulur, yönetici izni gerekmez. Henüz kod imzalı değil, bu yüzden SmartScreen uyarır: SHA-256'yı denetle, sonra Ek bilgi, Yine de çalıştır.",dlWin:"Kurulum (.exe)",portable:"taşınabilir",relTag:"sürüm notları",relP:"Tor'u Ayarlar'dan yeniden bağla, mesajlarının izlediği yolu gör, Tor engellenince köprü önerisi al, kendine şifreli notlar tut ve Windows'ta PIN'i klavyeyle gir.",allRel:"Tüm sürümler",copy:"kopyala",copied:"kopyalandı",copyFail:"seç ve kopyala",
+dlTag:"indir",dlH:"Kilit'i indir, sonra doğrula",dlP:"Tüm sürümler GitHub Releases'te. Kurmadan önce SHA-256'yı ve Android'de imza sertifikasını karşılaştır.",andP:"İki izin: yalnızca gömülü Tor'un kullandığı ağ ve sohbette çektiğin fotoğraflar için kamera.",dlApk:"APK'yı indir",winP:"Yalnızca senin kullanıcın için kurulur, yönetici izni gerekmez. Henüz kod imzalı değil, bu yüzden SmartScreen uyarır: SHA-256'yı denetle, sonra Ek bilgi, Yine de çalıştır.",dlWin:"Kurulum (.exe)",portable:"taşınabilir",relTag:"sürüm notları",relP:"Hemen okunan küçük bağlama kodu, bilgisayarı daha hızlı bağlama ve Kilit kendiliğinden kapanırsa kopyalanabilen bir hata kaydı.",allRel:"Tüm sürümler",copy:"kopyala",copied:"kopyalandı",copyFail:"seç ve kopyala",
 docTag:"belgeler",docH:"Nasıl çalıştığını oku",d1:"ağ protokolü",d2:"bağlı cihazlar",d3:"kasa ve taşıyıcı biçimi",d4:"neye karşı korur, neye karşı korumaz",d5:"relay'lerin neyi görebildiği",d6:"kendin derle",
 q1:"Kilit telefon numarası ya da hesap istiyor mu?",a1:"Hayır. Dört kelimelik bir Kilit kimliği alırsın ve QR kod ya da bağlantı olarak paylaşırsın. Telefon numarası, e-posta ya da rehber yüklemesi yok.",q2:"Relay'ler neyi görebilir?",a2:"Posta kutusu adreslerini, mesaj zamanlarını ve boyut sınıfını. İçeriği görmez; Kilit Tor üzerinden bağlandığı için IP adresini de görmez.",q3:"Yaşadığım yerde Tor engelli. Çalışır mı?",a3:"Kilit köprü kullanabilir: yerleşik obfs4 ya da Snowflake, veya kendi eklediğin köprü satırları. Otomatik mod önce doğrudan, sonra obfs4, sonra Snowflake dener.",q4:"Telefonumu kaybedersem ne olur?",a4:"Kasa o telefonun donanım anahtarına bağlıdır, başka yerde açılamaz. Şifreli yedekleme sonraki bir aşamada gelecek.",q5:"Windows kurulum dosyası için neden uyarıyor?",a5:"Kurulum dosyası henüz kod imzalı değil. SHA-256'yı sürüm notlarıyla karşılaştır, sonra Ek bilgi ve Yine de çalıştır'ı seç. Taşınabilir zip aynı uygulamadır.",q6:"Kilit denetlendi mi?",a6:"Hayır. Kilit alfa aşamasında ve bağımsız bir güvenlik incelemesinden geçmedi. Hayatının ya da özgürlüğünün bağlı olduğu durumlarda kullanma.",
 ossH:"Kodu oku.<br><em>Sonra güven.</em>",ossRepo:"Depo",ossIssues:"Issue'lar ve fikirler",ossVuln:"Açığı özel olarak bildir",lic:"GPL-3.0-or-later. Kısmen Kryfo'dan (GPL-3.0-or-later) türetildi ve libsignal'e (AGPL-3.0) bağlanır; bu yüzden birleşik program AGPL-3.0 ağ etkileşimi koşullarını taşır. Kilit, Kryfo değildir ve yazarlarınca onaylanmamıştır.",

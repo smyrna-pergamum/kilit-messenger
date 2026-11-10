@@ -771,11 +771,11 @@ class LId extends L {
       'Tidak ada kunci perangkat keras: jika file brankas disalin, PIN bisa ditebak di perangkat lain.';
 
   @override
-  String get settingsFingerprint => 'Nomor keamanan Anda';
+  String get settingsFingerprint => 'Nomor tanda tangan brankasmu';
 
   @override
   String get settingsFingerprintHint =>
-      'Saat memverifikasi kontak, nomor ini harus sama di kedua perangkat.';
+      'Nomor ini milik kunci brankasmu, yang menandatangani paket yang kamu segel (mode pembawa). Orang yang menerima paket bertanda tangan darimu melihat nomor penandatangan di dalamnya; jika sama dengan nomor ini, yang bisa ia cek denganmu langsung atau lewat telepon, paket itu darimu. Untuk obrolan, bandingkan nomor keamanan di dalam tiap percakapan.';
 
   @override
   String get settingsAppearance => 'Tampilan';
@@ -1215,4 +1215,17 @@ class LId extends L {
   @override
   String get linkScanInDevices =>
       'Ini kode untuk menautkan komputer. Di ponsel ini buka Pengaturan, Perangkat tertaut, Tautkan komputer, lalu pindai di sana.';
+
+  @override
+  String get crashTitle => 'Kilit tertutup tiba-tiba';
+
+  @override
+  String get crashBody =>
+      'Terakhir kali Kilit tertutup sendiri. Laporan di bawah tidak berisi pesan atau kunci, hanya letak kesalahannya. Salin dan kirim ke pengembang, misalnya lewat issue GitHub.';
+
+  @override
+  String get crashCopy => 'Salin laporan';
+
+  @override
+  String get linkFetchingKey => 'Mengambil kunci komputer dari relay…';
 }

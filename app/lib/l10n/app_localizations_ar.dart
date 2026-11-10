@@ -768,11 +768,11 @@ class LAr extends L {
       'لا يوجد مفتاح عتاد: إذا نُسخ ملف الخزنة، يمكن تخمين رمز PIN على جهاز آخر.';
 
   @override
-  String get settingsFingerprint => 'رقم الأمان الخاص بك';
+  String get settingsFingerprint => 'رقم توقيع خزنتك';
 
   @override
   String get settingsFingerprintHint =>
-      'عند التحقق من جهة اتصال يجب أن يكون متطابقًا على الجهازين.';
+      'هذا الرقم يخص مفاتيح خزنتك التي توقّع الحِزم التي تختمها (وضع الناقل). من يتلقى منك حزمة موقّعة يرى رقم الموقّع فيها؛ فإن طابق هذا الرقم، ويمكنه التحقق منه معك وجهًا لوجه أو في مكالمة، فالحزمة منك. أما للمحادثات فقارن رقم الأمان داخل كل محادثة.';
 
   @override
   String get settingsAppearance => 'المظهر';
@@ -1206,4 +1206,17 @@ class LAr extends L {
   @override
   String get linkScanInDevices =>
       'هذا رمز لربط حاسوب. افتح على هذا الهاتف الإعدادات، الأجهزة المرتبطة، ربط حاسوب، وامسحه هناك.';
+
+  @override
+  String get crashTitle => 'أُغلق Kilit بشكل غير متوقع';
+
+  @override
+  String get crashBody =>
+      'أُغلق Kilit من تلقاء نفسه في المرة الماضية. لا يحوي التقرير أدناه رسائل ولا مفاتيح، بل مكان الخلل فقط. انسخه وأرسله إلى المطوّر، مثلًا في بلاغ على GitHub.';
+
+  @override
+  String get crashCopy => 'انسخ التقرير';
+
+  @override
+  String get linkFetchingKey => 'جارٍ جلب مفتاح الحاسوب من المرحّلات…';
 }

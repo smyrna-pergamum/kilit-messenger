@@ -772,11 +772,11 @@ class LFa extends L {
       'کلید سخت‌افزاری وجود ندارد: اگر فایل گاوصندوق کپی شود، PIN را می‌توان روی دستگاه دیگری حدس زد.';
 
   @override
-  String get settingsFingerprint => 'شماره امنیتی شما';
+  String get settingsFingerprint => 'شمارهٔ امضای گاوصندوق تو';
 
   @override
   String get settingsFingerprintHint =>
-      'هنگام تأیید یک مخاطب، باید در هر دو دستگاه یکسان باشد.';
+      'این شماره از آنِ کلیدهای گاوصندوق توست که بسته‌هایی را که مهر می‌کنی امضا می‌کنند (حالت حامل). کسی که از تو بستهٔ امضاشده می‌گیرد، شمارهٔ امضاکننده را در آن می‌بیند؛ اگر با این شماره یکی باشد، که می‌تواند حضوری یا تلفنی با تو بسنجد، بسته از توست. برای گفتگوها، شمارهٔ امنیتی درون هر گفتگو را مقایسه کن.';
 
   @override
   String get settingsAppearance => 'ظاهر';
@@ -1215,4 +1215,17 @@ class LFa extends L {
   @override
   String get linkScanInDevices =>
       'این کدی برای پیوند یک رایانه است. در همین گوشی تنظیمات، دستگاه‌های پیوندی، پیوند رایانه را باز کن و آن‌جا اسکن کن.';
+
+  @override
+  String get crashTitle => 'Kilit ناگهان بسته شد';
+
+  @override
+  String get crashBody =>
+      'دفعهٔ پیش Kilit خودبه‌خود بسته شد. گزارش زیر پیام یا کلیدی ندارد، فقط جای خطا را دارد. آن را کپی کن و برای توسعه‌دهنده بفرست، مثلاً در یک issue گیت‌هاب.';
+
+  @override
+  String get crashCopy => 'کپی گزارش';
+
+  @override
+  String get linkFetchingKey => 'کلید رایانه از رله‌ها گرفته می‌شود…';
 }

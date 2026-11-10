@@ -231,8 +231,8 @@
   "hwDev": "Keine (Entwicklungskern)",
   "hwBoundHint": "Deine PIN ist an den Hardware-Schlüssel dieses Geräts gebunden. Selbst eine Kopie der Tresordatei kann auf keinem anderen Gerät ausprobiert werden.",
   "hwNotBoundHint": "Kein Hardware-Schlüssel: Wird die Tresordatei kopiert, kann die PIN auf einem anderen Gerät erraten werden.",
-  "settingsFingerprint": "Deine Sicherheitsnummer",
-  "settingsFingerprintHint": "Beim Verifizieren eines Kontakts muss sie auf beiden Geräten gleich sein.",
+  "settingsFingerprint": "Deine Tresor-Signaturnummer",
+  "settingsFingerprintHint": "Diese Nummer gehört zu den Schlüsseln deines Tresors, die deine versiegelten Pakete signieren (Trägermodus). Wer ein signiertes Paket von dir bekommt, sieht darin die Nummer des Unterzeichners; stimmt sie mit dieser überein, was er mit dir persönlich oder am Telefon prüfen kann, stammt das Paket von dir. Für Chats vergleiche stattdessen die Sicherheitsnummer im jeweiligen Chat.",
   "settingsAppearance": "Darstellung",
   "themeSystem": "System",
   "themeLight": "Hell",
@@ -359,5 +359,9 @@
   "selfNoteDiscard": "Verwerfen",
   "linkTorWait": "Tor ist noch nicht verbunden, darum wartet die Kopplung. Beide Geräte brauchen Tor.",
   "linkFailed": "Kopplung nicht gestartet: {error}",
-  "linkScanInDevices": "Das ist ein Code zum Koppeln eines Computers. Öffne auf diesem Telefon Einstellungen, Gekoppelte Geräte, Computer koppeln, und scanne ihn dort."
+  "linkScanInDevices": "Das ist ein Code zum Koppeln eines Computers. Öffne auf diesem Telefon Einstellungen, Gekoppelte Geräte, Computer koppeln, und scanne ihn dort.",
+  "crashTitle": "Kilit wurde unerwartet beendet",
+  "crashBody": "Beim letzten Mal wurde Kilit von selbst beendet. Der Bericht unten enthält keine Nachrichten oder Schlüssel, nur die Stelle des Fehlers. Kopiere ihn und schick ihn dem Entwickler, etwa in einem GitHub-Issue.",
+  "crashCopy": "Bericht kopieren",
+  "linkFetchingKey": "Der Schlüssel des Computers wird von den Relais geholt…"
 }

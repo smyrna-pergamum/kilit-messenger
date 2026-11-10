@@ -777,11 +777,11 @@ class LIt extends L {
       'Nessuna chiave hardware: se il file della cassaforte viene copiato, il PIN può essere indovinato su un altro dispositivo.';
 
   @override
-  String get settingsFingerprint => 'Il tuo numero di sicurezza';
+  String get settingsFingerprint => 'Il tuo numero di firma della cassaforte';
 
   @override
   String get settingsFingerprintHint =>
-      'Quando verifichi un contatto, deve essere uguale su entrambi i dispositivi.';
+      'Questo numero appartiene alle chiavi della tua cassaforte, che firmano i pacchetti che sigilli (modalità vettore). Chi riceve da te un pacchetto firmato vi vede il numero del firmatario; se coincide con questo, cosa che può verificare con te di persona o al telefono, il pacchetto è tuo. Per le chat confronta invece il numero di sicurezza dentro ogni conversazione.';
 
   @override
   String get settingsAppearance => 'Aspetto';
@@ -1225,4 +1225,17 @@ class LIt extends L {
   @override
   String get linkScanInDevices =>
       'Questo è un codice per collegare un computer. Su questo telefono apri Impostazioni, Dispositivi collegati, Collega un computer, e scansionalo lì.';
+
+  @override
+  String get crashTitle => 'Kilit si è chiuso inaspettatamente';
+
+  @override
+  String get crashBody =>
+      'L\'ultima volta Kilit si è chiuso da solo. Il rapporto qui sotto non contiene messaggi né chiavi, solo dove si è verificato l\'errore. Copialo e invialo allo sviluppatore, ad esempio in una issue su GitHub.';
+
+  @override
+  String get crashCopy => 'Copia rapporto';
+
+  @override
+  String get linkFetchingKey => 'Recupero della chiave del computer dai relay…';
 }

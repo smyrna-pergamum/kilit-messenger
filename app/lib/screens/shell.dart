@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../core/kilit_core.dart';
 import '../l10n/app_localizations.dart';
+import '../platform/crash_report.dart';
 import '../platform/files.dart';
 import '../platform/tor.dart';
 import '../state/prefs.dart';
@@ -83,6 +85,7 @@ class _ShellState extends State<Shell> {
   void initState() {
     super.initState();
     widget.tor.addListener(_torChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showCrash());
     // things shared or opened into Kilit wait until the vault is open
     _incoming = widget.files.incomingReady.listen((_) => _take());
     WidgetsBinding.instance.addPostFrameCallback((_) => _take());
@@ -137,6 +140,7 @@ class _ShellState extends State<Shell> {
       files: widget.files,
       tor: widget.tor,
       onOwnBridges: _ownBridges,
+      chats: _chats,
     ),
   };
 
@@ -144,6 +148,53 @@ class _ShellState extends State<Shell> {
   void _ownBridges() {
     widget.prefs.openSections.add('bridges');
     setState(() => _index = 3);
+  }
+
+  /// Kilit closed on its own last time: the report, to copy and send.
+  Future<void> _showCrash() async {
+    final report = CrashReport.pending;
+    if (report == null || !mounted) return;
+    CrashReport.pending = null;
+    final l = L.of(context);
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        key: const ValueKey('crash-dialog'),
+        title: Text(l.crashTitle),
+        content: SizedBox(
+          width: 480,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(l.crashBody),
+                const SizedBox(height: 12),
+                SelectableText(
+                  report,
+                  style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l.close),
+          ),
+          FilledButton.icon(
+            key: const ValueKey('crash-copy'),
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: report));
+              if (context.mounted) Navigator.pop(context);
+            },
+            icon: const Icon(Icons.copy_rounded),
+            label: Text(l.crashCopy),
+          ),
+        ],
+      ),
+    );
   }
 
   // bridges are offered once a session, the first time Tor seems blocked

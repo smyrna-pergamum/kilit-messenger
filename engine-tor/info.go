@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime/debug"
 	"strings"
 	"sync/atomic"
 
@@ -177,8 +178,28 @@ func Reconnect() error {
 	return nil
 }
 
+// crashName is where a fatal Go error (or a crash in tor) is written, for
+// the app to show the next time it starts.
+const crashName = "crash.log"
+
+// crashTo sends a fatal error's report to dir/crash.log as well.
+func crashTo(dir string) {
+	f, err := os.OpenFile(filepath.Join(dir, crashName), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+	if err != nil {
+		return
+	}
+	if err := debug.SetCrashOutput(f, debug.CrashOptions{}); err != nil {
+		_ = f.Close()
+		return
+	}
+	// SetCrashOutput keeps its own copy of the file
+	_ = f.Close()
+}
+
 // logArgs makes tor log notices to dataDir/tor/notices.log.
 func logArgs(dir string) []string {
+	trimLog(filepath.Join(dir, crashName))
+	crashTo(dir)
 	p := filepath.Join(dir, logName)
 	trimLog(p)
 	mu.Lock()

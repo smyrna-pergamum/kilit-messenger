@@ -231,8 +231,8 @@
   "hwDev": "Nenhum (núcleo de desenvolvimento)",
   "hwBoundHint": "Seu PIN está vinculado à chave de hardware deste aparelho. Nem uma cópia do arquivo do cofre pode ser testada em outro aparelho.",
   "hwNotBoundHint": "Sem chave de hardware: se o arquivo do cofre for copiado, o PIN pode ser adivinhado em outro aparelho.",
-  "settingsFingerprint": "Seu número de segurança",
-  "settingsFingerprintHint": "Ao verificar um contato, ele deve ser igual nos dois aparelhos.",
+  "settingsFingerprint": "Seu número de assinatura do cofre",
+  "settingsFingerprintHint": "Este número pertence às chaves do seu cofre, que assinam os pacotes que você sela (modo portador). Quem recebe de você um pacote assinado vê nele o número de quem assinou; se for igual a este, o que pode conferir com você pessoalmente ou numa ligação, o pacote é seu. Para conversas, compare o número de segurança dentro de cada conversa.",
   "settingsAppearance": "Aparência",
   "themeSystem": "Sistema",
   "themeLight": "Claro",
@@ -359,5 +359,9 @@
   "selfNoteDiscard": "Descartar",
   "linkTorWait": "O Tor ainda não está conectado, então a vinculação espera. Os dois aparelhos precisam do Tor.",
   "linkFailed": "A vinculação não começou: {error}",
-  "linkScanInDevices": "Este é um código para vincular um computador. Neste celular abra Configurações, Aparelhos vinculados, Vincular um computador, e escaneie lá."
+  "linkScanInDevices": "Este é um código para vincular um computador. Neste celular abra Configurações, Aparelhos vinculados, Vincular um computador, e escaneie lá.",
+  "crashTitle": "O Kilit fechou inesperadamente",
+  "crashBody": "Da última vez o Kilit fechou sozinho. O relatório abaixo não contém mensagens nem chaves, só onde falhou. Copie e envie ao desenvolvedor, por exemplo numa issue do GitHub.",
+  "crashCopy": "Copiar relatório",
+  "linkFetchingKey": "Buscando a chave do computador nos relays…"
 }

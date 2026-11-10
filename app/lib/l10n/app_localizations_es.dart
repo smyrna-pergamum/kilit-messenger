@@ -776,11 +776,11 @@ class LEs extends L {
       'Sin clave de hardware: si se copia el archivo de la bóveda, el PIN se puede adivinar en otro dispositivo.';
 
   @override
-  String get settingsFingerprint => 'Tu número de seguridad';
+  String get settingsFingerprint => 'Tu número de firma de la bóveda';
 
   @override
   String get settingsFingerprintHint =>
-      'Al verificar un contacto, debe ser el mismo en ambos dispositivos.';
+      'Este número pertenece a las claves de tu bóveda, que firman los paquetes que sellas (modo portador). Quien recibe de ti un paquete firmado ve en él el número del firmante; si coincide con este, algo que puede comprobar contigo en persona o en una llamada, el paquete es tuyo. Para los chats, compara en su lugar el número de seguridad de cada conversación.';
 
   @override
   String get settingsAppearance => 'Apariencia';
@@ -1223,4 +1223,18 @@ class LEs extends L {
   @override
   String get linkScanInDevices =>
       'Este es un código para vincular un ordenador. En este teléfono abre Ajustes, Dispositivos vinculados, Vincular un ordenador, y escanéalo allí.';
+
+  @override
+  String get crashTitle => 'Kilit se cerró inesperadamente';
+
+  @override
+  String get crashBody =>
+      'La última vez Kilit se cerró solo. El informe de abajo no contiene mensajes ni claves, solo dónde falló. Cópialo y envíalo al desarrollador, por ejemplo en un issue de GitHub.';
+
+  @override
+  String get crashCopy => 'Copiar informe';
+
+  @override
+  String get linkFetchingKey =>
+      'Obteniendo la clave del ordenador desde los relés…';
 }
