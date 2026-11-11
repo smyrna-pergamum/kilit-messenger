@@ -188,7 +188,7 @@ class LEs extends L {
 
   @override
   String safetyHint(String name) {
-    return 'Compara estos 60 dígitos con $name, en persona o por teléfono. Si coinciden en ambos teléfonos, no hay nadie en medio.';
+    return 'Compara estos 60 dígitos con $name, en persona o en una llamada. Si coinciden en ambos lados, no hay nadie en medio.';
   }
 
   @override
@@ -218,7 +218,7 @@ class LEs extends L {
 
   @override
   String get timerHint =>
-      'Los mensajes nuevos de este chat desaparecen tras este tiempo, en ambos teléfonos.';
+      'Los mensajes nuevos de este chat desaparecen tras este tiempo, para los dos.';
 
   @override
   String get timerOff => 'Desactivado';
@@ -252,7 +252,7 @@ class LEs extends L {
 
   @override
   String get cameraNoCamera =>
-      'No se pudo abrir la cámara. Revisa el permiso de cámara en los ajustes del teléfono.';
+      'No se pudo abrir la cámara. Permite que Kilit use la cámara en los ajustes del dispositivo.';
 
   @override
   String get cameraShutter => 'Hacer una foto';
@@ -265,7 +265,7 @@ class LEs extends L {
 
   @override
   String get cameraIntro =>
-      'Las fotos se toman solo en memoria: no se escribe nada en el teléfono y no llevan ubicación ni datos de la cámara.';
+      'Las fotos se toman solo en memoria: no se escribe nada en el dispositivo y no llevan ubicación ni datos de la cámara.';
 
   @override
   String get cameraSendTo => 'Enviar a…';
@@ -894,7 +894,7 @@ class LEs extends L {
 
   @override
   String get resendHint =>
-      'Un relay tiene el mensaje, pero su teléfono aún no ha confirmado que llegó. Kilit lo reenvía una vez al día durante una semana hasta que llegue.';
+      'Un relay tiene este mensaje, pero su dispositivo aún no ha confirmado que llegó. Kilit lo reenvía una vez al día durante una semana, hasta que llegue.';
 
   @override
   String get resendDone => 'Enviado de nuevo.';
@@ -1222,7 +1222,7 @@ class LEs extends L {
 
   @override
   String get linkScanInDevices =>
-      'Este es un código para vincular un ordenador. En este teléfono abre Ajustes, Dispositivos vinculados, Vincular un ordenador, y escanéalo allí.';
+      'Este es un código para vincular un ordenador. En el teléfono abre Ajustes, Dispositivos vinculados, Vincular un ordenador, y escanéalo allí.';
 
   @override
   String get crashTitle => 'Kilit se cerró inesperadamente';
@@ -1285,4 +1285,61 @@ class LEs extends L {
   @override
   String get linkRequestOther =>
       '¿Un código distinto? No lo apruebes: esa solicitud la envió otra persona.';
+
+  @override
+  String get deviceLeave => 'Salir de este ID de Kilit';
+
+  @override
+  String get deviceLeaveConfirm =>
+      'Este ordenador sale del ID de Kilit de tu teléfono. Se borran los chats, contactos y grupos de este ordenador; el teléfono los conserva todos. Tus archivos y notas de la bóveda se quedan aquí. Puedes volver a vincular este ordenador más tarde.';
+
+  @override
+  String get deviceLeaveDone =>
+      'Este ordenador salió del ID de Kilit. Ahora es un Kilit nuevo.';
+
+  @override
+  String get deviceLeftTitle => 'Quitado del ID de Kilit de tu teléfono';
+
+  @override
+  String get deviceLeft =>
+      'Tu teléfono quitó este ordenador de su ID de Kilit. Se borraron los chats, contactos y grupos de este ordenador; tus archivos y notas de la bóveda se quedan. Para volver a usarlo, vincúlalo en Ajustes, Dispositivos vinculados.';
+
+  @override
+  String get cameraOpenSettings => 'Abrir ajustes de la cámara';
+
+  @override
+  String get cameraIntroDesktop =>
+      'En Windows la cámara entrega cada foto como un archivo: Kilit lo lee en memoria al instante, sobrescribe el archivo y lo borra. Las fotos no llevan ubicación ni datos de la cámara.';
+
+  @override
+  String get voiceRecord => 'Grabar un mensaje de voz';
+
+  @override
+  String get voiceRecording => 'Grabando…';
+
+  @override
+  String get voiceStopped => 'Grabación detenida';
+
+  @override
+  String get voiceLimitHint =>
+      'El sonido se queda en memoria y se envía cifrado. Un mensaje de voz se detiene a los 5 minutos.';
+
+  @override
+  String get voiceNoMic =>
+      'No se pudo abrir el micrófono. Permite que Kilit use el micrófono en los ajustes del dispositivo.';
+
+  @override
+  String get voiceOpenSettings => 'Abrir ajustes del micrófono';
+
+  @override
+  String get voiceMessage => 'Mensaje de voz';
+
+  @override
+  String get voicePlay => 'Reproducir';
+
+  @override
+  String get voicePause => 'Pausa';
+
+  @override
+  String get voiceCannotPlay => 'No se puede reproducir';
 }

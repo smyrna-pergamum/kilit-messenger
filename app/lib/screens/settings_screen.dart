@@ -16,7 +16,7 @@ import 'devices_screen.dart';
 import 'tor_screen.dart';
 
 /// Shown in "About"; kept in step with pubspec.yaml's version.
-const appVersion = '0.1.9-alpha';
+const appVersion = '0.1.10-alpha';
 
 String pinProtectionName(L l, PinProtection p) => switch (p) {
   PinProtection.strongbox => l.hwStrongbox,

@@ -187,7 +187,7 @@ class LEn extends L {
 
   @override
   String safetyHint(String name) {
-    return 'Compare these 60 digits with $name, in person or on a call. If they are the same on both phones, no one is in between.';
+    return 'Compare these 60 digits with $name, in person or on a call. If they are the same on both sides, no one is in between.';
   }
 
   @override
@@ -216,7 +216,7 @@ class LEn extends L {
 
   @override
   String get timerHint =>
-      'New messages in this chat disappear after this time, on both phones.';
+      'New messages in this chat disappear after this time, for both of you.';
 
   @override
   String get timerOff => 'Off';
@@ -250,7 +250,7 @@ class LEn extends L {
 
   @override
   String get cameraNoCamera =>
-      'The camera could not be opened. Check the camera permission in the phone\'s settings.';
+      'The camera could not be opened. Allow Kilit to use the camera in the device\'s settings.';
 
   @override
   String get cameraShutter => 'Take a photo';
@@ -263,7 +263,7 @@ class LEn extends L {
 
   @override
   String get cameraIntro =>
-      'Photos are taken in memory only: nothing is written to the phone, and they carry no location or camera data.';
+      'Photos are taken in memory only: nothing is written to the device, and they carry no location or camera data.';
 
   @override
   String get cameraSendTo => 'Send to…';
@@ -890,7 +890,7 @@ class LEn extends L {
 
   @override
   String get resendHint =>
-      'A relay has this message, but their phone has not said it arrived. Kilit sends it again once a day for a week, until it does.';
+      'A relay has this message, but their device has not said it arrived. Kilit sends it again once a day for a week, until it does.';
 
   @override
   String get resendDone => 'Sent again.';
@@ -1214,7 +1214,7 @@ class LEn extends L {
 
   @override
   String get linkScanInDevices =>
-      'This is a code for linking a computer. On this phone open Settings, Linked devices, Link a computer, and scan it there.';
+      'This is a code for linking a computer. On the phone open Settings, Linked devices, Link a computer, and scan it there.';
 
   @override
   String get crashTitle => 'Kilit closed unexpectedly';
@@ -1276,4 +1276,61 @@ class LEn extends L {
   @override
   String get linkRequestOther =>
       'A different code? Do not approve it: someone else sent that request.';
+
+  @override
+  String get deviceLeave => 'Leave this Kilit ID';
+
+  @override
+  String get deviceLeaveConfirm =>
+      'This computer leaves your phone\'s Kilit ID. The chats, contacts and groups on this computer are deleted; the phone keeps them all. Your vault files and notes stay here. You can link this computer again later.';
+
+  @override
+  String get deviceLeaveDone =>
+      'This computer left the Kilit ID. It is a new Kilit now.';
+
+  @override
+  String get deviceLeftTitle => 'Taken off your phone\'s Kilit ID';
+
+  @override
+  String get deviceLeft =>
+      'Your phone took this computer off its Kilit ID. The chats, contacts and groups on this computer were deleted; your vault files and notes stay. To use it again, link it in Settings, Linked devices.';
+
+  @override
+  String get cameraOpenSettings => 'Open camera settings';
+
+  @override
+  String get cameraIntroDesktop =>
+      'On Windows the camera hands each photo over as a file: Kilit reads it into memory at once, overwrites the file and deletes it. Photos carry no location or camera data.';
+
+  @override
+  String get voiceRecord => 'Record a voice message';
+
+  @override
+  String get voiceRecording => 'Recording…';
+
+  @override
+  String get voiceStopped => 'Recording stopped';
+
+  @override
+  String get voiceLimitHint =>
+      'The sound stays in memory and is sent encrypted. A voice message stops at 5 minutes.';
+
+  @override
+  String get voiceNoMic =>
+      'The microphone could not be opened. Allow Kilit to use the microphone in the device\'s settings.';
+
+  @override
+  String get voiceOpenSettings => 'Open microphone settings';
+
+  @override
+  String get voiceMessage => 'Voice message';
+
+  @override
+  String get voicePlay => 'Play';
+
+  @override
+  String get voicePause => 'Pause';
+
+  @override
+  String get voiceCannotPlay => 'Cannot play';
 }

@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.1.9+10
+version: 0.1.10+11
 
 environment:
   sdk: ^3.13.5
@@ -48,6 +48,14 @@ dependencies:
   # the in-app camera: frames are taken from the preview stream in memory,
   # never with takePicture, which writes a file
   camera: 0.12.1
+  # the camera package has no Windows part of its own. This copy saves
+  # takePicture's file in the temp folder instead of Pictures: on Windows
+  # there is no frame stream, so a photo or a QR code is read from that
+  # file, which is overwritten and deleted at once (third_party/README.md)
+  camera_windows:
+    path: third_party/camera_windows
+  record: 7.1.2
+  audioplayers: 6.8.1
 
 dev_dependencies:
   flutter_test:

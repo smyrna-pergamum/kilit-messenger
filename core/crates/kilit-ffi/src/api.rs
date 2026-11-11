@@ -486,6 +486,9 @@ pub struct LinkStatus {
     pub listening: bool,
     /// The requests that came, newest first.
     pub requests: Vec<LinkRequestItem>,
+    /// This computer was taken off the phone's ID and left it: it is a new
+    /// Kilit again. Shown once, until [`KilitHandle::link_cancel`].
+    pub left: bool,
 }
 
 /// A request to link a new device by Kilit ID.
@@ -1173,6 +1176,7 @@ impl KilitHandle {
             code: s.code,
             done: s.done,
             listening: s.listening,
+            left: s.left,
             requests: s
                 .requests
                 .into_iter()
@@ -1211,6 +1215,13 @@ impl KilitHandle {
         let (events, _) = self.engine()?.link_approve(&tag, &name)?;
         self.publish_now(events)?;
         Ok(())
+    }
+
+    /// A linked computer: leaves the phone's ID. The phone is told; this
+    /// device forgets the ID's chats, contacts and groups and becomes a
+    /// new Kilit. The vault's own files and notes stay.
+    pub fn leave_id(&self) -> Result<(), KilitError> {
+        Ok(self.engine()?.leave_id()?)
     }
 
     /// Stops a linking under way.

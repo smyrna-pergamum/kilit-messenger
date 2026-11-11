@@ -1285,16 +1285,55 @@ impl Messaging {
     }
 
     /// The phone: forgets a linked device. Its sessions go; the card no
-    /// longer shows it.
-    pub fn remove_own_device(&mut self, device: u32) -> Result<(), MessagingError> {
-        if self.device != 1 || self.s.own_devices.remove(&device).is_none() {
+    /// longer shows it. Returns a last message for that device carrying
+    /// the new card, so it learns it was taken off and leaves the ID.
+    pub fn remove_own_device(
+        &mut self,
+        device: u32,
+        now: SystemTime,
+    ) -> Result<Option<Outgoing>, MessagingError> {
+        if self.device != 1 || !self.s.own_devices.contains_key(&device) {
             return Err(MessagingError::NoContact);
         }
+        self.s.devices_version += 1;
+        let kept = self.s.own_devices.remove(&device);
+        let card = self.card("");
+        // the session with it is still here, for this one message
+        if let Some(b) = kept {
+            self.s.own_devices.insert(device, b);
+        }
+        let bye = match card {
+            Ok(card) => self
+                .seal_own(
+                    device,
+                    &Content {
+                        card: Some(card),
+                        ..Content::default()
+                    },
+                    now,
+                )
+                .ok(),
+            Err(_) => None,
+        };
+        self.s.own_devices.remove(&device);
         self.s
             .sessions
             .remove(&format!("{}.{device}", self.my_address));
-        self.s.devices_version += 1;
-        Ok(())
+        Ok(bye)
+    }
+
+    /// A linked device: whether `card`, this ID's card from the phone, is
+    /// newer than what this device knows and no longer lists it, so the
+    /// phone took it off.
+    pub fn card_drops_me(&self, card: &[u8]) -> bool {
+        let Ok(c) = ciborium::from_reader::<Card, _>(card) else {
+            return false;
+        };
+        self.device != 1
+            && c.v == CARD_VERSION
+            && c.identity.as_slice() == &*self.me.identity_key().serialize()
+            && c.devices_version > self.s.devices_version
+            && !c.devices.contains_key(&self.device)
     }
 
     /// A linked device: takes this ID's card as the phone published it, so

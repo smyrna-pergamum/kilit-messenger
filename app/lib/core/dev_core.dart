@@ -485,6 +485,29 @@ class DevCore implements KilitCore {
   Future<void> unlinkDevice(int id) async =>
       _devices.removeWhere((d) => d.id == id);
 
+  @override
+  Future<void> leaveId() async {
+    _requireOpen();
+    if (_primary) throw StateError('only a linked device can leave');
+    _forgetId();
+  }
+
+  /// The phone took this computer off: it leaves on the next round.
+  void removedByPhone() {
+    _forgetId();
+    _link = const LinkStatus(left: true);
+    _relay.add(const Arrived('', ''));
+  }
+
+  void _forgetId() {
+    _primary = true;
+    _devices.clear();
+    _contacts.clear();
+    _chats.clear();
+    _groups.clear();
+    _groupChats.clear();
+  }
+
   // ---- groups: the same stand-in; [groupMessage] plays a member.
 
   final Map<String, Group> _groups = {};

@@ -177,8 +177,14 @@ abstract interface class KilitCore {
   /// This Kilit ID's devices, this one included.
   Future<List<LinkedDevice>> devices();
 
-  /// The phone: takes a linked device off this ID.
+  /// The phone: takes a linked device off this ID. The device is told and
+  /// leaves the ID.
   Future<void> unlinkDevice(int id);
+
+  /// A linked computer: leaves the phone's Kilit ID. The phone is told;
+  /// the chats, contacts and groups here go, the vault's files stay, and
+  /// this becomes a new Kilit.
+  Future<void> leaveId();
 
   /// The groups, newest conversation first.
   Future<List<Group>> groups();
@@ -255,7 +261,12 @@ class LinkStatus {
     this.done = false,
     this.listening = false,
     this.requests = const [],
+    this.left = false,
   });
+
+  /// This computer was taken off the phone's Kilit ID and left it: it is a
+  /// new Kilit again. Shown once, until [KilitCore.linkCancel].
+  final bool left;
 
   /// The phone: listening for requests to link by Kilit ID.
   final bool listening;
@@ -476,6 +487,9 @@ class ChatFile {
 
   bool get ready => blob.isNotEmpty;
   bool get isImage => mime.startsWith('image/');
+
+  /// A voice message, or any sound: played in the bubble.
+  bool get isVoice => mime.startsWith('audio/');
 }
 
 /// Where someone stands; [member]s are known only through a group and

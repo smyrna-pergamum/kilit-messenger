@@ -188,7 +188,7 @@ class LFa extends L {
 
   @override
   String safetyHint(String name) {
-    return 'این ۶۰ رقم را با $name حضوری یا در تماس مقایسه کنید. اگر در هر دو گوشی یکسان باشد، کسی در میان نیست.';
+    return 'این ۶۰ رقم را با $name حضوری یا در تماس مقایسه کنید. اگر در هر دو طرف یکسان باشد، کسی در میان نیست.';
   }
 
   @override
@@ -218,7 +218,7 @@ class LFa extends L {
 
   @override
   String get timerHint =>
-      'پیام‌های تازهٔ این گفتگو پس از این زمان، در هر دو گوشی ناپدید می‌شوند.';
+      'پیام‌های تازهٔ این گفتگو پس از این زمان، برای هر دوی شما ناپدید می‌شوند.';
 
   @override
   String get timerOff => 'خاموش';
@@ -252,7 +252,7 @@ class LFa extends L {
 
   @override
   String get cameraNoCamera =>
-      'دوربین باز نشد. مجوز دوربین را در تنظیمات گوشی بررسی کن.';
+      'دوربین باز نشد. در تنظیمات دستگاه به Kilit اجازهٔ استفاده از دوربین را بده.';
 
   @override
   String get cameraShutter => 'گرفتن عکس';
@@ -265,7 +265,7 @@ class LFa extends L {
 
   @override
   String get cameraIntro =>
-      'عکس‌ها فقط در حافظه گرفته می‌شوند: چیزی روی گوشی نوشته نمی‌شود و اطلاعات مکان یا دوربین ندارند.';
+      'عکس‌ها فقط در حافظه گرفته می‌شوند: چیزی روی دستگاه نوشته نمی‌شود و اطلاعات مکان یا دوربین ندارند.';
 
   @override
   String get cameraSendTo => 'ارسال برای…';
@@ -889,7 +889,7 @@ class LFa extends L {
 
   @override
   String get resendHint =>
-      'پیام روی یک رله است، اما گوشی طرف مقابل هنوز رسیدنش را تأیید نکرده. Kilit تا یک هفته روزی یک بار آن را دوباره می‌فرستد تا برسد.';
+      'پیام روی یک رله است، اما دستگاه طرف مقابل هنوز رسیدنش را اعلام نکرده. Kilit تا یک هفته روزی یک بار آن را دوباره می‌فرستد تا برسد.';
 
   @override
   String get resendDone => 'دوباره فرستاده شد.';
@@ -1214,7 +1214,7 @@ class LFa extends L {
 
   @override
   String get linkScanInDevices =>
-      'این کدی برای پیوند یک رایانه است. در همین گوشی تنظیمات، دستگاه‌های پیوندی، پیوند رایانه را باز کن و آن‌جا اسکن کن.';
+      'این کدی برای پیوند یک رایانه است. در گوشی تنظیمات، دستگاه‌های پیوندشده، پیوند یک رایانه را باز کن و آن‌جا اسکن کن.';
 
   @override
   String get crashTitle => 'Kilit ناگهان بسته شد';
@@ -1275,4 +1275,61 @@ class LFa extends L {
   @override
   String get linkRequestOther =>
       'کد دیگری است؟ تأیید نکن: آن درخواست را کس دیگری فرستاده.';
+
+  @override
+  String get deviceLeave => 'خروج از این شناسهٔ Kilit';
+
+  @override
+  String get deviceLeaveConfirm =>
+      'این رایانه از شناسهٔ Kilit گوشی‌ات خارج می‌شود. گفتگوها، مخاطبان و گروه‌های این رایانه پاک می‌شوند؛ گوشی همه را نگه می‌دارد. فایل‌ها و یادداشت‌های گاوصندوقت این‌جا می‌مانند. بعداً می‌توانی این رایانه را دوباره پیوند بدهی.';
+
+  @override
+  String get deviceLeaveDone =>
+      'این رایانه از شناسهٔ Kilit خارج شد. حالا یک Kilit تازه است.';
+
+  @override
+  String get deviceLeftTitle => 'از شناسهٔ Kilit گوشی‌ات برداشته شد';
+
+  @override
+  String get deviceLeft =>
+      'گوشی‌ات این رایانه را از شناسهٔ Kilit خود برداشت. گفتگوها، مخاطبان و گروه‌های این رایانه پاک شدند؛ فایل‌ها و یادداشت‌های گاوصندوقت سر جایشان هستند. برای استفادهٔ دوباره، آن را از تنظیمات، دستگاه‌های پیوندشده پیوند بده.';
+
+  @override
+  String get cameraOpenSettings => 'باز کردن تنظیمات دوربین';
+
+  @override
+  String get cameraIntroDesktop =>
+      'در Windows دوربین هر عکس را به‌صورت یک فایل تحویل می‌دهد: Kilit آن را بی‌درنگ در حافظه می‌خواند، روی فایل بازنویسی می‌کند و آن را پاک می‌کند. عکس‌ها اطلاعات مکان یا دوربین ندارند.';
+
+  @override
+  String get voiceRecord => 'ضبط پیام صوتی';
+
+  @override
+  String get voiceRecording => 'در حال ضبط…';
+
+  @override
+  String get voiceStopped => 'ضبط متوقف شد';
+
+  @override
+  String get voiceLimitHint =>
+      'صدا در حافظه می‌ماند و رمزگذاری‌شده فرستاده می‌شود. پیام صوتی در ۵ دقیقه متوقف می‌شود.';
+
+  @override
+  String get voiceNoMic =>
+      'میکروفون باز نشد. در تنظیمات دستگاه به Kilit اجازهٔ استفاده از میکروفون را بده.';
+
+  @override
+  String get voiceOpenSettings => 'باز کردن تنظیمات میکروفون';
+
+  @override
+  String get voiceMessage => 'پیام صوتی';
+
+  @override
+  String get voicePlay => 'پخش';
+
+  @override
+  String get voicePause => 'مکث';
+
+  @override
+  String get voiceCannotPlay => 'پخش نمی‌شود';
 }

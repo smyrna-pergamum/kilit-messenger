@@ -188,7 +188,7 @@ class LTr extends L {
 
   @override
   String safetyHint(String name) {
-    return 'Bu 60 haneyi $name ile yüz yüze ya da telefonda karşılaştırın. İki telefonda da aynıysa arada kimse yoktur.';
+    return 'Bu 60 haneyi $name ile yüz yüze ya da telefonda karşılaştırın. İki tarafta da aynıysa arada kimse yoktur.';
   }
 
   @override
@@ -217,7 +217,7 @@ class LTr extends L {
 
   @override
   String get timerHint =>
-      'Bu sohbetteki yeni mesajlar bu süreden sonra iki telefondan da silinir.';
+      'Bu sohbetteki yeni mesajlar bu süreden sonra ikinizden de silinir.';
 
   @override
   String get timerOff => 'Kapalı';
@@ -251,7 +251,7 @@ class LTr extends L {
 
   @override
   String get cameraNoCamera =>
-      'Kamera açılamadı. Telefonun ayarlarından kamera iznini kontrol et.';
+      'Kamera açılamadı. Cihazın ayarlarından Kilit\'in kamerayı kullanmasına izin ver.';
 
   @override
   String get cameraShutter => 'Fotoğraf çek';
@@ -264,7 +264,7 @@ class LTr extends L {
 
   @override
   String get cameraIntro =>
-      'Fotoğraflar yalnızca bellekte çekilir: telefona hiçbir şey yazılmaz ve içlerinde konum ya da kamera bilgisi olmaz.';
+      'Fotoğraflar yalnızca bellekte çekilir: cihaza hiçbir şey yazılmaz ve içlerinde konum ya da kamera bilgisi olmaz.';
 
   @override
   String get cameraSendTo => 'Gönder…';
@@ -886,7 +886,7 @@ class LTr extends L {
 
   @override
   String get resendHint =>
-      'Mesaj bir relay\'de, ama karşı telefon ulaştığını henüz bildirmedi. Kilit, ulaşana kadar bir hafta boyunca günde bir kez yeniden gönderir.';
+      'Mesaj bir relay\'de, ama karşı cihaz ulaştığını henüz bildirmedi. Kilit, ulaşana kadar bir hafta boyunca günde bir kez yeniden gönderir.';
 
   @override
   String get resendDone => 'Tekrar gönderildi.';
@@ -1213,7 +1213,7 @@ class LTr extends L {
 
   @override
   String get linkScanInDevices =>
-      'Bu bir bilgisayar bağlama kodu. Bu telefonda Ayarlar → Bağlı cihazlar → Bilgisayar bağla\'yı açıp orada okut.';
+      'Bu bir bilgisayar bağlama kodu. Telefonda Ayarlar → Bağlı cihazlar → Bilgisayar bağla\'yı açıp orada okut.';
 
   @override
   String get crashTitle => 'Kilit beklenmedik şekilde kapandı';
@@ -1275,4 +1275,61 @@ class LTr extends L {
   @override
   String get linkRequestOther =>
       'Kod farklı mı? Onaylama: o isteği başka biri göndermiştir.';
+
+  @override
+  String get deviceLeave => 'Bu Kilit ID\'den çık';
+
+  @override
+  String get deviceLeaveConfirm =>
+      'Bu bilgisayar telefonundaki Kilit ID\'den çıkar. Bu bilgisayardaki sohbetler, kişiler ve gruplar silinir; telefonda hepsi kalır. Kasandaki dosyalar ve notlar burada kalır. Bu bilgisayarı daha sonra yeniden bağlayabilirsin.';
+
+  @override
+  String get deviceLeaveDone =>
+      'Bu bilgisayar Kilit ID\'den çıktı. Artık yeni bir Kilit.';
+
+  @override
+  String get deviceLeftTitle => 'Telefonundaki Kilit ID\'den çıkarıldı';
+
+  @override
+  String get deviceLeft =>
+      'Telefonun bu bilgisayarı Kilit ID\'sinden çıkardı. Bu bilgisayardaki sohbetler, kişiler ve gruplar silindi; kasandaki dosyalar ve notlar duruyor. Yeniden kullanmak için Ayarlar → Bağlı cihazlar\'dan bağla.';
+
+  @override
+  String get cameraOpenSettings => 'Kamera ayarlarını aç';
+
+  @override
+  String get cameraIntroDesktop =>
+      'Windows\'ta kamera her fotoğrafı bir dosya olarak verir: Kilit onu hemen belleğe okur, dosyanın üzerine yazar ve siler. Fotoğraflarda konum ya da kamera bilgisi olmaz.';
+
+  @override
+  String get voiceRecord => 'Sesli mesaj kaydet';
+
+  @override
+  String get voiceRecording => 'Kaydediliyor…';
+
+  @override
+  String get voiceStopped => 'Kayıt durdu';
+
+  @override
+  String get voiceLimitHint =>
+      'Ses bellekte kalır ve şifreli gönderilir. Sesli mesaj 5 dakikada durur.';
+
+  @override
+  String get voiceNoMic =>
+      'Mikrofon açılamadı. Cihazın ayarlarından Kilit\'in mikrofonu kullanmasına izin ver.';
+
+  @override
+  String get voiceOpenSettings => 'Mikrofon ayarlarını aç';
+
+  @override
+  String get voiceMessage => 'Sesli mesaj';
+
+  @override
+  String get voicePlay => 'Oynat';
+
+  @override
+  String get voicePause => 'Duraklat';
+
+  @override
+  String get voiceCannotPlay => 'Oynatılamıyor';
 }

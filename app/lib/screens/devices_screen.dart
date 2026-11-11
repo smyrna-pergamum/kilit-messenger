@@ -148,7 +148,41 @@ class _DevicesSectionState extends State<DevicesSection> {
     );
     if (ok != true) return;
     await widget.core.unlinkDevice(d.id);
+    widget.chats?.touched();
     await _load();
+  }
+
+  /// A linked computer: leaves the phone's Kilit ID.
+  Future<void> _leave() async {
+    final l = L.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l.deviceLeave),
+        content: Text(l.deviceLeaveConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l.cancel),
+          ),
+          TextButton(
+            key: const ValueKey('device-leave-yes'),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l.deviceLeave),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await widget.core.leaveId();
+    } on Object catch (e) {
+      if (mounted) _say(l.linkFailed('$e'));
+      return;
+    }
+    widget.chats?.touched();
+    await _load();
+    if (mounted) _say(l.deviceLeaveDone);
   }
 
   void _say(String m) => ScaffoldMessenger.of(context)
@@ -185,6 +219,17 @@ class _DevicesSectionState extends State<DevicesSection> {
                     child: Text(l.deviceRemove),
                   )
                 : null,
+          ),
+        if (!_primary)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+            child: OutlinedButton.icon(
+              key: const ValueKey('device-leave'),
+              onPressed: _leave,
+              style: OutlinedButton.styleFrom(foregroundColor: t.danger),
+              icon: const Icon(Icons.logout_rounded),
+              label: Text(l.deviceLeave),
+            ),
           ),
         if (_primary && !_fresh)
           Padding(

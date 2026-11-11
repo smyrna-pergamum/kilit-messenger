@@ -506,7 +506,7 @@ fn a_linked_device_talks_as_the_same_id() {
     assert_eq!(pc.decrypt(&again.payload, now()).unwrap().text, "yine");
 
     // the phone takes the computer off: Bora's next card drops it
-    ayse.m.remove_own_device(2).unwrap();
+    ayse.m.remove_own_device(2, SystemTime::now()).unwrap();
     bora.m
         .take_contact_card(&ayse_id, &ayse.m.card("").unwrap(), now())
         .unwrap();

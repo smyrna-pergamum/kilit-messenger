@@ -9,6 +9,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../core/kilit_core.dart';
 import '../l10n/app_localizations.dart';
+import '../platform/desktop_camera.dart';
 import '../platform/files.dart';
 import '../platform/tor.dart';
 import '../state/chat_service.dart';
@@ -18,7 +19,9 @@ import '../theme/theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/emoji_panel.dart';
 import '../widgets/lock_button.dart';
+import '../widgets/voice.dart';
 import 'camera_screen.dart';
+import 'desktop_scanner.dart';
 import 'devices_screen.dart' show LinkOfferScreen;
 import 'tor_screen.dart';
 import 'vault_screen.dart' show formatDate;
@@ -31,6 +34,8 @@ String lineSummary(L l, ChatLine line) => line.text.isNotEmpty
     ? line.text
     : line.sticker.isNotEmpty
     ? l.stickerLine
+    : line.file?.isVoice ?? false
+    ? l.voiceMessage
     : line.file?.name ?? '';
 
 /// A contact's name, or their Kilit ID until they get one.
@@ -899,24 +904,33 @@ class _ScanScreenState extends State<ScanScreen> {
       appBar: AppBar(title: Text(l.scanTitle)),
       body: Stack(
         children: [
-          ReaderWidget(
-            codeFormat: Format.qrCode,
-            showGallery: false,
-            showToggleCamera: false,
-            // decode nearly the whole frame: the default 50% crop misses a
-            // code held close enough to fill the screen. tryHarder and
-            // tryInverted read it in poorer light and from dark themes.
-            cropPercent: 0.9,
-            tryHarder: true,
-            tryInverted: true,
-            scanDelay: const Duration(milliseconds: 500),
-            onScan: (code) {
-              final text = code.text;
-              if (_done || !code.isValid || text == null) return;
-              _done = true;
-              Navigator.pop(context, text);
-            },
-          ),
+          if (!DesktopCamera.streams)
+            DesktopScanner(
+              onScan: (text) {
+                if (_done) return;
+                _done = true;
+                Navigator.pop(context, text);
+              },
+            )
+          else
+            ReaderWidget(
+              codeFormat: Format.qrCode,
+              showGallery: false,
+              showToggleCamera: false,
+              // decode nearly the whole frame: the default 50% crop misses a
+              // code held close enough to fill the screen. tryHarder and
+              // tryInverted read it in poorer light and from dark themes.
+              cropPercent: 0.9,
+              tryHarder: true,
+              tryInverted: true,
+              scanDelay: const Duration(milliseconds: 500),
+              onScan: (code) {
+                final text = code.text;
+                if (_done || !code.isValid || text == null) return;
+                _done = true;
+                Navigator.pop(context, text);
+              },
+            ),
           Positioned(
             left: 24,
             right: 24,
@@ -1244,6 +1258,14 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  Future<void> _voice() async {
+    FocusScope.of(context).unfocus();
+    final bytes = await recordVoice(context);
+    if (bytes != null && mounted) {
+      await _sendFile(voiceName(), voiceMime, bytes);
+    }
+  }
+
   Future<void> _attach() async {
     final l = L.of(context);
     final what = await showModalBottomSheet<String>(
@@ -1568,6 +1590,12 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                   ),
                   IconButton(
+                    key: const ValueKey('chat-voice'),
+                    tooltip: l.voiceRecord,
+                    icon: const Icon(Icons.mic_none_rounded),
+                    onPressed: _sending ? null : _voice,
+                  ),
+                  IconButton(
                     key: const ValueKey('chat-send'),
                     tooltip: l.chatSend,
                     icon: Icon(Icons.send_rounded, color: t.accent),
@@ -1793,6 +1821,18 @@ class _FileView extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      );
+    }
+    if (file.isVoice) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 6),
+        child: GestureDetector(
+          onLongPress: () => _actions(context),
+          child: VoicePlayer(
+            load: () => core.readAttachment(file.blob),
+            mime: file.mime,
+          ),
         ),
       );
     }

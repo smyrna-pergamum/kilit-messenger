@@ -186,7 +186,7 @@ class LVi extends L {
 
   @override
   String safetyHint(String name) {
-    return 'So sánh 60 chữ số này với $name, trực tiếp hoặc qua cuộc gọi. Nếu giống nhau trên cả hai điện thoại thì không có ai ở giữa.';
+    return 'So sánh 60 chữ số này với $name, trực tiếp hoặc qua cuộc gọi. Nếu giống nhau ở cả hai bên thì không có ai ở giữa.';
   }
 
   @override
@@ -215,7 +215,7 @@ class LVi extends L {
 
   @override
   String get timerHint =>
-      'Tin nhắn mới trong cuộc trò chuyện này biến mất sau thời gian này, trên cả hai điện thoại.';
+      'Tin nhắn mới trong cuộc trò chuyện này biến mất sau thời gian này, với cả hai người.';
 
   @override
   String get timerOff => 'Tắt';
@@ -249,7 +249,7 @@ class LVi extends L {
 
   @override
   String get cameraNoCamera =>
-      'Không mở được máy ảnh. Hãy kiểm tra quyền máy ảnh trong cài đặt điện thoại.';
+      'Không mở được máy ảnh. Hãy cho phép Kilit dùng máy ảnh trong cài đặt của thiết bị.';
 
   @override
   String get cameraShutter => 'Chụp ảnh';
@@ -262,7 +262,7 @@ class LVi extends L {
 
   @override
   String get cameraIntro =>
-      'Ảnh chỉ được chụp trong bộ nhớ: không có gì được ghi vào điện thoại và ảnh không chứa vị trí hay dữ liệu máy ảnh.';
+      'Ảnh chỉ được chụp trong bộ nhớ: không có gì được ghi vào thiết bị và ảnh không chứa vị trí hay dữ liệu máy ảnh.';
 
   @override
   String get cameraSendTo => 'Gửi cho…';
@@ -887,7 +887,7 @@ class LVi extends L {
 
   @override
   String get resendHint =>
-      'Một relay đã giữ tin nhắn, nhưng điện thoại của họ chưa báo đã nhận. Kilit gửi lại mỗi ngày một lần trong một tuần cho đến khi tin đến nơi.';
+      'Một relay đang giữ tin nhắn này, nhưng thiết bị của họ chưa báo đã nhận. Kilit gửi lại mỗi ngày một lần trong một tuần cho đến khi tin đến nơi.';
 
   @override
   String get resendDone => 'Đã gửi lại.';
@@ -1211,7 +1211,7 @@ class LVi extends L {
 
   @override
   String get linkScanInDevices =>
-      'Đây là mã để liên kết máy tính. Trên điện thoại này mở Cài đặt, Thiết bị đã liên kết, Liên kết máy tính, rồi quét ở đó.';
+      'Đây là mã để liên kết máy tính. Trên điện thoại mở Cài đặt, Thiết bị đã liên kết, Liên kết máy tính, rồi quét ở đó.';
 
   @override
   String get crashTitle => 'Kilit đã đóng bất ngờ';
@@ -1273,4 +1273,61 @@ class LVi extends L {
   @override
   String get linkRequestOther =>
       'Mã khác? Đừng chấp thuận: người khác đã gửi yêu cầu đó.';
+
+  @override
+  String get deviceLeave => 'Rời Kilit ID này';
+
+  @override
+  String get deviceLeaveConfirm =>
+      'Máy tính này rời khỏi Kilit ID của điện thoại bạn. Các cuộc trò chuyện, liên hệ và nhóm trên máy tính này sẽ bị xóa; điện thoại vẫn giữ tất cả. Tệp và ghi chú trong kho của bạn vẫn ở đây. Bạn có thể liên kết lại máy tính này sau.';
+
+  @override
+  String get deviceLeaveDone =>
+      'Máy tính này đã rời Kilit ID. Giờ nó là một Kilit mới.';
+
+  @override
+  String get deviceLeftTitle => 'Đã bị gỡ khỏi Kilit ID của điện thoại bạn';
+
+  @override
+  String get deviceLeft =>
+      'Điện thoại của bạn đã gỡ máy tính này khỏi Kilit ID của nó. Các cuộc trò chuyện, liên hệ và nhóm trên máy tính này đã bị xóa; tệp và ghi chú trong kho vẫn còn. Để dùng lại, hãy liên kết nó trong Cài đặt, Thiết bị đã liên kết.';
+
+  @override
+  String get cameraOpenSettings => 'Mở cài đặt máy ảnh';
+
+  @override
+  String get cameraIntroDesktop =>
+      'Trên Windows, máy ảnh giao mỗi ảnh dưới dạng một tệp: Kilit đọc ngay vào bộ nhớ, ghi đè tệp rồi xóa nó. Ảnh không chứa vị trí hay dữ liệu máy ảnh.';
+
+  @override
+  String get voiceRecord => 'Ghi tin nhắn thoại';
+
+  @override
+  String get voiceRecording => 'Đang ghi…';
+
+  @override
+  String get voiceStopped => 'Đã dừng ghi';
+
+  @override
+  String get voiceLimitHint =>
+      'Âm thanh nằm trong bộ nhớ và được gửi đã mã hóa. Tin nhắn thoại dừng ở 5 phút.';
+
+  @override
+  String get voiceNoMic =>
+      'Không mở được micrô. Hãy cho phép Kilit dùng micrô trong cài đặt của thiết bị.';
+
+  @override
+  String get voiceOpenSettings => 'Mở cài đặt micrô';
+
+  @override
+  String get voiceMessage => 'Tin nhắn thoại';
+
+  @override
+  String get voicePlay => 'Phát';
+
+  @override
+  String get voicePause => 'Tạm dừng';
+
+  @override
+  String get voiceCannotPlay => 'Không phát được';
 }

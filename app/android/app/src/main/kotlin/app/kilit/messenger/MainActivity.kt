@@ -64,6 +64,20 @@ class MainActivity : FlutterActivity() {
         MethodChannel(messenger, APP_CHANNEL).setMethodCallHandler { call, result ->
             if (call.method == "lastExit") {
                 result.success(CrashLog.lastExit(this))
+            } else if (call.method == "openSettings") {
+                // Kilit's page in Android's settings, for the camera permission
+                val intent = Intent(
+                    android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    android.net.Uri.fromParts("package", packageName, null),
+                ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                result.success(
+                    try {
+                        startActivity(intent)
+                        true
+                    } catch (e: android.content.ActivityNotFoundException) {
+                        false
+                    }
+                )
             } else if (call.method == "restart") {
                 val launch = packageManager.getLaunchIntentForPackage(packageName)
                 val component = launch?.component

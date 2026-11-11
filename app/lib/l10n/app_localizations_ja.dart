@@ -184,7 +184,7 @@ class LJa extends L {
 
   @override
   String safetyHint(String name) {
-    return 'この60桁を $name と、会って、または通話で照合してください。両方の電話で同じなら、間に誰もいません。';
+    return 'この60桁を $name と、会って、または通話で照合してください。双方で同じなら、間に誰もいません。';
   }
 
   @override
@@ -212,7 +212,7 @@ class LJa extends L {
   String get timerTitle => '消えるメッセージ';
 
   @override
-  String get timerHint => 'このチャットの新しいメッセージは、この時間が過ぎると両方の電話から消えます。';
+  String get timerHint => 'このチャットの新しいメッセージは、この時間が過ぎると双方から消えます。';
 
   @override
   String get timerOff => 'オフ';
@@ -245,7 +245,7 @@ class LJa extends L {
   }
 
   @override
-  String get cameraNoCamera => 'カメラを開けませんでした。電話の設定でカメラの権限を確認してください。';
+  String get cameraNoCamera => 'カメラを開けませんでした。端末の設定で Kilit にカメラの使用を許可してください。';
 
   @override
   String get cameraShutter => '写真を撮る';
@@ -257,7 +257,7 @@ class LJa extends L {
   String get cameraUse => '使う';
 
   @override
-  String get cameraIntro => '写真はメモリ上でのみ撮影されます。電話には何も書き込まれず、位置情報やカメラの情報も含まれません。';
+  String get cameraIntro => '写真はメモリ上でのみ撮影されます。端末には何も書き込まれず、位置情報やカメラの情報も含まれません。';
 
   @override
   String get cameraSendTo => '送信先…';
@@ -861,7 +861,7 @@ class LJa extends L {
 
   @override
   String get resendHint =>
-      'メッセージはリレーにありますが、相手の端末から到着の知らせがまだありません。届くまで、Kilit は 1 週間、1 日 1 回再送します。';
+      'このメッセージはリレーにありますが、相手の端末から到着の知らせがまだありません。届くまで、Kilit は 1 週間、1 日 1 回再送します。';
 
   @override
   String get resendDone => '再送しました。';
@@ -1177,7 +1177,7 @@ class LJa extends L {
 
   @override
   String get linkScanInDevices =>
-      'これはパソコンをリンクするためのコードです。このスマホで 設定 → リンク済みの端末 → パソコンをリンク を開き、そこで読み取ってください。';
+      'これはパソコンをリンクするためのコードです。スマホで 設定 → リンク済みデバイス → パソコンをリンク を開き、そこで読み取ってください。';
 
   @override
   String get crashTitle => 'Kilit が予期せず終了しました';
@@ -1235,4 +1235,58 @@ class LJa extends L {
 
   @override
   String get linkRequestOther => 'コードが違いますか？ 承認しないでください。そのリクエストは別の人が送ったものです。';
+
+  @override
+  String get deviceLeave => 'この Kilit ID から抜ける';
+
+  @override
+  String get deviceLeaveConfirm =>
+      'このパソコンはスマホの Kilit ID から抜けます。このパソコン上のチャット、連絡先、グループは削除されますが、スマホにはすべて残ります。金庫のファイルとメモはここに残ります。このパソコンは後でもう一度リンクできます。';
+
+  @override
+  String get deviceLeaveDone => 'このパソコンは Kilit ID から抜けました。これからは新しい Kilit です。';
+
+  @override
+  String get deviceLeftTitle => 'スマホの Kilit ID から外されました';
+
+  @override
+  String get deviceLeft =>
+      'スマホがこのパソコンを Kilit ID から外しました。このパソコン上のチャット、連絡先、グループは削除されました。金庫のファイルとメモは残っています。もう一度使うには、設定 → リンク済みデバイス でリンクしてください。';
+
+  @override
+  String get cameraOpenSettings => 'カメラの設定を開く';
+
+  @override
+  String get cameraIntroDesktop =>
+      'Windows ではカメラが写真を1枚ずつファイルとして渡します。Kilit はそれをすぐにメモリに読み込み、ファイルを上書きして削除します。写真には位置情報やカメラの情報は含まれません。';
+
+  @override
+  String get voiceRecord => 'ボイスメッセージを録音';
+
+  @override
+  String get voiceRecording => '録音中…';
+
+  @override
+  String get voiceStopped => '録音を停止しました';
+
+  @override
+  String get voiceLimitHint => '音声はメモリ上にのみ置かれ、暗号化して送信されます。ボイスメッセージは5分で停止します。';
+
+  @override
+  String get voiceNoMic => 'マイクを開けませんでした。端末の設定で Kilit にマイクの使用を許可してください。';
+
+  @override
+  String get voiceOpenSettings => 'マイクの設定を開く';
+
+  @override
+  String get voiceMessage => 'ボイスメッセージ';
+
+  @override
+  String get voicePlay => '再生';
+
+  @override
+  String get voicePause => '一時停止';
+
+  @override
+  String get voiceCannotPlay => '再生できません';
 }

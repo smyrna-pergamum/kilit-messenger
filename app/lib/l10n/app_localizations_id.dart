@@ -187,7 +187,7 @@ class LId extends L {
 
   @override
   String safetyHint(String name) {
-    return 'Bandingkan 60 digit ini dengan $name, secara langsung atau lewat telepon. Jika sama di kedua ponsel, tidak ada siapa pun di antara kalian.';
+    return 'Bandingkan 60 digit ini dengan $name, secara langsung atau lewat panggilan. Jika sama di kedua sisi, tidak ada siapa pun di antara kalian.';
   }
 
   @override
@@ -216,7 +216,7 @@ class LId extends L {
 
   @override
   String get timerHint =>
-      'Pesan baru di obrolan ini hilang setelah waktu ini, di kedua ponsel.';
+      'Pesan baru di obrolan ini hilang setelah waktu ini, bagi kalian berdua.';
 
   @override
   String get timerOff => 'Mati';
@@ -250,7 +250,7 @@ class LId extends L {
 
   @override
   String get cameraNoCamera =>
-      'Kamera tidak bisa dibuka. Periksa izin kamera di setelan ponsel.';
+      'Kamera tidak bisa dibuka. Izinkan Kilit memakai kamera di pengaturan perangkat.';
 
   @override
   String get cameraShutter => 'Ambil foto';
@@ -263,7 +263,7 @@ class LId extends L {
 
   @override
   String get cameraIntro =>
-      'Foto diambil hanya di memori: tidak ada yang ditulis ke ponsel, dan tidak berisi lokasi atau data kamera.';
+      'Foto diambil hanya di memori: tidak ada yang ditulis ke perangkat, dan foto tidak berisi lokasi atau data kamera.';
 
   @override
   String get cameraSendTo => 'Kirim ke…';
@@ -889,7 +889,7 @@ class LId extends L {
 
   @override
   String get resendHint =>
-      'Pesan ini ada di relay, tetapi ponsel mereka belum mengonfirmasi penerimaannya. Kilit mengirim ulang sekali sehari selama seminggu sampai pesan diterima.';
+      'Pesan ini ada di relay, tetapi perangkat mereka belum memberi tahu bahwa pesan sudah sampai. Kilit mengirim ulang sekali sehari selama seminggu sampai pesan sampai.';
 
   @override
   String get resendDone => 'Terkirim lagi.';
@@ -1214,7 +1214,7 @@ class LId extends L {
 
   @override
   String get linkScanInDevices =>
-      'Ini kode untuk menautkan komputer. Di ponsel ini buka Pengaturan, Perangkat tertaut, Tautkan komputer, lalu pindai di sana.';
+      'Ini kode untuk menautkan komputer. Di ponsel buka Pengaturan, Perangkat tertaut, Tautkan komputer, lalu pindai di sana.';
 
   @override
   String get crashTitle => 'Kilit tertutup tiba-tiba';
@@ -1276,4 +1276,61 @@ class LId extends L {
   @override
   String get linkRequestOther =>
       'Kodenya beda? Jangan setujui: orang lain yang mengirim permintaan itu.';
+
+  @override
+  String get deviceLeave => 'Keluar dari ID Kilit ini';
+
+  @override
+  String get deviceLeaveConfirm =>
+      'Komputer ini keluar dari ID Kilit ponselmu. Obrolan, kontak, dan grup di komputer ini dihapus; ponsel tetap menyimpan semuanya. File dan catatan di brankasmu tetap di sini. Kamu bisa menautkan komputer ini lagi nanti.';
+
+  @override
+  String get deviceLeaveDone =>
+      'Komputer ini sudah keluar dari ID Kilit. Sekarang ini Kilit baru.';
+
+  @override
+  String get deviceLeftTitle => 'Dikeluarkan dari ID Kilit ponselmu';
+
+  @override
+  String get deviceLeft =>
+      'Ponselmu mengeluarkan komputer ini dari ID Kilit-nya. Obrolan, kontak, dan grup di komputer ini sudah dihapus; file dan catatan di brankasmu tetap ada. Untuk memakainya lagi, tautkan di Pengaturan, Perangkat tertaut.';
+
+  @override
+  String get cameraOpenSettings => 'Buka pengaturan kamera';
+
+  @override
+  String get cameraIntroDesktop =>
+      'Di Windows, kamera menyerahkan setiap foto sebagai file: Kilit langsung membacanya ke memori, menimpa file itu, lalu menghapusnya. Foto tidak berisi lokasi atau data kamera.';
+
+  @override
+  String get voiceRecord => 'Rekam pesan suara';
+
+  @override
+  String get voiceRecording => 'Merekam…';
+
+  @override
+  String get voiceStopped => 'Rekaman berhenti';
+
+  @override
+  String get voiceLimitHint =>
+      'Suara tetap di memori dan dikirim terenkripsi. Pesan suara berhenti di 5 menit.';
+
+  @override
+  String get voiceNoMic =>
+      'Mikrofon tidak bisa dibuka. Izinkan Kilit memakai mikrofon di pengaturan perangkat.';
+
+  @override
+  String get voiceOpenSettings => 'Buka pengaturan mikrofon';
+
+  @override
+  String get voiceMessage => 'Pesan suara';
+
+  @override
+  String get voicePlay => 'Putar';
+
+  @override
+  String get voicePause => 'Jeda';
+
+  @override
+  String get voiceCannotPlay => 'Tidak bisa diputar';
 }

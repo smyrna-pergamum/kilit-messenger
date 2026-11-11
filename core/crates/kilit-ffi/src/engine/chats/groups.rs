@@ -470,6 +470,18 @@ impl Engine {
         Ok(events)
     }
 
+    /// Forgets every group, its conversation and files, on a device
+    /// leaving the ID.
+    pub(super) fn forget_groups(&mut self) -> Result<(), EngineError> {
+        for id in self.groups_all()?.list.keys() {
+            for l in self.load_group_chat(id)? {
+                self.drop_file(&l)?;
+            }
+            self.store.delete(&group_blob(id)?)?;
+        }
+        Ok(self.store.delete(GROUPS)?)
+    }
+
     /// Forgets a group this vault has left, or that ended: its
     /// conversation and files go too.
     pub fn delete_group(&mut self, id: &str) -> Result<(), EngineError> {

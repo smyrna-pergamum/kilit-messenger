@@ -4,9 +4,13 @@
     <!-- The embedded Tor needs the network; nothing else in Kilit opens a
          connection, and everything goes through Tor. -->
     <uses-permission android:name="android.permission.INTERNET"/>
-    <!-- The camera plugin asks for the microphone for video; Kilit takes
-         stills only (enableAudio: false), so it is taken out again. -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove"/>
+    <!-- Voice messages (0.1.10). Asked for only when the user first taps
+         the microphone in a chat; the camera itself still records no
+         sound (enableAudio: false). -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- The audio player asks for this to stream sound from the web; Kilit
+         plays voice messages from memory only. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove"/>
     <!-- Plugins ask for storage too; Kilit reads and writes files only
          through the system picker (Storage Access Framework), which needs
          no permission. -->

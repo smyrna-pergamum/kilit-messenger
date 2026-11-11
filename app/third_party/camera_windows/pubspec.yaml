@@ -1,0 +1,31 @@
+name: camera_windows
+description: A Flutter plugin for getting information about and controlling the camera on Windows.
+# Kilit: a copy of 0.3.0+1 whose takePicture writes to the temp folder
+# instead of Pictures (windows/camera_plugin.cpp, GetFilePathForPicture).
+publish_to: none
+repository: https://github.com/flutter/packages/tree/main/packages/camera/camera_windows
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+camera%22
+version: 0.3.0+1
+
+environment:
+  sdk: ^3.11.0
+  flutter: ">=3.41.0"
+
+flutter:
+  plugin:
+    implements: camera
+    platforms:
+      windows:
+        pluginClass: CameraWindows
+        dartPluginClass: CameraWindows
+
+dependencies:
+  camera_platform_interface: ^2.14.0
+  cross_file: ^0.3.1
+  flutter:
+    sdk: flutter
+  meta: ^1.10.0
+  stream_transform: ^2.0.0
+
+topics:
+  - camera

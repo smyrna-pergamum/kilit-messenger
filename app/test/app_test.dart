@@ -15,6 +15,7 @@ import 'package:kilit/screens/tor_screen.dart';
 import 'package:kilit/state/prefs.dart';
 import 'package:kilit/theme/theme.dart';
 import 'package:kilit/widgets/pin_pad.dart';
+import 'package:kilit/widgets/voice.dart';
 
 Future<void> enterPin(WidgetTester tester, String pin) async {
   for (final c in pin.split('')) {
@@ -319,6 +320,61 @@ Future<void> letTorUp(WidgetTester tester) async {
     await tester.pump(const Duration(seconds: 1));
   }
   await tester.pumpAndSettle();
+}
+
+/// The microphone in tests: a few pieces of "sound", in memory.
+class _FakeVoice implements VoiceInput {
+  final _out = StreamController<Uint8List>();
+
+  @override
+  Future<bool> allowed() async => true;
+
+  @override
+  Future<Stream<Uint8List>> start() async {
+    _out
+      ..add(Uint8List.fromList(List.filled(400, 1)))
+      ..add(Uint8List.fromList(List.filled(400, 2)));
+    return _out.stream;
+  }
+
+  @override
+  Future<void> stop() => _out.close();
+
+  @override
+  Future<void> dispose() async {}
+}
+
+/// A microphone that is not allowed.
+class _NoMic extends _FakeVoice {
+  @override
+  Future<bool> allowed() async => false;
+}
+
+/// A new Kilit linked to a phone with a QR code, back in Settings.
+Future<DevCore> linkedComputer(
+  WidgetTester tester, {
+  TorController? tor,
+}) async {
+  final (core, _) = await startApp(tester, tor: tor);
+  await enterPin(tester, '482916');
+  await enterPin(tester, '482916');
+  if (tor != null) await letTorUp(tester);
+  await openSettingsSection(tester, 'devices');
+  await tester.ensureVisible(
+    find.byKey(const ValueKey('device-link-to-phone')),
+  );
+  await tester.tap(find.byKey(const ValueKey('device-link-to-phone')));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('With QR code'));
+  for (var i = 0; i < 3; i++) {
+    await tester.pump(const Duration(milliseconds: 500));
+  }
+  core.finishLink();
+  await tester.pump(const Duration(seconds: 3));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Close'));
+  await tester.pumpAndSettle();
+  return core;
 }
 
 void main() {
@@ -1061,6 +1117,105 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('line-delivered')), findsOneWidget);
     tor.stop();
+  });
+
+  testWidgets('a linked computer leaves the Kilit ID of the phone', (
+    tester,
+  ) async {
+    final core = await linkedComputer(tester);
+    expect(await core.isPrimary(), isFalse);
+    await tester.ensureVisible(find.byKey(const ValueKey('device-leave')));
+    await tester.tap(find.byKey(const ValueKey('device-leave')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('device-leave-yes')));
+    await tester.pumpAndSettle();
+    expect(await core.isPrimary(), isTrue);
+    expect(
+      find.text('This computer left the Kilit ID. It is a new Kilit now.'),
+      findsOneWidget,
+    );
+    // a new Kilit again: it can be linked once more
+    expect(find.byKey(const ValueKey('device-leave')), findsNothing);
+    expect(find.byKey(const ValueKey('device-link-to-phone')), findsOneWidget);
+  });
+
+  testWidgets('the computer says so when the phone takes it off', (
+    tester,
+  ) async {
+    final tor = readyTor();
+    addTearDown(tor.dispose);
+    final core = await linkedComputer(tester, tor: tor);
+    core.removedByPhone();
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('left-dialog')), findsOneWidget);
+    await tester.tap(find.text('Close'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('left-dialog')), findsNothing);
+    expect((await core.linkState()).left, isFalse);
+    // said once
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('left-dialog')), findsNothing);
+    tor.stop();
+  });
+
+  testWidgets('a voice message is recorded in memory and sent', (tester) async {
+    VoiceInput.make = _FakeVoice.new;
+    addTearDown(() => VoiceInput.make = _FakeVoice.new);
+    final (_, _, tor) = await chatWithBora(tester);
+    addTearDown(tor.dispose);
+    await tester.tap(find.byKey(const ValueKey('chat-voice')));
+    // the sheet slides up; the recording clock keeps it from settling
+    for (var i = 0; i < 4; i++) {
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+    expect(find.byKey(const ValueKey('voice-time')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('voice-send')));
+    for (var i = 0; i < 4; i++) {
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('voice-message')), findsOneWidget);
+    expect(find.byKey(const ValueKey('voice-play')), findsOneWidget);
+    tor.stop();
+  });
+
+  testWidgets('without the microphone, the way to its setting shows', (
+    tester,
+  ) async {
+    VoiceInput.make = _NoMic.new;
+    addTearDown(() => VoiceInput.make = _FakeVoice.new);
+    final (_, _, tor) = await chatWithBora(tester);
+    addTearDown(tor.dispose);
+    await tester.tap(find.byKey(const ValueKey('chat-voice')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('voice-failed')), findsOneWidget);
+    expect(find.byKey(const ValueKey('voice-settings')), findsOneWidget);
+    await tester.tap(find.text('Close'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('voice-message')), findsNothing);
+    tor.stop();
+  });
+
+  testWidgets('a camera that does not open shows the way to its setting', (
+    tester,
+  ) async {
+    await startApp(tester);
+    await enterPin(tester, '482916');
+    await enterPin(tester, '482916');
+    await tester.tap(find.byIcon(Icons.photo_camera_outlined).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('camera-to-vault')));
+    // the camera plugin answers outside the test's clock
+    for (var i = 0; i < 4; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 100)),
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+    expect(find.byKey(const ValueKey('camera-failed')), findsOneWidget);
+    expect(find.byKey(const ValueKey('camera-settings')), findsOneWidget);
   });
 
   testWidgets('a disappearing-message time marks new messages', (tester) async {

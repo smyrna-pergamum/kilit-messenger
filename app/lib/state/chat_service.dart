@@ -29,6 +29,10 @@ class ChatService extends ChangeNotifier {
   /// Goes up whenever contacts or conversations may have changed.
   int revision = 0;
 
+  /// This computer was taken off the phone's Kilit ID and left it; the
+  /// shell says so once and clears it.
+  bool left = false;
+
   /// Connected to the relays (through Tor).
   bool get online => _online;
   NetTick get net => _net;
@@ -75,13 +79,17 @@ class ChatService extends ChangeNotifier {
     try {
       final t = await core.netTick();
       if (_disposed) return;
-      final changed =
+      var changed =
           t.arrived.isNotEmpty ||
           t.relaysUp != _net.relaysUp ||
           t.queued != _net.queued;
       _net = t;
       for (final a in t.arrived) {
         _arrivals.add(a);
+      }
+      if (!left && (await core.linkState()).left) {
+        left = true;
+        changed = true;
       }
       if (changed) {
         revision++;

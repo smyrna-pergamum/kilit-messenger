@@ -85,6 +85,7 @@ class _ShellState extends State<Shell> {
   void initState() {
     super.initState();
     widget.tor.addListener(_torChanged);
+    _chats.addListener(_checkLeft);
     WidgetsBinding.instance.addPostFrameCallback((_) => _showCrash());
     // things shared or opened into Kilit wait until the vault is open
     _incoming = widget.files.incomingReady.listen((_) => _take());
@@ -148,6 +149,33 @@ class _ShellState extends State<Shell> {
   void _ownBridges() {
     widget.prefs.openSections.add('bridges');
     setState(() => _index = 3);
+  }
+
+  bool _leftShown = false;
+
+  /// The phone took this computer off its Kilit ID: say what happened.
+  Future<void> _checkLeft() async {
+    if (!_chats.left || _leftShown || !mounted) return;
+    _leftShown = true;
+    final l = L.of(context);
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        key: const ValueKey('left-dialog'),
+        title: Text(l.deviceLeftTitle),
+        content: Text(l.deviceLeft),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l.close),
+          ),
+        ],
+      ),
+    );
+    await widget.session.core.linkCancel();
+    _chats.left = false;
+    _leftShown = false;
+    _chats.touched();
   }
 
   /// Kilit closed on its own last time: the report, to copy and send.

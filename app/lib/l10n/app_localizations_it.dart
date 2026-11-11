@@ -191,7 +191,7 @@ class LIt extends L {
 
   @override
   String safetyHint(String name) {
-    return 'Confronta queste 60 cifre con $name, di persona o al telefono. Se sono uguali su entrambi i telefoni, non c\'è nessuno nel mezzo.';
+    return 'Confronta queste 60 cifre con $name, di persona o in una chiamata. Se sono uguali da entrambe le parti, non c\'è nessuno nel mezzo.';
   }
 
   @override
@@ -220,7 +220,7 @@ class LIt extends L {
 
   @override
   String get timerHint =>
-      'I nuovi messaggi di questa chat scompaiono dopo questo tempo, su entrambi i telefoni.';
+      'I nuovi messaggi di questa chat scompaiono dopo questo tempo, per entrambi.';
 
   @override
   String get timerOff => 'Disattivati';
@@ -254,7 +254,7 @@ class LIt extends L {
 
   @override
   String get cameraNoCamera =>
-      'Impossibile aprire la fotocamera. Controlla il permesso della fotocamera nelle impostazioni del telefono.';
+      'Impossibile aprire la fotocamera. Consenti a Kilit di usare la fotocamera nelle impostazioni del dispositivo.';
 
   @override
   String get cameraShutter => 'Scatta una foto';
@@ -267,7 +267,7 @@ class LIt extends L {
 
   @override
   String get cameraIntro =>
-      'Le foto si scattano solo in memoria: sul telefono non viene scritto nulla e non contengono posizione né dati della fotocamera.';
+      'Le foto si scattano solo in memoria: sul dispositivo non viene scritto nulla e non contengono posizione né dati della fotocamera.';
 
   @override
   String get cameraSendTo => 'Invia a…';
@@ -895,7 +895,7 @@ class LIt extends L {
 
   @override
   String get resendHint =>
-      'Un relay ha il messaggio, ma il loro telefono non ne ha ancora confermato l\'arrivo. Kilit lo reinvia una volta al giorno per una settimana, finché non arriva.';
+      'Un relay ha questo messaggio, ma il dispositivo dell\'altra persona non ne ha ancora confermato l\'arrivo. Kilit lo reinvia una volta al giorno per una settimana, finché non arriva.';
 
   @override
   String get resendDone => 'Inviato di nuovo.';
@@ -1224,7 +1224,7 @@ class LIt extends L {
 
   @override
   String get linkScanInDevices =>
-      'Questo è un codice per collegare un computer. Su questo telefono apri Impostazioni, Dispositivi collegati, Collega un computer, e scansionalo lì.';
+      'Questo è un codice per collegare un computer. Sul telefono apri Impostazioni, Dispositivi collegati, Collega un computer, e scansionalo lì.';
 
   @override
   String get crashTitle => 'Kilit si è chiuso inaspettatamente';
@@ -1286,4 +1286,61 @@ class LIt extends L {
   @override
   String get linkRequestOther =>
       'Un codice diverso? Non approvarla: quella richiesta l\'ha inviata qualcun altro.';
+
+  @override
+  String get deviceLeave => 'Esci da questo ID Kilit';
+
+  @override
+  String get deviceLeaveConfirm =>
+      'Questo computer esce dall\'ID Kilit del tuo telefono. Chat, contatti e gruppi su questo computer vengono eliminati; il telefono li conserva tutti. I file e le note della tua cassaforte restano qui. Potrai collegare di nuovo questo computer più tardi.';
+
+  @override
+  String get deviceLeaveDone =>
+      'Questo computer è uscito dall\'ID Kilit. Ora è un nuovo Kilit.';
+
+  @override
+  String get deviceLeftTitle => 'Rimosso dall\'ID Kilit del tuo telefono';
+
+  @override
+  String get deviceLeft =>
+      'Il tuo telefono ha rimosso questo computer dal suo ID Kilit. Chat, contatti e gruppi su questo computer sono stati eliminati; i file e le note della cassaforte restano. Per usarlo di nuovo, collegalo in Impostazioni, Dispositivi collegati.';
+
+  @override
+  String get cameraOpenSettings => 'Apri impostazioni fotocamera';
+
+  @override
+  String get cameraIntroDesktop =>
+      'Su Windows la fotocamera consegna ogni foto come file: Kilit lo legge subito in memoria, sovrascrive il file e lo elimina. Le foto non contengono posizione né dati della fotocamera.';
+
+  @override
+  String get voiceRecord => 'Registra un messaggio vocale';
+
+  @override
+  String get voiceRecording => 'Registrazione…';
+
+  @override
+  String get voiceStopped => 'Registrazione interrotta';
+
+  @override
+  String get voiceLimitHint =>
+      'L\'audio resta in memoria e viene inviato cifrato. Un messaggio vocale si ferma a 5 minuti.';
+
+  @override
+  String get voiceNoMic =>
+      'Impossibile aprire il microfono. Consenti a Kilit di usare il microfono nelle impostazioni del dispositivo.';
+
+  @override
+  String get voiceOpenSettings => 'Apri impostazioni microfono';
+
+  @override
+  String get voiceMessage => 'Messaggio vocale';
+
+  @override
+  String get voicePlay => 'Riproduci';
+
+  @override
+  String get voicePause => 'Pausa';
+
+  @override
+  String get voiceCannotPlay => 'Impossibile riprodurre';
 }

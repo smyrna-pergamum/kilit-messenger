@@ -171,6 +171,11 @@ abstract class KilitHandle implements RustOpaqueInterface {
   /// Leaves a group (the admin ends it instead).
   Future<void> leaveGroup({required String id});
 
+  /// A linked computer: leaves the phone's ID. The phone is told; this
+  /// device forgets the ID's chats, contacts and groups and becomes a
+  /// new Kilit. The vault's own files and notes stay.
+  Future<void> leaveId();
+
   /// The phone: links the device whose QR code said `text`. Returns the
   /// code both screens show.
   Future<String> linkAccept({required String text, required String name});
@@ -1027,6 +1032,10 @@ class LinkStatus {
   /// The requests that came, newest first.
   final List<LinkRequestItem> requests;
 
+  /// This computer was taken off the phone's ID and left it: it is a new
+  /// Kilit again. Shown once, until [`KilitHandle::link_cancel`].
+  final bool left;
+
   const LinkStatus({
     this.offer,
     required this.waiting,
@@ -1034,6 +1043,7 @@ class LinkStatus {
     required this.done,
     required this.listening,
     required this.requests,
+    required this.left,
   });
 
   @override
@@ -1043,7 +1053,8 @@ class LinkStatus {
       code.hashCode ^
       done.hashCode ^
       listening.hashCode ^
-      requests.hashCode;
+      requests.hashCode ^
+      left.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -1055,7 +1066,8 @@ class LinkStatus {
           code == other.code &&
           done == other.done &&
           listening == other.listening &&
-          requests == other.requests;
+          requests == other.requests &&
+          left == other.left;
 }
 
 /// How opening a pasted message went.

@@ -456,7 +456,7 @@ abstract class L {
   /// No description provided for @safetyHint.
   ///
   /// In en, this message translates to:
-  /// **'Compare these 60 digits with {name}, in person or on a call. If they are the same on both phones, no one is in between.'**
+  /// **'Compare these 60 digits with {name}, in person or on a call. If they are the same on both sides, no one is in between.'**
   String safetyHint(String name);
 
   /// No description provided for @attachCamera.
@@ -510,7 +510,7 @@ abstract class L {
   /// No description provided for @timerHint.
   ///
   /// In en, this message translates to:
-  /// **'New messages in this chat disappear after this time, on both phones.'**
+  /// **'New messages in this chat disappear after this time, for both of you.'**
   String get timerHint;
 
   /// No description provided for @timerOff.
@@ -570,7 +570,7 @@ abstract class L {
   /// No description provided for @cameraNoCamera.
   ///
   /// In en, this message translates to:
-  /// **'The camera could not be opened. Check the camera permission in the phone\'s settings.'**
+  /// **'The camera could not be opened. Allow Kilit to use the camera in the device\'s settings.'**
   String get cameraNoCamera;
 
   /// No description provided for @cameraShutter.
@@ -594,7 +594,7 @@ abstract class L {
   /// No description provided for @cameraIntro.
   ///
   /// In en, this message translates to:
-  /// **'Photos are taken in memory only: nothing is written to the phone, and they carry no location or camera data.'**
+  /// **'Photos are taken in memory only: nothing is written to the device, and they carry no location or camera data.'**
   String get cameraIntro;
 
   /// No description provided for @cameraSendTo.
@@ -1728,7 +1728,7 @@ abstract class L {
   /// No description provided for @resendHint.
   ///
   /// In en, this message translates to:
-  /// **'A relay has this message, but their phone has not said it arrived. Kilit sends it again once a day for a week, until it does.'**
+  /// **'A relay has this message, but their device has not said it arrived. Kilit sends it again once a day for a week, until it does.'**
   String get resendHint;
 
   /// No description provided for @resendDone.
@@ -2280,7 +2280,7 @@ abstract class L {
   /// No description provided for @linkScanInDevices.
   ///
   /// In en, this message translates to:
-  /// **'This is a code for linking a computer. On this phone open Settings, Linked devices, Link a computer, and scan it there.'**
+  /// **'This is a code for linking a computer. On the phone open Settings, Linked devices, Link a computer, and scan it there.'**
   String get linkScanInDevices;
 
   /// No description provided for @crashTitle.
@@ -2390,6 +2390,108 @@ abstract class L {
   /// In en, this message translates to:
   /// **'A different code? Do not approve it: someone else sent that request.'**
   String get linkRequestOther;
+
+  /// No description provided for @deviceLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave this Kilit ID'**
+  String get deviceLeave;
+
+  /// No description provided for @deviceLeaveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This computer leaves your phone\'s Kilit ID. The chats, contacts and groups on this computer are deleted; the phone keeps them all. Your vault files and notes stay here. You can link this computer again later.'**
+  String get deviceLeaveConfirm;
+
+  /// No description provided for @deviceLeaveDone.
+  ///
+  /// In en, this message translates to:
+  /// **'This computer left the Kilit ID. It is a new Kilit now.'**
+  String get deviceLeaveDone;
+
+  /// No description provided for @deviceLeftTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Taken off your phone\'s Kilit ID'**
+  String get deviceLeftTitle;
+
+  /// No description provided for @deviceLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Your phone took this computer off its Kilit ID. The chats, contacts and groups on this computer were deleted; your vault files and notes stay. To use it again, link it in Settings, Linked devices.'**
+  String get deviceLeft;
+
+  /// No description provided for @cameraOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open camera settings'**
+  String get cameraOpenSettings;
+
+  /// No description provided for @cameraIntroDesktop.
+  ///
+  /// In en, this message translates to:
+  /// **'On Windows the camera hands each photo over as a file: Kilit reads it into memory at once, overwrites the file and deletes it. Photos carry no location or camera data.'**
+  String get cameraIntroDesktop;
+
+  /// No description provided for @voiceRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Record a voice message'**
+  String get voiceRecord;
+
+  /// No description provided for @voiceRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording…'**
+  String get voiceRecording;
+
+  /// No description provided for @voiceStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording stopped'**
+  String get voiceStopped;
+
+  /// No description provided for @voiceLimitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The sound stays in memory and is sent encrypted. A voice message stops at 5 minutes.'**
+  String get voiceLimitHint;
+
+  /// No description provided for @voiceNoMic.
+  ///
+  /// In en, this message translates to:
+  /// **'The microphone could not be opened. Allow Kilit to use the microphone in the device\'s settings.'**
+  String get voiceNoMic;
+
+  /// No description provided for @voiceOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open microphone settings'**
+  String get voiceOpenSettings;
+
+  /// No description provided for @voiceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice message'**
+  String get voiceMessage;
+
+  /// No description provided for @voicePlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get voicePlay;
+
+  /// No description provided for @voicePause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get voicePause;
+
+  /// No description provided for @voiceCannotPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot play'**
+  String get voiceCannotPlay;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

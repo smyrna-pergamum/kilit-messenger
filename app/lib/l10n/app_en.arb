@@ -76,7 +76,7 @@
   "chatSend": "Send",
   "chatNewContact": "Wrote to you without being added. Accept to reply, or block them. Compare safety numbers before you trust them.",
   "safetyTitle": "Safety number",
-  "safetyHint": "Compare these 60 digits with {name}, in person or on a call. If they are the same on both phones, no one is in between.",
+  "safetyHint": "Compare these 60 digits with {name}, in person or on a call. If they are the same on both sides, no one is in between.",
   "@safetyHint": {
     "placeholders": {
       "name": {
@@ -92,7 +92,7 @@
   "fileToVault": "Add to vault",
   "fileSavedVault": "Added to the vault.",
   "timerTitle": "Disappearing messages",
-  "timerHint": "New messages in this chat disappear after this time, on both phones.",
+  "timerHint": "New messages in this chat disappear after this time, for both of you.",
   "timerOff": "Off",
   "timer5m": "5 minutes",
   "timer1h": "1 hour",
@@ -109,11 +109,11 @@
       }
     }
   },
-  "cameraNoCamera": "The camera could not be opened. Check the camera permission in the phone's settings.",
+  "cameraNoCamera": "The camera could not be opened. Allow Kilit to use the camera in the device's settings.",
   "cameraShutter": "Take a photo",
   "cameraRetake": "Retake",
   "cameraUse": "Use",
-  "cameraIntro": "Photos are taken in memory only: nothing is written to the phone, and they carry no location or camera data.",
+  "cameraIntro": "Photos are taken in memory only: nothing is written to the device, and they carry no location or camera data.",
   "cameraSendTo": "Send to…",
   "cameraToVault": "Keep in the vault",
   "cameraSavedVault": "Photo kept in the vault.",
@@ -391,7 +391,7 @@
   "torRouteCustomHint": "Bridge lines from bridges.torproject.org or someone you trust.",
   "torRouteLinesHint": "One bridge line per row",
   "resend": "Send again",
-  "resendHint": "A relay has this message, but their phone has not said it arrived. Kilit sends it again once a day for a week, until it does.",
+  "resendHint": "A relay has this message, but their device has not said it arrived. Kilit sends it again once a day for a week, until it does.",
   "resendDone": "Sent again.",
   "newGroup": "New group",
   "groupName": "Group name",
@@ -593,7 +593,7 @@
   "selfNoteDiscard": "Discard",
   "linkTorWait": "Tor is not connected yet, so linking waits. Both devices need Tor.",
   "linkFailed": "Linking did not start: {error}",
-  "linkScanInDevices": "This is a code for linking a computer. On this phone open Settings, Linked devices, Link a computer, and scan it there.",
+  "linkScanInDevices": "This is a code for linking a computer. On the phone open Settings, Linked devices, Link a computer, and scan it there.",
   "@linkFailed": {
     "placeholders": {
       "error": {
@@ -618,5 +618,22 @@
   "linkListenScan": "Scan the computer's code instead",
   "linkRequestCode": "A computer asks to link. Is this the code on its screen?",
   "linkRequestApprove": "Same code: link it",
-  "linkRequestOther": "A different code? Do not approve it: someone else sent that request."
+  "linkRequestOther": "A different code? Do not approve it: someone else sent that request.",
+  "deviceLeave": "Leave this Kilit ID",
+  "deviceLeaveConfirm": "This computer leaves your phone's Kilit ID. The chats, contacts and groups on this computer are deleted; the phone keeps them all. Your vault files and notes stay here. You can link this computer again later.",
+  "deviceLeaveDone": "This computer left the Kilit ID. It is a new Kilit now.",
+  "deviceLeftTitle": "Taken off your phone's Kilit ID",
+  "deviceLeft": "Your phone took this computer off its Kilit ID. The chats, contacts and groups on this computer were deleted; your vault files and notes stay. To use it again, link it in Settings, Linked devices.",
+  "cameraOpenSettings": "Open camera settings",
+  "cameraIntroDesktop": "On Windows the camera hands each photo over as a file: Kilit reads it into memory at once, overwrites the file and deletes it. Photos carry no location or camera data.",
+  "voiceRecord": "Record a voice message",
+  "voiceRecording": "Recording…",
+  "voiceStopped": "Recording stopped",
+  "voiceLimitHint": "The sound stays in memory and is sent encrypted. A voice message stops at 5 minutes.",
+  "voiceNoMic": "The microphone could not be opened. Allow Kilit to use the microphone in the device's settings.",
+  "voiceOpenSettings": "Open microphone settings",
+  "voiceMessage": "Voice message",
+  "voicePlay": "Play",
+  "voicePause": "Pause",
+  "voiceCannotPlay": "Cannot play"
 }

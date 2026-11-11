@@ -17,6 +17,8 @@ const LINK_NAME: &str = "link.cbor";
 /// `kilit://link?h=<hash of the X-Wing public key>&t=<tag>`; 0.1.6 and
 /// before put the whole key in the code: `k=<X-Wing public key>`.
 pub const LINK_URL: &str = "kilit://link?";
+/// `sync_to` of a linked device's last message: it leaves the ID.
+const LEAVE: &str = "leave";
 /// A linking not finished in this long is dropped.
 const LINK_LIFE: i64 = 15 * 60;
 
@@ -88,6 +90,17 @@ struct Linking {
     names: BTreeMap<u32, (String, i64)>,
     /// The card changed (a device came or went): publish it again.
     card_dirty: bool,
+    /// A linked device: the phone took it off; it leaves the ID on the
+    /// next round.
+    #[serde(default)]
+    removed: bool,
+    /// The phone: devices that said they leave, to take off next round.
+    #[serde(default)]
+    leaving: Vec<u32>,
+    /// A linked device left the ID because the phone took it off: say so
+    /// once.
+    #[serde(default)]
+    left: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -131,6 +144,9 @@ pub struct LinkState {
     pub code: Option<String>,
     /// Linking finished.
     pub done: bool,
+    /// This device was taken off the phone's ID and left it: it is a new
+    /// Kilit again. Said once, until [`Engine::link_cancel`].
+    pub left: bool,
 }
 
 /// One of this ID's devices.
@@ -770,6 +786,7 @@ impl Engine {
             waiting: l.waiting.is_some() || l.pending.is_some(),
             code: l.code,
             done: l.done,
+            left: l.left,
         })
     }
 
@@ -783,7 +800,96 @@ impl Engine {
         l.waiting = None;
         l.code = None;
         l.done = false;
+        l.left = false;
         self.save_linking(&l)
+    }
+
+    /// Run before a round's events: a device the phone took off leaves the
+    /// ID, and the phone takes off the devices that said they leave.
+    /// Returns true when this device just left.
+    pub(super) fn settle_devices(&mut self) -> Result<bool, EngineError> {
+        if self.store.len(SIGNAL)?.is_none() {
+            return Ok(false);
+        }
+        let mut l = self.linking()?;
+        if l.removed {
+            self.forget_id()?;
+            let l = Linking {
+                left: true,
+                ..Linking::default()
+            };
+            self.save_linking(&l)?;
+            return Ok(true);
+        }
+        if l.leaving.is_empty() {
+            return Ok(false);
+        }
+        let mut m = self.messaging()?;
+        let mut changed = false;
+        for d in std::mem::take(&mut l.leaving) {
+            if m.device_id() == 1 && m.own_devices().contains(&d) {
+                // it has left already: no last message for it
+                m.remove_own_device(d, self.system_now())
+                    .map_err(messaging_err)?;
+                l.names.remove(&d);
+                changed = true;
+            }
+        }
+        if changed {
+            self.save_messaging(&m)?;
+            l.card_dirty = true;
+        }
+        self.save_linking(&l)?;
+        if changed {
+            self.tell_contacts_card()?;
+        }
+        Ok(false)
+    }
+
+    /// A linked device: leaves the phone's ID. The phone is told and takes
+    /// it off; this device forgets the ID's chats, contacts and groups and
+    /// is a new Kilit again. The vault's own files and notes stay.
+    pub fn leave_id(&mut self) -> Result<(), EngineError> {
+        let mut m = self.messaging()?;
+        if m.device_id() == 1 {
+            return Err(EngineError::Rejected(
+                "only a linked device can leave its phone's ID".into(),
+            ));
+        }
+        let bye = m
+            .seal_own(
+                1,
+                &Content {
+                    sync_to: LEAVE.into(),
+                    ..Content::default()
+                },
+                self.system_now(),
+            )
+            .ok();
+        self.forget_id()?;
+        if let Some(o) = bye {
+            let event = self.message_event(o.tag, &o.payload)?;
+            self.queue(vec![event])?;
+        }
+        Ok(())
+    }
+
+    /// Forgets this ID here: chats with their files, groups, contacts, the
+    /// Signal state, what waited to be sent, linking. The next use makes a
+    /// new Kilit ID.
+    fn forget_id(&mut self) -> Result<(), EngineError> {
+        let m = self.messaging()?;
+        for c in m.contacts() {
+            for l in self.load_chat(&c.id)? {
+                self.drop_file(&l)?;
+            }
+            self.store.delete(&chat_blob(&c.id)?)?;
+        }
+        self.forget_groups()?;
+        for blob in [FILES, OUTBOX, LINK, SIGNAL] {
+            self.store.delete(blob)?;
+        }
+        Ok(())
     }
 
     /// This ID's devices, this one included.
@@ -813,8 +919,15 @@ impl Engine {
     /// The phone: takes a linked device off this ID. Contacts are told.
     pub fn unlink_device(&mut self, device: u32) -> Result<(), EngineError> {
         let mut m = self.messaging()?;
-        m.remove_own_device(device).map_err(messaging_err)?;
+        let bye = m
+            .remove_own_device(device, self.system_now())
+            .map_err(messaging_err)?;
         self.save_messaging(&m)?;
+        // the device learns it was taken off, and leaves
+        if let Some(o) = bye {
+            let event = self.message_event(o.tag, &o.payload)?;
+            self.queue(vec![event])?;
+        }
         let mut l = self.linking()?;
         l.names.remove(&device);
         l.card_dirty = true;
@@ -831,7 +944,26 @@ impl Engine {
         files: &mut Files,
     ) -> Result<(), EngineError> {
         let now = self.system_now();
+        // a linked device leaves: the phone takes it off next round, with
+        // a fresh vault state rather than the one this loop holds
+        if r.sync_to == LEAVE {
+            if m.device_id() == 1 && r.device != 1 {
+                let mut l = self.linking()?;
+                if !l.leaving.contains(&r.device) {
+                    l.leaving.push(r.device);
+                }
+                self.save_linking(&l)?;
+            }
+            return Ok(());
+        }
         if r.sync_to.is_empty() {
+            if let Some(card) = &r.card
+                && m.card_drops_me(card)
+            {
+                let mut l = self.linking()?;
+                l.removed = true;
+                return self.save_linking(&l);
+            }
             if let Some(card) = &r.card {
                 m.take_own_card(card, now).map_err(messaging_err)?;
                 self.save_messaging(m)?;

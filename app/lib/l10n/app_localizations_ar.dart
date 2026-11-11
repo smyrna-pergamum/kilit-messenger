@@ -185,7 +185,7 @@ class LAr extends L {
 
   @override
   String safetyHint(String name) {
-    return 'قارن هذه الأرقام الستين مع $name، وجهًا لوجه أو في مكالمة. إذا تطابقت على الهاتفين فلا أحد بينكما.';
+    return 'قارن هذه الأرقام الستين مع $name، وجهًا لوجه أو في مكالمة. إذا تطابقت على الجانبين فلا أحد بينكما.';
   }
 
   @override
@@ -214,7 +214,7 @@ class LAr extends L {
 
   @override
   String get timerHint =>
-      'تختفي الرسائل الجديدة في هذه المحادثة بعد هذه المدة، على الهاتفين.';
+      'تختفي الرسائل الجديدة في هذه المحادثة بعد هذه المدة، لدى كليكما.';
 
   @override
   String get timerOff => 'متوقفة';
@@ -248,7 +248,7 @@ class LAr extends L {
 
   @override
   String get cameraNoCamera =>
-      'تعذّر فتح الكاميرا. تحقّق من إذن الكاميرا في إعدادات الهاتف.';
+      'تعذّر فتح الكاميرا. اسمح لـ Kilit باستخدام الكاميرا من إعدادات الجهاز.';
 
   @override
   String get cameraShutter => 'التقاط صورة';
@@ -261,7 +261,7 @@ class LAr extends L {
 
   @override
   String get cameraIntro =>
-      'تُلتقط الصور في الذاكرة فقط: لا يُكتب شيء على الهاتف، ولا تحمل موقعًا ولا بيانات كاميرا.';
+      'تُلتقط الصور في الذاكرة فقط: لا يُكتب شيء على الجهاز، ولا تحمل موقعًا ولا بيانات كاميرا.';
 
   @override
   String get cameraSendTo => 'إرسال إلى…';
@@ -883,7 +883,7 @@ class LAr extends L {
 
   @override
   String get resendHint =>
-      'الرسالة لدى أحد المرحِّلات، لكن هاتفهم لم يؤكد وصولها بعد. يعيد Kilit إرسالها مرة يوميًا لمدة أسبوع حتى تصل.';
+      'الرسالة لدى أحد المرحِّلات، لكن جهاز الطرف الآخر لم يُبلغ بوصولها بعد. يعيد Kilit إرسالها مرة يوميًا لمدة أسبوع حتى تصل.';
 
   @override
   String get resendDone => 'أُعيد الإرسال.';
@@ -1205,7 +1205,7 @@ class LAr extends L {
 
   @override
   String get linkScanInDevices =>
-      'هذا رمز لربط حاسوب. افتح على هذا الهاتف الإعدادات، الأجهزة المرتبطة، ربط حاسوب، وامسحه هناك.';
+      'هذا رمز لربط حاسوب. افتح على الهاتف الإعدادات، الأجهزة المرتبطة، ربط كمبيوتر، وامسحه هناك.';
 
   @override
   String get crashTitle => 'أُغلق Kilit بشكل غير متوقع';
@@ -1264,4 +1264,61 @@ class LAr extends L {
 
   @override
   String get linkRequestOther => 'رمز مختلف؟ لا توافق: أرسل الطلبَ شخصٌ آخر.';
+
+  @override
+  String get deviceLeave => 'مغادرة معرّف Kilit هذا';
+
+  @override
+  String get deviceLeaveConfirm =>
+      'سيغادر هذا الحاسوب معرّف Kilit الخاص بهاتفك. تُحذف المحادثات وجهات الاتصال والمجموعات من هذا الحاسوب؛ ويحتفظ الهاتف بها كلها. تبقى ملفات خزنتك وملاحظاتها هنا. يمكنك ربط هذا الحاسوب مجددًا لاحقًا.';
+
+  @override
+  String get deviceLeaveDone =>
+      'غادر هذا الحاسوب معرّف Kilit. أصبح الآن Kilit جديدًا.';
+
+  @override
+  String get deviceLeftTitle => 'أُزيل من معرّف Kilit الخاص بهاتفك';
+
+  @override
+  String get deviceLeft =>
+      'أزال هاتفك هذا الحاسوب من معرّف Kilit الخاص به. حُذفت المحادثات وجهات الاتصال والمجموعات من هذا الحاسوب؛ وبقيت ملفات خزنتك وملاحظاتها. لاستخدامه مجددًا، اربطه من الإعدادات، الأجهزة المرتبطة.';
+
+  @override
+  String get cameraOpenSettings => 'فتح إعدادات الكاميرا';
+
+  @override
+  String get cameraIntroDesktop =>
+      'على Windows تسلّم الكاميرا كل صورة كملف: يقرؤه Kilit إلى الذاكرة فورًا، ثم يكتب فوق الملف ويحذفه. لا تحمل الصور موقعًا ولا بيانات كاميرا.';
+
+  @override
+  String get voiceRecord => 'تسجيل رسالة صوتية';
+
+  @override
+  String get voiceRecording => 'جارٍ التسجيل…';
+
+  @override
+  String get voiceStopped => 'توقف التسجيل';
+
+  @override
+  String get voiceLimitHint =>
+      'يبقى الصوت في الذاكرة ويُرسل مشفّرًا. تتوقف الرسالة الصوتية عند 5 دقائق.';
+
+  @override
+  String get voiceNoMic =>
+      'تعذّر فتح الميكروفون. اسمح لـ Kilit باستخدام الميكروفون من إعدادات الجهاز.';
+
+  @override
+  String get voiceOpenSettings => 'فتح إعدادات الميكروفون';
+
+  @override
+  String get voiceMessage => 'رسالة صوتية';
+
+  @override
+  String get voicePlay => 'تشغيل';
+
+  @override
+  String get voicePause => 'إيقاف مؤقت';
+
+  @override
+  String get voiceCannotPlay => 'تعذّر التشغيل';
 }

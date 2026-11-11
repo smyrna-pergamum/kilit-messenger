@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../core/kilit_core.dart';
 import '../l10n/app_localizations.dart';
+import '../platform/desktop_camera.dart';
 import '../theme/tokens.dart';
 
 /// Takes a photo without writing anything to disk: the camera's preview
@@ -14,7 +15,9 @@ import '../theme/tokens.dart';
 /// or null.
 ///
 /// (The camera plugin's takePicture would write the full-size picture, with
-/// everything the sensor knows, to a file first.)
+/// everything the sensor knows, to a file first.) On Windows there is no
+/// stream: there the picture comes through [DesktopCamera.shot], whose file
+/// is gone at once, and the core takes its metadata out.
 class CameraCapture extends StatefulWidget {
   const CameraCapture({super.key, required this.core});
 
@@ -44,14 +47,18 @@ class _CameraCaptureState extends State<CameraCapture> {
         (c) => c.lensDirection == CameraLensDirection.back,
         orElse: () => cams.first,
       );
-      final c = CameraController(
-        back,
-        ResolutionPreset.veryHigh,
-        enableAudio: false,
-        imageFormatGroup: ImageFormatGroup.yuv420,
-      );
+      final c = DesktopCamera.streams
+          ? CameraController(
+              back,
+              ResolutionPreset.veryHigh,
+              enableAudio: false,
+              imageFormatGroup: ImageFormatGroup.yuv420,
+            )
+          : CameraController(back, ResolutionPreset.high, enableAudio: false);
       await c.initialize();
-      await c.startImageStream((img) => _latest = img);
+      if (DesktopCamera.streams) {
+        await c.startImageStream((img) => _latest = img);
+      }
       if (!mounted) {
         await c.dispose();
         return;
@@ -81,6 +88,7 @@ class _CameraCaptureState extends State<CameraCapture> {
   }
 
   Future<void> _shutter() async {
+    if (!DesktopCamera.streams) return _desktopShutter();
     final c = _cam;
     final img = _latest;
     if (c == null || img == null || _busy || img.planes.length < 3) return;
@@ -110,6 +118,25 @@ class _CameraCaptureState extends State<CameraCapture> {
     }
   }
 
+  /// Windows: a picture through a file that is gone at once, then without
+  /// its metadata.
+  Future<void> _desktopShutter() async {
+    final c = _cam;
+    if (c == null || _busy) return;
+    setState(() => _busy = true);
+    try {
+      final raw = await DesktopCamera.shot(c);
+      final clean = await widget.core.cleanMetadata(raw);
+      final jpeg = clean.bytes;
+      if (jpeg == null) throw StateError('${clean.outcome}');
+      if (mounted) setState(() => _shot = jpeg);
+    } on Object {
+      if (mounted) setState(() => _failed = true);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
@@ -125,17 +152,7 @@ class _CameraCaptureState extends State<CameraCapture> {
       ),
       body: SafeArea(
         child: _failed
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Text(
-                    l.cameraNoCamera,
-                    key: const ValueKey('camera-failed'),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-              )
+            ? const Center(child: CameraFailed())
             : Column(
                 children: [
                   Expanded(
@@ -247,7 +264,7 @@ class CameraTab extends StatelessWidget {
             Icon(Icons.photo_camera_outlined, size: 48, color: t.accent),
             const SizedBox(height: 12),
             Text(
-              l.cameraIntro,
+              DesktopCamera.streams ? l.cameraIntro : l.cameraIntroDesktop,
               textAlign: TextAlign.center,
               style: TextStyle(color: t.textMuted),
             ),
@@ -267,6 +284,39 @@ class CameraTab extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// The camera did not open: why, and the way to the setting that lets
+/// Kilit use it.
+class CameraFailed extends StatelessWidget {
+  const CameraFailed({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    return Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            l.cameraNoCamera,
+            key: const ValueKey('camera-failed'),
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white),
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            key: const ValueKey('camera-settings'),
+            style: OutlinedButton.styleFrom(foregroundColor: Colors.white),
+            onPressed: DesktopCamera.openSettings,
+            icon: const Icon(Icons.settings_outlined),
+            label: Text(l.cameraOpenSettings),
+          ),
+        ],
       ),
     );
   }

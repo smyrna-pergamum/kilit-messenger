@@ -183,7 +183,7 @@ class LZh extends L {
 
   @override
   String safetyHint(String name) {
-    return '与 $name 当面或通话核对这 60 位数字。如果两部手机上一致，就说明中间没有他人。';
+    return '与 $name 当面或通话核对这 60 位数字。如果双方一致，就说明中间没有他人。';
   }
 
   @override
@@ -211,7 +211,7 @@ class LZh extends L {
   String get timerTitle => '阅后即焚消息';
 
   @override
-  String get timerHint => '此对话中的新消息会在这段时间后从两部手机上消失。';
+  String get timerHint => '此对话中的新消息会在这段时间后从你们双方那里消失。';
 
   @override
   String get timerOff => '关闭';
@@ -244,7 +244,7 @@ class LZh extends L {
   }
 
   @override
-  String get cameraNoCamera => '无法打开相机。请在手机设置中检查相机权限。';
+  String get cameraNoCamera => '无法打开相机。请在设备设置中允许 Kilit 使用相机。';
 
   @override
   String get cameraShutter => '拍照';
@@ -256,7 +256,7 @@ class LZh extends L {
   String get cameraUse => '使用';
 
   @override
-  String get cameraIntro => '照片只在内存中拍摄：不会向手机写入任何内容，也不含位置或相机信息。';
+  String get cameraIntro => '照片只在内存中拍摄：不会向设备写入任何内容，也不含位置或相机信息。';
 
   @override
   String get cameraSendTo => '发送给…';
@@ -847,7 +847,7 @@ class LZh extends L {
   String get resend => '重新发送';
 
   @override
-  String get resendHint => '中继已收到这条消息，但对方手机尚未确认送达。在送达之前，Kilit 会在一周内每天重发一次。';
+  String get resendHint => '中继已收到这条消息，但对方设备尚未告知已送达。在送达之前，Kilit 会在一周内每天重发一次。';
 
   @override
   String get resendDone => '已重新发送。';
@@ -1158,7 +1158,7 @@ class LZh extends L {
 
   @override
   String get linkScanInDevices =>
-      '这是用于关联电脑的代码。请在这部手机上打开 设置 → 已关联设备 → 关联电脑，并在那里扫描。';
+      '这是用于关联电脑的代码。请在手机上打开 设置 → 已关联设备 → 关联电脑，并在那里扫描。';
 
   @override
   String get crashTitle => 'Kilit 意外关闭';
@@ -1215,4 +1215,58 @@ class LZh extends L {
 
   @override
   String get linkRequestOther => '代码不同？不要批准：那个请求是别人发送的。';
+
+  @override
+  String get deviceLeave => '退出此 Kilit ID';
+
+  @override
+  String get deviceLeaveConfirm =>
+      '这台电脑将退出你手机的 Kilit ID。这台电脑上的聊天、联系人和群组会被删除；手机上会全部保留。你保险库中的文件和笔记留在这里。之后你可以再次关联这台电脑。';
+
+  @override
+  String get deviceLeaveDone => '这台电脑已退出 Kilit ID。现在它是一个新的 Kilit。';
+
+  @override
+  String get deviceLeftTitle => '已从你手机的 Kilit ID 中移除';
+
+  @override
+  String get deviceLeft =>
+      '你的手机已将这台电脑从其 Kilit ID 中移除。这台电脑上的聊天、联系人和群组已删除；保险库中的文件和笔记仍保留。要再次使用，请在 设置 → 已关联设备 中关联它。';
+
+  @override
+  String get cameraOpenSettings => '打开相机设置';
+
+  @override
+  String get cameraIntroDesktop =>
+      '在 Windows 上，相机会把每张照片作为文件交出：Kilit 立即将其读入内存，覆写该文件并删除。照片不含位置或相机信息。';
+
+  @override
+  String get voiceRecord => '录制语音消息';
+
+  @override
+  String get voiceRecording => '正在录音…';
+
+  @override
+  String get voiceStopped => '录音已停止';
+
+  @override
+  String get voiceLimitHint => '声音只保存在内存中，并加密发送。语音消息最长 5 分钟。';
+
+  @override
+  String get voiceNoMic => '无法打开麦克风。请在设备设置中允许 Kilit 使用麦克风。';
+
+  @override
+  String get voiceOpenSettings => '打开麦克风设置';
+
+  @override
+  String get voiceMessage => '语音消息';
+
+  @override
+  String get voicePlay => '播放';
+
+  @override
+  String get voicePause => '暂停';
+
+  @override
+  String get voiceCannotPlay => '无法播放';
 }

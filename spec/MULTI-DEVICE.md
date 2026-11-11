@@ -115,7 +115,21 @@ Kamera ya da kare kod gerekmeden:
 ## Cihaz çıkarma
 
 Telefon bir cihazı listeden çıkarır, kartı yeniden yayımlar ve kişilere
-haber verir. Çıkarılan cihaza "kendini sil" iletisi gider. Kimlik anahtarı o
+haber verir. Silmeden önce, o cihazla olan oturumu son bir kez kullanarak
+cihaza yeni kartı gönderir. Cihaz, kendisini listelemeyen ve
+`devices_version`'ı kendi bildiğinden büyük olan bu kartı görünce bir sonraki
+turda kimlikten çıkar. Bu ileti 0.1.9'a kadar gönderilmiyordu; o zamana dek
+çıkarılan cihaz durumu hiç öğrenmiyordu.
+
+Bağlı cihaz kendisi de çıkabilir (Ayarlar → Bağlı cihazlar → "Bu Kilit ID'den
+çık"). Telefona `sync_to = "leave"` olan bir kopya gönderir. Telefon bunu
+bir sonraki turda işler: cihazı listeden siler, kartı yeniden yayımlar ve
+kişilere haber verir.
+
+Çıkan cihazda şunlar silinir: sohbetler ve ekleri, gruplar, kişiler, Signal
+durumu, giden kutusu ve bağlama kaydı. Kasadaki dosyalar ve notlar kalır.
+Cihaz bir sonraki kullanımda yeni bir Kilit ID ile yeni bir Kilit olur ve
+yeniden bağlanabilir. Kimlik anahtarı o
 cihazda bir kez bulunduğu için, kaybolan ya da çalınan bir cihaz için tek
 güvenli yol kimliği yenilemektir. Bu, yeni kelimeler ve kişilerin yeniden
 eklenmesi demektir.

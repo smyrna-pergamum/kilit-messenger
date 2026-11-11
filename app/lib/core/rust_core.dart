@@ -506,6 +506,7 @@ class RustCore implements KilitCore {
     final s = await _h.linkState();
     return LinkStatus(
       listening: s.listening,
+      left: s.left,
       requests: [for (final r in s.requests) LinkRequest(r.tag, r.code)],
       offer: s.offer,
       waiting: s.waiting,
@@ -530,6 +531,9 @@ class RustCore implements KilitCore {
 
   @override
   Future<void> unlinkDevice(int id) => _h.unlinkDevice(id: id);
+
+  @override
+  Future<void> leaveId() => _h.leaveId();
 
   @override
   Future<Uint8List> cameraJpeg(CameraFrame f) => rust.cameraJpeg(

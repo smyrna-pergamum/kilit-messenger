@@ -919,6 +919,10 @@ impl Engine {
     /// does not open (old, not for us, from a blocked contact, a stranger
     /// without the proof of work) is dropped without a word.
     pub fn receive_events(&mut self, events: &[Event]) -> Result<Vec<Incoming>, EngineError> {
+        // this device just left the ID: what came was for that ID
+        if self.settle_devices()? {
+            return Ok(Vec::new());
+        }
         let mut files: Files = self.load(FILES)?;
         let mut pieces: HashMap<String, Vec<&Event>> = HashMap::new();
         let mut messages = Vec::new();
@@ -1708,6 +1712,77 @@ mod tests {
         let out = bora.outbox().unwrap();
         relays.take_outbox(&mut bora);
         assert_eq!(out.len(), 1);
+
+        // the computer gets the phone's last message and leaves the ID
+        let id = ayse.my_kilit().unwrap().kilit_id;
+        relays.deliver(&mut pc);
+        assert!(!pc.link_state().unwrap().left);
+        relays.deliver(&mut pc);
+        assert!(pc.link_state().unwrap().left);
+        assert!(pc.contacts().unwrap().is_empty());
+        assert!(pc.groups().unwrap().is_empty());
+        assert!(pc.is_primary().unwrap());
+        assert_ne!(pc.my_kilit().unwrap().kilit_id, id);
+        // a new Kilit again: it can be linked once more
+        pc.link_cancel().unwrap();
+        assert!(!pc.link_state().unwrap().left);
+        pc.link_offer().unwrap();
+    }
+
+    #[test]
+    fn a_computer_leaves_and_the_phone_takes_it_off() {
+        let (da, db, dc) = (
+            tempfile::tempdir().unwrap(),
+            tempfile::tempdir().unwrap(),
+            tempfile::tempdir().unwrap(),
+        );
+        let mut ayse = ready(&da, "482916");
+        let mut bora = ready(&db, "739204");
+        let mut pc = ready(&dc, "615283");
+        let mut relays = Relays::default();
+        let (ayse_id, bora_id) = meet(&mut ayse, &mut bora, &mut relays);
+        // a phone cannot leave its own ID
+        assert!(ayse.leave_id().is_err());
+
+        let offer = pc.link_offer().unwrap();
+        relays.take_outbox(&mut pc);
+        ayse.link_accept(&offer, "Telefon").unwrap();
+        relays.deliver(&mut ayse);
+        relays.take_outbox(&mut ayse);
+        relays.deliver(&mut pc);
+        relays.take_outbox(&mut pc);
+        relays.deliver(&mut ayse);
+        assert_eq!(ayse.devices().unwrap().len(), 2);
+        assert!(ayse.take_card_dirty().unwrap());
+        relays.take_outbox(&mut ayse);
+        relays.deliver(&mut bora);
+        relays.deliver(&mut pc);
+        assert_eq!(pc.contacts().unwrap().len(), 1);
+
+        // the computer leaves: it is a new Kilit at once
+        pc.leave_id().unwrap();
+        assert!(pc.contacts().unwrap().is_empty());
+        assert!(pc.is_primary().unwrap());
+        assert!(!pc.link_state().unwrap().left);
+        relays.take_outbox(&mut pc);
+
+        // the phone hears it and takes the computer off, and tells Bora
+        relays.deliver(&mut ayse);
+        relays.deliver(&mut ayse);
+        let devices = ayse.devices().unwrap();
+        assert_eq!(devices.iter().map(|d| d.id).collect::<Vec<_>>(), vec![1]);
+        assert!(ayse.take_card_dirty().unwrap());
+        relays.take_outbox(&mut ayse);
+        relays.deliver(&mut bora);
+        relays.take_outbox(&mut bora);
+        bora.send_message(&ayse_id, "yalnız telefona").unwrap();
+        assert_eq!(bora.outbox().unwrap().len(), 1);
+        relays.take_outbox(&mut bora);
+        assert_eq!(relays.deliver(&mut ayse).len(), 1);
+        assert_eq!(
+            ayse.chat(&bora_id).unwrap().last().unwrap().text,
+            "yalnız telefona"
+        );
     }
 
     #[test]

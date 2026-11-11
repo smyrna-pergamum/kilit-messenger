@@ -349,6 +349,14 @@ class _GroupScreenState extends State<GroupScreen> {
     }
   }
 
+  Future<void> _voice() async {
+    FocusScope.of(context).unfocus();
+    final bytes = await recordVoice(context);
+    if (bytes != null && mounted) {
+      await _sendFile(voiceName(), voiceMime, bytes);
+    }
+  }
+
   Future<void> _attach() async {
     final l = L.of(context);
     final what = await showModalBottomSheet<String>(
@@ -562,6 +570,12 @@ class _GroupScreenState extends State<GroupScreen> {
                           if (_panel) setState(() => _panel = false);
                         },
                       ),
+                    ),
+                    IconButton(
+                      key: const ValueKey('chat-voice'),
+                      tooltip: l.voiceRecord,
+                      icon: const Icon(Icons.mic_none_rounded),
+                      onPressed: _sending ? null : _voice,
                     ),
                     IconButton(
                       key: const ValueKey('chat-send'),
