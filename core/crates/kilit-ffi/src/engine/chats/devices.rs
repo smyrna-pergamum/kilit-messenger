@@ -220,6 +220,14 @@ fn read_link(text: &str) -> Result<Scanned, EngineError> {
     Ok(Scanned::Key(r, tag))
 }
 
+/// Where the phone puts the package. Relays keep only events whose `p` tag
+/// is 64 hex digits, so the 32-digit offer tag is not used as it is.
+fn package_tag(tag: &str) -> String {
+    hex(&Sha256::digest(
+        format!("kilit/v1/link-package\0{tag}").as_bytes(),
+    ))
+}
+
 fn reply_tag(tag: &str) -> String {
     hex(&Sha256::digest(
         format!("kilit/v1/link-reply\0{tag}").as_bytes(),
@@ -572,7 +580,7 @@ impl Engine {
             Vec::new(),
         )
         .map_err(|_| EngineError::Damaged)?;
-        let event = self.message_event(tag.to_owned(), &sealed)?;
+        let event = self.message_event(package_tag(tag), &sealed)?;
         self.queue(vec![event.clone()])?;
         let code = code_of(&key);
         let mut l = self.linking()?;
@@ -593,7 +601,7 @@ impl Engine {
         let l = self.linking()?;
         let mut v = Vec::new();
         if let Some(o) = &l.offer {
-            v.push(o.tag.clone());
+            v.push(package_tag(&o.tag));
         }
         if let Some(w) = &l.waiting {
             v.push(w.reply_tag.clone());
@@ -624,7 +632,7 @@ impl Engine {
         let mut rest = Vec::new();
         for e in events {
             let tag = e.tag("p").unwrap_or_default().to_owned();
-            if l.offer.as_ref().is_some_and(|o| o.tag == tag) {
+            if l.offer.as_ref().is_some_and(|o| package_tag(&o.tag) == tag) {
                 // a package that does not open is someone else's: ignore
                 let _ = self.take_package(e);
             } else if l.waiting.as_ref().is_some_and(|w| w.reply_tag == tag) {

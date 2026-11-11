@@ -617,6 +617,11 @@ impl Engine {
     }
 
     fn message_event(&self, tag: String, payload: &[u8]) -> Result<Event, EngineError> {
+        // relays drop an event whose `p` tag is not 64 hex digits
+        debug_assert!(
+            tag.len() == 64 && tag.bytes().all(|b| b.is_ascii_hexdigit()),
+            "p tag {tag}"
+        );
         Event::sign_once(
             (self.now)(),
             MESSAGE_KIND,
@@ -1971,5 +1976,97 @@ mod tests {
             super::super::Unlock::Wiped
         );
         assert_eq!(std::fs::read_dir(da.path()).unwrap().count(), 0);
+    }
+
+    /// Links a computer by Kilit ID through the real relays, without Tor.
+    /// `cargo test -p kilit-ffi live_link -- --ignored --nocapture`
+    #[test]
+    #[ignore]
+    fn live_link_by_kilit_id() {
+        use kilit_net::Net;
+        use std::time::Instant;
+        struct Side {
+            e: Engine,
+            net: Net,
+            tags: Option<Vec<(char, Vec<String>)>>,
+            sent: std::collections::HashMap<String, Instant>,
+        }
+        fn tick(s: &mut Side, who: &str) {
+            let got = s.net.take();
+            if !got.is_empty() {
+                eprintln!("[{who}] got {} events", got.len());
+            }
+            s.e.receive_events(&got).unwrap();
+            let f = s.e.inbox_filter().unwrap();
+            if s.tags.as_ref() != Some(&f.tags) {
+                eprintln!("[{who}] watch {} tags", f.tags[0].1.len());
+                s.net.watch(f.clone());
+                s.tags = Some(f.tags);
+            }
+            let out = s.e.outbox().unwrap();
+            let kept: Vec<String> = out
+                .iter()
+                .filter(|ev| s.net.stored(&ev.id) > 0)
+                .map(|ev| ev.id.clone())
+                .collect();
+            if !kept.is_empty() {
+                eprintln!("[{who}] relays kept {}", kept.len());
+            }
+            s.e.mark_stored(&kept).unwrap();
+            for ev in out.into_iter().filter(|ev| !kept.contains(&ev.id)) {
+                if s.sent.get(&ev.id).is_none_or(|t| t.elapsed() > Duration::from_secs(30)) {
+                    eprintln!("[{who}] publish {} bytes, p={}", ev.content.len(), ev.tag("p").unwrap_or(""));
+                    s.sent.insert(ev.id.clone(), Instant::now());
+                    s.net.publish(ev);
+                }
+            }
+        }
+        let relays: Vec<String> = kilit_net::RELAYS.iter().map(|r| (*r).to_owned()).collect();
+        let (dp, dc) = (tempfile::tempdir().unwrap(), tempfile::tempdir().unwrap());
+        let mut phone = Side { e: ready(&dp, "482916"), net: Net::start(None, relays.clone()).unwrap(), tags: None, sent: Default::default() };
+        let mut pc = Side { e: ready(&dc, "615283"), net: Net::start(None, relays).unwrap(), tags: None, sent: Default::default() };
+        phone.net.publish(phone.e.card_event().unwrap());
+        let start = Instant::now();
+        let until = |what: &str, ok: &mut dyn FnMut() -> bool| {
+            while !ok() {
+                assert!(start.elapsed() < Duration::from_secs(300), "timed out: {what}");
+                std::thread::sleep(Duration::from_secs(1));
+            }
+            eprintln!("== {what} at {:?}", start.elapsed());
+        };
+        std::thread::sleep(Duration::from_secs(8));
+        let typed = format!("@{}", phone.e.my_kilit().unwrap().kilit_id);
+        let inv = Engine::invite(&typed).unwrap();
+        let cards = pc.net.query(&Engine::card_filter(&inv), Duration::from_secs(25));
+        eprintln!("cards: {}", cards.len());
+        let code = pc.e.link_request(&inv, &cards).unwrap();
+        phone.e.link_listen().unwrap();
+        let mut tag = String::new();
+        until("request on phone", &mut || {
+            tick(&mut pc, "pc");
+            tick(&mut phone, "phone");
+            let s = phone.e.link_state().unwrap();
+            if let Some(r) = s.requests.iter().find(|r| r.code == code) {
+                tag = r.tag.clone();
+                true
+            } else {
+                false
+            }
+        });
+        let (events, _) = phone.e.link_approve(&tag, "Telefon").unwrap();
+        for ev in events {
+            phone.sent.insert(ev.id.clone(), Instant::now());
+            phone.net.publish(ev);
+        }
+        until("pc linked", &mut || {
+            tick(&mut phone, "phone");
+            tick(&mut pc, "pc");
+            pc.e.link_state().unwrap().done
+        });
+        until("phone saw the reply", &mut || {
+            tick(&mut pc, "pc");
+            tick(&mut phone, "phone");
+            phone.e.link_state().unwrap().done
+        });
     }
 }
