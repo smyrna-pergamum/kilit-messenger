@@ -2014,8 +2014,15 @@ mod tests {
             }
             s.e.mark_stored(&kept).unwrap();
             for ev in out.into_iter().filter(|ev| !kept.contains(&ev.id)) {
-                if s.sent.get(&ev.id).is_none_or(|t| t.elapsed() > Duration::from_secs(30)) {
-                    eprintln!("[{who}] publish {} bytes, p={}", ev.content.len(), ev.tag("p").unwrap_or(""));
+                if s.sent
+                    .get(&ev.id)
+                    .is_none_or(|t| t.elapsed() > Duration::from_secs(30))
+                {
+                    eprintln!(
+                        "[{who}] publish {} bytes, p={}",
+                        ev.content.len(),
+                        ev.tag("p").unwrap_or("")
+                    );
                     s.sent.insert(ev.id.clone(), Instant::now());
                     s.net.publish(ev);
                 }
@@ -2023,13 +2030,26 @@ mod tests {
         }
         let relays: Vec<String> = kilit_net::RELAYS.iter().map(|r| (*r).to_owned()).collect();
         let (dp, dc) = (tempfile::tempdir().unwrap(), tempfile::tempdir().unwrap());
-        let mut phone = Side { e: ready(&dp, "482916"), net: Net::start(None, relays.clone()).unwrap(), tags: None, sent: Default::default() };
-        let mut pc = Side { e: ready(&dc, "615283"), net: Net::start(None, relays).unwrap(), tags: None, sent: Default::default() };
+        let mut phone = Side {
+            e: ready(&dp, "482916"),
+            net: Net::start(None, relays.clone()).unwrap(),
+            tags: None,
+            sent: Default::default(),
+        };
+        let mut pc = Side {
+            e: ready(&dc, "615283"),
+            net: Net::start(None, relays).unwrap(),
+            tags: None,
+            sent: Default::default(),
+        };
         phone.net.publish(phone.e.card_event().unwrap());
         let start = Instant::now();
         let until = |what: &str, ok: &mut dyn FnMut() -> bool| {
             while !ok() {
-                assert!(start.elapsed() < Duration::from_secs(300), "timed out: {what}");
+                assert!(
+                    start.elapsed() < Duration::from_secs(300),
+                    "timed out: {what}"
+                );
                 std::thread::sleep(Duration::from_secs(1));
             }
             eprintln!("== {what} at {:?}", start.elapsed());
@@ -2037,7 +2057,9 @@ mod tests {
         std::thread::sleep(Duration::from_secs(8));
         let typed = format!("@{}", phone.e.my_kilit().unwrap().kilit_id);
         let inv = Engine::invite(&typed).unwrap();
-        let cards = pc.net.query(&Engine::card_filter(&inv), Duration::from_secs(25));
+        let cards = pc
+            .net
+            .query(&Engine::card_filter(&inv), Duration::from_secs(25));
         eprintln!("cards: {}", cards.len());
         let code = pc.e.link_request(&inv, &cards).unwrap();
         phone.e.link_listen().unwrap();
